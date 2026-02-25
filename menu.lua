@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (GỘP TAB + XÓA CAMERA + TỐI ƯU UI)
+-- MENU VIP PRO V38 (Hãy theo dõi tôi)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -40,7 +40,7 @@ local Theme = {
 
 -- [1. GIAO DIỆN CHÍNH]
 local gui = Instance.new("ScreenGui")
-gui.Name = "MobileProMax_V38"
+gui.Name = "MobileProMax"
 gui.ResetOnSpawn = false
 gui.DisplayOrder = 99999
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
@@ -60,7 +60,7 @@ gui.Parent = guiParent
 local openBtn = Instance.new("TextButton", gui)
 openBtn.Size = UDim2.new(0, 110, 0, 40)
 openBtn.Position = UDim2.new(0, 15, 0, 15)
-openBtn.Text = "💎 MENU VIP"
+openBtn.Text = "MỞ MENU"
 openBtn.BackgroundColor3 = Theme.MainBg
 openBtn.BackgroundTransparency = 0.05
 openBtn.TextColor3 = Theme.Brand
@@ -110,7 +110,7 @@ headerCover.BackgroundColor3 = Theme.HeaderBg; headerCover.BackgroundTransparenc
 
 local titleLabel = Instance.new("TextLabel", header)
 titleLabel.Size = UDim2.new(1, 0, 1, 0); titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "MENU PRO MAX V38"
+titleLabel.Text = "MENU PRO MAX"
 titleLabel.TextColor3 = Color3.new(1, 1, 1); titleLabel.Font = Enum.Font.GothamBlack; titleLabel.TextSize = 14
 local titleGradient = Instance.new("UIGradient", titleLabel)
 titleGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Theme.Brand), ColorSequenceKeypoint.new(1, Theme.BrandGradient)})
@@ -143,7 +143,7 @@ local function createTab(name, x, width)
     return btn, indicator
 end
 
--- Đã xóa tab Bản Đồ, chia lại tỉ lệ 4 Tab (mỗi tab 25%)
+--  Tab Menu 
 local tab1, ind1 = createTab("NHÂN VẬT", 0, 0.25)
 local tab2, ind2 = createTab("TIỆN ÍCH", 0.25, 0.25)
 local tab3, ind3 = createTab("TP SAVE", 0.50, 0.25)
@@ -185,7 +185,7 @@ local opened = true
 openBtn.MouseButton1Click:Connect(function()
     clickAnimate(openBtn)
     opened = not opened
-    openBtn.Text = opened and "✖ ĐÓNG MENU" or "💎 MENU VIP"
+    openBtn.Text = opened and "ĐÓNG MENU" or "MỞ MENU"
     openBtn.TextColor3 = opened and Theme.AccentOff or Theme.Brand
     TweenService:Create(openStroke, TweenInfo.new(0.3), {Color = opened and Theme.AccentOff or Theme.Brand}):Play()
     frame:TweenPosition(opened and UDim2.new(0.5, -170, 0.5, -225) or UDim2.new(0.5, -170, 1.2, 0), "Out", "Back", 0.5)
@@ -298,25 +298,17 @@ local function optimizePart(obj)
     end
 end
 
--- ==============================================
--- [NỘI DUNG TỪNG TAB ĐÃ ĐƯỢC QUY HOẠCH LẠI]
--- ==============================================
-
--- [TAB 1: NHÂN VẬT (GỘP BẢN ĐỒ VÀO ĐÂY)]
-createToggle(page1, "🛡️ Chống ngã & Chống văng", false, function(v) State.AntiStun = v end)
+-- [TAB 1: NHÂN VẬT]
+createToggle(page1, "🛡️ Chống ngã & Chống văng xa", false, function(v) State.AntiStun = v end)
 createToggle(page1, "🏃 Chạy nhanh", false, function(v) State.Speed = v end)
 createSlider(page1, "Tốc độ chạy", 16, 1000, 60, function(val) State.SpeedValue = val end)
-createToggle(page1, "🦘 Nhảy siêu cao", false, function(v) State.Jump = v end)
+createToggle(page1, "🦘 Nhảy cao", false, function(v) State.Jump = v end)
 createSlider(page1, "Lực nhảy", 50, 300, 120, function(val) State.JumpValue = val end)
 createToggle(page1, "🚀 Nhảy trên không", false, function(v) State.InfJump = v end) 
-
--- Chuyển từ Tiện Ích sang
-createToggle(page1, "🐿️ Lấy đồ nhanh (Mở rương xa)", false, function(v) 
+createToggle(page1, "🐿️ Lấy đồ nhanh", false, function(v) 
     State.Instant = v 
     if v then for _, prompt in pairs(workspace:GetDescendants()) do if prompt:IsA("ProximityPrompt") then prompt.HoldDuration = 0; prompt.MaxActivationDistance = 25 end end end
 end)
-
--- Chuyển từ Bản Đồ sang
 createToggle(page1, "👻 Đi xuyên tường", false, function(v) State.Noclip = v end)
 
 local waterPart = Instance.new("Part")
@@ -325,7 +317,7 @@ createToggle(page1, "🌊 Đi trên mặt nước", false, function(v) State.Wal
 
 local xrayMats = {}
 local origAmbient = Lighting.Ambient
-createToggle(page1, "🩻 Nhìn thấu bản đồ (X-Ray)", false, function(v) 
+createToggle(page1, "👀 Nhìn xuyên map (X-Ray)", false, function(v) 
     State.XRay = v 
     task.spawn(function()
         if v then
@@ -350,7 +342,7 @@ createToggle(page1, "🩻 Nhìn thấu bản đồ (X-Ray)", false, function(v)
     end)
 end)
 
-createToggle(page1, "🕹️ FPS Boost (Giảm Lag MAX)", false, function(v) 
+createToggle(page1, "🕹️ giảm FPS  (Giảm đồ họa)", false, function(v) 
     State.LowGfx = v 
     if v then 
         Lighting.GlobalShadows = false; Lighting.FogEnd = 9e9; pcall(function() settings().Rendering.QualityLevel = 1 end)
@@ -362,18 +354,18 @@ createToggle(page1, "🕹️ FPS Boost (Giảm Lag MAX)", false, function(v)
     end
 end)
 
-createToggle(page1, "🔴 ESP Tên & Khoảng Cách", false, function(v) State.ESP = v end)
+createToggle(page1, "🔴 ESP người chơi", false, function(v) State.ESP = v end)
 
-createToggle(page1, "💡 Bật đèn phát sáng", false, function(v) 
+createToggle(page1, "💡 Ánh sáng quanh người chơi", false, function(v) 
     State.PlayerLight = v 
     if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then 
         local light = player.Character.HumanoidRootPart:FindFirstChild("PlayerPointLight"); if light then light:Destroy() end 
     end
 end)
-createSlider(page1, "Phạm vi sáng (m)", 50, 1000, 60, function(val) State.LightRange = val end)
-createSlider(page1, "Độ sáng (chói)", 0, 5, 3, function(val) State.LightBrightness = val end)
+createSlider(page1, "Phạm vi sáng", 50, 1000, 60, function(val) State.LightRange = val end)
+createSlider(page1, "Độ sáng", 0, 5, 3, function(val) State.LightBrightness = val end)
 
--- Jump Request setup cho InfJump
+-- Thiết lập nhảy cho InfJump
 UIS.JumpRequest:Connect(function() 
     if State.InfJump and player.Character then 
         local hum = player.Character:FindFirstChildOfClass("Humanoid") 
@@ -390,7 +382,7 @@ createToggle(page2, "🛡️ Chống bị kick (Anti-AFK)", true, function(v) St
 -- Chuyển từ Bản Đồ sang
 createDualButtons(page2, "🌞 TRỜI SÁNG", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12 end, "🌚 TRỜI TỐI", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0 end)
 
-createDualButtons(page2, "🔄 REJOIN", Theme.AccentOn, function()
+createDualButtons(page2, "🔄 VÀO LẠI SERVER", Theme.AccentOn, function()
     if #Players:GetPlayers() <= 1 then
         player:Kick("\nRejoining...")
         task.wait()
@@ -398,7 +390,7 @@ createDualButtons(page2, "🔄 REJOIN", Theme.AccentOn, function()
     else
         TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, player)
     end
-end, "🌐 TÌM SERVER", Theme.Brand, function()
+end, "🌐 ĐỔI SERVER", Theme.Brand, function()
     local Api = "https://games.roblox.com/v1/games/"
     local _place = game.PlaceId
     local _servers = Api..tostring(_place).."/servers/Public?sortOrder=Asc&limit=100"
