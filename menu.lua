@@ -342,7 +342,7 @@ createToggle(page1, "👀 Nhìn xuyên map (X-Ray)", false, function(v)
     end)
 end)
 
-createToggle(page1, "🕹️ giảm FPS  (Giảm đồ họa)", false, function(v) 
+createToggle(page1, "🕹️ giảm FPS  (Đồ Hoạ FF)", false, function(v) 
     State.LowGfx = v 
     if v then 
         Lighting.GlobalShadows = false; Lighting.FogEnd = 9e9; pcall(function() settings().Rendering.QualityLevel = 1 end)
@@ -378,10 +378,7 @@ ProximityPromptService.PromptButtonHoldBegan:Connect(function(prompt) if State.I
 
 -- [TAB 2: TIỆN ÍCH]
 createToggle(page2, "🛡️ Chống bị kick (Anti-AFK)", true, function(v) State.AntiAfk = v end)
-
--- Chuyển từ Bản Đồ sang
-createDualButtons(page2, "🌞 TRỜI SÁNG", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12 end, "🌚 TRỜI TỐI", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0 end)
-
+createDualButtons(page2, "🌞 TRỜI SÁNG (FAKE)", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12 end, "🌚 TRỜI TỐI (FAKE)", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0 end)
 createDualButtons(page2, "🔄 VÀO LẠI SERVER", Theme.AccentOn, function()
     if #Players:GetPlayers() <= 1 then
         player:Kick("\nRejoining...")
@@ -406,10 +403,10 @@ end, "🌐 ĐỔI SERVER", Theme.Brand, function()
     TeleportService:TeleportToPlaceInstance(_place, Server.id, player)
 end)
 
-createButton(page2, "💻 Lệnh admin (Infinite Yield)", Theme.AccentOn, function() pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) end)
+createButton(page2, "💻 Lệnh admin", Theme.AccentOn, function() pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) end)
 createButton(page2, "🔨 LẤY BTOOLS", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://cdn.wearedevs.net/scripts/BTools.txt"))() end) end)
 createButton(page2, "🕊️ FLY (Bay)", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end)
-createButton(page2, "📂 MENU TP SAVE V2", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
+createButton(page2, "📂 TP SAVE V2", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
 
 -- [TAB 3: VỊ TRÍ TP SAVE]
 local savedLocCount = 0
@@ -454,11 +451,11 @@ local function updatePlayerList()
             
             local nLabel = Instance.new("TextLabel", btn)
             nLabel.Size = UDim2.new(0.7, 0, 1, 0); nLabel.Position = UDim2.new(0.05, 0, 0, 0); nLabel.BackgroundTransparency = 1
-            nLabel.Text = "👤 " .. p.DisplayName; nLabel.TextColor3 = Theme.TextTitle; nLabel.Font = Enum.Font.GothamSemibold; nLabel.TextSize = 13; nLabel.TextXAlignment = Enum.TextXAlignment.Left
+            nLabel.Text = "👤: " .. p.DisplayName; nLabel.TextColor3 = Theme.TextTitle; nLabel.Font = Enum.Font.GothamSemibold; nLabel.TextSize = 13; nLabel.TextXAlignment = Enum.TextXAlignment.Left
             
             local arrow = Instance.new("TextLabel", btn)
             arrow.Size = UDim2.new(0.2, 0, 1, 0); arrow.Position = UDim2.new(0.75, 0, 0, 0); arrow.BackgroundTransparency = 1
-            arrow.Text = " BAY ➜ "; arrow.TextColor3 = Theme.Brand; arrow.Font = Enum.Font.GothamBold; arrow.TextSize = 11; arrow.TextXAlignment = Enum.TextXAlignment.Right
+            arrow.Text = " 🐿️🧂 "; arrow.TextColor3 = Theme.Brand; arrow.Font = Enum.Font.GothamBold; arrow.TextSize = 11; arrow.TextXAlignment = Enum.TextXAlignment.Right
             
             btn.MouseButton1Click:Connect(function()
                 clickAnimate(btn)
@@ -471,12 +468,8 @@ local function updatePlayerList()
         end
     end
 end
-createButton(page4, "🔄 LÀM MỚI DANH SÁCH", Theme.Brand, updatePlayerList)
+createButton(page4, "LÀM MỚI DANH SÁCH", Theme.Brand, updatePlayerList)
 updatePlayerList()
-
--- ==============================================
--- [VÒNG LẶP HỆ THỐNG VÀ XỬ LÝ SỰ KIỆN]
--- ==============================================
 
 player.Idled:Connect(function()
     if State.AntiAfk then
@@ -507,8 +500,8 @@ RunService.RenderStepped:Connect(function()
             hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, true)
             hum:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
         end
-
-        -- LOGIC WALK ON WATER
+            
+        -- LOGIC Đi trên mặt nước
         if State.WalkOnWater and root then
             local params = RaycastParams.new()
             params.FilterDescendantsInstances = {char}
@@ -540,7 +533,7 @@ RunService.RenderStepped:Connect(function()
             end
         end
         
-        -- LOGIC ESP VÀ VIỀN ĐỎ
+        -- LOGIC ESP viền đỏ
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= player and p.Character and p.Character:FindFirstChild("Head") then
                 local tChar = p.Character
