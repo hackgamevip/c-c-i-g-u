@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (Hãy theo dõi tôi)
+-- MENU VIP PRO V38 (ĐÃ FIX LỖI)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -40,7 +40,7 @@ local Theme = {
 
 -- [1. GIAO DIỆN CHÍNH]
 local gui = Instance.new("ScreenGui")
-gui.Name = "MobileProMax"
+gui.Name = "MobileProMax_V38"
 gui.ResetOnSpawn = false
 gui.DisplayOrder = 99999
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
@@ -70,12 +70,19 @@ Instance.new("UICorner", openBtn).CornerRadius = UDim.new(0, 12)
 local openStroke = Instance.new("UIStroke", openBtn)
 openStroke.Color = Theme.Brand; openStroke.Thickness = 1.5; openStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
+-- Fix lỗi bấm bị kẹt scale
+local isAnimating = false
 local function clickAnimate(obj)
-    local scale = Instance.new("UIScale", obj)
-    TweenService:Create(scale, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Scale = 0.92}):Play()
-    task.wait(0.1)
-    TweenService:Create(scale, TweenInfo.new(0.15, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {Scale = 1}):Play()
-    task.delay(0.3, function() scale:Destroy() end)
+    if isAnimating then return end
+    isAnimating = true
+    task.spawn(function()
+        local scale = obj:FindFirstChildOfClass("UIScale") or Instance.new("UIScale", obj)
+        TweenService:Create(scale, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Scale = 0.92}):Play()
+        task.wait(0.1)
+        TweenService:Create(scale, TweenInfo.new(0.15, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {Scale = 1}):Play()
+        task.wait(0.15)
+        isAnimating = false
+    end)
 end
 
 local btnDragToggle, btnDragStart, btnStartPos
@@ -110,7 +117,7 @@ headerCover.BackgroundColor3 = Theme.HeaderBg; headerCover.BackgroundTransparenc
 
 local titleLabel = Instance.new("TextLabel", header)
 titleLabel.Size = UDim2.new(1, 0, 1, 0); titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "MENU PRO MAX"
+titleLabel.Text = "MENU PRO MAX V38"
 titleLabel.TextColor3 = Color3.new(1, 1, 1); titleLabel.Font = Enum.Font.GothamBlack; titleLabel.TextSize = 14
 local titleGradient = Instance.new("UIGradient", titleLabel)
 titleGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Theme.Brand), ColorSequenceKeypoint.new(1, Theme.BrandGradient)})
@@ -210,10 +217,10 @@ local function createButton(parent, text, color, callback)
 end
 
 local function createDualButtons(parent, text1, color1, cb1, text2, color2, cb2)
-    local frame = Instance.new("Frame", parent)
-    frame.Size = UDim2.new(0.9, 0, 0, 42); frame.BackgroundTransparency = 1
+    local dFrame = Instance.new("Frame", parent)
+    dFrame.Size = UDim2.new(0.9, 0, 0, 42); dFrame.BackgroundTransparency = 1
     local function makeBtn(xPos, txt, col, cb)
-        local btn = Instance.new("TextButton", frame)
+        local btn = Instance.new("TextButton", dFrame)
         btn.Size = UDim2.new(0.48, 0, 1, 0); btn.Position = UDim2.new(xPos, 0, 0, 0)
         btn.BackgroundColor3 = Theme.ItemBg; btn.Text = ""; btn.AutoButtonColor = false
         Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
@@ -258,9 +265,9 @@ local function createToggle(parent, text, defaultState, callback)
 end
 
 local function createSlider(parent, text, min, max, default, callback)
-    local frame = Instance.new("Frame", parent)
-    frame.Size = UDim2.new(0.9, 0, 0, 48); frame.BackgroundTransparency = 1
-    local bg = Instance.new("Frame", frame)
+    local sFrame = Instance.new("Frame", parent)
+    sFrame.Size = UDim2.new(0.9, 0, 0, 48); sFrame.BackgroundTransparency = 1
+    local bg = Instance.new("Frame", sFrame)
     bg.Size = UDim2.new(1, 0, 1, 0); bg.BackgroundColor3 = Theme.ItemBg
     Instance.new("UICorner", bg).CornerRadius = UDim.new(0, 10)
     local stroke = Instance.new("UIStroke", bg); stroke.Color = Theme.Stroke; stroke.Thickness = 1
@@ -299,20 +306,33 @@ local function optimizePart(obj)
 end
 
 -- [TAB 1: NHÂN VẬT]
-createToggle(page1, "🛡️ Chống ngã & Chống văng xa", false, function(v) State.AntiStun = v end)
+createToggle(page1, "🛡️ Chống ngã & Chống văng", false, function(v) State.AntiStun = v end)
 createToggle(page1, "🏃 Chạy nhanh", false, function(v) State.Speed = v end)
 createSlider(page1, "Tốc độ chạy", 16, 1000, 60, function(val) State.SpeedValue = val end)
 createToggle(page1, "🦘 Nhảy cao", false, function(v) State.Jump = v end)
 createSlider(page1, "Lực nhảy", 50, 300, 120, function(val) State.JumpValue = val end)
-createToggle(page1, "🚀 Nhảy trên không", false, function(v) State.InfJump = v end) 
-createToggle(page1, "🐿️ Lấy đồ nhanh", false, function(v) 
+createToggle(page1, "🚀 Nhảy trên không (InfJump)", false, function(v) State.InfJump = v end) 
+createToggle(page1, "🐿️ Lấy đồ nhanh (Auto Interact)", false, function(v) 
     State.Instant = v 
-    if v then for _, prompt in pairs(workspace:GetDescendants()) do if prompt:IsA("ProximityPrompt") then prompt.HoldDuration = 0; prompt.MaxActivationDistance = 25 end end end
+    if v then 
+        task.spawn(function()
+            for _, prompt in pairs(workspace:GetDescendants()) do 
+                if prompt:IsA("ProximityPrompt") then 
+                    prompt.HoldDuration = 0; prompt.MaxActivationDistance = 25 
+                end 
+            end
+        end)
+    end
 end)
-createToggle(page1, "👻 Đi xuyên tường", false, function(v) State.Noclip = v end)
+createToggle(page1, "👻 Đi xuyên tường (Noclip)", false, function(v) State.Noclip = v end)
 
+-- Fix: Tối ưu phần đi trên mặt nước, tạo Part khi cần
 local waterPart = Instance.new("Part")
-waterPart.Size = Vector3.new(6, 1, 6); waterPart.Transparency = 1; waterPart.Anchored = true; waterPart.CanCollide = true
+waterPart.Size = Vector3.new(6, 1, 6)
+waterPart.Transparency = 1
+waterPart.Anchored = true
+waterPart.CanCollide = true
+
 createToggle(page1, "🌊 Đi trên mặt nước", false, function(v) State.WalkOnWater = v end)
 
 local xrayMats = {}
@@ -328,38 +348,45 @@ createToggle(page1, "👀 Nhìn xuyên map (X-Ray)", false, function(v)
                     if not xrayMats[obj] then xrayMats[obj] = {obj.Transparency, obj.Material} end
                     obj.Transparency = 0.8; obj.Material = Enum.Material.SmoothPlastic
                 end
-                if i % 250 == 0 then task.wait() end 
+                if i % 100 == 0 then task.wait() end -- Giảm lag khi duyệt
             end
         else
             Lighting.Ambient = origAmbient; Lighting.Brightness = 1
             local count = 0
             for obj, data in pairs(xrayMats) do
                 if obj and obj.Parent then obj.Transparency = data[1]; obj.Material = data[2] end
-                count = count + 1; if count % 250 == 0 then task.wait() end
+                count = count + 1; if count % 100 == 0 then task.wait() end
             end
             xrayMats = {}
         end
     end)
 end)
 
-createToggle(page1, "🕹️ giảm FPS  (Đồ Hoạ FF)", false, function(v) 
+createToggle(page1, "🕹️ Giảm FPS (Đồ Hoạ Thấp)", false, function(v) 
     State.LowGfx = v 
-    if v then 
-        Lighting.GlobalShadows = false; Lighting.FogEnd = 9e9; pcall(function() settings().Rendering.QualityLevel = 1 end)
-        pcall(function() workspace.Terrain.WaterWaveSize = 0; workspace.Terrain.WaterWaveSpeed = 0; workspace.Terrain.WaterReflectance = 0; workspace.Terrain.WaterTransparency = 0; workspace.Terrain.Decoration = false end)
-        for _, obj in pairs(Lighting:GetChildren()) do if obj:IsA("PostEffect") or obj:IsA("BlurEffect") or obj:IsA("SunRaysEffect") or obj:IsA("ColorCorrectionEffect") or obj:IsA("BloomEffect") or obj:IsA("DepthOfFieldEffect") then obj.Enabled = false end end
-        for _, obj in pairs(workspace:GetDescendants()) do optimizePart(obj) end
-    else 
-        Lighting.GlobalShadows = true; pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic end) 
-    end
+    task.spawn(function()
+        if v then 
+            Lighting.GlobalShadows = false; Lighting.FogEnd = 9e9; pcall(function() settings().Rendering.QualityLevel = 1 end)
+            pcall(function() workspace.Terrain.WaterWaveSize = 0; workspace.Terrain.WaterWaveSpeed = 0; workspace.Terrain.WaterReflectance = 0; workspace.Terrain.WaterTransparency = 0; workspace.Terrain.Decoration = false end)
+            for _, obj in pairs(Lighting:GetChildren()) do if obj:IsA("PostEffect") or obj:IsA("BlurEffect") or obj:IsA("SunRaysEffect") or obj:IsA("ColorCorrectionEffect") or obj:IsA("BloomEffect") or obj:IsA("DepthOfFieldEffect") then obj.Enabled = false end end
+            local des = workspace:GetDescendants()
+            for i, obj in ipairs(des) do 
+                optimizePart(obj)
+                if i % 100 == 0 then task.wait() end
+            end
+        else 
+            Lighting.GlobalShadows = true; pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic end) 
+        end
+    end)
 end)
 
-createToggle(page1, "🔴 ESP người chơi", false, function(v) State.ESP = v end)
+createToggle(page1, "🔴 ESP Người chơi", false, function(v) State.ESP = v end)
 
-createToggle(page1, "💡 Ánh sáng quanh người chơi", false, function(v) 
+createToggle(page1, "💡 Phát sáng (Light)", false, function(v) 
     State.PlayerLight = v 
     if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then 
-        local light = player.Character.HumanoidRootPart:FindFirstChild("PlayerPointLight"); if light then light:Destroy() end 
+        local light = player.Character.HumanoidRootPart:FindFirstChild("PlayerPointLight")
+        if light then light:Destroy() end 
     end
 end)
 createSlider(page1, "Phạm vi sáng", 50, 1000, 60, function(val) State.LightRange = val end)
@@ -377,9 +404,9 @@ ProximityPromptService.PromptButtonHoldBegan:Connect(function(prompt) if State.I
 
 
 -- [TAB 2: TIỆN ÍCH]
-createToggle(page2, "🛡️ Chống bị kick khi treo máy (Anti-AFK)", true, function(v) State.AntiAfk = v end)
-createDualButtons(page2, "🌞 TRỜI SÁNG (FAKE)", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12 end, "🌚 TRỜI TỐI (FAKE)", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0 end)
-createDualButtons(page2, "🔄 VÀO LẠI SERVER", Theme.AccentOn, function()
+createToggle(page2, "🛡️ Anti-AFK (Không bị kick)", true, function(v) State.AntiAfk = v end)
+createDualButtons(page2, "🌞 TRỜI SÁNG", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12 end, "🌚 TRỜI TỐI", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0 end)
+createDualButtons(page2, "🔄 VÀO LẠI", Theme.AccentOn, function()
     if #Players:GetPlayers() <= 1 then
         player:Kick("\nRejoining...")
         task.wait()
@@ -403,23 +430,25 @@ end, "🌐 ĐỔI SERVER", Theme.Brand, function()
     TeleportService:TeleportToPlaceInstance(_place, Server.id, player)
 end)
 
-createButton(page2, "💻 Lệnh admin", Theme.AccentOn, function()
+createButton(page2, "💻 Mở Admin Menu", Theme.AccentOn, function()
     pcall(function() 
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) end)
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() 
+    end) 
+end)
 
-createButton(page2, "🔨 LẤY BTOOLS", Theme.Brand, function() 
+createButton(page2, "🔨 Nhận BTools", Theme.Brand, function() 
     pcall(function() 
         loadstring(game:HttpGet("https://raw.githubusercontent.com/0Ben1/fe/main/F3X%20BTools"))() 
     end) 
 end)
 
-createButton(page2, "🕊️ FLY (Bay)", Theme.Brand, function() 
+createButton(page2, "🕊️ Bật chế độ Fly", Theme.Brand, function() 
     pcall(function() 
         loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")()  
     end) 
 end)
 
-createButton(page2, "📂 TP SAVE V2", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
+createButton(page2, "📂 GUI TP Phụ", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
 
 -- [TAB 3: VỊ TRÍ TP SAVE]
 local savedLocCount = 0
@@ -444,7 +473,7 @@ local function createPosItem(name, cframe)
     tpBtn.MouseButton1Click:Connect(function() clickAnimate(tpBtn); if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then player.Character.HumanoidRootPart.CFrame = cframe end end)
     delBtn.MouseButton1Click:Connect(function() clickAnimate(delBtn); task.wait(0.1); item:Destroy() end)
 end
-createButton(page3, "📍 LƯU TỌA ĐỘ", Theme.AccentOn, function()
+createButton(page3, "📍 LƯU TỌA ĐỘ HIỆN TẠI", Theme.AccentOn, function()
     if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
         savedLocCount = savedLocCount + 1
         createPosItem("Vị trí " .. savedLocCount, player.Character.HumanoidRootPart.CFrame)
@@ -453,12 +482,12 @@ end)
 
 -- [TAB 4: TP NGƯỜI CHƠI]
 local function updatePlayerList()
-    for _, child in pairs(page4:GetChildren()) do if child.Name == "PlayerBtn_TP" or child.Name == "PaddingFrame" then child:Destroy() end end
+    for _, child in pairs(page4:GetChildren()) do if child.Name == "PaddingFrame" then child:Destroy() end end
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= player then
             local pFrame = Instance.new("Frame", page4); pFrame.Name = "PaddingFrame"; pFrame.Size = UDim2.new(0.9, 0, 0, 42); pFrame.BackgroundTransparency = 1
             local btn = Instance.new("TextButton", pFrame)
-            btn.Name = "PlayerBtn_TP"; btn.Size = UDim2.new(1, 0, 1, 0); btn.BackgroundColor3 = Theme.ItemBg; btn.Text = ""; btn.AutoButtonColor = false
+            btn.Size = UDim2.new(1, 0, 1, 0); btn.BackgroundColor3 = Theme.ItemBg; btn.Text = ""; btn.AutoButtonColor = false
             Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
             local stroke = Instance.new("UIStroke", btn); stroke.Color = Theme.Stroke; stroke.Thickness = 1
             
@@ -468,7 +497,7 @@ local function updatePlayerList()
             
             local arrow = Instance.new("TextLabel", btn)
             arrow.Size = UDim2.new(0.2, 0, 1, 0); arrow.Position = UDim2.new(0.75, 0, 0, 0); arrow.BackgroundTransparency = 1
-            arrow.Text = " 🐿️🧂 "; arrow.TextColor3 = Theme.Brand; arrow.Font = Enum.Font.GothamBold; arrow.TextSize = 11; arrow.TextXAlignment = Enum.TextXAlignment.Right
+            arrow.Text = " DỊCH CHUYỂN "; arrow.TextColor3 = Theme.Brand; arrow.Font = Enum.Font.GothamBold; arrow.TextSize = 10; arrow.TextXAlignment = Enum.TextXAlignment.Right
             
             btn.MouseButton1Click:Connect(function()
                 clickAnimate(btn)
@@ -481,7 +510,7 @@ local function updatePlayerList()
         end
     end
 end
-createButton(page4, "LÀM MỚI DANH SÁCH", Theme.Brand, updatePlayerList)
+createButton(page4, "🔄 LÀM MỚI DANH SÁCH", Theme.Brand, updatePlayerList)
 updatePlayerList()
 
 player.Idled:Connect(function()
@@ -514,7 +543,7 @@ RunService.RenderStepped:Connect(function()
             hum:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
         end
             
-        -- LOGIC Đi trên mặt nước
+        -- LOGIC Đi trên mặt nước (Đã tối ưu)
         if State.WalkOnWater and root then
             local params = RaycastParams.new()
             params.FilterDescendantsInstances = {char}
