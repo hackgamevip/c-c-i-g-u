@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (Hãy theo dõi tôi)
+-- MENU VIP PRO V38 (Bản cập nhật thêm Tên thật & ID màu xanh)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -143,7 +143,6 @@ local function createTab(name, x, width)
     return btn, indicator
 end
 
---  Tab Menu 
 local tab1, ind1 = createTab("NHÂN VẬT", 0, 0.25)
 local tab2, ind2 = createTab("TIỆN ÍCH", 0.25, 0.25)
 local tab3, ind3 = createTab("TP SAVE", 0.50, 0.25)
@@ -325,17 +324,17 @@ createToggle(page1, "👀 Nhìn xuyên map (X-Ray)", false, function(v)
             local descendants = workspace:GetDescendants()
             for i, obj in ipairs(descendants) do
                 if obj:IsA("BasePart") and not obj:IsDescendantOf(player.Character) and obj.Name ~= "Terrain" then
-                    if not xrayMats[obj] then xrayMats[obj] = {obj.Transparency, obj.Material} end
-                    obj.Transparency = 0.8; obj.Material = Enum.Material.SmoothPlastic
+                    if not xrayMats[obj] then xrayMats[obj] = obj.Transparency end
+                    obj.Transparency = 0.5
                 end
-                if i % 250 == 0 then task.wait() end 
+                if i % 1000 == 0 then task.wait() end 
             end
         else
             Lighting.Ambient = origAmbient; Lighting.Brightness = 1
             local count = 0
-            for obj, data in pairs(xrayMats) do
-                if obj and obj.Parent then obj.Transparency = data[1]; obj.Material = data[2] end
-                count = count + 1; if count % 250 == 0 then task.wait() end
+            for obj, origTrans in pairs(xrayMats) do
+                if obj and obj.Parent then obj.Transparency = origTrans end
+                count = count + 1; if count % 1000 == 0 then task.wait() end
             end
             xrayMats = {}
         end
@@ -365,7 +364,6 @@ end)
 createSlider(page1, "Phạm vi sáng", 50, 1000, 60, function(val) State.LightRange = val end)
 createSlider(page1, "Độ sáng", 0, 5, 3, function(val) State.LightBrightness = val end)
 
--- Thiết lập nhảy cho InfJump
 UIS.JumpRequest:Connect(function() 
     if State.InfJump and player.Character then 
         local hum = player.Character:FindFirstChildOfClass("Humanoid") 
@@ -374,7 +372,6 @@ UIS.JumpRequest:Connect(function()
 end)
 
 ProximityPromptService.PromptButtonHoldBegan:Connect(function(prompt) if State.Instant then pcall(function() fireproximityprompt(prompt) end) end end)
-
 
 -- [TAB 2: TIỆN ÍCH]
 createToggle(page2, "🛡️ Chống bị kick khi treo máy (Anti-AFK)", true, function(v) State.AntiAfk = v end)
@@ -403,22 +400,9 @@ end, "🌐 ĐỔI SERVER", Theme.Brand, function()
     TeleportService:TeleportToPlaceInstance(_place, Server.id, player)
 end)
 
-createButton(page2, "💻 Lệnh admin", Theme.AccentOn, function()
-    pcall(function() 
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) end)
-
-createButton(page2, "🔨 LẤY BTOOLS", Theme.Brand, function() 
-    pcall(function() 
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/0Ben1/fe/main/F3X%20BTools"))() 
-    end) 
-end)
-
-createButton(page2, "🕊️ FLY (Bay)", Theme.Brand, function() 
-    pcall(function() 
-        loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")()  
-    end) 
-end)
-
+createButton(page2, "💻 Lệnh admin", Theme.AccentOn, function() pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) end)
+createButton(page2, "🔨 LẤY BTOOLS", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/0Ben1/fe/main/F3X%20BTools"))() end) end)
+createButton(page2, "🕊️ FLY (Bay)", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end)
 createButton(page2, "📂 TP SAVE V2", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
 
 -- [TAB 3: VỊ TRÍ TP SAVE]
@@ -451,21 +435,29 @@ createButton(page3, "📍 LƯU TỌA ĐỘ", Theme.AccentOn, function()
     end
 end)
 
--- [TAB 4: TP NGƯỜI CHƠI]
+-- [TAB 4: TP NGƯỜI CHƠI (TỰ ĐỘNG LÀM MỚI + HIỂN THỊ TÊN THẬT & ID)]
 local function updatePlayerList()
-    for _, child in pairs(page4:GetChildren()) do if child.Name == "PlayerBtn_TP" or child.Name == "PaddingFrame" then child:Destroy() end end
+    for _, child in pairs(page4:GetChildren()) do if child.Name == "PaddingFrame" then child:Destroy() end end
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= player then
-            local pFrame = Instance.new("Frame", page4); pFrame.Name = "PaddingFrame"; pFrame.Size = UDim2.new(0.9, 0, 0, 42); pFrame.BackgroundTransparency = 1
+            local pFrame = Instance.new("Frame", page4); pFrame.Name = "PaddingFrame"; pFrame.Size = UDim2.new(0.9, 0, 0, 48); pFrame.BackgroundTransparency = 1
             local btn = Instance.new("TextButton", pFrame)
             btn.Name = "PlayerBtn_TP"; btn.Size = UDim2.new(1, 0, 1, 0); btn.BackgroundColor3 = Theme.ItemBg; btn.Text = ""; btn.AutoButtonColor = false
             Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
             local stroke = Instance.new("UIStroke", btn); stroke.Color = Theme.Stroke; stroke.Thickness = 1
             
+            -- Tên hiển thị (DisplayName)
             local nLabel = Instance.new("TextLabel", btn)
-            nLabel.Size = UDim2.new(0.7, 0, 1, 0); nLabel.Position = UDim2.new(0.05, 0, 0, 0); nLabel.BackgroundTransparency = 1
+            nLabel.Size = UDim2.new(0.7, 0, 0.5, 0); nLabel.Position = UDim2.new(0.05, 0, 0.05, 0); nLabel.BackgroundTransparency = 1
             nLabel.Text = "👤: " .. p.DisplayName; nLabel.TextColor3 = Theme.TextTitle; nLabel.Font = Enum.Font.GothamSemibold; nLabel.TextSize = 13; nLabel.TextXAlignment = Enum.TextXAlignment.Left
             
+            -- Tên thật & ID (Username & UserId)
+            local subLabel = Instance.new("TextLabel", btn)
+            subLabel.Size = UDim2.new(0.7, 0, 0.45, 0); subLabel.Position = UDim2.new(0.05, 0, 0.5, 0); subLabel.BackgroundTransparency = 1
+            subLabel.Text = "@" .. p.Name .. " (" .. tostring(p.UserId) .. ")"
+            subLabel.TextColor3 = Color3.fromRGB(100, 255, 100) -- Màu xanh lá mạ nổi bật
+            subLabel.Font = Enum.Font.Gotham; subLabel.TextSize = 10; subLabel.TextXAlignment = Enum.TextXAlignment.Left
+
             local arrow = Instance.new("TextLabel", btn)
             arrow.Size = UDim2.new(0.2, 0, 1, 0); arrow.Position = UDim2.new(0.75, 0, 0, 0); arrow.BackgroundTransparency = 1
             arrow.Text = " 🐿️🧂 "; arrow.TextColor3 = Theme.Brand; arrow.Font = Enum.Font.GothamBold; arrow.TextSize = 11; arrow.TextXAlignment = Enum.TextXAlignment.Right
@@ -481,8 +473,9 @@ local function updatePlayerList()
         end
     end
 end
-createButton(page4, "LÀM MỚI DANH SÁCH", Theme.Brand, updatePlayerList)
 updatePlayerList()
+Players.PlayerAdded:Connect(updatePlayerList)
+Players.PlayerRemoving:Connect(updatePlayerList)
 
 player.Idled:Connect(function()
     if State.AntiAfk then
@@ -514,7 +507,6 @@ RunService.RenderStepped:Connect(function()
             hum:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
         end
             
-        -- LOGIC Đi trên mặt nước
         if State.WalkOnWater and root then
             local params = RaycastParams.new()
             params.FilterDescendantsInstances = {char}
@@ -530,7 +522,6 @@ RunService.RenderStepped:Connect(function()
             waterPart.Parent = nil
         end
 
-        -- LOGIC ĐÈN PHÁT SÁNG
         if root then
             local light = root:FindFirstChild("PlayerPointLight")
             if State.PlayerLight then 
@@ -546,28 +537,11 @@ RunService.RenderStepped:Connect(function()
             end
         end
         
-        -- LOGIC ESP viền đỏ
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= player and p.Character and p.Character:FindFirstChild("Head") then
                 local tChar = p.Character
                 local head = tChar.Head
                 
-                if State.ESP or State.XRay then
-                    local hl = tChar:FindFirstChild("Red_ESP_HL")
-                    if not hl then
-                        hl = Instance.new("Highlight", tChar)
-                        hl.Name = "Red_ESP_HL"
-                        hl.FillTransparency = 0.7
-                        hl.FillColor = Color3.fromRGB(255, 0, 0) 
-                        hl.OutlineColor = Color3.fromRGB(255, 0, 0) 
-                        hl.OutlineTransparency = 0
-                        hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop 
-                    end
-                else
-                    local hl = tChar:FindFirstChild("Red_ESP_HL")
-                    if hl then hl:Destroy() end
-                end
-
                 if State.ESP then
                     local bgui = head:FindFirstChild("MobileESP_Name")
                     if not bgui then
@@ -605,9 +579,8 @@ end)
 
 workspace.DescendantAdded:Connect(function(v)
     if State.XRay and v:IsA("BasePart") and not v:IsDescendantOf(player.Character) and v.Name ~= "Terrain" then
-        if not xrayMats[v] then xrayMats[v] = {v.Transparency, v.Material} end
-        v.Transparency = 0.8
-        v.Material = Enum.Material.SmoothPlastic
+        if not xrayMats[v] then xrayMats[v] = v.Transparency end
+        v.Transparency = 0.5
     end
     if State.Instant and v:IsA("ProximityPrompt") then v.HoldDuration = 0; v.MaxActivationDistance = 25 end
 end)
