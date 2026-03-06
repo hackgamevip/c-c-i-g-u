@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (Bản cập nhật thêm Tên thật & ID màu xanh)
+-- MENU VIP PRO V38 (Bản Fix Noclip, Lock Pos & Màn hình đen/trắng)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -19,7 +19,7 @@ local camera = workspace.CurrentCamera
 local State = {
     Instant = false, Noclip = false, LowGfx = false, Speed = false, Jump = false,
     InfJump = false, PlayerLight = false, ESP = false, AntiAfk = true, AntiStun = false, 
-    WalkOnWater = false, XRay = false,
+    WalkOnWater = false, XRay = false, LockPosition = false,
     SpeedValue = 60, JumpValue = 120, LightRange = 60, LightBrightness = 3 
 }
 
@@ -43,7 +43,7 @@ local gui = Instance.new("ScreenGui")
 gui.Name = "MobileProMax"
 gui.ResetOnSpawn = false
 gui.DisplayOrder = 99999
-gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling -- Tối ưu để lớp phủ màn hình nằm dưới Menu
 
 local guiParent = player:WaitForChild("PlayerGui")
 pcall(function()
@@ -56,6 +56,14 @@ pcall(function()
 end)
 gui.Parent = guiParent
 
+-- [LỚP PHỦ MÀN HÌNH ĐEN/TRẮNG]
+local screenOverlay = Instance.new("Frame", gui)
+screenOverlay.Size = UDim2.new(2, 0, 2, 0)
+screenOverlay.Position = UDim2.new(-0.5, 0, -0.5, 0)
+screenOverlay.BackgroundColor3 = Color3.new(0,0,0)
+screenOverlay.ZIndex = 0
+screenOverlay.Visible = false
+
 -- [NÚT MỞ MENU]
 local openBtn = Instance.new("TextButton", gui)
 openBtn.Size = UDim2.new(0, 110, 0, 40)
@@ -66,6 +74,7 @@ openBtn.BackgroundTransparency = 0.05
 openBtn.TextColor3 = Theme.Brand
 openBtn.Font = Enum.Font.GothamBold
 openBtn.TextSize = 12
+openBtn.ZIndex = 10
 Instance.new("UICorner", openBtn).CornerRadius = UDim.new(0, 12)
 local openStroke = Instance.new("UIStroke", openBtn)
 openStroke.Color = Theme.Brand; openStroke.Thickness = 1.5; openStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
@@ -97,21 +106,25 @@ frame.Size = UDim2.new(0, 340, 0, 450)
 frame.Position = UDim2.new(0.5, -170, 0.5, -225)
 frame.BackgroundColor3 = Theme.MainBg
 frame.BackgroundTransparency = 0.05 
+frame.ZIndex = 10
 Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 18)
 local frameStroke = Instance.new("UIStroke", frame); frameStroke.Color = Theme.Stroke; frameStroke.Thickness = 1
 
 local header = Instance.new("Frame", frame)
 header.Size = UDim2.new(1, 0, 0, 45)
 header.BackgroundColor3 = Theme.HeaderBg; header.BackgroundTransparency = 0; header.BorderSizePixel = 0
+header.ZIndex = 10
 Instance.new("UICorner", header).CornerRadius = UDim.new(0, 18)
 local headerCover = Instance.new("Frame", header) 
 headerCover.Size = UDim2.new(1, 0, 0, 15); headerCover.Position = UDim2.new(0, 0, 1, -15)
 headerCover.BackgroundColor3 = Theme.HeaderBg; headerCover.BackgroundTransparency = 0; headerCover.BorderSizePixel = 0
+headerCover.ZIndex = 10
 
 local titleLabel = Instance.new("TextLabel", header)
 titleLabel.Size = UDim2.new(1, 0, 1, 0); titleLabel.BackgroundTransparency = 1
 titleLabel.Text = "MENU PRO MAX"
 titleLabel.TextColor3 = Color3.new(1, 1, 1); titleLabel.Font = Enum.Font.GothamBlack; titleLabel.TextSize = 14
+titleLabel.ZIndex = 10
 local titleGradient = Instance.new("UIGradient", titleLabel)
 titleGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Theme.Brand), ColorSequenceKeypoint.new(1, Theme.BrandGradient)})
 
@@ -131,14 +144,17 @@ UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputT
 local tabBar = Instance.new("Frame", frame)
 tabBar.Size = UDim2.new(1, 0, 0, 38); tabBar.Position = UDim2.new(0, 0, 0, 45)
 tabBar.BackgroundColor3 = Theme.TabBg; tabBar.BackgroundTransparency = 0; tabBar.BorderSizePixel = 0
+tabBar.ZIndex = 10
 local function createTab(name, x, width)
     local btn = Instance.new("TextButton", tabBar)
     btn.Size = UDim2.new(width, 0, 1, 0); btn.Position = UDim2.new(x, 0, 0, 0)
     btn.Text = name; btn.BackgroundTransparency = 1; btn.TextColor3 = Theme.TextDim
     btn.Font = Enum.Font.GothamBold; btn.TextSize = 10
+    btn.ZIndex = 10
     local indicator = Instance.new("Frame", btn)
     indicator.Size = UDim2.new(0.5, 0, 0, 3); indicator.Position = UDim2.new(0.25, 0, 1, -3)
     indicator.BackgroundColor3 = Theme.Brand; indicator.BorderSizePixel = 0; indicator.Visible = false
+    indicator.ZIndex = 10
     Instance.new("UICorner", indicator).CornerRadius = UDim.new(1, 0)
     return btn, indicator
 end
@@ -151,11 +167,13 @@ local tab4, ind4 = createTab("TP PLAYER", 0.75, 0.25)
 local pageContainer = Instance.new("Frame", frame)
 pageContainer.Size = UDim2.new(1, 0, 1, -95); pageContainer.Position = UDim2.new(0, 0, 0, 88)
 pageContainer.BackgroundTransparency = 1
+pageContainer.ZIndex = 10
 
 local function createPage()
     local pg = Instance.new("ScrollingFrame", pageContainer)
     pg.Size = UDim2.new(1, 0, 1, 0); pg.BackgroundTransparency = 1
     pg.ScrollBarThickness = 3; pg.ScrollBarImageColor3 = Theme.Brand; pg.Visible = false; pg.BorderSizePixel = 0
+    pg.ZIndex = 10
     local layout = Instance.new("UIListLayout", pg)
     layout.HorizontalAlignment = Enum.HorizontalAlignment.Center; layout.Padding = UDim.new(0, 10)
     Instance.new("UIPadding", pg).PaddingTop = UDim.new(0, 10); Instance.new("UIPadding", pg).PaddingBottom = UDim.new(0, 30) 
@@ -195,12 +213,12 @@ local function createButton(parent, text, color, callback)
     local btnFrame = Instance.new("Frame", parent)
     btnFrame.Size = UDim2.new(0.9, 0, 0, 42); btnFrame.BackgroundTransparency = 1
     local btn = Instance.new("TextButton", btnFrame)
-    btn.Size = UDim2.new(1, 0, 1, 0); btn.BackgroundColor3 = Theme.ItemBg; btn.Text = ""; btn.AutoButtonColor = false
+    btn.Size = UDim2.new(1, 0, 1, 0); btn.BackgroundColor3 = Theme.ItemBg; btn.Text = ""; btn.AutoButtonColor = false; btn.ZIndex = 10
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
     local stroke = Instance.new("UIStroke", btn); stroke.Color = color; stroke.Thickness = 1; stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     local title = Instance.new("TextLabel", btn)
     title.Size = UDim2.new(1, 0, 1, 0); title.BackgroundTransparency = 1; title.Text = text
-    title.TextColor3 = color; title.Font = Enum.Font.GothamBold; title.TextSize = 13
+    title.TextColor3 = color; title.Font = Enum.Font.GothamBold; title.TextSize = 13; title.ZIndex = 10
     btn.MouseButton1Click:Connect(function()
         clickAnimate(btn); TweenService:Create(stroke, TweenInfo.new(0.15), {Color = Theme.TextTitle}):Play()
         task.wait(0.15); TweenService:Create(stroke, TweenInfo.new(0.3), {Color = color}):Play(); callback()
@@ -214,12 +232,12 @@ local function createDualButtons(parent, text1, color1, cb1, text2, color2, cb2)
     local function makeBtn(xPos, txt, col, cb)
         local btn = Instance.new("TextButton", frame)
         btn.Size = UDim2.new(0.48, 0, 1, 0); btn.Position = UDim2.new(xPos, 0, 0, 0)
-        btn.BackgroundColor3 = Theme.ItemBg; btn.Text = ""; btn.AutoButtonColor = false
+        btn.BackgroundColor3 = Theme.ItemBg; btn.Text = ""; btn.AutoButtonColor = false; btn.ZIndex = 10
         Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
         local stroke = Instance.new("UIStroke", btn); stroke.Color = col; stroke.Thickness = 1; stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
         local title = Instance.new("TextLabel", btn)
         title.Size = UDim2.new(1, 0, 1, 0); title.BackgroundTransparency = 1; title.Text = txt
-        title.TextColor3 = col; title.Font = Enum.Font.GothamBold; title.TextSize = 12
+        title.TextColor3 = col; title.Font = Enum.Font.GothamBold; title.TextSize = 12; title.ZIndex = 10
         btn.MouseButton1Click:Connect(function()
             clickAnimate(btn); TweenService:Create(stroke, TweenInfo.new(0.15), {Color = Theme.TextTitle}):Play()
             task.wait(0.15); TweenService:Create(stroke, TweenInfo.new(0.3), {Color = col}):Play(); cb()
@@ -232,15 +250,15 @@ local function createToggle(parent, text, defaultState, callback)
     local btnFrame = Instance.new("Frame", parent)
     btnFrame.Size = UDim2.new(0.9, 0, 0, 44); btnFrame.BackgroundTransparency = 1
     local btn = Instance.new("TextButton", btnFrame)
-    btn.Size = UDim2.new(1, 0, 1, 0); btn.Text = ""; btn.AutoButtonColor = false 
+    btn.Size = UDim2.new(1, 0, 1, 0); btn.Text = ""; btn.AutoButtonColor = false; btn.ZIndex = 10
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
     local stroke = Instance.new("UIStroke", btn); stroke.Thickness = 1
     local title = Instance.new("TextLabel", btn)
     title.Size = UDim2.new(0.7, 0, 1, 0); title.Position = UDim2.new(0.05, 0, 0, 0)
-    title.BackgroundTransparency = 1; title.Text = text; title.TextColor3 = Theme.TextTitle; title.Font = Enum.Font.GothamSemibold; title.TextSize = 13; title.TextXAlignment = Enum.TextXAlignment.Left
+    title.BackgroundTransparency = 1; title.Text = text; title.TextColor3 = Theme.TextTitle; title.Font = Enum.Font.GothamSemibold; title.TextSize = 13; title.TextXAlignment = Enum.TextXAlignment.Left; title.ZIndex = 10
     local status = Instance.new("TextLabel", btn)
     status.Size = UDim2.new(0.2, 0, 1, 0); status.Position = UDim2.new(0.75, 0, 0, 0)
-    status.BackgroundTransparency = 1; status.Font = Enum.Font.GothamBold; status.TextSize = 12; status.TextXAlignment = Enum.TextXAlignment.Right
+    status.BackgroundTransparency = 1; status.Font = Enum.Font.GothamBold; status.TextSize = 12; status.TextXAlignment = Enum.TextXAlignment.Right; status.ZIndex = 10
     local active = defaultState or false
     status.Text = active and "ON" or "OFF"
     status.TextColor3 = active and Theme.AccentOn or Theme.AccentOff
@@ -260,20 +278,20 @@ local function createSlider(parent, text, min, max, default, callback)
     local frame = Instance.new("Frame", parent)
     frame.Size = UDim2.new(0.9, 0, 0, 48); frame.BackgroundTransparency = 1
     local bg = Instance.new("Frame", frame)
-    bg.Size = UDim2.new(1, 0, 1, 0); bg.BackgroundColor3 = Theme.ItemBg
+    bg.Size = UDim2.new(1, 0, 1, 0); bg.BackgroundColor3 = Theme.ItemBg; bg.ZIndex = 10
     Instance.new("UICorner", bg).CornerRadius = UDim.new(0, 10)
     local stroke = Instance.new("UIStroke", bg); stroke.Color = Theme.Stroke; stroke.Thickness = 1
     local titleLabel = Instance.new("TextLabel", bg)
     titleLabel.Size = UDim2.new(0.7, 0, 0.4, 0); titleLabel.Position = UDim2.new(0.05, 0, 0.1, 0)
-    titleLabel.BackgroundTransparency = 1; titleLabel.Text = text; titleLabel.TextColor3 = Theme.TextDim; titleLabel.Font = Enum.Font.GothamSemibold; titleLabel.TextSize = 12; titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.BackgroundTransparency = 1; titleLabel.Text = text; titleLabel.TextColor3 = Theme.TextDim; titleLabel.Font = Enum.Font.GothamSemibold; titleLabel.TextSize = 12; titleLabel.TextXAlignment = Enum.TextXAlignment.Left; titleLabel.ZIndex = 10
     local valLabel = Instance.new("TextLabel", bg)
     valLabel.Size = UDim2.new(0.25, 0, 0.4, 0); valLabel.Position = UDim2.new(0.7, 0, 0.1, 0)
-    valLabel.BackgroundTransparency = 1; valLabel.Text = tostring(default); valLabel.TextColor3 = Theme.Brand; valLabel.Font = Enum.Font.GothamBold; valLabel.TextSize = 12; valLabel.TextXAlignment = Enum.TextXAlignment.Right
+    valLabel.BackgroundTransparency = 1; valLabel.Text = tostring(default); valLabel.TextColor3 = Theme.Brand; valLabel.Font = Enum.Font.GothamBold; valLabel.TextSize = 12; valLabel.TextXAlignment = Enum.TextXAlignment.Right; valLabel.ZIndex = 10
     local track = Instance.new("Frame", bg)
-    track.Size = UDim2.new(0.9, 0, 0.15, 0); track.Position = UDim2.new(0.05, 0, 0.65, 0); track.BackgroundColor3 = Theme.MainBg
+    track.Size = UDim2.new(0.9, 0, 0.15, 0); track.Position = UDim2.new(0.05, 0, 0.65, 0); track.BackgroundColor3 = Theme.MainBg; track.ZIndex = 10
     Instance.new("UICorner", track).CornerRadius = UDim.new(1, 0)
     local fill = Instance.new("Frame", track)
-    fill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0); fill.BackgroundColor3 = Theme.AccentOn
+    fill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0); fill.BackgroundColor3 = Theme.AccentOn; fill.ZIndex = 10
     Instance.new("UICorner", fill).CornerRadius = UDim.new(1, 0)
     local dragging = false
     local function updateSlider(input)
@@ -298,6 +316,14 @@ local function optimizePart(obj)
 end
 
 -- [TAB 1: NHÂN VẬT]
+
+createToggle(page1, "🔒 Khóa vị trí (Đóng băng)", false, function(v) 
+    State.LockPosition = v 
+    if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        player.Character.HumanoidRootPart.Anchored = false -- Nhả khóa ngay lập tức khi tắt
+    end
+end)
+
 createToggle(page1, "🛡️ Chống ngã & Chống văng xa", false, function(v) State.AntiStun = v end)
 createToggle(page1, "🏃 Chạy nhanh", false, function(v) State.Speed = v end)
 createSlider(page1, "Tốc độ chạy", 16, 1000, 60, function(val) State.SpeedValue = val end)
@@ -308,7 +334,18 @@ createToggle(page1, "🐿️ Lấy đồ nhanh", false, function(v)
     State.Instant = v 
     if v then for _, prompt in pairs(workspace:GetDescendants()) do if prompt:IsA("ProximityPrompt") then prompt.HoldDuration = 0; prompt.MaxActivationDistance = 25 end end end
 end)
-createToggle(page1, "👻 Đi xuyên tường", false, function(v) State.Noclip = v end)
+
+-- SỬA LỖI NOCLIP: Phục hồi trạng thái va chạm ngay khi tắt
+createToggle(page1, "👻 Đi xuyên tường", false, function(v) 
+    State.Noclip = v 
+    if not v and player.Character then
+        for _, part in pairs(player.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = true
+            end
+        end
+    end
+end)
 
 local waterPart = Instance.new("Part")
 waterPart.Size = Vector3.new(6, 1, 6); waterPart.Transparency = 1; waterPart.Anchored = true; waterPart.CanCollide = true
@@ -374,6 +411,25 @@ end)
 ProximityPromptService.PromptButtonHoldBegan:Connect(function(prompt) if State.Instant then pcall(function() fireproximityprompt(prompt) end) end end)
 
 -- [TAB 2: TIỆN ÍCH]
+
+createToggle(page2, "⬛ Màn hình đen (Giảm lag / Treo máy)", false, function(v)
+    if v then
+        screenOverlay.BackgroundColor3 = Color3.new(0, 0, 0)
+        screenOverlay.Visible = true
+    else
+        screenOverlay.Visible = false
+    end
+end)
+
+createToggle(page2, "⬜ Màn hình trắng (Treo máy)", false, function(v)
+    if v then
+        screenOverlay.BackgroundColor3 = Color3.new(1, 1, 1)
+        screenOverlay.Visible = true
+    else
+        screenOverlay.Visible = false
+    end
+end)
+
 createToggle(page2, "🛡️ Chống bị kick khi treo máy (Anti-AFK)", true, function(v) State.AntiAfk = v end)
 createDualButtons(page2, "🌞 TRỜI SÁNG (FAKE)", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12 end, "🌚 TRỜI TỐI (FAKE)", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0 end)
 createDualButtons(page2, "🔄 VÀO LẠI SERVER", Theme.AccentOn, function()
@@ -409,21 +465,21 @@ createButton(page2, "📂 TP SAVE V2", Theme.Brand, function() pcall(function() 
 local savedLocCount = 0
 local function createPosItem(name, cframe)
     local item = Instance.new("Frame", page3)
-    item.Size = UDim2.new(0.9, 0, 0, 48); item.BackgroundColor3 = Theme.ItemBg
+    item.Size = UDim2.new(0.9, 0, 0, 48); item.BackgroundColor3 = Theme.ItemBg; item.ZIndex = 10
     Instance.new("UICorner", item).CornerRadius = UDim.new(0, 8)
     local stroke = Instance.new("UIStroke", item); stroke.Color = Theme.Stroke; stroke.Thickness = 1
     local nameBox = Instance.new("TextBox", item)
     nameBox.Size = UDim2.new(0.45, 0, 1, 0); nameBox.Position = UDim2.new(0.05, 0, 0, 0)
     nameBox.Text = name; nameBox.TextColor3 = Theme.TextTitle; nameBox.Font = Enum.Font.GothamSemibold; nameBox.TextSize = 12
-    nameBox.BackgroundTransparency = 1; nameBox.TextXAlignment = Enum.TextXAlignment.Left; nameBox.ClearTextOnFocus = false
+    nameBox.BackgroundTransparency = 1; nameBox.TextXAlignment = Enum.TextXAlignment.Left; nameBox.ClearTextOnFocus = false; nameBox.ZIndex = 10
     local tpBtn = Instance.new("TextButton", item)
     tpBtn.Size = UDim2.new(0.25, 0, 0.6, 0); tpBtn.Position = UDim2.new(0.53, 0, 0.2, 0)
     tpBtn.Text = "TP"; tpBtn.BackgroundColor3 = Theme.Brand; tpBtn.TextColor3 = Color3.new(1,1,1)
-    tpBtn.Font = Enum.Font.GothamBold; tpBtn.TextSize = 11; Instance.new("UICorner", tpBtn).CornerRadius = UDim.new(0, 6)
+    tpBtn.Font = Enum.Font.GothamBold; tpBtn.TextSize = 11; tpBtn.ZIndex = 10; Instance.new("UICorner", tpBtn).CornerRadius = UDim.new(0, 6)
     local delBtn = Instance.new("TextButton", item)
     delBtn.Size = UDim2.new(0.15, 0, 0.6, 0); delBtn.Position = UDim2.new(0.81, 0, 0.2, 0)
     delBtn.Text = "X"; delBtn.BackgroundColor3 = Theme.AccentOff; delBtn.TextColor3 = Color3.new(1,1,1)
-    delBtn.Font = Enum.Font.GothamBold; delBtn.TextSize = 12; Instance.new("UICorner", delBtn).CornerRadius = UDim.new(0, 6)
+    delBtn.Font = Enum.Font.GothamBold; delBtn.TextSize = 12; delBtn.ZIndex = 10; Instance.new("UICorner", delBtn).CornerRadius = UDim.new(0, 6)
     
     tpBtn.MouseButton1Click:Connect(function() clickAnimate(tpBtn); if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then player.Character.HumanoidRootPart.CFrame = cframe end end)
     delBtn.MouseButton1Click:Connect(function() clickAnimate(delBtn); task.wait(0.1); item:Destroy() end)
@@ -435,32 +491,30 @@ createButton(page3, "📍 LƯU TỌA ĐỘ", Theme.AccentOn, function()
     end
 end)
 
--- [TAB 4: TP NGƯỜI CHƠI (TỰ ĐỘNG LÀM MỚI + HIỂN THỊ TÊN THẬT & ID)]
+-- [TAB 4: TP NGƯỜI CHƠI (XÓA ID, CHỈ GIỮ TÊN THẬT MÀU XANH)]
 local function updatePlayerList()
     for _, child in pairs(page4:GetChildren()) do if child.Name == "PaddingFrame" then child:Destroy() end end
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= player then
-            local pFrame = Instance.new("Frame", page4); pFrame.Name = "PaddingFrame"; pFrame.Size = UDim2.new(0.9, 0, 0, 48); pFrame.BackgroundTransparency = 1
+            local pFrame = Instance.new("Frame", page4); pFrame.Name = "PaddingFrame"; pFrame.Size = UDim2.new(0.9, 0, 0, 48); pFrame.BackgroundTransparency = 1; pFrame.ZIndex = 10
             local btn = Instance.new("TextButton", pFrame)
-            btn.Name = "PlayerBtn_TP"; btn.Size = UDim2.new(1, 0, 1, 0); btn.BackgroundColor3 = Theme.ItemBg; btn.Text = ""; btn.AutoButtonColor = false
+            btn.Name = "PlayerBtn_TP"; btn.Size = UDim2.new(1, 0, 1, 0); btn.BackgroundColor3 = Theme.ItemBg; btn.Text = ""; btn.AutoButtonColor = false; btn.ZIndex = 10
             Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
             local stroke = Instance.new("UIStroke", btn); stroke.Color = Theme.Stroke; stroke.Thickness = 1
             
-            -- Tên hiển thị (DisplayName)
             local nLabel = Instance.new("TextLabel", btn)
             nLabel.Size = UDim2.new(0.7, 0, 0.5, 0); nLabel.Position = UDim2.new(0.05, 0, 0.05, 0); nLabel.BackgroundTransparency = 1
-            nLabel.Text = "👤: " .. p.DisplayName; nLabel.TextColor3 = Theme.TextTitle; nLabel.Font = Enum.Font.GothamSemibold; nLabel.TextSize = 13; nLabel.TextXAlignment = Enum.TextXAlignment.Left
+            nLabel.Text = "👤: " .. p.DisplayName; nLabel.TextColor3 = Theme.TextTitle; nLabel.Font = Enum.Font.GothamSemibold; nLabel.TextSize = 13; nLabel.TextXAlignment = Enum.TextXAlignment.Left; nLabel.ZIndex = 10
             
-            -- Tên thật & ID (Username & UserId)
             local subLabel = Instance.new("TextLabel", btn)
             subLabel.Size = UDim2.new(0.7, 0, 0.45, 0); subLabel.Position = UDim2.new(0.05, 0, 0.5, 0); subLabel.BackgroundTransparency = 1
-            subLabel.Text = "@" .. p.Name .. " (" .. tostring(p.UserId) .. ")"
-            subLabel.TextColor3 = Color3.fromRGB(100, 255, 100) -- Màu xanh lá mạ nổi bật
-            subLabel.Font = Enum.Font.Gotham; subLabel.TextSize = 10; subLabel.TextXAlignment = Enum.TextXAlignment.Left
+            subLabel.Text = "@" .. p.Name -- Xóa ID, chỉ để lại tên thật
+            subLabel.TextColor3 = Color3.fromRGB(100, 255, 100) 
+            subLabel.Font = Enum.Font.Gotham; subLabel.TextSize = 10; subLabel.TextXAlignment = Enum.TextXAlignment.Left; subLabel.ZIndex = 10
 
             local arrow = Instance.new("TextLabel", btn)
             arrow.Size = UDim2.new(0.2, 0, 1, 0); arrow.Position = UDim2.new(0.75, 0, 0, 0); arrow.BackgroundTransparency = 1
-            arrow.Text = " 🐿️🧂 "; arrow.TextColor3 = Theme.Brand; arrow.Font = Enum.Font.GothamBold; arrow.TextSize = 11; arrow.TextXAlignment = Enum.TextXAlignment.Right
+            arrow.Text = " 🐿️🧂 "; arrow.TextColor3 = Theme.Brand; arrow.Font = Enum.Font.GothamBold; arrow.TextSize = 11; arrow.TextXAlignment = Enum.TextXAlignment.Right; arrow.ZIndex = 10
             
             btn.MouseButton1Click:Connect(function()
                 clickAnimate(btn)
@@ -491,9 +545,20 @@ RunService.RenderStepped:Connect(function()
         local hum = char:FindFirstChildOfClass("Humanoid")
         local root = char:FindFirstChild("HumanoidRootPart")
         
+        -- Logic Khóa Vị Trí
+        if State.LockPosition and root then
+            root.Anchored = true
+        end
+
         if State.Speed then hum.WalkSpeed = State.SpeedValue else hum.WalkSpeed = 16 end
         if State.Jump then hum.JumpPower = State.JumpValue else hum.JumpPower = 50 end
-        if State.Noclip then for _, v in pairs(char:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = false end end end
+        
+        -- Logic Noclip
+        if State.Noclip then 
+            for _, v in pairs(char:GetDescendants()) do 
+                if v:IsA("BasePart") then v.CanCollide = false end 
+            end 
+        end
         
         if State.AntiStun then
             hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
