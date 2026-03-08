@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (FIX LỖI ĐỒ HỌA BỀ MẶT TÀNG HÌNH & X-RAY)
+-- MENU VIP PRO V38 (FIX LỖI TAB NHÂN VẬT: JUMP & NOCLIP)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -306,6 +306,15 @@ local function createSlider(parent, text, min, max, default, callback)
     return bg
 end
 
+local function optimizePart(obj)
+    if State.LowGfx then
+        if obj:IsA("BasePart") or obj:IsA("MeshPart") then 
+            obj.Material = Enum.Material.SmoothPlastic; obj.Reflectance = 0; obj.CastShadow = false 
+        elseif obj:IsA("Decal") or obj:IsA("Texture") then obj.Transparency = 1 
+        elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles") then obj.Enabled = false end
+    end
+end
+
 -- [TAB 1: NHÂN VẬT]
 createToggle(page1, "🔒 Khóa vị trí (Đóng băng)", false, function(v) 
     State.LockPosition = v 
@@ -336,7 +345,6 @@ createToggle(page1, "👻 Đi xuyên tường", false, function(v)
     end
 end)
 
--- Sửa Đi trên mặt nước
 local waterPart = Instance.new("Part")
 waterPart.Size = Vector3.new(10, 1, 10) 
 waterPart.Transparency = 1
@@ -345,7 +353,6 @@ waterPart.CanCollide = true
 
 createToggle(page1, "🌊 Đi trên mặt nước", false, function(v) State.WalkOnWater = v end)
 
--- Sửa X-Ray dứt điểm lỗi màn hình rác/vàng
 local xrayMats = {}
 createToggle(page1, "👀 Nhìn xuyên map (X-Ray)", false, function(v) 
     State.XRay = v 
@@ -353,7 +360,6 @@ createToggle(page1, "👀 Nhìn xuyên map (X-Ray)", false, function(v)
         if v then
             local descendants = workspace:GetDescendants()
             for i, obj in ipairs(descendants) do
-                -- CHỈ QUÉT VÀ THAY ĐỔI CÁC KHỐI NHÌN THẤY ĐƯỢC (BỎ QUA KHỐI TÀNG HÌNH)
                 if obj:IsA("BasePart") and not obj:IsDescendantOf(player.Character) and obj.Name ~= "Terrain" and obj.Transparency < 1 then
                     if not xrayMats[obj] then xrayMats[obj] = obj.Transparency end
                     obj.Transparency = 0.5
@@ -527,6 +533,18 @@ player.Idled:Connect(function()
     end
 end)
 
+-- [TÁCH NOCLIP SANG LUỒNG STEPPED ĐỂ CHỐNG LỖI VẬT LÝ]
+RunService.Stepped:Connect(function()
+    local char = player.Character
+    if State.Noclip and char then
+        for _, v in pairs(char:GetDescendants()) do 
+            if v:IsA("BasePart") and v.CanCollide then 
+                v.CanCollide = false 
+            end 
+        end 
+    end
+end)
+
 RunService.RenderStepped:Connect(function()
     local char = player.Character
     if char and char:FindFirstChildOfClass("Humanoid") then
@@ -534,13 +552,17 @@ RunService.RenderStepped:Connect(function()
         local root = char:FindFirstChild("HumanoidRootPart")
         
         if State.LockPosition and root then root.Anchored = true end
-        if State.Speed then hum.WalkSpeed = State.SpeedValue else hum.WalkSpeed = 16 end
-        if State.Jump then hum.JumpPower = State.JumpValue else hum.JumpPower = 50 end
         
-        if State.Noclip then 
-            for _, v in pairs(char:GetDescendants()) do 
-                if v:IsA("BasePart") then v.CanCollide = false end 
-            end 
+        -- Sửa Lỗi WalkSpeed
+        if State.Speed then hum.WalkSpeed = State.SpeedValue else hum.WalkSpeed = 16 end
+        
+        -- Sửa Lỗi JumpPower (Bắt buộc dùng UseJumpPower)
+        if State.Jump then 
+            hum.UseJumpPower = true
+            hum.JumpPower = State.JumpValue 
+        else 
+            hum.UseJumpPower = true
+            hum.JumpPower = 50 
         end
         
         if State.AntiStun then
@@ -555,7 +577,7 @@ RunService.RenderStepped:Connect(function()
             hum:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
         end
             
-        -- Logic Đi Mặt Nước Cải Tiến
+        -- Logic Đi Mặt Nước 
         if State.WalkOnWater and root then
             local params = RaycastParams.new()
             params.FilterDescendantsInstances = {char, waterPart} 
