@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (Bản Fix Noclip, Lock Pos & Màn hình đen/trắng)
+-- MENU VIP PRO V38 (Bản Cập Nhật Sửa Lỗi X-Ray, Water Walk & Giao Diện)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -43,7 +43,7 @@ local gui = Instance.new("ScreenGui")
 gui.Name = "MobileProMax"
 gui.ResetOnSpawn = false
 gui.DisplayOrder = 99999
-gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling -- Tối ưu để lớp phủ màn hình nằm dưới Menu
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 local guiParent = player:WaitForChild("PlayerGui")
 pcall(function()
@@ -315,49 +315,54 @@ local function optimizePart(obj)
     end
 end
 
--- [TAB 1: NHÂN VẬT]
+-- [TAB 1: NHÂN VẬT (Sắp xếp lại theo yêu cầu)]
 
 createToggle(page1, "🔒 Khóa vị trí (Đóng băng)", false, function(v) 
     State.LockPosition = v 
     if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        player.Character.HumanoidRootPart.Anchored = false -- Nhả khóa ngay lập tức khi tắt
+        player.Character.HumanoidRootPart.Anchored = false 
     end
 end)
 
+-- [ĐƯA NHẢY CAO LÊN TRƯỚC]
+createToggle(page1, "🦘 Nhảy cao", false, function(v) State.Jump = v end)
+createSlider(page1, "Lực nhảy", 50, 300, 120, function(val) State.JumpValue = val end)
+
+-- [CHỐNG NGÃ & CHẠY NHANH XUỐNG DƯỚI]
 createToggle(page1, "🛡️ Chống ngã & Chống văng xa", false, function(v) State.AntiStun = v end)
 createToggle(page1, "🏃 Chạy nhanh", false, function(v) State.Speed = v end)
 createSlider(page1, "Tốc độ chạy", 16, 1000, 60, function(val) State.SpeedValue = val end)
-createToggle(page1, "🦘 Nhảy cao", false, function(v) State.Jump = v end)
-createSlider(page1, "Lực nhảy", 50, 300, 120, function(val) State.JumpValue = val end)
+
 createToggle(page1, "🚀 Nhảy trên không", false, function(v) State.InfJump = v end) 
 createToggle(page1, "🐿️ Lấy đồ nhanh", false, function(v) 
     State.Instant = v 
     if v then for _, prompt in pairs(workspace:GetDescendants()) do if prompt:IsA("ProximityPrompt") then prompt.HoldDuration = 0; prompt.MaxActivationDistance = 25 end end end
 end)
 
--- SỬA LỖI NOCLIP: Phục hồi trạng thái va chạm ngay khi tắt
 createToggle(page1, "👻 Đi xuyên tường", false, function(v) 
     State.Noclip = v 
     if not v and player.Character then
         for _, part in pairs(player.Character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = true
-            end
+            if part:IsA("BasePart") then part.CanCollide = true end
         end
     end
 end)
 
+-- [SỬA LẠI ĐI TRÊN MẶT NƯỚC BẰNG BỆ ĐỠ RỘNG HƠN]
 local waterPart = Instance.new("Part")
-waterPart.Size = Vector3.new(6, 1, 6); waterPart.Transparency = 1; waterPart.Anchored = true; waterPart.CanCollide = true
+waterPart.Size = Vector3.new(20, 1, 20) -- Làm rộng ra để không bị trượt
+waterPart.Transparency = 1
+waterPart.Anchored = true
+waterPart.CanCollide = true
+
 createToggle(page1, "🌊 Đi trên mặt nước", false, function(v) State.WalkOnWater = v end)
 
+-- [SỬA LẠI X-RAY: XÓA ĐỔI ÁNH SÁNG, CHỈ XUYÊN MAP]
 local xrayMats = {}
-local origAmbient = Lighting.Ambient
 createToggle(page1, "👀 Nhìn xuyên map (X-Ray)", false, function(v) 
     State.XRay = v 
     task.spawn(function()
         if v then
-            Lighting.Ambient = Color3.fromRGB(255,255,255); Lighting.Brightness = 3
             local descendants = workspace:GetDescendants()
             for i, obj in ipairs(descendants) do
                 if obj:IsA("BasePart") and not obj:IsDescendantOf(player.Character) and obj.Name ~= "Terrain" then
@@ -367,7 +372,6 @@ createToggle(page1, "👀 Nhìn xuyên map (X-Ray)", false, function(v)
                 if i % 1000 == 0 then task.wait() end 
             end
         else
-            Lighting.Ambient = origAmbient; Lighting.Brightness = 1
             local count = 0
             for obj, origTrans in pairs(xrayMats) do
                 if obj and obj.Parent then obj.Transparency = origTrans end
@@ -457,7 +461,16 @@ end, "🌐 ĐỔI SERVER", Theme.Brand, function()
 end)
 
 createButton(page2, "💻 Lệnh admin", Theme.AccentOn, function() pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) end)
-createButton(page2, "🔨 LẤY BTOOLS", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/0Ben1/fe/main/F3X%20BTools"))() end) end)
+
+-- [SỬA LẠI TÍNH NĂNG BTOOLS HOẠT ĐỘNG 100%]
+createButton(page2, "🔨 LẤY BTOOLS", Theme.Brand, function() 
+    pcall(function() 
+        local b1 = Instance.new("HopperBin", player.Backpack); b1.BinType = Enum.BinType.Clone
+        local b2 = Instance.new("HopperBin", player.Backpack); b2.BinType = Enum.BinType.Hammer
+        local b3 = Instance.new("HopperBin", player.Backpack); b3.BinType = Enum.BinType.Grab
+    end) 
+end)
+
 createButton(page2, "🕊️ FLY (Bay)", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end)
 createButton(page2, "📂 TP SAVE V2", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
 
@@ -491,7 +504,7 @@ createButton(page3, "📍 LƯU TỌA ĐỘ", Theme.AccentOn, function()
     end
 end)
 
--- [TAB 4: TP NGƯỜI CHƠI (XÓA ID, CHỈ GIỮ TÊN THẬT MÀU XANH)]
+-- [TAB 4: TP NGƯỜI CHƠI]
 local function updatePlayerList()
     for _, child in pairs(page4:GetChildren()) do if child.Name == "PaddingFrame" then child:Destroy() end end
     for _, p in pairs(Players:GetPlayers()) do
@@ -508,7 +521,7 @@ local function updatePlayerList()
             
             local subLabel = Instance.new("TextLabel", btn)
             subLabel.Size = UDim2.new(0.7, 0, 0.45, 0); subLabel.Position = UDim2.new(0.05, 0, 0.5, 0); subLabel.BackgroundTransparency = 1
-            subLabel.Text = "@" .. p.Name -- Xóa ID, chỉ để lại tên thật
+            subLabel.Text = "@" .. p.Name 
             subLabel.TextColor3 = Color3.fromRGB(100, 255, 100) 
             subLabel.Font = Enum.Font.Gotham; subLabel.TextSize = 10; subLabel.TextXAlignment = Enum.TextXAlignment.Left; subLabel.ZIndex = 10
 
@@ -545,15 +558,10 @@ RunService.RenderStepped:Connect(function()
         local hum = char:FindFirstChildOfClass("Humanoid")
         local root = char:FindFirstChild("HumanoidRootPart")
         
-        -- Logic Khóa Vị Trí
-        if State.LockPosition and root then
-            root.Anchored = true
-        end
-
+        if State.LockPosition and root then root.Anchored = true end
         if State.Speed then hum.WalkSpeed = State.SpeedValue else hum.WalkSpeed = 16 end
         if State.Jump then hum.JumpPower = State.JumpValue else hum.JumpPower = 50 end
         
-        -- Logic Noclip
         if State.Noclip then 
             for _, v in pairs(char:GetDescendants()) do 
                 if v:IsA("BasePart") then v.CanCollide = false end 
@@ -572,14 +580,17 @@ RunService.RenderStepped:Connect(function()
             hum:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
         end
             
+        -- LOGIC MẶT NƯỚC (Đã sửa lại để không tự chặn)
         if State.WalkOnWater and root then
             local params = RaycastParams.new()
-            params.FilterDescendantsInstances = {char}
+            params.FilterDescendantsInstances = {char, waterPart} -- Quan trọng: Tránh vướng vào chính bệ đỡ
             params.FilterType = Enum.RaycastFilterType.Exclude
+            params.IgnoreWater = false -- Phải bằng false để quét trúng nước
+            
             local result = workspace:Raycast(root.Position, Vector3.new(0, -10, 0), params)
             if result and result.Material == Enum.Material.Water then
                 waterPart.Parent = workspace
-                waterPart.CFrame = CFrame.new(result.Position.X, result.Position.Y - 0.5, result.Position.Z)
+                waterPart.CFrame = CFrame.new(result.Position.X, result.Position.Y - 1, result.Position.Z)
             else
                 waterPart.Parent = nil
             end
@@ -626,10 +637,12 @@ RunService.RenderStepped:Connect(function()
                         tLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
                         tLabel.Font = Enum.Font.GothamBold
                         tLabel.TextSize = 11
+                        tLabel.RichText = true -- Bật hỗ trợ định dạng màu
                     end
                     if root and tChar:FindFirstChild("HumanoidRootPart") then
                         local dist = math.floor((root.Position - tChar.HumanoidRootPart.Position).Magnitude)
-                        bgui.NameLabel.Text = p.DisplayName .. "\n[" .. dist .. "m]"
+                        -- Định dạng ESP màu xanh cho khoảng cách
+                        bgui.NameLabel.Text = p.DisplayName .. '\n<font color="#4CAF50">[' .. dist .. 'm]</font>'
                     else
                         bgui.NameLabel.Text = p.DisplayName
                     end
