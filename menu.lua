@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (Bản Cập Nhật Sửa Lỗi X-Ray, Water Walk & Giao Diện)
+-- MENU VIP PRO V38 (FIX LỖI ĐỒ HỌA BỀ MẶT TÀNG HÌNH & X-RAY)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -140,7 +140,7 @@ UIS.InputChanged:Connect(function(input)
 end)
 UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragToggle = false end end)
 
--- [HỆ THỐNG 4 TAB CÂN ĐỐI]
+-- [HỆ THỐNG TAB]
 local tabBar = Instance.new("Frame", frame)
 tabBar.Size = UDim2.new(1, 0, 0, 38); tabBar.Position = UDim2.new(0, 0, 0, 45)
 tabBar.BackgroundColor3 = Theme.TabBg; tabBar.BackgroundTransparency = 0; tabBar.BorderSizePixel = 0
@@ -208,7 +208,7 @@ openBtn.MouseButton1Click:Connect(function()
     frame:TweenPosition(opened and UDim2.new(0.5, -170, 0.5, -225) or UDim2.new(0.5, -170, 1.2, 0), "Out", "Back", 0.5)
 end)
 
--- [CÁC HÀM TẠO NÚT VÀ CÔNG TẮC]
+-- [CÁC HÀM TẠO NÚT]
 local function createButton(parent, text, color, callback)
     local btnFrame = Instance.new("Frame", parent)
     btnFrame.Size = UDim2.new(0.9, 0, 0, 42); btnFrame.BackgroundTransparency = 1
@@ -306,17 +306,7 @@ local function createSlider(parent, text, min, max, default, callback)
     return bg
 end
 
-local function optimizePart(obj)
-    if State.LowGfx then
-        if obj:IsA("BasePart") or obj:IsA("MeshPart") then 
-            obj.Material = Enum.Material.SmoothPlastic; obj.Reflectance = 0; obj.CastShadow = false 
-        elseif obj:IsA("Decal") or obj:IsA("Texture") then obj.Transparency = 1 
-        elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles") then obj.Enabled = false end
-    end
-end
-
--- [TAB 1: NHÂN VẬT (Sắp xếp lại theo yêu cầu)]
-
+-- [TAB 1: NHÂN VẬT]
 createToggle(page1, "🔒 Khóa vị trí (Đóng băng)", false, function(v) 
     State.LockPosition = v 
     if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
@@ -324,11 +314,9 @@ createToggle(page1, "🔒 Khóa vị trí (Đóng băng)", false, function(v)
     end
 end)
 
--- [ĐƯA NHẢY CAO LÊN TRƯỚC]
 createToggle(page1, "🦘 Nhảy cao", false, function(v) State.Jump = v end)
 createSlider(page1, "Lực nhảy", 50, 300, 120, function(val) State.JumpValue = val end)
 
--- [CHỐNG NGÃ & CHẠY NHANH XUỐNG DƯỚI]
 createToggle(page1, "🛡️ Chống ngã & Chống văng xa", false, function(v) State.AntiStun = v end)
 createToggle(page1, "🏃 Chạy nhanh", false, function(v) State.Speed = v end)
 createSlider(page1, "Tốc độ chạy", 16, 1000, 60, function(val) State.SpeedValue = val end)
@@ -348,16 +336,16 @@ createToggle(page1, "👻 Đi xuyên tường", false, function(v)
     end
 end)
 
--- [SỬA LẠI ĐI TRÊN MẶT NƯỚC BẰNG BỆ ĐỠ RỘNG HƠN]
+-- Sửa Đi trên mặt nước
 local waterPart = Instance.new("Part")
-waterPart.Size = Vector3.new(20, 1, 20) -- Làm rộng ra để không bị trượt
+waterPart.Size = Vector3.new(10, 1, 10) 
 waterPart.Transparency = 1
 waterPart.Anchored = true
 waterPart.CanCollide = true
 
 createToggle(page1, "🌊 Đi trên mặt nước", false, function(v) State.WalkOnWater = v end)
 
--- [SỬA LẠI X-RAY: XÓA ĐỔI ÁNH SÁNG, CHỈ XUYÊN MAP]
+-- Sửa X-Ray dứt điểm lỗi màn hình rác/vàng
 local xrayMats = {}
 createToggle(page1, "👀 Nhìn xuyên map (X-Ray)", false, function(v) 
     State.XRay = v 
@@ -365,33 +353,22 @@ createToggle(page1, "👀 Nhìn xuyên map (X-Ray)", false, function(v)
         if v then
             local descendants = workspace:GetDescendants()
             for i, obj in ipairs(descendants) do
-                if obj:IsA("BasePart") and not obj:IsDescendantOf(player.Character) and obj.Name ~= "Terrain" then
+                -- CHỈ QUÉT VÀ THAY ĐỔI CÁC KHỐI NHÌN THẤY ĐƯỢC (BỎ QUA KHỐI TÀNG HÌNH)
+                if obj:IsA("BasePart") and not obj:IsDescendantOf(player.Character) and obj.Name ~= "Terrain" and obj.Transparency < 1 then
                     if not xrayMats[obj] then xrayMats[obj] = obj.Transparency end
                     obj.Transparency = 0.5
                 end
-                if i % 1000 == 0 then task.wait() end 
+                if i % 500 == 0 then task.wait() end 
             end
         else
             local count = 0
             for obj, origTrans in pairs(xrayMats) do
                 if obj and obj.Parent then obj.Transparency = origTrans end
-                count = count + 1; if count % 1000 == 0 then task.wait() end
+                count = count + 1; if count % 500 == 0 then task.wait() end
             end
             xrayMats = {}
         end
     end)
-end)
-
-createToggle(page1, "🕹️ giảm FPS  (Đồ Hoạ FF)", false, function(v) 
-    State.LowGfx = v 
-    if v then 
-        Lighting.GlobalShadows = false; Lighting.FogEnd = 9e9; pcall(function() settings().Rendering.QualityLevel = 1 end)
-        pcall(function() workspace.Terrain.WaterWaveSize = 0; workspace.Terrain.WaterWaveSpeed = 0; workspace.Terrain.WaterReflectance = 0; workspace.Terrain.WaterTransparency = 0; workspace.Terrain.Decoration = false end)
-        for _, obj in pairs(Lighting:GetChildren()) do if obj:IsA("PostEffect") or obj:IsA("BlurEffect") or obj:IsA("SunRaysEffect") or obj:IsA("ColorCorrectionEffect") or obj:IsA("BloomEffect") or obj:IsA("DepthOfFieldEffect") then obj.Enabled = false end end
-        for _, obj in pairs(workspace:GetDescendants()) do optimizePart(obj) end
-    else 
-        Lighting.GlobalShadows = true; pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic end) 
-    end
 end)
 
 createToggle(page1, "🔴 ESP người chơi", false, function(v) State.ESP = v end)
@@ -415,7 +392,6 @@ end)
 ProximityPromptService.PromptButtonHoldBegan:Connect(function(prompt) if State.Instant then pcall(function() fireproximityprompt(prompt) end) end end)
 
 -- [TAB 2: TIỆN ÍCH]
-
 createToggle(page2, "⬛ Màn hình đen (Giảm lag / Treo máy)", false, function(v)
     if v then
         screenOverlay.BackgroundColor3 = Color3.new(0, 0, 0)
@@ -462,7 +438,6 @@ end)
 
 createButton(page2, "💻 Lệnh admin", Theme.AccentOn, function() pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) end)
 
--- [SỬA LẠI TÍNH NĂNG BTOOLS HOẠT ĐỘNG 100%]
 createButton(page2, "🔨 LẤY BTOOLS", Theme.Brand, function() 
     pcall(function() 
         local b1 = Instance.new("HopperBin", player.Backpack); b1.BinType = Enum.BinType.Clone
@@ -580,17 +555,17 @@ RunService.RenderStepped:Connect(function()
             hum:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
         end
             
-        -- LOGIC MẶT NƯỚC (Đã sửa lại để không tự chặn)
+        -- Logic Đi Mặt Nước Cải Tiến
         if State.WalkOnWater and root then
             local params = RaycastParams.new()
-            params.FilterDescendantsInstances = {char, waterPart} -- Quan trọng: Tránh vướng vào chính bệ đỡ
+            params.FilterDescendantsInstances = {char, waterPart} 
             params.FilterType = Enum.RaycastFilterType.Exclude
-            params.IgnoreWater = false -- Phải bằng false để quét trúng nước
+            params.IgnoreWater = false 
             
             local result = workspace:Raycast(root.Position, Vector3.new(0, -10, 0), params)
             if result and result.Material == Enum.Material.Water then
                 waterPart.Parent = workspace
-                waterPart.CFrame = CFrame.new(result.Position.X, result.Position.Y - 1, result.Position.Z)
+                waterPart.CFrame = CFrame.new(root.Position.X, result.Position.Y - 0.5, root.Position.Z)
             else
                 waterPart.Parent = nil
             end
@@ -637,11 +612,10 @@ RunService.RenderStepped:Connect(function()
                         tLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
                         tLabel.Font = Enum.Font.GothamBold
                         tLabel.TextSize = 11
-                        tLabel.RichText = true -- Bật hỗ trợ định dạng màu
+                        tLabel.RichText = true 
                     end
                     if root and tChar:FindFirstChild("HumanoidRootPart") then
                         local dist = math.floor((root.Position - tChar.HumanoidRootPart.Position).Magnitude)
-                        -- Định dạng ESP màu xanh cho khoảng cách
                         bgui.NameLabel.Text = p.DisplayName .. '\n<font color="#4CAF50">[' .. dist .. 'm]</font>'
                     else
                         bgui.NameLabel.Text = p.DisplayName
@@ -656,7 +630,7 @@ RunService.RenderStepped:Connect(function()
 end)
 
 workspace.DescendantAdded:Connect(function(v)
-    if State.XRay and v:IsA("BasePart") and not v:IsDescendantOf(player.Character) and v.Name ~= "Terrain" then
+    if State.XRay and v:IsA("BasePart") and not v:IsDescendantOf(player.Character) and v.Name ~= "Terrain" and v.Transparency < 1 then
         if not xrayMats[v] then xrayMats[v] = v.Transparency end
         v.Transparency = 0.5
     end
