@@ -410,7 +410,7 @@ task.spawn(function()
         local jobText = game.JobId ~= "" and string.sub(game.JobId, 1, 15).."..." or "N/A"
         
         serverInfoLabel.Text = string.format(
-            "<b>Khung hình (FPS):</b> %d\n<b>Độ trễ mạng (Ping):</b> %s\n<b>Người chơi:</b> %d / %d\n<b>ID:</b> %s",
+            "<b>Khung hình (FPS):</b> %d\n<b>Độ trễ mạng (Ping):</b> %s\n<b>Người chơi:</b> %d / %d\n<b>ID SV:</b> %s",
             fps, ping, pCount, maxP, jobText
         )
         
@@ -421,7 +421,7 @@ task.spawn(function()
         local timeString = string.format("%02d:%02d:%02d", hours, mins, secs)
         
         extraInfoLabel.Text = string.format(
-            "<b>Thời gian bạn đã chơi:</b> %s\n<b>Giờ hệ thống:</b> %s\n<b>Phiên bản:</b> V38 Pro Max Dashboard",
+            "<b>Thời gian bạn đã chơi:</b> %s\n<b>Giờ hệ thống:</b> %s\n<b>Phiên bản:</b> MENU VIP PRO 🇻🇳",
             timeString, os.date("%H:%M:%S")
         )
     end
