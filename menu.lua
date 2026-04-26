@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (hãy theo dõi tôi)
+-- MENU VIP PRO V38 (Bản Cập Nhật)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -306,13 +306,31 @@ local function createSlider(parent, text, min, max, default, callback)
     return bg
 end
 
-local function optimizePart(obj)
-    if State.LowGfx then
-        if obj:IsA("BasePart") or obj:IsA("MeshPart") then 
-            obj.Material = Enum.Material.SmoothPlastic; obj.Reflectance = 0; obj.CastShadow = false 
-        elseif obj:IsA("Decal") or obj:IsA("Texture") then obj.Transparency = 1 
-        elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles") then obj.Enabled = false end
-    end
+-- [HÀM TẠO Ô DÁN SCRIPT]
+local function createScriptBox(parent, textTitle, defaultScript)
+    local frame = Instance.new("Frame", parent)
+    frame.Size = UDim2.new(0.9, 0, 0, 85); frame.BackgroundTransparency = 1
+    
+    local title = Instance.new("TextLabel", frame)
+    title.Size = UDim2.new(1, 0, 0, 20); title.BackgroundTransparency = 1
+    title.Text = textTitle; title.TextColor3 = Theme.TextTitle; title.Font = Enum.Font.GothamBold; title.TextSize = 12; title.TextXAlignment = Enum.TextXAlignment.Left
+    
+    local textBox = Instance.new("TextBox", frame)
+    textBox.Size = UDim2.new(1, 0, 0, 30); textBox.Position = UDim2.new(0, 0, 0, 22)
+    textBox.BackgroundColor3 = Theme.ItemBg; textBox.TextColor3 = Theme.Brand; textBox.Font = Enum.Font.Code; textBox.TextSize = 10
+    textBox.Text = defaultScript; textBox.ClearTextOnFocus = false; textBox.TextWrapped = true; textBox.TextXAlignment = Enum.TextXAlignment.Left
+    Instance.new("UICorner", textBox).CornerRadius = UDim.new(0, 6)
+    local stroke = Instance.new("UIStroke", textBox); stroke.Color = Theme.Stroke; stroke.Thickness = 1
+    
+    local execBtn = Instance.new("TextButton", frame)
+    execBtn.Size = UDim2.new(1, 0, 0, 30); execBtn.Position = UDim2.new(0, 0, 0, 55)
+    execBtn.BackgroundColor3 = Theme.AccentOn; execBtn.Text = "▶ CHẠY SCRIPT"; execBtn.TextColor3 = Color3.new(1,1,1); execBtn.Font = Enum.Font.GothamBold; execBtn.TextSize = 12
+    Instance.new("UICorner", execBtn).CornerRadius = UDim.new(0, 6)
+    
+    execBtn.MouseButton1Click:Connect(function()
+        clickAnimate(execBtn)
+        if textBox.Text ~= "" then pcall(function() loadstring(textBox.Text)() end) end
+    end)
 end
 
 -- [TAB 1: NHÂN VẬT]
@@ -449,7 +467,9 @@ createButton(page2, "🔨 LẤY BTOOLS", Theme.Brand, function()
     end) 
 end)
 
-createButton(page2, "🕊️ FLY (Bay)", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end)
+-- Ô chạy script tuỳ chỉnh (Đã dán sẵn Fly V4 Remake)
+createScriptBox(page2, "🚀 CHẠY SCRIPT TÙY CHỈNH", 'loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V4-Remake-133528"))()')
+
 createButton(page2, "📂 TP SAVE V2", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
 
 -- [TAB 3: VỊ TRÍ TP SAVE]
@@ -530,7 +550,6 @@ player.Idled:Connect(function()
     end
 end)
 
-
 RunService.Stepped:Connect(function()
     local char = player.Character
     if State.Noclip and char then
@@ -550,9 +569,7 @@ RunService.RenderStepped:Connect(function()
         
         if State.LockPosition and root then root.Anchored = true end
         
-        
         if State.Speed then hum.WalkSpeed = State.SpeedValue else hum.WalkSpeed = 16 end
-        
         
         if State.Jump then 
             hum.UseJumpPower = true
@@ -574,17 +591,25 @@ RunService.RenderStepped:Connect(function()
             hum:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
         end
             
-        -- Logic Đi Mặt Nước 
+        -- Logic Đi Mặt Nước Mới (Tối ưu chống chìm & tự đẩy lên nếu rớt)
         if State.WalkOnWater and root then
             local params = RaycastParams.new()
             params.FilterDescendantsInstances = {char, waterPart} 
             params.FilterType = Enum.RaycastFilterType.Exclude
             params.IgnoreWater = false 
             
-            local result = workspace:Raycast(root.Position, Vector3.new(0, -10, 0), params)
-            if result and result.Material == Enum.Material.Water then
+            local result = workspace:Raycast(root.Position, Vector3.new(0, -15, 0), params)
+            if result and (result.Material == Enum.Material.Water or hum:GetState() == Enum.HumanoidStateType.Swimming) then
                 waterPart.Parent = workspace
-                waterPart.CFrame = CFrame.new(root.Position.X, result.Position.Y - 0.5, root.Position.Z)
+                
+                -- Căn chỉnh tọa độ Y phù hợp để nhân vật không chìm
+                local targetY = result and result.Position.Y or (root.Position.Y - 2.5)
+                waterPart.CFrame = CFrame.new(root.Position.X, targetY + 0.5, root.Position.Z)
+                
+                -- Tự động đổi trạng thái nếu vô tình kẹt ở trạng thái bơi
+                if hum:GetState() == Enum.HumanoidStateType.Swimming then
+                    hum:ChangeState(Enum.HumanoidStateType.Running)
+                end
             else
                 waterPart.Parent = nil
             end
