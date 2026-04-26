@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (Bản Cập Nhật - Fix Auto Collect & Fly V3 X)
+-- MENU VIP PRO V38 (Bản Cập Nhật - Avatar & Copy ID)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -128,6 +128,19 @@ titleLabel.ZIndex = 10
 local titleGradient = Instance.new("UIGradient", titleLabel)
 titleGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Theme.Brand), ColorSequenceKeypoint.new(1, Theme.BrandGradient)})
 
+-- [AVATAR GÓC MENU]
+local avatarImg = Instance.new("ImageLabel", header)
+avatarImg.Size = UDim2.new(0, 32, 0, 32)
+avatarImg.Position = UDim2.new(0, 10, 0, 6)
+avatarImg.BackgroundTransparency = 1
+avatarImg.ZIndex = 10
+pcall(function()
+    avatarImg.Image = Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+end)
+Instance.new("UICorner", avatarImg).CornerRadius = UDim.new(1, 0) -- Bo tròn thành vòng tròn
+local avatarStroke = Instance.new("UIStroke", avatarImg)
+avatarStroke.Color = Theme.Brand; avatarStroke.Thickness = 1.5; avatarStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
 -- [KÉO THẢ MENU]
 local dragToggle, dragStart, startPos
 header.InputBegan:Connect(function(input)
@@ -140,7 +153,7 @@ UIS.InputChanged:Connect(function(input)
 end)
 UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragToggle = false end end)
 
--- [HỆ THỐNG TAB - NÂNG CẤP LÊN 5 TAB]
+-- [HỆ THỐNG TAB]
 local tabBar = Instance.new("Frame", frame)
 tabBar.Size = UDim2.new(1, 0, 0, 38); tabBar.Position = UDim2.new(0, 0, 0, 45)
 tabBar.BackgroundColor3 = Theme.TabBg; tabBar.BackgroundTransparency = 0; tabBar.BorderSizePixel = 0
@@ -315,9 +328,9 @@ end
 -- [TAB 1: THÔNG TIN - DASHBOARD]
 -- ==========================================
 
-local function createInfoBox(parent, icon, titleText)
+local function createInfoBox(parent, icon, titleText, heightOffset)
     local item = Instance.new("Frame", parent)
-    item.Size = UDim2.new(0.9, 0, 0, 85) 
+    item.Size = UDim2.new(0.9, 0, 0, heightOffset or 85) 
     item.BackgroundColor3 = Theme.ItemBg; item.ZIndex = 10
     Instance.new("UICorner", item).CornerRadius = UDim.new(0, 8)
     local stroke = Instance.new("UIStroke", item); stroke.Color = Theme.Stroke; stroke.Thickness = 1
@@ -337,9 +350,19 @@ local function createInfoBox(parent, icon, titleText)
     return content
 end
 
-local playerInfoLabel = createInfoBox(page1, "👤", "THÔNG TIN NHÂN VẬT")
-local serverInfoLabel = createInfoBox(page1, "🌐", "THÔNG TIN MÁY CHỦ")
-local extraInfoLabel = createInfoBox(page1, "⚙️", "TRẠNG THÁI MENU")
+local playerInfoLabel = createInfoBox(page1, "👤", "THÔNG TIN NHÂN VẬT", 85)
+local serverInfoLabel = createInfoBox(page1, "🌐", "THÔNG TIN MÁY CHỦ", 95)
+
+-- NÚT COPY SERVER ID
+createButton(page1, "📋 SAO CHÉP ID SERVER (JOB ID)", Theme.AccentOn, function() 
+    pcall(function() 
+        if setclipboard then 
+            setclipboard(tostring(game.JobId)) 
+        end 
+    end) 
+end)
+
+local extraInfoLabel = createInfoBox(page1, "⚙️", "TRẠNG THÁI MENU", 85)
 
 local fps = 0
 RunService.RenderStepped:Connect(function(dt) fps = math.floor(1/dt) end)
@@ -371,9 +394,11 @@ task.spawn(function()
         
         local pCount = #Players:GetPlayers()
         local maxP = Players.MaxPlayers
+        local jobText = game.JobId ~= "" and string.sub(game.JobId, 1, 15).."..." or "N/A"
+        
         serverInfoLabel.Text = string.format(
-            "<b>Khung hình (FPS):</b> %d\n<b>Độ trễ mạng (Ping):</b> %s\n<b>Người chơi:</b> %d / %d\n<b>Game ID:</b> %d",
-            fps, ping, pCount, maxP, game.PlaceId
+            "<b>Khung hình (FPS):</b> %d\n<b>Độ trễ mạng (Ping):</b> %s\n<b>Người chơi:</b> %d / %d\n<b>ID:</b> %s",
+            fps, ping, pCount, maxP, jobText
         )
         
         local execTime = math.floor(workspace.DistributedGameTime)
@@ -552,21 +577,21 @@ local function rejoinServer()
     else TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, player) end
 end
 
--- [CẬP NHẬT AUTO COLLECT - THÊM PCALL VÀ TĂNG TỐC ĐỘ]
+-- [ĐÃ FIX AUTO COLLECT]
 createToggle(page3, "🧲 Auto nhặt đồ xung quanh (50m)", false, function(v) State.AutoCollect = v end)
 task.spawn(function()
-    while task.wait(0.2) do -- Giảm xuống 0.2s để gom nhanh hơn
+    while task.wait(0.2) do
         if State.AutoCollect and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             local root = player.Character.HumanoidRootPart
             for _, obj in pairs(workspace:GetDescendants()) do
-                if not State.AutoCollect then break end -- Dừng ngay nếu tắt
+                if not State.AutoCollect then break end
                 
                 if obj:IsA("Tool") and obj:FindFirstChild("Handle") then
                     if (obj.Handle.Position - root.Position).Magnitude <= 50 then
-                        pcall(function() -- Bọc pcall để chống lag đơ script
+                        pcall(function()
                             if firetouchinterest then 
                                 firetouchinterest(root, obj.Handle, 0)
-                                task.wait(0.01) -- Đợi rất ngắn để kích hoạt
+                                task.wait(0.01)
                                 firetouchinterest(root, obj.Handle, 1) 
                             else 
                                 obj.Handle.CFrame = root.CFrame 
