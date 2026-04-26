@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (Bản Cập Nhật - Tối Ưu UI & Nút Copy Nhỏ)
+-- MENU VIP PRO V38 
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -174,7 +174,7 @@ local function createTab(name, x, width)
 end
 
 local tab1, ind1 = createTab("THÔNG TIN", 0, 0.2)
-local tab2, ind2 = createTab("NHÂN VẬT", 0.2, 0.2)
+local tab2, ind2 = createTab("TÍNH NĂNG", 0.2, 0.2)
 local tab3, ind3 = createTab("TIỆN ÍCH", 0.4, 0.2)
 local tab4, ind4 = createTab("TP SAVE", 0.6, 0.2)
 local tab5, ind5 = createTab("TP PLAYER", 0.8, 0.2)
@@ -357,7 +357,7 @@ local serverInfoLabel, serverInfoFrame = createInfoBox(page1, "🌐", "THÔNG TI
 local copyIdBtn = Instance.new("TextButton", serverInfoFrame)
 copyIdBtn.Size = UDim2.new(0, 24, 0, 24)
 copyIdBtn.Position = UDim2.new(1, -30, 1, -30) -- Góc phải dưới
-copyIdBtn.Text = "📋"
+copyIdBtn.Text = "❐"
 copyIdBtn.BackgroundTransparency = 1
 copyIdBtn.TextSize = 14
 copyIdBtn.ZIndex = 11
@@ -375,7 +375,7 @@ copyIdBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
-local extraInfoLabel = createInfoBox(page1, "⚙️", "TRẠNG THÁI MENU", 85)
+local extraInfoLabel = createInfoBox(page1, "⚙️", "TRẠNG THÁI", 85)
 
 local fps = 0
 RunService.RenderStepped:Connect(function(dt) fps = math.floor(1/dt) end)
@@ -434,8 +434,38 @@ end)
 
 local astralClone = nil
 local astralProps = {}
+createToggle(page2, "🏃 Chạy nhanh", false, function(v) 
+    State.Speed = v; if not v and player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.WalkSpeed = 16 end
+end)
+createSlider(page2, "Tốc độ chạy", 16, 1000, 60, function(val) State.SpeedValue = val end)
 
-createToggle(page2, "👻 Xuất hồn (Tách thể)", false, function(v)
+createToggle(page2, "🦘 Nhảy cao", false, function(v) 
+    State.Jump = v; if not v and player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.UseJumpPower = true; player.Character.Humanoid.JumpPower = 50 end
+end)
+createSlider(page2, "Lực nhảy", 50, 300, 120, function(val) State.JumpValue = val end)
+
+createToggle(page2, "🛡️ Chống ngã & Chống văng", false, function(v) 
+    State.AntiStun = v 
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+        local hum = player.Character.Humanoid
+        hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, not v)
+        hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, not v)
+        hum:SetStateEnabled(Enum.HumanoidStateType.Physics, not v)
+    end
+end)
+
+createToggle(page2, "🔒 Khóa vị trí", false, function(v) 
+    State.LockPosition = v; if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then player.Character.HumanoidRootPart.Anchored = false end
+end)
+createToggle(page2, "🚀 Nhảy trên không", false, function(v) State.InfJump = v end) 
+createToggle(page2, "🐿️ Lấy đồ nhanh", false, function(v) 
+    State.Instant = v; if v then for _, prompt in pairs(workspace:GetDescendants()) do if prompt:IsA("ProximityPrompt") then prompt.HoldDuration = 0; prompt.MaxActivationDistance = 25 end end end
+end)
+createToggle(page2, "👻 Đi xuyên tường", false, function(v) 
+    State.Noclip = v; if not v and player.Character then for _, part in pairs(player.Character:GetDescendants()) do if part:IsA("BasePart") then part.CanCollide = true end end end
+end)
+
+createToggle(page2, "👻 Xuất hồn", false, function(v)
     local char = player.Character
     if v then
         if char and char:FindFirstChild("HumanoidRootPart") then
@@ -479,38 +509,6 @@ player.CharacterAdded:Connect(function()
     if astralClone then astralClone:Destroy(); astralClone = nil end
     astralProps = {}
 end)
-
-createToggle(page2, "🏃 Chạy nhanh", false, function(v) 
-    State.Speed = v; if not v and player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.WalkSpeed = 16 end
-end)
-createSlider(page2, "Tốc độ chạy", 16, 1000, 60, function(val) State.SpeedValue = val end)
-
-createToggle(page2, "🦘 Nhảy cao", false, function(v) 
-    State.Jump = v; if not v and player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.UseJumpPower = true; player.Character.Humanoid.JumpPower = 50 end
-end)
-createSlider(page2, "Lực nhảy", 50, 300, 120, function(val) State.JumpValue = val end)
-
-createToggle(page2, "🛡️ Chống ngã & Chống văng", false, function(v) 
-    State.AntiStun = v 
-    if player.Character and player.Character:FindFirstChild("Humanoid") then
-        local hum = player.Character.Humanoid
-        hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, not v)
-        hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, not v)
-        hum:SetStateEnabled(Enum.HumanoidStateType.Physics, not v)
-    end
-end)
-
-createToggle(page2, "🔒 Khóa vị trí", false, function(v) 
-    State.LockPosition = v; if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then player.Character.HumanoidRootPart.Anchored = false end
-end)
-createToggle(page2, "🚀 Nhảy trên không", false, function(v) State.InfJump = v end) 
-createToggle(page2, "🐿️ Lấy đồ nhanh", false, function(v) 
-    State.Instant = v; if v then for _, prompt in pairs(workspace:GetDescendants()) do if prompt:IsA("ProximityPrompt") then prompt.HoldDuration = 0; prompt.MaxActivationDistance = 25 end end end
-end)
-createToggle(page2, "👻 Đi xuyên tường", false, function(v) 
-    State.Noclip = v; if not v and player.Character then for _, part in pairs(player.Character:GetDescendants()) do if part:IsA("BasePart") then part.CanCollide = true end end end
-end)
-
 local waterPart = Instance.new("Part"); waterPart.Size = Vector3.new(10, 1, 10); waterPart.Transparency = 1; waterPart.Anchored = true; waterPart.CanCollide = true
 createToggle(page2, "🌊 Đi trên mặt nước", false, function(v) State.WalkOnWater = v end)
 
@@ -590,7 +588,7 @@ local function rejoinServer()
     else TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, player) end
 end
 
-createToggle(page3, "🧲 Auto nhặt đồ xung quanh (50m)", false, function(v) State.AutoCollect = v end)
+createToggle(page3, "🧲 Auto nhặt đồ xung quanh", false, function(v) State.AutoCollect = v end)
 task.spawn(function()
     while task.wait(0.2) do
         if State.AutoCollect and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
@@ -629,8 +627,8 @@ createToggle(page3, "🛡️ Chống AFK", true, function(v) State.AntiAfk = v e
 
 createDualButtons(page3, "🌞 SÁNG (FAKE)", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12 end, "🌚 TỐI (FAKE)", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0 end)
 
-createDualButtons(page3, "🔄 VÀO LẠI", Theme.AccentOn, rejoinServer, "🎲 ĐỔI SV NGẪU NHIÊN", Theme.Brand, function() hopServer("Desc") end)
-createDualButtons(page3, "📉 SV ÍT NGƯỜI", Color3.fromRGB(52, 152, 219), function() hopServer("Asc") end, "📈 SV NHIỀU NGƯỜI", Color3.fromRGB(231, 76, 60), function() hopServer("Desc") end)
+createDualButtons(page3, "🔄 VÀO LẠI SV", Theme.AccentOn, rejoinServer, "🎲 ĐỔI SV NGẪU NHIÊN", Theme.Brand, function() hopServer("Desc") end)
+createDualButtons(page3, "📉 ĐỔI SV ÍT NGƯỜI", Color3.fromRGB(52, 152, 219), function() hopServer("Asc") end, "📈 ĐỔI SV NHIỀU NGƯỜI", Color3.fromRGB(231, 76, 60), function() hopServer("Desc") end)
 
 createDualButtons(page3, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) end, 
 "🔨 LẤY BTOOLS", Theme.Brand, function() pcall(function() 
@@ -639,8 +637,8 @@ createDualButtons(page3, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(f
     local b3 = Instance.new("HopperBin", player.Backpack); b3.BinType = Enum.BinType.Grab
 end) end)
 
-createDualButtons(page3, "🕊️ FLY (CŨ)", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end, 
-"🚀 FLY V3 X", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end) end)
+createDualButtons(page3, "🕊️ FLY V1", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end, 
+"🕊️ FLY V3 ", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end) end)
 
 createButton(page3, "📂 TP SAVE V2 GUI", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
 
