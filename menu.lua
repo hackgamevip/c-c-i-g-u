@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (Bản Cập Nhật - Tách Hồn & Auto Nhặt Đồ)
+-- MENU VIP PRO V38 (Bản Cập Nhật - Tối Ưu UI & Server Hop)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -237,7 +237,7 @@ local function createDualButtons(parent, text1, color1, cb1, text2, color2, cb2)
         local stroke = Instance.new("UIStroke", btn); stroke.Color = col; stroke.Thickness = 1; stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
         local title = Instance.new("TextLabel", btn)
         title.Size = UDim2.new(1, 0, 1, 0); title.BackgroundTransparency = 1; title.Text = txt
-        title.TextColor3 = col; title.Font = Enum.Font.GothamBold; title.TextSize = 12; title.ZIndex = 10
+        title.TextColor3 = col; title.Font = Enum.Font.GothamBold; title.TextSize = 11; title.ZIndex = 10
         btn.MouseButton1Click:Connect(function()
             clickAnimate(btn); TweenService:Create(stroke, TweenInfo.new(0.15), {Color = Theme.TextTitle}):Play()
             task.wait(0.15); TweenService:Create(stroke, TweenInfo.new(0.3), {Color = col}):Play(); cb()
@@ -308,7 +308,6 @@ end
 
 -- [TAB 1: NHÂN VẬT]
 
--- Logic Tách Hồn
 local astralClone = nil
 local astralProps = {}
 
@@ -321,11 +320,9 @@ createToggle(page1, "👻 Xuất hồn (Tách thể)", false, function(v)
             astralClone.Name = player.Name .. "_Thế_Thân"
             astralClone.Parent = workspace
             
-            -- Khóa xác thật ở lại
             local cloneRoot = astralClone:FindFirstChild("HumanoidRootPart")
             if cloneRoot then cloneRoot.Anchored = true end
             
-            -- Hóa linh hồn cho nhân vật thật
             astralProps = {}
             for _, part in pairs(char:GetDescendants()) do
                 if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
@@ -339,7 +336,6 @@ createToggle(page1, "👻 Xuất hồn (Tách thể)", false, function(v)
             end
         end
     else
-        -- Kéo hồn về lại với xác
         if astralClone then
             if char and char:FindFirstChild("HumanoidRootPart") then
                 local cloneRoot = astralClone:FindFirstChild("HumanoidRootPart")
@@ -350,8 +346,6 @@ createToggle(page1, "👻 Xuất hồn (Tách thể)", false, function(v)
             astralClone:Destroy()
             astralClone = nil
         end
-        
-        -- Phục hồi lại da thịt
         for part, props in pairs(astralProps) do
             if part and part.Parent then
                 for k, val in pairs(props) do
@@ -363,7 +357,6 @@ createToggle(page1, "👻 Xuất hồn (Tách thể)", false, function(v)
     end
 end)
 
--- Dọn dẹp xác nếu người chơi lỡ chết
 player.CharacterAdded:Connect(function()
     if astralClone then astralClone:Destroy(); astralClone = nil end
     astralProps = {}
@@ -371,17 +364,14 @@ end)
 
 createToggle(page1, "🏃 Chạy nhanh", false, function(v) 
     State.Speed = v 
-    if not v and player.Character and player.Character:FindFirstChild("Humanoid") then
-        player.Character.Humanoid.WalkSpeed = 16 
-    end
+    if not v and player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.WalkSpeed = 16 end
 end)
 createSlider(page1, "Tốc độ chạy", 16, 1000, 60, function(val) State.SpeedValue = val end)
 
 createToggle(page1, "🦘 Nhảy cao", false, function(v) 
     State.Jump = v 
     if not v and player.Character and player.Character:FindFirstChild("Humanoid") then
-        player.Character.Humanoid.UseJumpPower = true
-        player.Character.Humanoid.JumpPower = 50 
+        player.Character.Humanoid.UseJumpPower = true; player.Character.Humanoid.JumpPower = 50 
     end
 end)
 createSlider(page1, "Lực nhảy", 50, 300, 120, function(val) State.JumpValue = val end)
@@ -398,33 +388,19 @@ end)
 
 createToggle(page1, "🔒 Khóa vị trí", false, function(v) 
     State.LockPosition = v 
-    if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        player.Character.HumanoidRootPart.Anchored = false 
-    end
+    if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then player.Character.HumanoidRootPart.Anchored = false end
 end)
-
 createToggle(page1, "🚀 Nhảy trên không", false, function(v) State.InfJump = v end) 
-
 createToggle(page1, "🐿️ Lấy đồ nhanh", false, function(v) 
     State.Instant = v 
     if v then for _, prompt in pairs(workspace:GetDescendants()) do if prompt:IsA("ProximityPrompt") then prompt.HoldDuration = 0; prompt.MaxActivationDistance = 25 end end end
 end)
-
 createToggle(page1, "👻 Đi xuyên tường", false, function(v) 
     State.Noclip = v 
-    if not v and player.Character then
-        for _, part in pairs(player.Character:GetDescendants()) do
-            if part:IsA("BasePart") then part.CanCollide = true end
-        end
-    end
+    if not v and player.Character then for _, part in pairs(player.Character:GetDescendants()) do if part:IsA("BasePart") then part.CanCollide = true end end end
 end)
 
-local waterPart = Instance.new("Part")
-waterPart.Size = Vector3.new(10, 1, 10) 
-waterPart.Transparency = 1
-waterPart.Anchored = true
-waterPart.CanCollide = true
-
+local waterPart = Instance.new("Part"); waterPart.Size = Vector3.new(10, 1, 10); waterPart.Transparency = 1; waterPart.Anchored = true; waterPart.CanCollide = true
 createToggle(page1, "🌊 Đi trên mặt nước", false, function(v) State.WalkOnWater = v end)
 
 local xrayMats = {}
@@ -432,8 +408,7 @@ createToggle(page1, "👀 Nhìn xuyên map", false, function(v)
     State.XRay = v 
     task.spawn(function()
         if v then
-            local descendants = workspace:GetDescendants()
-            for i, obj in ipairs(descendants) do
+            for i, obj in ipairs(workspace:GetDescendants()) do
                 if obj:IsA("BasePart") and not obj:IsDescendantOf(player.Character) and obj.Name ~= "Terrain" and obj.Transparency < 1 then
                     if not xrayMats[obj] then xrayMats[obj] = obj.Transparency end
                     obj.Transparency = 0.5
@@ -471,36 +446,63 @@ end)
 
 ProximityPromptService.PromptButtonHoldBegan:Connect(function(prompt) if State.Instant then pcall(function() fireproximityprompt(prompt) end) end end)
 
--- [TAB 2: TIỆN ÍCH]
+-- [TAB 2: TIỆN ÍCH - ĐÃ LÀM GỌN VÀ THÊM TÍNH NĂNG]
+
+-- Hàm hỗ trợ đổi Server
+local function hopServer(sortOrder)
+    local api = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=" .. sortOrder .. "&limit=100"
+    local function getServers(cursor)
+        local url = api .. (cursor and "&cursor=" .. cursor or "")
+        local success, res = pcall(game.HttpGet, game, url)
+        if success then return HttpService:JSONDecode(res) end
+    end
+    local nextCursor = nil
+    local targetServer = nil
+    repeat
+        local data = getServers(nextCursor)
+        if not data or not data.data then break end
+        for _, s in pairs(data.data) do
+            if s.playing and s.maxPlayers and s.playing < s.maxPlayers and s.id ~= game.JobId then
+                if sortOrder == "Asc" then
+                    if s.playing > 0 then targetServer = s; break end -- Bỏ qua server 0 người
+                else
+                    targetServer = s; break
+                end
+            end
+        end
+        if targetServer then break end
+        nextCursor = data.nextPageCursor
+    until not nextCursor
+    
+    if targetServer then
+        TeleportService:TeleportToPlaceInstance(game.PlaceId, targetServer.id, player)
+    end
+end
+
+local function rejoinServer()
+    if #Players:GetPlayers() <= 1 then
+        player:Kick("\nĐang vào lại server...")
+        task.wait()
+        TeleportService:Teleport(game.PlaceId, player)
+    else
+        TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, player)
+    end
+end
 
 createToggle(page2, "🧲 Auto nhặt đồ xung quanh (50m)", false, function(v) State.AutoCollect = v end)
-
--- Vòng lặp ngầm xử lý Auto Collect (chống lag)
 task.spawn(function()
     while task.wait(0.5) do
         if State.AutoCollect and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             local root = player.Character.HumanoidRootPart
             for _, obj in pairs(workspace:GetDescendants()) do
-                -- Lấy vật phẩm rơi dạng Tool
                 if obj:IsA("Tool") and obj:FindFirstChild("Handle") then
                     if (obj.Handle.Position - root.Position).Magnitude <= 50 then
-                        if firetouchinterest then
-                            firetouchinterest(root, obj.Handle, 0)
-                            task.wait()
-                            firetouchinterest(root, obj.Handle, 1)
-                        else
-                            obj.Handle.CFrame = root.CFrame
-                        end
+                        if firetouchinterest then firetouchinterest(root, obj.Handle, 0); task.wait(); firetouchinterest(root, obj.Handle, 1) else obj.Handle.CFrame = root.CFrame end
                     end
-                -- Tự động nhấn E (ProximityPrompt) xung quanh
                 elseif obj:IsA("ProximityPrompt") then
                     local parentPart = obj.Parent
-                    if parentPart and parentPart:IsA("BasePart") then
-                        if (parentPart.Position - root.Position).Magnitude <= 50 then
-                            if fireproximityprompt then
-                                fireproximityprompt(obj)
-                            end
-                        end
+                    if parentPart and parentPart:IsA("BasePart") and (parentPart.Position - root.Position).Magnitude <= 50 then
+                        if fireproximityprompt then fireproximityprompt(obj) end
                     end
                 end
             end
@@ -508,41 +510,20 @@ task.spawn(function()
     end
 end)
 
-createToggle(page2, "⬛ Màn hình đen (Giảm lag)", false, function(v)
-    if v then screenOverlay.BackgroundColor3 = Color3.new(0, 0, 0); screenOverlay.Visible = true else screenOverlay.Visible = false end
-end)
-
-createToggle(page2, "⬜ Màn hình trắng", false, function(v)
-    if v then screenOverlay.BackgroundColor3 = Color3.new(1, 1, 1); screenOverlay.Visible = true else screenOverlay.Visible = false end
-end)
-
+createToggle(page2, "⬛ Màn hình đen (Giảm lag)", false, function(v) screenOverlay.BackgroundColor3 = Color3.new(0, 0, 0); screenOverlay.Visible = v end)
+createToggle(page2, "⬜ Màn hình trắng (Treo máy)", false, function(v) screenOverlay.BackgroundColor3 = Color3.new(1, 1, 1); screenOverlay.Visible = v end)
 createToggle(page2, "🛡️ Chống AFK", true, function(v) State.AntiAfk = v end)
+
 createDualButtons(page2, "🌞 SÁNG (FAKE)", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12 end, "🌚 TỐI (FAKE)", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0 end)
-createDualButtons(page2, "🔄 VÀO LẠI", Theme.AccentOn, function()
-    if #Players:GetPlayers() <= 1 then
-        player:Kick("\nRejoining..."); task.wait(); TeleportService:Teleport(game.PlaceId, player)
-    else
-        TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, player)
-    end
-end, "🌐 ĐỔI SERVER", Theme.Brand, function()
-    local Api = "https://games.roblox.com/v1/games/"
-    local _place = game.PlaceId
-    local _servers = Api..tostring(_place).."/servers/Public?sortOrder=Asc&limit=100"
-    local function ListServers(cursor)
-        local Raw = game:HttpGet(_servers .. ((cursor and "&cursor="..cursor) or ""))
-        return HttpService:JSONDecode(Raw)
-    end
-    local Server, Next; repeat
-        local Servers = ListServers(Next)
-        Server = Servers.data[1]
-        Next = Servers.nextPageCursor
-    until Server
-    TeleportService:TeleportToPlaceInstance(_place, Server.id, player)
-end)
 
-createButton(page2, "💻 Lệnh admin", Theme.AccentOn, function() pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) end)
+-- LOGIC ĐỔI SERVER CHUYÊN SÂU
+createDualButtons(page2, "🔄 VÀO LẠI SERVER", Theme.AccentOn, rejoinServer, "🎲 ĐỔI SV NGẪU NHIÊN", Theme.Brand, function() hopServer("Desc") end)
+createDualButtons(page2, "📉 SV ÍT NGƯỜI", Color3.fromRGB(52, 152, 219), function() hopServer("Asc") end, "📈 SV NHIỀU NGƯỜI", Color3.fromRGB(231, 76, 60), function() hopServer("Desc") end)
 
-createButton(page2, "🔨 LẤY BTOOLS", Theme.Brand, function() 
+-- GOM NÚT ADMIN & BTOOLS VÀO 1 HÀNG
+createDualButtons(page2, "💻 LỆNH ADMIN", Theme.AccentOn, function() 
+    pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) 
+end, "🔨 LẤY BTOOLS", Theme.Brand, function() 
     pcall(function() 
         local b1 = Instance.new("HopperBin", player.Backpack); b1.BinType = Enum.BinType.Clone
         local b2 = Instance.new("HopperBin", player.Backpack); b2.BinType = Enum.BinType.Hammer
@@ -550,11 +531,14 @@ createButton(page2, "🔨 LẤY BTOOLS", Theme.Brand, function()
     end) 
 end)
 
-createButton(page2, "🕊️ FLY (Bay)", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end)
+-- GOM FLY CŨ VÀ FLY V4 VÀO CÙNG 1 HÀNG
+createDualButtons(page2, "🕊️ FLY (CŨ)", Theme.Brand, function() 
+    pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) 
+end, "🚀 FLY V4", Theme.Brand, function() 
+    pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V4-Remake-133528"))() end) 
+end)
 
-createButton(page2, "🚀 FLY V4 REMAKE", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V4-Remake-133528"))() end) end)
-
-createButton(page2, "📂 TP SAVE V2", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
+createButton(page2, "📂 TP SAVE V2 GUI", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
 
 -- [TAB 3: VỊ TRÍ TP SAVE]
 local savedLocCount = 0
@@ -627,21 +611,13 @@ Players.PlayerAdded:Connect(updatePlayerList)
 Players.PlayerRemoving:Connect(updatePlayerList)
 
 player.Idled:Connect(function()
-    if State.AntiAfk then
-        VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-        task.wait(1)
-        VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-    end
+    if State.AntiAfk then VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame); task.wait(1); VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame) end
 end)
 
 RunService.Stepped:Connect(function()
     local char = player.Character
     if State.Noclip and char then
-        for _, v in pairs(char:GetDescendants()) do 
-            if v:IsA("BasePart") and v.CanCollide then 
-                v.CanCollide = false 
-            end 
-        end 
+        for _, v in pairs(char:GetDescendants()) do if v:IsA("BasePart") and v.CanCollide then v.CanCollide = false end end 
     end
 end)
 
@@ -658,74 +634,39 @@ RunService.RenderStepped:Connect(function()
         if State.AntiStun then hum.PlatformStand = false; if root then root.RotVelocity = Vector3.new(0, 0, 0) end end
             
         if State.WalkOnWater and root then
-            local params = RaycastParams.new()
-            params.FilterDescendantsInstances = {char, waterPart, astralClone} 
-            params.FilterType = Enum.RaycastFilterType.Exclude
-            params.IgnoreWater = false 
-            
+            local params = RaycastParams.new(); params.FilterDescendantsInstances = {char, waterPart, astralClone}; params.FilterType = Enum.RaycastFilterType.Exclude; params.IgnoreWater = false 
             local result = workspace:Raycast(root.Position, Vector3.new(0, -15, 0), params)
             if result and (result.Material == Enum.Material.Water or hum:GetState() == Enum.HumanoidStateType.Swimming) then
                 waterPart.Parent = workspace
                 local targetY = result and result.Position.Y or (root.Position.Y - 2.5)
                 waterPart.CFrame = CFrame.new(root.Position.X, targetY + 0.5, root.Position.Z)
                 if hum:GetState() == Enum.HumanoidStateType.Swimming then hum:ChangeState(Enum.HumanoidStateType.Running) end
-            else
-                waterPart.Parent = nil
-            end
-        else
-            waterPart.Parent = nil
-        end
+            else waterPart.Parent = nil end
+        else waterPart.Parent = nil end
 
         if root then
             local light = root:FindFirstChild("PlayerPointLight")
             if State.PlayerLight then 
-                if not light then 
-                    light = Instance.new("PointLight", root)
-                    light.Name = "PlayerPointLight"
-                    light.Shadows = false 
-                end 
-                light.Brightness = State.LightBrightness
-                light.Range = State.LightRange
-            else 
-                if light then light:Destroy() end 
-            end
+                if not light then light = Instance.new("PointLight", root); light.Name = "PlayerPointLight"; light.Shadows = false end 
+                light.Brightness = State.LightBrightness; light.Range = State.LightRange
+            else if light then light:Destroy() end end
         end
         
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= player and p.Character and p.Character:FindFirstChild("Head") then
-                local tChar = p.Character
-                local head = tChar.Head
-                
+                local tChar = p.Character; local head = tChar.Head
                 if State.ESP then
                     local bgui = head:FindFirstChild("MobileESP_Name")
                     if not bgui then
-                        bgui = Instance.new("BillboardGui", head)
-                        bgui.Name = "MobileESP_Name"
-                        bgui.Size = UDim2.new(0, 200, 0, 50)
-                        bgui.StudsOffset = Vector3.new(0, 2, 0)
-                        bgui.AlwaysOnTop = true
-                        bgui.Adornee = head
-                        
-                        local tLabel = Instance.new("TextLabel", bgui)
-                        tLabel.Name = "NameLabel"
-                        tLabel.Size = UDim2.new(1, 0, 1, 0)
-                        tLabel.BackgroundTransparency = 1
-                        tLabel.TextColor3 = Color3.fromRGB(255, 60, 60)
-                        tLabel.TextStrokeTransparency = 0.2
-                        tLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
-                        tLabel.Font = Enum.Font.GothamBold
-                        tLabel.TextSize = 11
-                        tLabel.RichText = true 
+                        bgui = Instance.new("BillboardGui", head); bgui.Name = "MobileESP_Name"; bgui.Size = UDim2.new(0, 200, 0, 50); bgui.StudsOffset = Vector3.new(0, 2, 0); bgui.AlwaysOnTop = true; bgui.Adornee = head
+                        local tLabel = Instance.new("TextLabel", bgui); tLabel.Name = "NameLabel"; tLabel.Size = UDim2.new(1, 0, 1, 0); tLabel.BackgroundTransparency = 1; tLabel.TextColor3 = Color3.fromRGB(255, 60, 60); tLabel.TextStrokeTransparency = 0.2; tLabel.TextStrokeColor3 = Color3.new(0, 0, 0); tLabel.Font = Enum.Font.GothamBold; tLabel.TextSize = 11; tLabel.RichText = true 
                     end
                     if root and tChar:FindFirstChild("HumanoidRootPart") then
                         local dist = math.floor((root.Position - tChar.HumanoidRootPart.Position).Magnitude)
                         bgui.NameLabel.Text = p.DisplayName .. '\n<font color="#4CAF50">[' .. dist .. 'm]</font>'
-                    else
-                        bgui.NameLabel.Text = p.DisplayName
-                    end
+                    else bgui.NameLabel.Text = p.DisplayName end
                 else
-                    local bgui = head:FindFirstChild("MobileESP_Name")
-                    if bgui then bgui:Destroy() end
+                    local bgui = head:FindFirstChild("MobileESP_Name"); if bgui then bgui:Destroy() end
                 end
             end
         end
@@ -734,8 +675,7 @@ end)
 
 workspace.DescendantAdded:Connect(function(v)
     if State.XRay and v:IsA("BasePart") and not v:IsDescendantOf(player.Character) and v.Name ~= "Terrain" and v.Transparency < 1 then
-        if not xrayMats[v] then xrayMats[v] = v.Transparency end
-        v.Transparency = 0.5
+        if not xrayMats[v] then xrayMats[v] = v.Transparency end; v.Transparency = 0.5
     end
     if State.Instant and v:IsA("ProximityPrompt") then v.HoldDuration = 0; v.MaxActivationDistance = 25 end
 end)
