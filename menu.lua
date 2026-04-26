@@ -461,7 +461,7 @@ createToggle(page2, "🚀 Nhảy trên không", false, function(v) State.InfJump
 createToggle(page2, "🐿️ Lấy đồ nhanh", false, function(v) 
     State.Instant = v; if v then for _, prompt in pairs(workspace:GetDescendants()) do if prompt:IsA("ProximityPrompt") then prompt.HoldDuration = 0; prompt.MaxActivationDistance = 25 end end end
 end)
-createToggle(page2, "👻 Đi xuyên tường", false, function(v) 
+createToggle(page2, "🚷 Đi xuyên tường", false, function(v) 
     State.Noclip = v; if not v and player.Character then for _, part in pairs(player.Character:GetDescendants()) do if part:IsA("BasePart") then part.CanCollide = true end end end
 end)
 
