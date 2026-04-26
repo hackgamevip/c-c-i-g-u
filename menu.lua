@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (Bản Cập Nhật)
+-- MENU VIP PRO V38 (Bản Cập Nhật - Fix Lỗi Nhân Vật)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -306,19 +306,44 @@ local function createSlider(parent, text, min, max, default, callback)
     return bg
 end
 
--- [TAB 1: NHÂN VẬT]
-createToggle(page1, "🏃 Chạy nhanh", false, function(v) State.Speed = v end)
+-- [TAB 1: NHÂN VẬT - FIXED BUGS]
+createToggle(page1, "🏃 Chạy nhanh", false, function(v) 
+    State.Speed = v 
+    if not v and player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.WalkSpeed = 16 -- Trả về tốc độ bình thường khi tắt
+    end
+end)
 createSlider(page1, "Tốc độ chạy", 16, 1000, 60, function(val) State.SpeedValue = val end)
-createToggle(page1, "🦘 Nhảy cao", false, function(v) State.Jump = v end)
+
+createToggle(page1, "🦘 Nhảy cao", false, function(v) 
+    State.Jump = v 
+    if not v and player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.UseJumpPower = true
+        player.Character.Humanoid.JumpPower = 50 -- Trả về lực nhảy bình thường khi tắt
+    end
+end)
 createSlider(page1, "Lực nhảy", 50, 300, 120, function(val) State.JumpValue = val end)
-createToggle(page1, "🛡️ Chống ngã & Chống văng xa", false, function(v) State.AntiStun = v end)
+
+createToggle(page1, "🛡️ Chống ngã & Chống văng xa", false, function(v) 
+    State.AntiStun = v 
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+        local hum = player.Character.Humanoid
+        -- Chỉ thay đổi thuộc tính vật lý một lần khi bật/tắt (khắc phục lỗi không leo được bậc thang)
+        hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, not v)
+        hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, not v)
+        hum:SetStateEnabled(Enum.HumanoidStateType.Physics, not v)
+    end
+end)
+
 createToggle(page1, "🔒 Khóa vị trí", false, function(v) 
     State.LockPosition = v 
     if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
         player.Character.HumanoidRootPart.Anchored = false 
     end
 end)
+
 createToggle(page1, "🚀 Nhảy trên không", false, function(v) State.InfJump = v end) 
+
 createToggle(page1, "🐿️ Lấy đồ nhanh", false, function(v) 
     State.Instant = v 
     if v then for _, prompt in pairs(workspace:GetDescendants()) do if prompt:IsA("ProximityPrompt") then prompt.HoldDuration = 0; prompt.MaxActivationDistance = 25 end end end
@@ -387,30 +412,18 @@ ProximityPromptService.PromptButtonHoldBegan:Connect(function(prompt) if State.I
 
 -- [TAB 2: TIỆN ÍCH]
 createToggle(page2, "⬛ Màn hình đen (Giảm lag / Treo máy)", false, function(v)
-    if v then
-        screenOverlay.BackgroundColor3 = Color3.new(0, 0, 0)
-        screenOverlay.Visible = true
-    else
-        screenOverlay.Visible = false
-    end
+    if v then screenOverlay.BackgroundColor3 = Color3.new(0, 0, 0); screenOverlay.Visible = true else screenOverlay.Visible = false end
 end)
 
 createToggle(page2, "⬜ Màn hình trắng (Treo máy)", false, function(v)
-    if v then
-        screenOverlay.BackgroundColor3 = Color3.new(1, 1, 1)
-        screenOverlay.Visible = true
-    else
-        screenOverlay.Visible = false
-    end
+    if v then screenOverlay.BackgroundColor3 = Color3.new(1, 1, 1); screenOverlay.Visible = true else screenOverlay.Visible = false end
 end)
 
 createToggle(page2, "🛡️ Chống bị kick khi treo máy (Anti-AFK)", true, function(v) State.AntiAfk = v end)
 createDualButtons(page2, "🌞 TRỜI SÁNG (FAKE)", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12 end, "🌚 TRỜI TỐI (FAKE)", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0 end)
 createDualButtons(page2, "🔄 VÀO LẠI SERVER", Theme.AccentOn, function()
     if #Players:GetPlayers() <= 1 then
-        player:Kick("\nRejoining...")
-        task.wait()
-        TeleportService:Teleport(game.PlaceId, player)
+        player:Kick("\nRejoining..."); task.wait(); TeleportService:Teleport(game.PlaceId, player)
     else
         TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, player)
     end
@@ -440,10 +453,8 @@ createButton(page2, "🔨 LẤY BTOOLS", Theme.Brand, function()
     end) 
 end)
 
--- Trả lại nút FLY cũ của bạn
 createButton(page2, "🕊️ FLY (Bay)", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end)
 
--- Nút FLY V4 REMAKE dạng nút bấm thông thường
 createButton(page2, "🚀 FLY V4 REMAKE", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V4-Remake-133528"))() end) end)
 
 createButton(page2, "📂 TP SAVE V2", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
@@ -537,6 +548,7 @@ RunService.Stepped:Connect(function()
     end
 end)
 
+-- [BẢN SỬA LỖI Ở PHẦN NÀY]
 RunService.RenderStepped:Connect(function()
     local char = player.Character
     if char and char:FindFirstChildOfClass("Humanoid") then
@@ -545,29 +557,23 @@ RunService.RenderStepped:Connect(function()
         
         if State.LockPosition and root then root.Anchored = true end
         
-        if State.Speed then hum.WalkSpeed = State.SpeedValue else hum.WalkSpeed = 16 end
+        -- Chỉ ép tốc độ khi bật tính năng (Tránh hỏng gia tốc tự nhiên)
+        if State.Speed then 
+            hum.WalkSpeed = State.SpeedValue 
+        end
         
+        -- Chỉ ép lực nhảy khi bật tính năng (Tránh hỏng lực hút của game)
         if State.Jump then 
             hum.UseJumpPower = true
             hum.JumpPower = State.JumpValue 
-        else 
-            hum.UseJumpPower = true
-            hum.JumpPower = 50 
         end
         
         if State.AntiStun then
-            hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
-            hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
-            hum:SetStateEnabled(Enum.HumanoidStateType.Physics, false) 
             hum.PlatformStand = false
             if root then root.RotVelocity = Vector3.new(0, 0, 0) end
-        else
-            hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, true)
-            hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, true)
-            hum:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
         end
             
-        -- Logic Đi Mặt Nước Mới (Tối ưu chống chìm & tự đẩy lên nếu rớt)
+        -- Logic Đi Mặt Nước Mới
         if State.WalkOnWater and root then
             local params = RaycastParams.new()
             params.FilterDescendantsInstances = {char, waterPart} 
@@ -577,12 +583,9 @@ RunService.RenderStepped:Connect(function()
             local result = workspace:Raycast(root.Position, Vector3.new(0, -15, 0), params)
             if result and (result.Material == Enum.Material.Water or hum:GetState() == Enum.HumanoidStateType.Swimming) then
                 waterPart.Parent = workspace
-                
-                -- Căn chỉnh tọa độ Y phù hợp để nhân vật không chìm
                 local targetY = result and result.Position.Y or (root.Position.Y - 2.5)
                 waterPart.CFrame = CFrame.new(root.Position.X, targetY + 0.5, root.Position.Z)
                 
-                -- Tự động đổi trạng thái nếu vô tình kẹt ở trạng thái bơi
                 if hum:GetState() == Enum.HumanoidStateType.Swimming then
                     hum:ChangeState(Enum.HumanoidStateType.Running)
                 end
