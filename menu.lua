@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (Bản Cập Nhật - Dashboard Thông Tin)
+-- MENU VIP PRO V38 (Bản Cập Nhật - Fix Auto Collect & Fly V3 X)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -150,7 +150,7 @@ local function createTab(name, x, width)
     local btn = Instance.new("TextButton", tabBar)
     btn.Size = UDim2.new(width, 0, 1, 0); btn.Position = UDim2.new(x, 0, 0, 0)
     btn.Text = name; btn.BackgroundTransparency = 1; btn.TextColor3 = Theme.TextDim
-    btn.Font = Enum.Font.GothamBold; btn.TextSize = 9 -- Giảm size một chút để vừa 5 tab
+    btn.Font = Enum.Font.GothamBold; btn.TextSize = 9
     btn.ZIndex = 10
     local indicator = Instance.new("Frame", btn)
     indicator.Size = UDim2.new(0.5, 0, 0, 3); indicator.Position = UDim2.new(0.25, 0, 1, -3)
@@ -160,7 +160,6 @@ local function createTab(name, x, width)
     return btn, indicator
 end
 
--- Chia đều 5 tab (mỗi tab chiếm 20% = 0.2)
 local tab1, ind1 = createTab("THÔNG TIN", 0, 0.2)
 local tab2, ind2 = createTab("NHÂN VẬT", 0.2, 0.2)
 local tab3, ind3 = createTab("TIỆN ÍCH", 0.4, 0.2)
@@ -186,7 +185,6 @@ local function createPage()
     return pg
 end
 
--- Tạo 5 trang tương ứng
 local page1, page2, page3, page4, page5 = createPage(), createPage(), createPage(), createPage(), createPage()
 
 local function showTab(pg, tb, ind)
@@ -203,7 +201,7 @@ tab2.MouseButton1Click:Connect(function() showTab(page2, tab2, ind2) end)
 tab3.MouseButton1Click:Connect(function() showTab(page3, tab3, ind3) end)
 tab4.MouseButton1Click:Connect(function() showTab(page4, tab4, ind4) end)
 tab5.MouseButton1Click:Connect(function() showTab(page5, tab5, ind5) end)
-showTab(page1, tab1, ind1) -- Bật Tab Thông Tin làm mặc định
+showTab(page1, tab1, ind1)
 
 local opened = true
 openBtn.MouseButton1Click:Connect(function()
@@ -343,14 +341,11 @@ local playerInfoLabel = createInfoBox(page1, "👤", "THÔNG TIN NHÂN VẬT")
 local serverInfoLabel = createInfoBox(page1, "🌐", "THÔNG TIN MÁY CHỦ")
 local extraInfoLabel = createInfoBox(page1, "⚙️", "TRẠNG THÁI MENU")
 
--- Lấy FPS (đếm khung hình)
 local fps = 0
 RunService.RenderStepped:Connect(function(dt) fps = math.floor(1/dt) end)
 
--- Vòng lặp cập nhật dữ liệu tự động cho Tab Thông Tin
 task.spawn(function()
     while task.wait(0.5) do
-        -- 1. Player Info
         local hp, maxHp, ws, jp = 0, 0, 0, 0
         if player.Character and player.Character:FindFirstChild("Humanoid") then
             local hum = player.Character.Humanoid
@@ -364,7 +359,6 @@ task.spawn(function()
             player.DisplayName, player.Name, hp, maxHp, ws, jp
         )
         
-        -- 2. Server Info
         local ping = "0"
         pcall(function()
             local stats = game:GetService("Stats")
@@ -382,7 +376,6 @@ task.spawn(function()
             fps, ping, pCount, maxP, game.PlaceId
         )
         
-        -- 3. Extra Info
         local execTime = math.floor(workspace.DistributedGameTime)
         local hours = math.floor(execTime / 3600)
         local mins = math.floor((execTime % 3600) / 60)
@@ -528,7 +521,6 @@ ProximityPromptService.PromptButtonHoldBegan:Connect(function(prompt) if State.I
 -- [TAB 3: TIỆN ÍCH]
 -- ==========================================
 
--- Hàm hỗ trợ đổi Server
 local function hopServer(sortOrder)
     local api = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=" .. sortOrder .. "&limit=100"
     local function getServers(cursor)
@@ -543,7 +535,7 @@ local function hopServer(sortOrder)
         for _, s in pairs(data.data) do
             if s.playing and s.maxPlayers and s.playing < s.maxPlayers and s.id ~= game.JobId then
                 if sortOrder == "Asc" then
-                    if s.playing > 0 then targetServer = s; break end -- Tránh server 0 người bị lỗi
+                    if s.playing > 0 then targetServer = s; break end
                 else targetServer = s; break end
             end
         end
@@ -560,20 +552,33 @@ local function rejoinServer()
     else TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, player) end
 end
 
+-- [CẬP NHẬT AUTO COLLECT - THÊM PCALL VÀ TĂNG TỐC ĐỘ]
 createToggle(page3, "🧲 Auto nhặt đồ xung quanh (50m)", false, function(v) State.AutoCollect = v end)
 task.spawn(function()
-    while task.wait(0.5) do
+    while task.wait(0.2) do -- Giảm xuống 0.2s để gom nhanh hơn
         if State.AutoCollect and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             local root = player.Character.HumanoidRootPart
             for _, obj in pairs(workspace:GetDescendants()) do
+                if not State.AutoCollect then break end -- Dừng ngay nếu tắt
+                
                 if obj:IsA("Tool") and obj:FindFirstChild("Handle") then
                     if (obj.Handle.Position - root.Position).Magnitude <= 50 then
-                        if firetouchinterest then firetouchinterest(root, obj.Handle, 0); task.wait(); firetouchinterest(root, obj.Handle, 1) else obj.Handle.CFrame = root.CFrame end
+                        pcall(function() -- Bọc pcall để chống lag đơ script
+                            if firetouchinterest then 
+                                firetouchinterest(root, obj.Handle, 0)
+                                task.wait(0.01) -- Đợi rất ngắn để kích hoạt
+                                firetouchinterest(root, obj.Handle, 1) 
+                            else 
+                                obj.Handle.CFrame = root.CFrame 
+                            end
+                        end)
                     end
-                elseif obj:IsA("ProximityPrompt") then
+                elseif obj:IsA("ProximityPrompt") and obj.Enabled then
                     local parentPart = obj.Parent
                     if parentPart and parentPart:IsA("BasePart") and (parentPart.Position - root.Position).Magnitude <= 50 then
-                        if fireproximityprompt then fireproximityprompt(obj) end
+                        pcall(function()
+                            if fireproximityprompt then fireproximityprompt(obj) end
+                        end)
                     end
                 end
             end
@@ -587,11 +592,9 @@ createToggle(page3, "🛡️ Chống AFK", true, function(v) State.AntiAfk = v e
 
 createDualButtons(page3, "🌞 SÁNG (FAKE)", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12 end, "🌚 TỐI (FAKE)", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0 end)
 
--- NÚT SERVER CHUYÊN SÂU
 createDualButtons(page3, "🔄 VÀO LẠI", Theme.AccentOn, rejoinServer, "🎲 ĐỔI SV NGẪU NHIÊN", Theme.Brand, function() hopServer("Desc") end)
 createDualButtons(page3, "📉 SV ÍT NGƯỜI", Color3.fromRGB(52, 152, 219), function() hopServer("Asc") end, "📈 SV NHIỀU NGƯỜI", Color3.fromRGB(231, 76, 60), function() hopServer("Desc") end)
 
--- GOM LỆNH ADMIN VÀ BTOOLS
 createDualButtons(page3, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) end, 
 "🔨 LẤY BTOOLS", Theme.Brand, function() pcall(function() 
     local b1 = Instance.new("HopperBin", player.Backpack); b1.BinType = Enum.BinType.Clone
@@ -599,9 +602,9 @@ createDualButtons(page3, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(f
     local b3 = Instance.new("HopperBin", player.Backpack); b3.BinType = Enum.BinType.Grab
 end) end)
 
--- GOM FLY CŨ VÀ FLY V4
+-- [CẬP NHẬT FLY V3 X]
 createDualButtons(page3, "🕊️ FLY (CŨ)", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end, 
-"🚀 FLY V4", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V4-Remake-133528"))() end) end)
+"🚀 FLY V3 X", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end) end)
 
 createButton(page3, "📂 TP SAVE V2 GUI", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
 
