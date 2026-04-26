@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (Bản Cập Nhật - Avatar & Copy ID)
+-- MENU VIP PRO V38 (Bản Cập Nhật - Tối Ưu UI & Nút Copy Nhỏ)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -137,7 +137,7 @@ avatarImg.ZIndex = 10
 pcall(function()
     avatarImg.Image = Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
 end)
-Instance.new("UICorner", avatarImg).CornerRadius = UDim.new(1, 0) -- Bo tròn thành vòng tròn
+Instance.new("UICorner", avatarImg).CornerRadius = UDim.new(1, 0)
 local avatarStroke = Instance.new("UIStroke", avatarImg)
 avatarStroke.Color = Theme.Brand; avatarStroke.Thickness = 1.5; avatarStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
@@ -347,19 +347,32 @@ local function createInfoBox(parent, icon, titleText, heightOffset)
     content.TextXAlignment = Enum.TextXAlignment.Left; content.TextYAlignment = Enum.TextYAlignment.Top
     content.RichText = true; content.ZIndex = 10
     
-    return content
+    return content, item
 end
 
 local playerInfoLabel = createInfoBox(page1, "👤", "THÔNG TIN NHÂN VẬT", 85)
-local serverInfoLabel = createInfoBox(page1, "🌐", "THÔNG TIN MÁY CHỦ", 95)
+local serverInfoLabel, serverInfoFrame = createInfoBox(page1, "🌐", "THÔNG TIN MÁY CHỦ", 95)
 
--- NÚT COPY SERVER ID
-createButton(page1, "📋 SAO CHÉP ID SERVER (JOB ID)", Theme.AccentOn, function() 
+-- NÚT COPY ID NHỎ GỌN TRONG GÓC
+local copyIdBtn = Instance.new("TextButton", serverInfoFrame)
+copyIdBtn.Size = UDim2.new(0, 24, 0, 24)
+copyIdBtn.Position = UDim2.new(1, -30, 1, -30) -- Góc phải dưới
+copyIdBtn.Text = "📋"
+copyIdBtn.BackgroundTransparency = 1
+copyIdBtn.TextSize = 14
+copyIdBtn.ZIndex = 11
+
+copyIdBtn.MouseButton1Click:Connect(function()
+    clickAnimate(copyIdBtn)
     pcall(function() 
         if setclipboard then 
-            setclipboard(tostring(game.JobId)) 
+            setclipboard(tostring(game.JobId))
+            local oldText = copyIdBtn.Text
+            copyIdBtn.Text = "✅"
+            task.wait(1)
+            copyIdBtn.Text = oldText
         end 
-    end) 
+    end)
 end)
 
 local extraInfoLabel = createInfoBox(page1, "⚙️", "TRẠNG THÁI MENU", 85)
@@ -577,7 +590,6 @@ local function rejoinServer()
     else TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, player) end
 end
 
--- [ĐÃ FIX AUTO COLLECT]
 createToggle(page3, "🧲 Auto nhặt đồ xung quanh (50m)", false, function(v) State.AutoCollect = v end)
 task.spawn(function()
     while task.wait(0.2) do
@@ -627,7 +639,6 @@ createDualButtons(page3, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(f
     local b3 = Instance.new("HopperBin", player.Backpack); b3.BinType = Enum.BinType.Grab
 end) end)
 
--- [CẬP NHẬT FLY V3 X]
 createDualButtons(page3, "🕊️ FLY (CŨ)", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end, 
 "🚀 FLY V3 X", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end) end)
 
