@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (Bản Cập Nhật - Fix Lỗi Nhân Vật)
+-- MENU VIP PRO V38 (Bản Cập Nhật - Tách Hồn)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -306,11 +306,73 @@ local function createSlider(parent, text, min, max, default, callback)
     return bg
 end
 
--- [TAB 1: NHÂN VẬT - FIXED BUGS]
+-- [TAB 1: NHÂN VẬT - FIXED BUGS & THÊM TÁCH HỒN]
+
+-- Logic Tách Hồn
+local astralClone = nil
+local astralProps = {}
+
+createToggle(page1, "👻 Xuất hồn (Tách thể)", false, function(v)
+    local char = player.Character
+    if v then
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            char.Archivable = true
+            astralClone = char:Clone()
+            astralClone.Name = player.Name .. "_Thế_Thân"
+            astralClone.Parent = workspace
+            
+            -- Khóa xác thật ở lại
+            local cloneRoot = astralClone:FindFirstChild("HumanoidRootPart")
+            if cloneRoot then cloneRoot.Anchored = true end
+            
+            -- Hóa linh hồn cho nhân vật thật (trong suốt, bay lượn)
+            astralProps = {}
+            for _, part in pairs(char:GetDescendants()) do
+                if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                    astralProps[part] = {Transparency = part.Transparency, Material = part.Material}
+                    part.Transparency = 0.6
+                    part.Material = Enum.Material.ForceField
+                elseif part:IsA("Decal") or part:IsA("Texture") then
+                    astralProps[part] = {Transparency = part.Transparency}
+                    part.Transparency = 0.6
+                end
+            end
+        end
+    else
+        -- Kéo hồn về lại với xác
+        if astralClone then
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                local cloneRoot = astralClone:FindFirstChild("HumanoidRootPart")
+                if cloneRoot then
+                    char.HumanoidRootPart.CFrame = cloneRoot.CFrame
+                end
+            end
+            astralClone:Destroy()
+            astralClone = nil
+        end
+        
+        -- Phục hồi lại da thịt
+        for part, props in pairs(astralProps) do
+            if part and part.Parent then
+                for k, val in pairs(props) do
+                    pcall(function() part[k] = val end)
+                end
+            end
+        end
+        astralProps = {}
+    end
+end)
+
+-- Dọn dẹp xác nếu người chơi lỡ chết
+player.CharacterAdded:Connect(function()
+    if astralClone then astralClone:Destroy(); astralClone = nil end
+    astralProps = {}
+end)
+
 createToggle(page1, "🏃 Chạy nhanh", false, function(v) 
     State.Speed = v 
     if not v and player.Character and player.Character:FindFirstChild("Humanoid") then
-        player.Character.Humanoid.WalkSpeed = 16 -- Trả về tốc độ bình thường khi tắt
+        player.Character.Humanoid.WalkSpeed = 16 
     end
 end)
 createSlider(page1, "Tốc độ chạy", 16, 1000, 60, function(val) State.SpeedValue = val end)
@@ -319,16 +381,15 @@ createToggle(page1, "🦘 Nhảy cao", false, function(v)
     State.Jump = v 
     if not v and player.Character and player.Character:FindFirstChild("Humanoid") then
         player.Character.Humanoid.UseJumpPower = true
-        player.Character.Humanoid.JumpPower = 50 -- Trả về lực nhảy bình thường khi tắt
+        player.Character.Humanoid.JumpPower = 50 
     end
 end)
 createSlider(page1, "Lực nhảy", 50, 300, 120, function(val) State.JumpValue = val end)
 
-createToggle(page1, "🛡️ Chống ngã & Chống văng xa", false, function(v) 
+createToggle(page1, "🛡️ Chống ngã & Chống văng", false, function(v) 
     State.AntiStun = v 
     if player.Character and player.Character:FindFirstChild("Humanoid") then
         local hum = player.Character.Humanoid
-        -- Chỉ thay đổi thuộc tính vật lý một lần khi bật/tắt (khắc phục lỗi không leo được bậc thang)
         hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, not v)
         hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, not v)
         hum:SetStateEnabled(Enum.HumanoidStateType.Physics, not v)
@@ -367,7 +428,7 @@ waterPart.CanCollide = true
 createToggle(page1, "🌊 Đi trên mặt nước", false, function(v) State.WalkOnWater = v end)
 
 local xrayMats = {}
-createToggle(page1, "👀 Nhìn xuyên map (X-Ray)", false, function(v) 
+createToggle(page1, "👀 Nhìn xuyên map", false, function(v) 
     State.XRay = v 
     task.spawn(function()
         if v then
@@ -411,17 +472,17 @@ end)
 ProximityPromptService.PromptButtonHoldBegan:Connect(function(prompt) if State.Instant then pcall(function() fireproximityprompt(prompt) end) end end)
 
 -- [TAB 2: TIỆN ÍCH]
-createToggle(page2, "⬛ Màn hình đen (Giảm lag / Treo máy)", false, function(v)
+createToggle(page2, "⬛ Màn hình đen (Giảm lag)", false, function(v)
     if v then screenOverlay.BackgroundColor3 = Color3.new(0, 0, 0); screenOverlay.Visible = true else screenOverlay.Visible = false end
 end)
 
-createToggle(page2, "⬜ Màn hình trắng (Treo máy)", false, function(v)
+createToggle(page2, "⬜ Màn hình trắng", false, function(v)
     if v then screenOverlay.BackgroundColor3 = Color3.new(1, 1, 1); screenOverlay.Visible = true else screenOverlay.Visible = false end
 end)
 
-createToggle(page2, "🛡️ Chống bị kick khi treo máy (Anti-AFK)", true, function(v) State.AntiAfk = v end)
-createDualButtons(page2, "🌞 TRỜI SÁNG (FAKE)", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12 end, "🌚 TRỜI TỐI (FAKE)", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0 end)
-createDualButtons(page2, "🔄 VÀO LẠI SERVER", Theme.AccentOn, function()
+createToggle(page2, "🛡️ Chống AFK", true, function(v) State.AntiAfk = v end)
+createDualButtons(page2, "🌞 SÁNG (FAKE)", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12 end, "🌚 TỐI (FAKE)", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0 end)
+createDualButtons(page2, "🔄 VÀO LẠI", Theme.AccentOn, function()
     if #Players:GetPlayers() <= 1 then
         player:Kick("\nRejoining..."); task.wait(); TeleportService:Teleport(game.PlaceId, player)
     else
@@ -548,7 +609,6 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- [BẢN SỬA LỖI Ở PHẦN NÀY]
 RunService.RenderStepped:Connect(function()
     local char = player.Character
     if char and char:FindFirstChildOfClass("Humanoid") then
@@ -557,26 +617,13 @@ RunService.RenderStepped:Connect(function()
         
         if State.LockPosition and root then root.Anchored = true end
         
-        -- Chỉ ép tốc độ khi bật tính năng (Tránh hỏng gia tốc tự nhiên)
-        if State.Speed then 
-            hum.WalkSpeed = State.SpeedValue 
-        end
-        
-        -- Chỉ ép lực nhảy khi bật tính năng (Tránh hỏng lực hút của game)
-        if State.Jump then 
-            hum.UseJumpPower = true
-            hum.JumpPower = State.JumpValue 
-        end
-        
-        if State.AntiStun then
-            hum.PlatformStand = false
-            if root then root.RotVelocity = Vector3.new(0, 0, 0) end
-        end
+        if State.Speed then hum.WalkSpeed = State.SpeedValue end
+        if State.Jump then hum.UseJumpPower = true; hum.JumpPower = State.JumpValue end
+        if State.AntiStun then hum.PlatformStand = false; if root then root.RotVelocity = Vector3.new(0, 0, 0) end end
             
-        -- Logic Đi Mặt Nước Mới
         if State.WalkOnWater and root then
             local params = RaycastParams.new()
-            params.FilterDescendantsInstances = {char, waterPart} 
+            params.FilterDescendantsInstances = {char, waterPart, astralClone} 
             params.FilterType = Enum.RaycastFilterType.Exclude
             params.IgnoreWater = false 
             
@@ -585,10 +632,7 @@ RunService.RenderStepped:Connect(function()
                 waterPart.Parent = workspace
                 local targetY = result and result.Position.Y or (root.Position.Y - 2.5)
                 waterPart.CFrame = CFrame.new(root.Position.X, targetY + 0.5, root.Position.Z)
-                
-                if hum:GetState() == Enum.HumanoidStateType.Swimming then
-                    hum:ChangeState(Enum.HumanoidStateType.Running)
-                end
+                if hum:GetState() == Enum.HumanoidStateType.Swimming then hum:ChangeState(Enum.HumanoidStateType.Running) end
             else
                 waterPart.Parent = nil
             end
