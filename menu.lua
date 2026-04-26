@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (Bản Cập Nhật - Tách Hồn)
+-- MENU VIP PRO V38 (Bản Cập Nhật - Tách Hồn & Auto Nhặt Đồ)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -19,7 +19,7 @@ local camera = workspace.CurrentCamera
 local State = {
     Instant = false, Noclip = false, LowGfx = false, Speed = false, Jump = false,
     InfJump = false, PlayerLight = false, ESP = false, AntiAfk = true, AntiStun = false, 
-    WalkOnWater = false, XRay = false, LockPosition = false,
+    WalkOnWater = false, XRay = false, LockPosition = false, AutoCollect = false,
     SpeedValue = 60, JumpValue = 120, LightRange = 60, LightBrightness = 3 
 }
 
@@ -306,7 +306,7 @@ local function createSlider(parent, text, min, max, default, callback)
     return bg
 end
 
--- [TAB 1: NHÂN VẬT - FIXED BUGS & THÊM TÁCH HỒN]
+-- [TAB 1: NHÂN VẬT]
 
 -- Logic Tách Hồn
 local astralClone = nil
@@ -325,7 +325,7 @@ createToggle(page1, "👻 Xuất hồn (Tách thể)", false, function(v)
             local cloneRoot = astralClone:FindFirstChild("HumanoidRootPart")
             if cloneRoot then cloneRoot.Anchored = true end
             
-            -- Hóa linh hồn cho nhân vật thật (trong suốt, bay lượn)
+            -- Hóa linh hồn cho nhân vật thật
             astralProps = {}
             for _, part in pairs(char:GetDescendants()) do
                 if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
@@ -472,6 +472,42 @@ end)
 ProximityPromptService.PromptButtonHoldBegan:Connect(function(prompt) if State.Instant then pcall(function() fireproximityprompt(prompt) end) end end)
 
 -- [TAB 2: TIỆN ÍCH]
+
+createToggle(page2, "🧲 Auto nhặt đồ xung quanh (50m)", false, function(v) State.AutoCollect = v end)
+
+-- Vòng lặp ngầm xử lý Auto Collect (chống lag)
+task.spawn(function()
+    while task.wait(0.5) do
+        if State.AutoCollect and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local root = player.Character.HumanoidRootPart
+            for _, obj in pairs(workspace:GetDescendants()) do
+                -- Lấy vật phẩm rơi dạng Tool
+                if obj:IsA("Tool") and obj:FindFirstChild("Handle") then
+                    if (obj.Handle.Position - root.Position).Magnitude <= 50 then
+                        if firetouchinterest then
+                            firetouchinterest(root, obj.Handle, 0)
+                            task.wait()
+                            firetouchinterest(root, obj.Handle, 1)
+                        else
+                            obj.Handle.CFrame = root.CFrame
+                        end
+                    end
+                -- Tự động nhấn E (ProximityPrompt) xung quanh
+                elseif obj:IsA("ProximityPrompt") then
+                    local parentPart = obj.Parent
+                    if parentPart and parentPart:IsA("BasePart") then
+                        if (parentPart.Position - root.Position).Magnitude <= 50 then
+                            if fireproximityprompt then
+                                fireproximityprompt(obj)
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
 createToggle(page2, "⬛ Màn hình đen (Giảm lag)", false, function(v)
     if v then screenOverlay.BackgroundColor3 = Color3.new(0, 0, 0); screenOverlay.Visible = true else screenOverlay.Visible = false end
 end)
