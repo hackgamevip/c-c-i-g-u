@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (Bản Cập Nhật - Tối Ưu UI & Server Hop)
+-- MENU VIP PRO V38 (Bản Cập Nhật - Dashboard Thông Tin)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -140,16 +140,17 @@ UIS.InputChanged:Connect(function(input)
 end)
 UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragToggle = false end end)
 
--- [HỆ THỐNG TAB]
+-- [HỆ THỐNG TAB - NÂNG CẤP LÊN 5 TAB]
 local tabBar = Instance.new("Frame", frame)
 tabBar.Size = UDim2.new(1, 0, 0, 38); tabBar.Position = UDim2.new(0, 0, 0, 45)
 tabBar.BackgroundColor3 = Theme.TabBg; tabBar.BackgroundTransparency = 0; tabBar.BorderSizePixel = 0
 tabBar.ZIndex = 10
+
 local function createTab(name, x, width)
     local btn = Instance.new("TextButton", tabBar)
     btn.Size = UDim2.new(width, 0, 1, 0); btn.Position = UDim2.new(x, 0, 0, 0)
     btn.Text = name; btn.BackgroundTransparency = 1; btn.TextColor3 = Theme.TextDim
-    btn.Font = Enum.Font.GothamBold; btn.TextSize = 10
+    btn.Font = Enum.Font.GothamBold; btn.TextSize = 9 -- Giảm size một chút để vừa 5 tab
     btn.ZIndex = 10
     local indicator = Instance.new("Frame", btn)
     indicator.Size = UDim2.new(0.5, 0, 0, 3); indicator.Position = UDim2.new(0.25, 0, 1, -3)
@@ -159,10 +160,12 @@ local function createTab(name, x, width)
     return btn, indicator
 end
 
-local tab1, ind1 = createTab("NHÂN VẬT", 0, 0.25)
-local tab2, ind2 = createTab("TIỆN ÍCH", 0.25, 0.25)
-local tab3, ind3 = createTab("TP SAVE", 0.50, 0.25)
-local tab4, ind4 = createTab("TP PLAYER", 0.75, 0.25)
+-- Chia đều 5 tab (mỗi tab chiếm 20% = 0.2)
+local tab1, ind1 = createTab("THÔNG TIN", 0, 0.2)
+local tab2, ind2 = createTab("NHÂN VẬT", 0.2, 0.2)
+local tab3, ind3 = createTab("TIỆN ÍCH", 0.4, 0.2)
+local tab4, ind4 = createTab("TP SAVE", 0.6, 0.2)
+local tab5, ind5 = createTab("TP PLAYER", 0.8, 0.2)
 
 local pageContainer = Instance.new("Frame", frame)
 pageContainer.Size = UDim2.new(1, 0, 1, -95); pageContainer.Position = UDim2.new(0, 0, 0, 88)
@@ -182,21 +185,25 @@ local function createPage()
     end)
     return pg
 end
-local page1, page2, page3, page4 = createPage(), createPage(), createPage(), createPage()
+
+-- Tạo 5 trang tương ứng
+local page1, page2, page3, page4, page5 = createPage(), createPage(), createPage(), createPage(), createPage()
 
 local function showTab(pg, tb, ind)
-    for _, p in pairs({page1, page2, page3, page4}) do p.Visible = false end
-    for _, t in pairs({tab1, tab2, tab3, tab4}) do t.TextColor3 = Theme.TextDim end
-    for _, i in pairs({ind1, ind2, ind3, ind4}) do i.Visible = false end
+    for _, p in pairs({page1, page2, page3, page4, page5}) do p.Visible = false end
+    for _, t in pairs({tab1, tab2, tab3, tab4, tab5}) do t.TextColor3 = Theme.TextDim end
+    for _, i in pairs({ind1, ind2, ind3, ind4, ind5}) do i.Visible = false end
     pg.Visible = true; tb.TextColor3 = Theme.TextTitle; ind.Visible = true
     ind.Size = UDim2.new(0, 0, 0, 3)
     TweenService:Create(ind, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0.5, 0, 0, 3)}):Play()
 end
+
 tab1.MouseButton1Click:Connect(function() showTab(page1, tab1, ind1) end)
 tab2.MouseButton1Click:Connect(function() showTab(page2, tab2, ind2) end)
 tab3.MouseButton1Click:Connect(function() showTab(page3, tab3, ind3) end)
 tab4.MouseButton1Click:Connect(function() showTab(page4, tab4, ind4) end)
-showTab(page1, tab1, ind1)
+tab5.MouseButton1Click:Connect(function() showTab(page5, tab5, ind5) end)
+showTab(page1, tab1, ind1) -- Bật Tab Thông Tin làm mặc định
 
 local opened = true
 openBtn.MouseButton1Click:Connect(function()
@@ -208,7 +215,7 @@ openBtn.MouseButton1Click:Connect(function()
     frame:TweenPosition(opened and UDim2.new(0.5, -170, 0.5, -225) or UDim2.new(0.5, -170, 1.2, 0), "Out", "Back", 0.5)
 end)
 
--- [CÁC HÀM TẠO NÚT]
+-- [CÁC HÀM TẠO NÚT CƠ BẢN]
 local function createButton(parent, text, color, callback)
     local btnFrame = Instance.new("Frame", parent)
     btnFrame.Size = UDim2.new(0.9, 0, 0, 42); btnFrame.BackgroundTransparency = 1
@@ -306,12 +313,98 @@ local function createSlider(parent, text, min, max, default, callback)
     return bg
 end
 
--- [TAB 1: NHÂN VẬT]
+-- ==========================================
+-- [TAB 1: THÔNG TIN - DASHBOARD]
+-- ==========================================
+
+local function createInfoBox(parent, icon, titleText)
+    local item = Instance.new("Frame", parent)
+    item.Size = UDim2.new(0.9, 0, 0, 85) 
+    item.BackgroundColor3 = Theme.ItemBg; item.ZIndex = 10
+    Instance.new("UICorner", item).CornerRadius = UDim.new(0, 8)
+    local stroke = Instance.new("UIStroke", item); stroke.Color = Theme.Stroke; stroke.Thickness = 1
+    
+    local title = Instance.new("TextLabel", item)
+    title.Size = UDim2.new(1, -20, 0, 25); title.Position = UDim2.new(0, 10, 0, 5)
+    title.BackgroundTransparency = 1; title.Text = icon .. " " .. titleText
+    title.TextColor3 = Theme.Brand; title.Font = Enum.Font.GothamBold; title.TextSize = 12; title.TextXAlignment = Enum.TextXAlignment.Left; title.ZIndex = 10
+    
+    local content = Instance.new("TextLabel", item)
+    content.Size = UDim2.new(1, -20, 1, -35); content.Position = UDim2.new(0, 10, 0, 30)
+    content.BackgroundTransparency = 1; content.Text = "Đang tải dữ liệu..."
+    content.TextColor3 = Theme.TextTitle; content.Font = Enum.Font.GothamSemibold; content.TextSize = 11
+    content.TextXAlignment = Enum.TextXAlignment.Left; content.TextYAlignment = Enum.TextYAlignment.Top
+    content.RichText = true; content.ZIndex = 10
+    
+    return content
+end
+
+local playerInfoLabel = createInfoBox(page1, "👤", "THÔNG TIN NHÂN VẬT")
+local serverInfoLabel = createInfoBox(page1, "🌐", "THÔNG TIN MÁY CHỦ")
+local extraInfoLabel = createInfoBox(page1, "⚙️", "TRẠNG THÁI MENU")
+
+-- Lấy FPS (đếm khung hình)
+local fps = 0
+RunService.RenderStepped:Connect(function(dt) fps = math.floor(1/dt) end)
+
+-- Vòng lặp cập nhật dữ liệu tự động cho Tab Thông Tin
+task.spawn(function()
+    while task.wait(0.5) do
+        -- 1. Player Info
+        local hp, maxHp, ws, jp = 0, 0, 0, 0
+        if player.Character and player.Character:FindFirstChild("Humanoid") then
+            local hum = player.Character.Humanoid
+            hp = math.floor(hum.Health)
+            maxHp = math.floor(hum.MaxHealth)
+            ws = math.floor(hum.WalkSpeed)
+            jp = math.floor(hum.JumpPower)
+        end
+        playerInfoLabel.Text = string.format(
+            "<b>Tên:</b> %s (@%s)\n<b>Máu (HP):</b> %d / %d\n<b>Tốc độ chạy:</b> %d\n<b>Lực nhảy:</b> %d",
+            player.DisplayName, player.Name, hp, maxHp, ws, jp
+        )
+        
+        -- 2. Server Info
+        local ping = "0"
+        pcall(function()
+            local stats = game:GetService("Stats")
+            if stats and stats:FindFirstChild("Network") and stats.Network:FindFirstChild("ServerStatsItem") then
+                ping = stats.Network.ServerStatsItem["Data Ping"]:GetValueString()
+            else
+                ping = tostring(math.floor(player:GetNetworkPing() * 1000)) .. " ms"
+            end
+        end)
+        
+        local pCount = #Players:GetPlayers()
+        local maxP = Players.MaxPlayers
+        serverInfoLabel.Text = string.format(
+            "<b>Khung hình (FPS):</b> %d\n<b>Độ trễ mạng (Ping):</b> %s\n<b>Người chơi:</b> %d / %d\n<b>Game ID:</b> %d",
+            fps, ping, pCount, maxP, game.PlaceId
+        )
+        
+        -- 3. Extra Info
+        local execTime = math.floor(workspace.DistributedGameTime)
+        local hours = math.floor(execTime / 3600)
+        local mins = math.floor((execTime % 3600) / 60)
+        local secs = execTime % 60
+        local timeString = string.format("%02d:%02d:%02d", hours, mins, secs)
+        
+        extraInfoLabel.Text = string.format(
+            "<b>Thời gian bạn đã chơi:</b> %s\n<b>Giờ hệ thống:</b> %s\n<b>Phiên bản:</b> V38 Pro Max Dashboard",
+            timeString, os.date("%H:%M:%S")
+        )
+    end
+end)
+
+
+-- ==========================================
+-- [TAB 2: NHÂN VẬT]
+-- ==========================================
 
 local astralClone = nil
 local astralProps = {}
 
-createToggle(page1, "👻 Xuất hồn (Tách thể)", false, function(v)
+createToggle(page2, "👻 Xuất hồn (Tách thể)", false, function(v)
     local char = player.Character
     if v then
         if char and char:FindFirstChild("HumanoidRootPart") then
@@ -339,19 +432,13 @@ createToggle(page1, "👻 Xuất hồn (Tách thể)", false, function(v)
         if astralClone then
             if char and char:FindFirstChild("HumanoidRootPart") then
                 local cloneRoot = astralClone:FindFirstChild("HumanoidRootPart")
-                if cloneRoot then
-                    char.HumanoidRootPart.CFrame = cloneRoot.CFrame
-                end
+                if cloneRoot then char.HumanoidRootPart.CFrame = cloneRoot.CFrame end
             end
             astralClone:Destroy()
             astralClone = nil
         end
         for part, props in pairs(astralProps) do
-            if part and part.Parent then
-                for k, val in pairs(props) do
-                    pcall(function() part[k] = val end)
-                end
-            end
+            if part and part.Parent then for k, val in pairs(props) do pcall(function() part[k] = val end) end end
         end
         astralProps = {}
     end
@@ -362,21 +449,17 @@ player.CharacterAdded:Connect(function()
     astralProps = {}
 end)
 
-createToggle(page1, "🏃 Chạy nhanh", false, function(v) 
-    State.Speed = v 
-    if not v and player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.WalkSpeed = 16 end
+createToggle(page2, "🏃 Chạy nhanh", false, function(v) 
+    State.Speed = v; if not v and player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.WalkSpeed = 16 end
 end)
-createSlider(page1, "Tốc độ chạy", 16, 1000, 60, function(val) State.SpeedValue = val end)
+createSlider(page2, "Tốc độ chạy", 16, 1000, 60, function(val) State.SpeedValue = val end)
 
-createToggle(page1, "🦘 Nhảy cao", false, function(v) 
-    State.Jump = v 
-    if not v and player.Character and player.Character:FindFirstChild("Humanoid") then
-        player.Character.Humanoid.UseJumpPower = true; player.Character.Humanoid.JumpPower = 50 
-    end
+createToggle(page2, "🦘 Nhảy cao", false, function(v) 
+    State.Jump = v; if not v and player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.UseJumpPower = true; player.Character.Humanoid.JumpPower = 50 end
 end)
-createSlider(page1, "Lực nhảy", 50, 300, 120, function(val) State.JumpValue = val end)
+createSlider(page2, "Lực nhảy", 50, 300, 120, function(val) State.JumpValue = val end)
 
-createToggle(page1, "🛡️ Chống ngã & Chống văng", false, function(v) 
+createToggle(page2, "🛡️ Chống ngã & Chống văng", false, function(v) 
     State.AntiStun = v 
     if player.Character and player.Character:FindFirstChild("Humanoid") then
         local hum = player.Character.Humanoid
@@ -386,32 +469,28 @@ createToggle(page1, "🛡️ Chống ngã & Chống văng", false, function(v)
     end
 end)
 
-createToggle(page1, "🔒 Khóa vị trí", false, function(v) 
-    State.LockPosition = v 
-    if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then player.Character.HumanoidRootPart.Anchored = false end
+createToggle(page2, "🔒 Khóa vị trí", false, function(v) 
+    State.LockPosition = v; if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then player.Character.HumanoidRootPart.Anchored = false end
 end)
-createToggle(page1, "🚀 Nhảy trên không", false, function(v) State.InfJump = v end) 
-createToggle(page1, "🐿️ Lấy đồ nhanh", false, function(v) 
-    State.Instant = v 
-    if v then for _, prompt in pairs(workspace:GetDescendants()) do if prompt:IsA("ProximityPrompt") then prompt.HoldDuration = 0; prompt.MaxActivationDistance = 25 end end end
+createToggle(page2, "🚀 Nhảy trên không", false, function(v) State.InfJump = v end) 
+createToggle(page2, "🐿️ Lấy đồ nhanh", false, function(v) 
+    State.Instant = v; if v then for _, prompt in pairs(workspace:GetDescendants()) do if prompt:IsA("ProximityPrompt") then prompt.HoldDuration = 0; prompt.MaxActivationDistance = 25 end end end
 end)
-createToggle(page1, "👻 Đi xuyên tường", false, function(v) 
-    State.Noclip = v 
-    if not v and player.Character then for _, part in pairs(player.Character:GetDescendants()) do if part:IsA("BasePart") then part.CanCollide = true end end end
+createToggle(page2, "👻 Đi xuyên tường", false, function(v) 
+    State.Noclip = v; if not v and player.Character then for _, part in pairs(player.Character:GetDescendants()) do if part:IsA("BasePart") then part.CanCollide = true end end end
 end)
 
 local waterPart = Instance.new("Part"); waterPart.Size = Vector3.new(10, 1, 10); waterPart.Transparency = 1; waterPart.Anchored = true; waterPart.CanCollide = true
-createToggle(page1, "🌊 Đi trên mặt nước", false, function(v) State.WalkOnWater = v end)
+createToggle(page2, "🌊 Đi trên mặt nước", false, function(v) State.WalkOnWater = v end)
 
 local xrayMats = {}
-createToggle(page1, "👀 Nhìn xuyên map", false, function(v) 
+createToggle(page2, "👀 Nhìn xuyên map", false, function(v) 
     State.XRay = v 
     task.spawn(function()
         if v then
             for i, obj in ipairs(workspace:GetDescendants()) do
                 if obj:IsA("BasePart") and not obj:IsDescendantOf(player.Character) and obj.Name ~= "Terrain" and obj.Transparency < 1 then
-                    if not xrayMats[obj] then xrayMats[obj] = obj.Transparency end
-                    obj.Transparency = 0.5
+                    if not xrayMats[obj] then xrayMats[obj] = obj.Transparency end; obj.Transparency = 0.5
                 end
                 if i % 500 == 0 then task.wait() end 
             end
@@ -426,16 +505,15 @@ createToggle(page1, "👀 Nhìn xuyên map", false, function(v)
     end)
 end)
 
-createToggle(page1, "🔴 ESP người chơi", false, function(v) State.ESP = v end)
+createToggle(page2, "🔴 ESP người chơi", false, function(v) State.ESP = v end)
 
-createToggle(page1, "💡 Ánh sáng quanh người chơi", false, function(v) 
-    State.PlayerLight = v 
-    if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then 
+createToggle(page2, "💡 Ánh sáng quanh người chơi", false, function(v) 
+    State.PlayerLight = v; if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then 
         local light = player.Character.HumanoidRootPart:FindFirstChild("PlayerPointLight"); if light then light:Destroy() end 
     end
 end)
-createSlider(page1, "Phạm vi sáng", 50, 2000, 60, function(val) State.LightRange = val end)
-createSlider(page1, "Độ sáng", 0, 5, 3, function(val) State.LightBrightness = val end)
+createSlider(page2, "Phạm vi sáng", 50, 2000, 60, function(val) State.LightRange = val end)
+createSlider(page2, "Độ sáng", 0, 5, 3, function(val) State.LightBrightness = val end)
 
 UIS.JumpRequest:Connect(function() 
     if State.InfJump and player.Character then 
@@ -446,7 +524,9 @@ end)
 
 ProximityPromptService.PromptButtonHoldBegan:Connect(function(prompt) if State.Instant then pcall(function() fireproximityprompt(prompt) end) end end)
 
--- [TAB 2: TIỆN ÍCH - ĐÃ LÀM GỌN VÀ THÊM TÍNH NĂNG]
+-- ==========================================
+-- [TAB 3: TIỆN ÍCH]
+-- ==========================================
 
 -- Hàm hỗ trợ đổi Server
 local function hopServer(sortOrder)
@@ -456,40 +536,31 @@ local function hopServer(sortOrder)
         local success, res = pcall(game.HttpGet, game, url)
         if success then return HttpService:JSONDecode(res) end
     end
-    local nextCursor = nil
-    local targetServer = nil
+    local nextCursor = nil; local targetServer = nil
     repeat
         local data = getServers(nextCursor)
         if not data or not data.data then break end
         for _, s in pairs(data.data) do
             if s.playing and s.maxPlayers and s.playing < s.maxPlayers and s.id ~= game.JobId then
                 if sortOrder == "Asc" then
-                    if s.playing > 0 then targetServer = s; break end -- Bỏ qua server 0 người
-                else
-                    targetServer = s; break
-                end
+                    if s.playing > 0 then targetServer = s; break end -- Tránh server 0 người bị lỗi
+                else targetServer = s; break end
             end
         end
         if targetServer then break end
         nextCursor = data.nextPageCursor
     until not nextCursor
     
-    if targetServer then
-        TeleportService:TeleportToPlaceInstance(game.PlaceId, targetServer.id, player)
-    end
+    if targetServer then TeleportService:TeleportToPlaceInstance(game.PlaceId, targetServer.id, player) end
 end
 
 local function rejoinServer()
     if #Players:GetPlayers() <= 1 then
-        player:Kick("\nĐang vào lại server...")
-        task.wait()
-        TeleportService:Teleport(game.PlaceId, player)
-    else
-        TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, player)
-    end
+        player:Kick("\nĐang vào lại server..."); task.wait(); TeleportService:Teleport(game.PlaceId, player)
+    else TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, player) end
 end
 
-createToggle(page2, "🧲 Auto nhặt đồ xung quanh (50m)", false, function(v) State.AutoCollect = v end)
+createToggle(page3, "🧲 Auto nhặt đồ xung quanh (50m)", false, function(v) State.AutoCollect = v end)
 task.spawn(function()
     while task.wait(0.5) do
         if State.AutoCollect and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
@@ -510,40 +581,36 @@ task.spawn(function()
     end
 end)
 
-createToggle(page2, "⬛ Màn hình đen (Giảm lag)", false, function(v) screenOverlay.BackgroundColor3 = Color3.new(0, 0, 0); screenOverlay.Visible = v end)
-createToggle(page2, "⬜ Màn hình trắng (Treo máy)", false, function(v) screenOverlay.BackgroundColor3 = Color3.new(1, 1, 1); screenOverlay.Visible = v end)
-createToggle(page2, "🛡️ Chống AFK", true, function(v) State.AntiAfk = v end)
+createToggle(page3, "⬛ Màn hình đen (Giảm lag)", false, function(v) screenOverlay.BackgroundColor3 = Color3.new(0, 0, 0); screenOverlay.Visible = v end)
+createToggle(page3, "⬜ Màn hình trắng (Treo máy)", false, function(v) screenOverlay.BackgroundColor3 = Color3.new(1, 1, 1); screenOverlay.Visible = v end)
+createToggle(page3, "🛡️ Chống AFK", true, function(v) State.AntiAfk = v end)
 
-createDualButtons(page2, "🌞 SÁNG (FAKE)", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12 end, "🌚 TỐI (FAKE)", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0 end)
+createDualButtons(page3, "🌞 SÁNG (FAKE)", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12 end, "🌚 TỐI (FAKE)", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0 end)
 
--- LOGIC ĐỔI SERVER CHUYÊN SÂU
-createDualButtons(page2, "🔄 VÀO LẠI SERVER", Theme.AccentOn, rejoinServer, "🎲 ĐỔI SV NGẪU NHIÊN", Theme.Brand, function() hopServer("Desc") end)
-createDualButtons(page2, "📉 SV ÍT NGƯỜI", Color3.fromRGB(52, 152, 219), function() hopServer("Asc") end, "📈 SV NHIỀU NGƯỜI", Color3.fromRGB(231, 76, 60), function() hopServer("Desc") end)
+-- NÚT SERVER CHUYÊN SÂU
+createDualButtons(page3, "🔄 VÀO LẠI", Theme.AccentOn, rejoinServer, "🎲 ĐỔI SV NGẪU NHIÊN", Theme.Brand, function() hopServer("Desc") end)
+createDualButtons(page3, "📉 SV ÍT NGƯỜI", Color3.fromRGB(52, 152, 219), function() hopServer("Asc") end, "📈 SV NHIỀU NGƯỜI", Color3.fromRGB(231, 76, 60), function() hopServer("Desc") end)
 
--- GOM NÚT ADMIN & BTOOLS VÀO 1 HÀNG
-createDualButtons(page2, "💻 LỆNH ADMIN", Theme.AccentOn, function() 
-    pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) 
-end, "🔨 LẤY BTOOLS", Theme.Brand, function() 
-    pcall(function() 
-        local b1 = Instance.new("HopperBin", player.Backpack); b1.BinType = Enum.BinType.Clone
-        local b2 = Instance.new("HopperBin", player.Backpack); b2.BinType = Enum.BinType.Hammer
-        local b3 = Instance.new("HopperBin", player.Backpack); b3.BinType = Enum.BinType.Grab
-    end) 
-end)
+-- GOM LỆNH ADMIN VÀ BTOOLS
+createDualButtons(page3, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) end, 
+"🔨 LẤY BTOOLS", Theme.Brand, function() pcall(function() 
+    local b1 = Instance.new("HopperBin", player.Backpack); b1.BinType = Enum.BinType.Clone
+    local b2 = Instance.new("HopperBin", player.Backpack); b2.BinType = Enum.BinType.Hammer
+    local b3 = Instance.new("HopperBin", player.Backpack); b3.BinType = Enum.BinType.Grab
+end) end)
 
--- GOM FLY CŨ VÀ FLY V4 VÀO CÙNG 1 HÀNG
-createDualButtons(page2, "🕊️ FLY (CŨ)", Theme.Brand, function() 
-    pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) 
-end, "🚀 FLY V4", Theme.Brand, function() 
-    pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V4-Remake-133528"))() end) 
-end)
+-- GOM FLY CŨ VÀ FLY V4
+createDualButtons(page3, "🕊️ FLY (CŨ)", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end, 
+"🚀 FLY V4", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V4-Remake-133528"))() end) end)
 
-createButton(page2, "📂 TP SAVE V2 GUI", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
+createButton(page3, "📂 TP SAVE V2 GUI", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
 
--- [TAB 3: VỊ TRÍ TP SAVE]
+-- ==========================================
+-- [TAB 4: VỊ TRÍ TP SAVE]
+-- ==========================================
 local savedLocCount = 0
 local function createPosItem(name, cframe)
-    local item = Instance.new("Frame", page3)
+    local item = Instance.new("Frame", page4)
     item.Size = UDim2.new(0.9, 0, 0, 48); item.BackgroundColor3 = Theme.ItemBg; item.ZIndex = 10
     Instance.new("UICorner", item).CornerRadius = UDim.new(0, 8)
     local stroke = Instance.new("UIStroke", item); stroke.Color = Theme.Stroke; stroke.Thickness = 1
@@ -563,19 +630,21 @@ local function createPosItem(name, cframe)
     tpBtn.MouseButton1Click:Connect(function() clickAnimate(tpBtn); if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then player.Character.HumanoidRootPart.CFrame = cframe end end)
     delBtn.MouseButton1Click:Connect(function() clickAnimate(delBtn); task.wait(0.1); item:Destroy() end)
 end
-createButton(page3, "📍 LƯU TỌA ĐỘ", Theme.AccentOn, function()
+createButton(page4, "📍 LƯU TỌA ĐỘ", Theme.AccentOn, function()
     if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
         savedLocCount = savedLocCount + 1
         createPosItem("Vị trí " .. savedLocCount, player.Character.HumanoidRootPart.CFrame)
     end
 end)
 
--- [TAB 4: TP NGƯỜI CHƠI]
+-- ==========================================
+-- [TAB 5: TP NGƯỜI CHƠI]
+-- ==========================================
 local function updatePlayerList()
-    for _, child in pairs(page4:GetChildren()) do if child.Name == "PaddingFrame" then child:Destroy() end end
+    for _, child in pairs(page5:GetChildren()) do if child.Name == "PaddingFrame" then child:Destroy() end end
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= player then
-            local pFrame = Instance.new("Frame", page4); pFrame.Name = "PaddingFrame"; pFrame.Size = UDim2.new(0.9, 0, 0, 48); pFrame.BackgroundTransparency = 1; pFrame.ZIndex = 10
+            local pFrame = Instance.new("Frame", page5); pFrame.Name = "PaddingFrame"; pFrame.Size = UDim2.new(0.9, 0, 0, 48); pFrame.BackgroundTransparency = 1; pFrame.ZIndex = 10
             local btn = Instance.new("TextButton", pFrame)
             btn.Name = "PlayerBtn_TP"; btn.Size = UDim2.new(1, 0, 1, 0); btn.BackgroundColor3 = Theme.ItemBg; btn.Text = ""; btn.AutoButtonColor = false; btn.ZIndex = 10
             Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
