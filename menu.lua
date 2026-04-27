@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (Bản Cập Nhật - Thêm Máy Phát Nhạc)
+-- MENU VIP PRO V38 (Bản Cập Nhật - Dán Nhanh & Lưu Nhạc)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -21,7 +21,7 @@ local State = {
     InfJump = false, PlayerLight = false, ESP = false, AntiAfk = true, AntiStun = false, 
     WalkOnWater = false, XRay = false, LockPosition = false, AutoCollect = false,
     SpeedValue = 60, JumpValue = 120, LightRange = 60, LightBrightness = 3,
-    MusicVolume = 2 -- Âm lượng nhạc mặc định
+    MusicVolume = 5
 }
 
 -- [BẢNG MÀU CHỦ ĐẠO - PREMIUM DARK MODE]
@@ -103,7 +103,7 @@ UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputT
 
 -- [KHUNG CHÍNH MENU]
 local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 360, 0, 450) -- Mở rộng menu ra một xíu để chứa 6 tab
+frame.Size = UDim2.new(0, 360, 0, 450)
 frame.Position = UDim2.new(0.5, -180, 0.5, -225)
 frame.BackgroundColor3 = Theme.MainBg
 frame.BackgroundTransparency = 0.05 
@@ -154,7 +154,7 @@ UIS.InputChanged:Connect(function(input)
 end)
 UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragToggle = false end end)
 
--- [HỆ THỐNG 6 TAB MỚI]
+-- [HỆ THỐNG 6 TAB]
 local tabBar = Instance.new("Frame", frame)
 tabBar.Size = UDim2.new(1, 0, 0, 38); tabBar.Position = UDim2.new(0, 0, 0, 45)
 tabBar.BackgroundColor3 = Theme.TabBg; tabBar.BackgroundTransparency = 0; tabBar.BorderSizePixel = 0
@@ -164,7 +164,7 @@ local function createTab(name, x, width)
     local btn = Instance.new("TextButton", tabBar)
     btn.Size = UDim2.new(width, 0, 1, 0); btn.Position = UDim2.new(x, 0, 0, 0)
     btn.Text = name; btn.BackgroundTransparency = 1; btn.TextColor3 = Theme.TextDim
-    btn.Font = Enum.Font.GothamBold; btn.TextSize = 8 -- Font chữ 8 để vừa 6 tab
+    btn.Font = Enum.Font.GothamBold; btn.TextSize = 8 
     btn.ZIndex = 10
     local indicator = Instance.new("Frame", btn)
     indicator.Size = UDim2.new(0.5, 0, 0, 3); indicator.Position = UDim2.new(0.25, 0, 1, -3)
@@ -177,7 +177,7 @@ end
 local tab1, ind1 = createTab("THÔNG TIN", 0, 0.16)
 local tab2, ind2 = createTab("NHÂN VẬT", 0.16, 0.16)
 local tab3, ind3 = createTab("TIỆN ÍCH", 0.32, 0.16)
-local tab4, ind4 = createTab("PHÁT NHẠC", 0.48, 0.18) -- Tab mới
+local tab4, ind4 = createTab("PHÁT NHẠC", 0.48, 0.18) 
 local tab5, ind5 = createTab("TP SAVE", 0.66, 0.16)
 local tab6, ind6 = createTab("TP PLAYER", 0.82, 0.18)
 
@@ -732,10 +732,10 @@ musicIcon.TextSize = 18
 musicIcon.ZIndex = 10
 
 local musicIdBox = Instance.new("TextBox", musicInputFrame)
-musicIdBox.Size = UDim2.new(0.8, 0, 1, 0)
+musicIdBox.Size = UDim2.new(0.65, 0, 1, 0) 
 musicIdBox.Position = UDim2.new(0.15, 0, 0, 0)
 musicIdBox.BackgroundTransparency = 1
-musicIdBox.PlaceholderText = "Nhập ID Nhạc Roblox vào đây..."
+musicIdBox.PlaceholderText = "Nhập ID Nhạc..."
 musicIdBox.Text = ""
 musicIdBox.TextColor3 = Theme.Brand
 musicIdBox.Font = Enum.Font.GothamSemibold
@@ -743,6 +743,28 @@ musicIdBox.TextSize = 12
 musicIdBox.TextXAlignment = Enum.TextXAlignment.Left
 musicIdBox.ClearTextOnFocus = false
 musicIdBox.ZIndex = 10
+
+-- NÚT DÁN NHANH (PASTE)
+local pasteBtn = Instance.new("TextButton", musicInputFrame)
+pasteBtn.Size = UDim2.new(0.2, 0, 1, 0)
+pasteBtn.Position = UDim2.new(0.8, 0, 0, 0)
+pasteBtn.BackgroundTransparency = 1
+pasteBtn.Text = "📋 Dán"
+pasteBtn.TextColor3 = Theme.AccentOn
+pasteBtn.Font = Enum.Font.GothamBold
+pasteBtn.TextSize = 11
+pasteBtn.ZIndex = 10
+
+pasteBtn.MouseButton1Click:Connect(function()
+    clickAnimate(pasteBtn)
+    pcall(function()
+        if getclipboard then
+            local cbText = tostring(getclipboard())
+            local numbers = string.match(cbText, "%d+")
+            musicIdBox.Text = numbers and numbers or cbText
+        end
+    end)
+end)
 
 createDualButtons(page4, "▶ PHÁT NHẠC", Theme.AccentOn, function()
     playMusic(musicIdBox.Text)
@@ -755,27 +777,48 @@ createSlider(page4, "Âm lượng nhạc", 0, 10, State.MusicVolume, function(va
     if currentSound then currentSound.Volume = val / 10 end
 end)
 
--- Gợi ý danh sách nhạc theo sở thích
-local listLabel = Instance.new("TextLabel", page4)
-listLabel.Size = UDim2.new(0.9, 0, 0, 20)
-listLabel.BackgroundTransparency = 1
-listLabel.Text = "★ DANH SÁCH BÀI HÁT YÊU THÍCH ★"
-listLabel.TextColor3 = Theme.TextTitle
-listLabel.Font = Enum.Font.GothamBold
-listLabel.TextSize = 11
-listLabel.ZIndex = 10
-
-local function createPresetButton(name, id)
-    createButton(page4, "🎶 " .. name, Color3.fromRGB(243, 156, 18), function()
+-- TÍNH NĂNG LƯU ID NHẠC
+local savedMusicCount = 0
+local function createSavedMusicItem(name, id)
+    local item = Instance.new("Frame", page4)
+    item.Size = UDim2.new(0.9, 0, 0, 48); item.BackgroundColor3 = Theme.ItemBg; item.ZIndex = 10
+    Instance.new("UICorner", item).CornerRadius = UDim.new(0, 8)
+    local stroke = Instance.new("UIStroke", item); stroke.Color = Theme.Stroke; stroke.Thickness = 1
+    
+    local nameBox = Instance.new("TextBox", item)
+    nameBox.Size = UDim2.new(0.45, 0, 1, 0); nameBox.Position = UDim2.new(0.05, 0, 0, 0)
+    nameBox.Text = name; nameBox.TextColor3 = Theme.TextTitle; nameBox.Font = Enum.Font.GothamSemibold; nameBox.TextSize = 12
+    nameBox.BackgroundTransparency = 1; nameBox.TextXAlignment = Enum.TextXAlignment.Left; nameBox.ClearTextOnFocus = false; nameBox.ZIndex = 10
+    
+    local playBtn = Instance.new("TextButton", item)
+    playBtn.Size = UDim2.new(0.25, 0, 0.6, 0); playBtn.Position = UDim2.new(0.53, 0, 0.2, 0)
+    playBtn.Text = "▶"; playBtn.BackgroundColor3 = Theme.Brand; playBtn.TextColor3 = Color3.new(1,1,1)
+    playBtn.Font = Enum.Font.GothamBold; playBtn.TextSize = 11; playBtn.ZIndex = 10; Instance.new("UICorner", playBtn).CornerRadius = UDim.new(0, 6)
+    
+    local delBtn = Instance.new("TextButton", item)
+    delBtn.Size = UDim2.new(0.15, 0, 0.6, 0); delBtn.Position = UDim2.new(0.81, 0, 0.2, 0)
+    delBtn.Text = "X"; delBtn.BackgroundColor3 = Theme.AccentOff; delBtn.TextColor3 = Color3.new(1,1,1)
+    delBtn.Font = Enum.Font.GothamBold; delBtn.TextSize = 12; delBtn.ZIndex = 10; Instance.new("UICorner", delBtn).CornerRadius = UDim.new(0, 6)
+    
+    playBtn.MouseButton1Click:Connect(function() 
+        clickAnimate(playBtn)
         musicIdBox.Text = tostring(id)
-        playMusic(id)
+        playMusic(id) 
+    end)
+    delBtn.MouseButton1Click:Connect(function() 
+        clickAnimate(delBtn)
+        task.wait(0.1)
+        item:Destroy() 
     end)
 end
 
--- Một số ID mẫu (Lưu ý: Do Roblox update audio privacy, một số ID cũ có thể không hoạt động nếu creator không mở public)
-createPresetButton("V-Pop Lofi Chill", 6967312480)
-createPresetButton("Jiang Xiaoni - For Ya (Cover)", 1848354536)
-createPresetButton("Nhạc Trung Remix", 130762736)
+createButton(page4, "💾 LƯU ID NHẠC ĐANG NHẬP", Theme.AccentOn, function()
+    local currentId = musicIdBox.Text:gsub("%s+", "")
+    if currentId ~= "" then
+        savedMusicCount = savedMusicCount + 1
+        createSavedMusicItem("Nhạc đã lưu " .. savedMusicCount, currentId)
+    end
+end)
 
 -- ==========================================
 -- [TAB 5: VỊ TRÍ TP SAVE]
