@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (Bản Cập Nhật - Join by ID & Tối Ưu Font)
+-- MENU VIP PRO V38 (Bản Cập Nhật - Avatar Người Chơi)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -30,7 +30,6 @@ local Theme = {
     TabBg = Color3.fromRGB(24, 24, 30),       
     ItemBg = Color3.fromRGB(35, 35, 45),      
     Stroke = Color3.fromRGB(60, 60, 75),      
-    -- Đổi màu chữ trắng đậm thành xanh xám nhạt thanh thoát hơn
     TextTitle = Color3.fromRGB(210, 225, 240),
     TextDim = Color3.fromRGB(160, 160, 175),  
     AccentOn = Color3.fromRGB(46, 204, 113),  
@@ -123,7 +122,7 @@ headerCover.ZIndex = 10
 
 local titleLabel = Instance.new("TextLabel", header)
 titleLabel.Size = UDim2.new(1, 0, 1, 0); titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "MENU VIP PRO"
+titleLabel.Text = "MENU PRO MAX"
 titleLabel.TextColor3 = Color3.new(1, 1, 1); titleLabel.Font = Enum.Font.GothamBlack; titleLabel.TextSize = 14
 titleLabel.ZIndex = 10
 local titleGradient = Instance.new("UIGradient", titleLabel)
@@ -344,8 +343,8 @@ local function createInfoBox(parent, icon, titleText, heightOffset)
     local content = Instance.new("TextLabel", item)
     content.Size = UDim2.new(1, -20, 1, -35); content.Position = UDim2.new(0, 10, 0, 30)
     content.BackgroundTransparency = 1; content.Text = "Đang tải..."
-    content.TextColor3 = Theme.TextTitle -- Font xanh xám nhạt nhẹ nhàng
-    content.Font = Enum.Font.Gotham; content.TextSize = 11 -- Bỏ in đậm
+    content.TextColor3 = Theme.TextTitle 
+    content.Font = Enum.Font.Gotham; content.TextSize = 11
     content.TextXAlignment = Enum.TextXAlignment.Left; content.TextYAlignment = Enum.TextYAlignment.Top
     content.RichText = true; content.ZIndex = 10
     
@@ -358,8 +357,8 @@ local serverInfoLabel, serverInfoFrame = createInfoBox(page1, "🌐", "THÔNG TI
 -- NÚT COPY ID NHỎ GỌN TRONG GÓC
 local copyIdBtn = Instance.new("TextButton", serverInfoFrame)
 copyIdBtn.Size = UDim2.new(0, 24, 0, 24)
-copyIdBtn.Position = UDim2.new(1, -30, 1, -28) -- Góc phải dưới
-copyIdBtn.Text = "📜"
+copyIdBtn.Position = UDim2.new(1, -30, 1, -28) 
+copyIdBtn.Text = "📋"
 copyIdBtn.BackgroundTransparency = 1
 copyIdBtn.TextSize = 14
 copyIdBtn.ZIndex = 11
@@ -683,7 +682,7 @@ createDualButtons(page3, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(f
 end) end)
 
 createDualButtons(page3, "🕊️ FLY V1", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end, 
-"🕊️ FLY V3 ", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end) end)
+"🚀 FLY V3 X", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end) end)
 
 createButton(page3, "📂 TP SAVE V2 GUI", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
 
@@ -720,13 +719,15 @@ createButton(page4, "📍 LƯU TỌA ĐỘ", Theme.AccentOn, function()
 end)
 
 -- ==========================================
--- [TAB 5: TP NGƯỜI CHƠI]
+-- [TAB 5: TP NGƯỜI CHƠI - AVATAR UPDATE]
 -- ==========================================
 local function updatePlayerList()
     for _, child in pairs(page5:GetChildren()) do if child.Name == "PaddingFrame" then child:Destroy() end end
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= player then
-            local pFrame = Instance.new("Frame", page5); pFrame.Name = "PaddingFrame"; pFrame.Size = UDim2.new(0.9, 0, 0, 48); pFrame.BackgroundTransparency = 1; pFrame.ZIndex = 10
+            local pFrame = Instance.new("Frame", page5)
+            pFrame.Name = "PaddingFrame"; pFrame.Size = UDim2.new(0.9, 0, 0, 48); pFrame.BackgroundTransparency = 1; pFrame.ZIndex = 10
+            
             local btn = Instance.new("TextButton", pFrame)
             btn.Name = "PlayerBtn_TP"; btn.Size = UDim2.new(1, 0, 1, 0); btn.BackgroundColor3 = Theme.ItemBg; btn.Text = ""; btn.AutoButtonColor = false; btn.ZIndex = 10
             Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
@@ -742,9 +743,25 @@ local function updatePlayerList()
             subLabel.TextColor3 = Color3.fromRGB(100, 255, 100) 
             subLabel.Font = Enum.Font.Gotham; subLabel.TextSize = 10; subLabel.TextXAlignment = Enum.TextXAlignment.Left; subLabel.ZIndex = 10
 
-            local arrow = Instance.new("TextLabel", btn)
-            arrow.Size = UDim2.new(0.2, 0, 1, 0); arrow.Position = UDim2.new(0.75, 0, 0, 0); arrow.BackgroundTransparency = 1
-            arrow.Text = " 🐿️🧂 "; arrow.TextColor3 = Theme.Brand; arrow.Font = Enum.Font.GothamBold; arrow.TextSize = 11; arrow.TextXAlignment = Enum.TextXAlignment.Right; arrow.ZIndex = 10
+            -- [ĐÃ SỬA: HIỂN THỊ AVATAR CỦA NGƯỜI CHƠI MỤC TIÊU]
+            local targetAvatar = Instance.new("ImageLabel", btn)
+            targetAvatar.Size = UDim2.new(0, 32, 0, 32)
+            targetAvatar.Position = UDim2.new(1, -42, 0.5, -16) -- Căn giữa lề phải
+            targetAvatar.BackgroundTransparency = 1
+            targetAvatar.ZIndex = 10
+            Instance.new("UICorner", targetAvatar).CornerRadius = UDim.new(1, 0) -- Bo tròn
+            
+            local targetStroke = Instance.new("UIStroke", targetAvatar)
+            targetStroke.Color = Theme.Stroke
+            targetStroke.Thickness = 1
+            targetStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+            -- Load avatar (dùng pcall để tránh lag danh sách)
+            task.spawn(function()
+                pcall(function()
+                    targetAvatar.Image = Players:GetUserThumbnailAsync(p.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+                end)
+            end)
             
             btn.MouseButton1Click:Connect(function()
                 clickAnimate(btn)
@@ -757,6 +774,7 @@ local function updatePlayerList()
         end
     end
 end
+
 updatePlayerList()
 Players.PlayerAdded:Connect(updatePlayerList)
 Players.PlayerRemoving:Connect(updatePlayerList)
