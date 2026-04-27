@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (Bản Cập Nhật - Avatar Người Chơi)
+-- MENU VIP PRO V38 (Bản Cập Nhật - Thêm Máy Phát Nhạc)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -20,7 +20,8 @@ local State = {
     Instant = false, Noclip = false, LowGfx = false, Speed = false, Jump = false,
     InfJump = false, PlayerLight = false, ESP = false, AntiAfk = true, AntiStun = false, 
     WalkOnWater = false, XRay = false, LockPosition = false, AutoCollect = false,
-    SpeedValue = 60, JumpValue = 120, LightRange = 60, LightBrightness = 3 
+    SpeedValue = 60, JumpValue = 120, LightRange = 60, LightBrightness = 3,
+    MusicVolume = 2 -- Âm lượng nhạc mặc định
 }
 
 -- [BẢNG MÀU CHỦ ĐẠO - PREMIUM DARK MODE]
@@ -102,8 +103,8 @@ UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputT
 
 -- [KHUNG CHÍNH MENU]
 local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 340, 0, 450)
-frame.Position = UDim2.new(0.5, -170, 0.5, -225)
+frame.Size = UDim2.new(0, 360, 0, 450) -- Mở rộng menu ra một xíu để chứa 6 tab
+frame.Position = UDim2.new(0.5, -180, 0.5, -225)
 frame.BackgroundColor3 = Theme.MainBg
 frame.BackgroundTransparency = 0.05 
 frame.ZIndex = 10
@@ -153,7 +154,7 @@ UIS.InputChanged:Connect(function(input)
 end)
 UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragToggle = false end end)
 
--- [HỆ THỐNG TAB]
+-- [HỆ THỐNG 6 TAB MỚI]
 local tabBar = Instance.new("Frame", frame)
 tabBar.Size = UDim2.new(1, 0, 0, 38); tabBar.Position = UDim2.new(0, 0, 0, 45)
 tabBar.BackgroundColor3 = Theme.TabBg; tabBar.BackgroundTransparency = 0; tabBar.BorderSizePixel = 0
@@ -163,7 +164,7 @@ local function createTab(name, x, width)
     local btn = Instance.new("TextButton", tabBar)
     btn.Size = UDim2.new(width, 0, 1, 0); btn.Position = UDim2.new(x, 0, 0, 0)
     btn.Text = name; btn.BackgroundTransparency = 1; btn.TextColor3 = Theme.TextDim
-    btn.Font = Enum.Font.GothamBold; btn.TextSize = 9
+    btn.Font = Enum.Font.GothamBold; btn.TextSize = 8 -- Font chữ 8 để vừa 6 tab
     btn.ZIndex = 10
     local indicator = Instance.new("Frame", btn)
     indicator.Size = UDim2.new(0.5, 0, 0, 3); indicator.Position = UDim2.new(0.25, 0, 1, -3)
@@ -173,11 +174,12 @@ local function createTab(name, x, width)
     return btn, indicator
 end
 
-local tab1, ind1 = createTab("THÔNG TIN", 0, 0.2)
-local tab2, ind2 = createTab("TÍNH NĂNG", 0.2, 0.2)
-local tab3, ind3 = createTab("TIỆN ÍCH", 0.4, 0.2)
-local tab4, ind4 = createTab("TP SAVE", 0.6, 0.2)
-local tab5, ind5 = createTab("TP PLAYER", 0.8, 0.2)
+local tab1, ind1 = createTab("THÔNG TIN", 0, 0.16)
+local tab2, ind2 = createTab("NHÂN VẬT", 0.16, 0.16)
+local tab3, ind3 = createTab("TIỆN ÍCH", 0.32, 0.16)
+local tab4, ind4 = createTab("PHÁT NHẠC", 0.48, 0.18) -- Tab mới
+local tab5, ind5 = createTab("TP SAVE", 0.66, 0.16)
+local tab6, ind6 = createTab("TP PLAYER", 0.82, 0.18)
 
 local pageContainer = Instance.new("Frame", frame)
 pageContainer.Size = UDim2.new(1, 0, 1, -95); pageContainer.Position = UDim2.new(0, 0, 0, 88)
@@ -198,12 +200,12 @@ local function createPage()
     return pg
 end
 
-local page1, page2, page3, page4, page5 = createPage(), createPage(), createPage(), createPage(), createPage()
+local page1, page2, page3, page4, page5, page6 = createPage(), createPage(), createPage(), createPage(), createPage(), createPage()
 
 local function showTab(pg, tb, ind)
-    for _, p in pairs({page1, page2, page3, page4, page5}) do p.Visible = false end
-    for _, t in pairs({tab1, tab2, tab3, tab4, tab5}) do t.TextColor3 = Theme.TextDim end
-    for _, i in pairs({ind1, ind2, ind3, ind4, ind5}) do i.Visible = false end
+    for _, p in pairs({page1, page2, page3, page4, page5, page6}) do p.Visible = false end
+    for _, t in pairs({tab1, tab2, tab3, tab4, tab5, tab6}) do t.TextColor3 = Theme.TextDim end
+    for _, i in pairs({ind1, ind2, ind3, ind4, ind5, ind6}) do i.Visible = false end
     pg.Visible = true; tb.TextColor3 = Theme.TextTitle; ind.Visible = true
     ind.Size = UDim2.new(0, 0, 0, 3)
     TweenService:Create(ind, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0.5, 0, 0, 3)}):Play()
@@ -214,6 +216,7 @@ tab2.MouseButton1Click:Connect(function() showTab(page2, tab2, ind2) end)
 tab3.MouseButton1Click:Connect(function() showTab(page3, tab3, ind3) end)
 tab4.MouseButton1Click:Connect(function() showTab(page4, tab4, ind4) end)
 tab5.MouseButton1Click:Connect(function() showTab(page5, tab5, ind5) end)
+tab6.MouseButton1Click:Connect(function() showTab(page6, tab6, ind6) end)
 showTab(page1, tab1, ind1)
 
 local opened = true
@@ -223,7 +226,7 @@ openBtn.MouseButton1Click:Connect(function()
     openBtn.Text = opened and "ĐÓNG MENU" or "MỞ MENU"
     openBtn.TextColor3 = opened and Theme.AccentOff or Theme.Brand
     TweenService:Create(openStroke, TweenInfo.new(0.3), {Color = opened and Theme.AccentOff or Theme.Brand}):Play()
-    frame:TweenPosition(opened and UDim2.new(0.5, -170, 0.5, -225) or UDim2.new(0.5, -170, 1.2, 0), "Out", "Back", 0.5)
+    frame:TweenPosition(opened and UDim2.new(0.5, -180, 0.5, -225) or UDim2.new(0.5, -180, 1.2, 0), "Out", "Back", 0.5)
 end)
 
 -- [CÁC HÀM TẠO NÚT CƠ BẢN]
@@ -687,11 +690,99 @@ createDualButtons(page3, "🕊️ FLY V1", Theme.Brand, function() pcall(functio
 createButton(page3, "📂 TP SAVE V2 GUI", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
 
 -- ==========================================
--- [TAB 4: VỊ TRÍ TP SAVE]
+-- [TAB 4: PHÁT NHẠC (MUSIC PLAYER)]
+-- ==========================================
+
+local currentSound = nil
+
+local function playMusic(id)
+    if currentSound then currentSound:Destroy() end
+    local soundId = tostring(id):gsub("%s+", "")
+    if soundId == "" then return end
+    
+    currentSound = Instance.new("Sound")
+    currentSound.SoundId = "rbxassetid://" .. soundId
+    currentSound.Volume = State.MusicVolume / 10
+    currentSound.Looped = true
+    currentSound.Parent = workspace
+    currentSound:Play()
+end
+
+local function stopMusic()
+    if currentSound then
+        currentSound:Stop()
+        currentSound:Destroy()
+        currentSound = nil
+    end
+end
+
+local musicInputFrame = Instance.new("Frame", page4)
+musicInputFrame.Size = UDim2.new(0.9, 0, 0, 48)
+musicInputFrame.BackgroundColor3 = Theme.ItemBg
+musicInputFrame.ZIndex = 10
+Instance.new("UICorner", musicInputFrame).CornerRadius = UDim.new(0, 8)
+local mStroke = Instance.new("UIStroke", musicInputFrame)
+mStroke.Color = Theme.Stroke; mStroke.Thickness = 1
+
+local musicIcon = Instance.new("TextLabel", musicInputFrame)
+musicIcon.Size = UDim2.new(0.15, 0, 1, 0)
+musicIcon.BackgroundTransparency = 1
+musicIcon.Text = "🎵"
+musicIcon.TextSize = 18
+musicIcon.ZIndex = 10
+
+local musicIdBox = Instance.new("TextBox", musicInputFrame)
+musicIdBox.Size = UDim2.new(0.8, 0, 1, 0)
+musicIdBox.Position = UDim2.new(0.15, 0, 0, 0)
+musicIdBox.BackgroundTransparency = 1
+musicIdBox.PlaceholderText = "Nhập ID Nhạc Roblox vào đây..."
+musicIdBox.Text = ""
+musicIdBox.TextColor3 = Theme.Brand
+musicIdBox.Font = Enum.Font.GothamSemibold
+musicIdBox.TextSize = 12
+musicIdBox.TextXAlignment = Enum.TextXAlignment.Left
+musicIdBox.ClearTextOnFocus = false
+musicIdBox.ZIndex = 10
+
+createDualButtons(page4, "▶ PHÁT NHẠC", Theme.AccentOn, function()
+    playMusic(musicIdBox.Text)
+end, "⏹ TẮT NHẠC", Theme.AccentOff, function()
+    stopMusic()
+end)
+
+createSlider(page4, "Âm lượng nhạc", 0, 10, State.MusicVolume, function(val)
+    State.MusicVolume = val
+    if currentSound then currentSound.Volume = val / 10 end
+end)
+
+-- Gợi ý danh sách nhạc theo sở thích
+local listLabel = Instance.new("TextLabel", page4)
+listLabel.Size = UDim2.new(0.9, 0, 0, 20)
+listLabel.BackgroundTransparency = 1
+listLabel.Text = "★ DANH SÁCH BÀI HÁT YÊU THÍCH ★"
+listLabel.TextColor3 = Theme.TextTitle
+listLabel.Font = Enum.Font.GothamBold
+listLabel.TextSize = 11
+listLabel.ZIndex = 10
+
+local function createPresetButton(name, id)
+    createButton(page4, "🎶 " .. name, Color3.fromRGB(243, 156, 18), function()
+        musicIdBox.Text = tostring(id)
+        playMusic(id)
+    end)
+end
+
+-- Một số ID mẫu (Lưu ý: Do Roblox update audio privacy, một số ID cũ có thể không hoạt động nếu creator không mở public)
+createPresetButton("V-Pop Lofi Chill", 6967312480)
+createPresetButton("Jiang Xiaoni - For Ya (Cover)", 1848354536)
+createPresetButton("Nhạc Trung Remix", 130762736)
+
+-- ==========================================
+-- [TAB 5: VỊ TRÍ TP SAVE]
 -- ==========================================
 local savedLocCount = 0
 local function createPosItem(name, cframe)
-    local item = Instance.new("Frame", page4)
+    local item = Instance.new("Frame", page5)
     item.Size = UDim2.new(0.9, 0, 0, 48); item.BackgroundColor3 = Theme.ItemBg; item.ZIndex = 10
     Instance.new("UICorner", item).CornerRadius = UDim.new(0, 8)
     local stroke = Instance.new("UIStroke", item); stroke.Color = Theme.Stroke; stroke.Thickness = 1
@@ -711,7 +802,7 @@ local function createPosItem(name, cframe)
     tpBtn.MouseButton1Click:Connect(function() clickAnimate(tpBtn); if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then player.Character.HumanoidRootPart.CFrame = cframe end end)
     delBtn.MouseButton1Click:Connect(function() clickAnimate(delBtn); task.wait(0.1); item:Destroy() end)
 end
-createButton(page4, "📍 LƯU TỌA ĐỘ", Theme.AccentOn, function()
+createButton(page5, "📍 LƯU TỌA ĐỘ", Theme.AccentOn, function()
     if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
         savedLocCount = savedLocCount + 1
         createPosItem("Vị trí " .. savedLocCount, player.Character.HumanoidRootPart.CFrame)
@@ -719,15 +810,13 @@ createButton(page4, "📍 LƯU TỌA ĐỘ", Theme.AccentOn, function()
 end)
 
 -- ==========================================
--- [TAB 5: TP NGƯỜI CHƠI - AVATAR UPDATE]
+-- [TAB 6: TP NGƯỜI CHƠI]
 -- ==========================================
 local function updatePlayerList()
-    for _, child in pairs(page5:GetChildren()) do if child.Name == "PaddingFrame" then child:Destroy() end end
+    for _, child in pairs(page6:GetChildren()) do if child.Name == "PaddingFrame" then child:Destroy() end end
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= player then
-            local pFrame = Instance.new("Frame", page5)
-            pFrame.Name = "PaddingFrame"; pFrame.Size = UDim2.new(0.9, 0, 0, 48); pFrame.BackgroundTransparency = 1; pFrame.ZIndex = 10
-            
+            local pFrame = Instance.new("Frame", page6); pFrame.Name = "PaddingFrame"; pFrame.Size = UDim2.new(0.9, 0, 0, 48); pFrame.BackgroundTransparency = 1; pFrame.ZIndex = 10
             local btn = Instance.new("TextButton", pFrame)
             btn.Name = "PlayerBtn_TP"; btn.Size = UDim2.new(1, 0, 1, 0); btn.BackgroundColor3 = Theme.ItemBg; btn.Text = ""; btn.AutoButtonColor = false; btn.ZIndex = 10
             Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
@@ -743,20 +832,18 @@ local function updatePlayerList()
             subLabel.TextColor3 = Color3.fromRGB(100, 255, 100) 
             subLabel.Font = Enum.Font.Gotham; subLabel.TextSize = 10; subLabel.TextXAlignment = Enum.TextXAlignment.Left; subLabel.ZIndex = 10
 
-            -- [ĐÃ SỬA: HIỂN THỊ AVATAR CỦA NGƯỜI CHƠI MỤC TIÊU]
             local targetAvatar = Instance.new("ImageLabel", btn)
             targetAvatar.Size = UDim2.new(0, 32, 0, 32)
-            targetAvatar.Position = UDim2.new(1, -42, 0.5, -16) -- Căn giữa lề phải
+            targetAvatar.Position = UDim2.new(1, -42, 0.5, -16) 
             targetAvatar.BackgroundTransparency = 1
             targetAvatar.ZIndex = 10
-            Instance.new("UICorner", targetAvatar).CornerRadius = UDim.new(1, 0) -- Bo tròn
+            Instance.new("UICorner", targetAvatar).CornerRadius = UDim.new(1, 0)
             
             local targetStroke = Instance.new("UIStroke", targetAvatar)
             targetStroke.Color = Theme.Stroke
             targetStroke.Thickness = 1
             targetStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-            -- Load avatar (dùng pcall để tránh lag danh sách)
             task.spawn(function()
                 pcall(function()
                     targetAvatar.Image = Players:GetUserThumbnailAsync(p.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
@@ -774,7 +861,6 @@ local function updatePlayerList()
         end
     end
 end
-
 updatePlayerList()
 Players.PlayerAdded:Connect(updatePlayerList)
 Players.PlayerRemoving:Connect(updatePlayerList)
