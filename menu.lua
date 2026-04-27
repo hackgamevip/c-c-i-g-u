@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 
+-- MENU VIP PRO V38 (Bản Cập Nhật - Join by ID & Tối Ưu Font)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -30,7 +30,8 @@ local Theme = {
     TabBg = Color3.fromRGB(24, 24, 30),       
     ItemBg = Color3.fromRGB(35, 35, 45),      
     Stroke = Color3.fromRGB(60, 60, 75),      
-    TextTitle = Color3.fromRGB(245, 245, 245),
+    -- Đổi màu chữ trắng đậm thành xanh xám nhạt thanh thoát hơn
+    TextTitle = Color3.fromRGB(210, 225, 240),
     TextDim = Color3.fromRGB(160, 160, 175),  
     AccentOn = Color3.fromRGB(46, 204, 113),  
     AccentOff = Color3.fromRGB(255, 71, 87),  
@@ -122,7 +123,7 @@ headerCover.ZIndex = 10
 
 local titleLabel = Instance.new("TextLabel", header)
 titleLabel.Size = UDim2.new(1, 0, 1, 0); titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "MENU PRO MAX"
+titleLabel.Text = "MENU VIP PRO"
 titleLabel.TextColor3 = Color3.new(1, 1, 1); titleLabel.Font = Enum.Font.GothamBlack; titleLabel.TextSize = 14
 titleLabel.ZIndex = 10
 local titleGradient = Instance.new("UIGradient", titleLabel)
@@ -342,8 +343,9 @@ local function createInfoBox(parent, icon, titleText, heightOffset)
     
     local content = Instance.new("TextLabel", item)
     content.Size = UDim2.new(1, -20, 1, -35); content.Position = UDim2.new(0, 10, 0, 30)
-    content.BackgroundTransparency = 1; content.Text = "Đang tải dữ liệu..."
-    content.TextColor3 = Theme.TextTitle; content.Font = Enum.Font.GothamSemibold; content.TextSize = 11
+    content.BackgroundTransparency = 1; content.Text = "Đang tải..."
+    content.TextColor3 = Theme.TextTitle -- Font xanh xám nhạt nhẹ nhàng
+    content.Font = Enum.Font.Gotham; content.TextSize = 11 -- Bỏ in đậm
     content.TextXAlignment = Enum.TextXAlignment.Left; content.TextYAlignment = Enum.TextYAlignment.Top
     content.RichText = true; content.ZIndex = 10
     
@@ -351,12 +353,12 @@ local function createInfoBox(parent, icon, titleText, heightOffset)
 end
 
 local playerInfoLabel = createInfoBox(page1, "👤", "THÔNG TIN NHÂN VẬT", 85)
-local serverInfoLabel, serverInfoFrame = createInfoBox(page1, "🌐", "THÔNG TIN MÁY CHỦ", 95)
+local serverInfoLabel, serverInfoFrame = createInfoBox(page1, "🌐", "THÔNG TIN MÁY CHỦ", 85)
 
 -- NÚT COPY ID NHỎ GỌN TRONG GÓC
 local copyIdBtn = Instance.new("TextButton", serverInfoFrame)
 copyIdBtn.Size = UDim2.new(0, 24, 0, 24)
-copyIdBtn.Position = UDim2.new(1, -30, 1, -30) -- Góc phải dưới
+copyIdBtn.Position = UDim2.new(1, -30, 1, -28) -- Góc phải dưới
 copyIdBtn.Text = "📜"
 copyIdBtn.BackgroundTransparency = 1
 copyIdBtn.TextSize = 14
@@ -375,7 +377,50 @@ copyIdBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
-local extraInfoLabel = createInfoBox(page1, "⚙️", "TRẠNG THÁI", 85)
+-- Ô DÁN ID ĐỂ THAM GIA LẠI
+local joinIdFrame = Instance.new("Frame", page1)
+joinIdFrame.Size = UDim2.new(0.9, 0, 0, 44)
+joinIdFrame.BackgroundColor3 = Theme.ItemBg
+joinIdFrame.ZIndex = 10
+Instance.new("UICorner", joinIdFrame).CornerRadius = UDim.new(0, 8)
+local jStroke = Instance.new("UIStroke", joinIdFrame)
+jStroke.Color = Theme.Stroke; jStroke.Thickness = 1
+
+local idBox = Instance.new("TextBox", joinIdFrame)
+idBox.Size = UDim2.new(0.65, 0, 1, 0)
+idBox.Position = UDim2.new(0.05, 0, 0, 0)
+idBox.BackgroundTransparency = 1
+idBox.PlaceholderText = "Dán ID Server vào đây..."
+idBox.Text = ""
+idBox.TextColor3 = Theme.Brand
+idBox.Font = Enum.Font.Gotham
+idBox.TextSize = 11
+idBox.TextXAlignment = Enum.TextXAlignment.Left
+idBox.ClearTextOnFocus = false
+idBox.ZIndex = 10
+
+local joinBtn = Instance.new("TextButton", joinIdFrame)
+joinBtn.Size = UDim2.new(0.25, 0, 0.65, 0)
+joinBtn.Position = UDim2.new(0.72, 0, 0.175, 0)
+joinBtn.BackgroundColor3 = Theme.AccentOn
+joinBtn.Text = "VÀO"
+joinBtn.TextColor3 = Color3.new(1, 1, 1)
+joinBtn.Font = Enum.Font.GothamBold
+joinBtn.TextSize = 11
+joinBtn.ZIndex = 10
+Instance.new("UICorner", joinBtn).CornerRadius = UDim.new(0, 6)
+
+joinBtn.MouseButton1Click:Connect(function()
+    clickAnimate(joinBtn)
+    local targetId = idBox.Text:gsub("%s+", "")
+    if targetId ~= "" then
+        pcall(function()
+            TeleportService:TeleportToPlaceInstance(game.PlaceId, targetId, player)
+        end)
+    end
+end)
+
+local extraInfoLabel = createInfoBox(page1, "⚙️", "TRẠNG THÁI", 80)
 
 local fps = 0
 RunService.RenderStepped:Connect(function(dt) fps = math.floor(1/dt) end)
@@ -391,7 +436,7 @@ task.spawn(function()
             jp = math.floor(hum.JumpPower)
         end
         playerInfoLabel.Text = string.format(
-            "<b>Tên:</b> %s (@%s)\n<b>Máu (HP):</b> %d / %d\n<b>Tốc độ chạy:</b> %d\n<b>Lực nhảy:</b> %d",
+            "<font color='#00C8FF'>Tên:</font> %s (@%s)\n<font color='#00C8FF'>Máu:</font> %d / %d\n<font color='#00C8FF'>Tốc độ:</font> %d\n<font color='#00C8FF'>Lực nhảy:</font> %d",
             player.DisplayName, player.Name, hp, maxHp, ws, jp
         )
         
@@ -410,7 +455,7 @@ task.spawn(function()
         local jobText = game.JobId ~= "" and string.sub(game.JobId, 1, 15).."..." or "N/A"
         
         serverInfoLabel.Text = string.format(
-            "<b>Khung hình (FPS):</b> %d\n<b>Độ trễ mạng (Ping):</b> %s\n<b>Người chơi:</b> %d / %d\n<b>ID SV:</b> %s",
+            "<font color='#00C8FF'>FPS:</font> %d\n<font color='#00C8FF'>Ping:</font> %s\n<font color='#00C8FF'>Người chơi:</font> %d / %d\n<font color='#00C8FF'>ID SV:</font> %s",
             fps, ping, pCount, maxP, jobText
         )
         
@@ -421,7 +466,7 @@ task.spawn(function()
         local timeString = string.format("%02d:%02d:%02d", hours, mins, secs)
         
         extraInfoLabel.Text = string.format(
-            "<b>Thời gian bạn đã chơi:</b> %s\n<b>Giờ hệ thống:</b> %s\n<b>Phiên bản:</b> MENU VIP PRO 🇻🇳",
+            "<font color='#00C8FF'>Thời gian chơi:</font> %s\n<font color='#00C8FF'>Giờ hệ thống:</font> %s\n<font color='#00C8FF'>Phiên bản:</font> MENU VIP PRO 🇻🇳",
             timeString, os.date("%H:%M:%S")
         )
     end
