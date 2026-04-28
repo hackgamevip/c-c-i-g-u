@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (Bản Cập Nhật - Máy Phát Nhạc Thông Minh)
+-- MENU VIP PRO V38 (Bản Cập Nhật - Fix Layout & Max Volume)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -22,7 +22,7 @@ local State = {
     InfJump = false, PlayerLight = false, ESP = false, AntiAfk = true, AntiStun = false, 
     WalkOnWater = false, XRay = false, LockPosition = false, AutoCollect = false,
     SpeedValue = 60, JumpValue = 120, LightRange = 60, LightBrightness = 3,
-    MusicVolume = 5
+    MusicVolume = 5 -- Mặc định âm lượng mức 5
 }
 
 -- [BẢNG MÀU CHỦ ĐẠO - PREMIUM DARK MODE]
@@ -480,16 +480,22 @@ createToggle(page2, "👻 Xuất hồn", false, function(v)
     if v then
         if char and char:FindFirstChild("HumanoidRootPart") then
             char.Archivable = true
-            astralClone = char:Clone(); astralClone.Name = player.Name .. "_Thế_Thân"; astralClone.Parent = workspace
+            astralClone = char:Clone()
+            astralClone.Name = player.Name .. "_Thế_Thân"
+            astralClone.Parent = workspace
+            
             local cloneRoot = astralClone:FindFirstChild("HumanoidRootPart")
             if cloneRoot then cloneRoot.Anchored = true end
+            
             astralProps = {}
             for _, part in pairs(char:GetDescendants()) do
                 if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
                     astralProps[part] = {Transparency = part.Transparency, Material = part.Material}
-                    part.Transparency = 0.6; part.Material = Enum.Material.ForceField
+                    part.Transparency = 0.6
+                    part.Material = Enum.Material.ForceField
                 elseif part:IsA("Decal") or part:IsA("Texture") then
-                    astralProps[part] = {Transparency = part.Transparency}; part.Transparency = 0.6
+                    astralProps[part] = {Transparency = part.Transparency}
+                    part.Transparency = 0.6
                 end
             end
         end
@@ -499,7 +505,8 @@ createToggle(page2, "👻 Xuất hồn", false, function(v)
                 local cloneRoot = astralClone:FindFirstChild("HumanoidRootPart")
                 if cloneRoot then char.HumanoidRootPart.CFrame = cloneRoot.CFrame end
             end
-            astralClone:Destroy(); astralClone = nil
+            astralClone:Destroy()
+            astralClone = nil
         end
         for part, props in pairs(astralProps) do
             if part and part.Parent then for k, val in pairs(props) do pcall(function() part[k] = val end) end end
@@ -598,17 +605,25 @@ task.spawn(function()
             local root = player.Character.HumanoidRootPart
             for _, obj in pairs(workspace:GetDescendants()) do
                 if not State.AutoCollect then break end
+                
                 if obj:IsA("Tool") and obj:FindFirstChild("Handle") then
                     if (obj.Handle.Position - root.Position).Magnitude <= 50 then
                         pcall(function()
-                            if firetouchinterest then firetouchinterest(root, obj.Handle, 0); task.wait(0.01); firetouchinterest(root, obj.Handle, 1) 
-                            else obj.Handle.CFrame = root.CFrame end
+                            if firetouchinterest then 
+                                firetouchinterest(root, obj.Handle, 0)
+                                task.wait(0.01)
+                                firetouchinterest(root, obj.Handle, 1) 
+                            else 
+                                obj.Handle.CFrame = root.CFrame 
+                            end
                         end)
                     end
                 elseif obj:IsA("ProximityPrompt") and obj.Enabled then
                     local parentPart = obj.Parent
                     if parentPart and parentPart:IsA("BasePart") and (parentPart.Position - root.Position).Magnitude <= 50 then
-                        pcall(function() if fireproximityprompt then fireproximityprompt(obj) end end)
+                        pcall(function()
+                            if fireproximityprompt then fireproximityprompt(obj) end
+                        end)
                     end
                 end
             end
@@ -644,29 +659,8 @@ createButton(page3, "📂 TP SAVE V2 GUI", Theme.Brand, function() pcall(functio
 local currentSound = nil
 local currentMusicId = ""
 local savedMusicList = {}
-local savedMusicContainer = Instance.new("Frame", page4) -- Sẽ thiết lập size sau
 
--- Hệ thống File I/O vĩnh viễn
-local fileName = "MenuProMax_SavedMusic.json"
-local function loadMusicData()
-    pcall(function()
-        if isfile and isfile(fileName) then
-            local data = readfile(fileName)
-            local decoded = HttpService:JSONDecode(data)
-            if type(decoded) == "table" then savedMusicList = decoded end
-        end
-    end)
-end
-local function saveMusicData()
-    pcall(function()
-        if writefile then
-            writefile(fileName, HttpService:JSONEncode(savedMusicList))
-        end
-    end)
-end
-loadMusicData()
-
--- Hiển thị bài hát đang phát
+-- Chỉnh sửa Layout của Page 4
 local nowPlayingLabel = Instance.new("TextLabel", page4)
 nowPlayingLabel.Size = UDim2.new(0.9, 0, 0, 30)
 nowPlayingLabel.BackgroundTransparency = 1
@@ -675,6 +669,35 @@ nowPlayingLabel.TextColor3 = Theme.Brand
 nowPlayingLabel.Font = Enum.Font.GothamBold
 nowPlayingLabel.TextSize = 12
 nowPlayingLabel.TextWrapped = true
+
+local musicInputFrame = Instance.new("Frame", page4)
+musicInputFrame.Size = UDim2.new(0.9, 0, 0, 48)
+musicInputFrame.BackgroundColor3 = Theme.ItemBg
+musicInputFrame.ZIndex = 10
+Instance.new("UICorner", musicInputFrame).CornerRadius = UDim.new(0, 8)
+local mStroke = Instance.new("UIStroke", musicInputFrame)
+mStroke.Color = Theme.Stroke; mStroke.Thickness = 1
+
+local musicIcon = Instance.new("TextLabel", musicInputFrame)
+musicIcon.Size = UDim2.new(0.15, 0, 1, 0)
+musicIcon.BackgroundTransparency = 1; musicIcon.Text = "🎵"; musicIcon.TextSize = 18; musicIcon.ZIndex = 10
+
+local musicIdBox = Instance.new("TextBox", musicInputFrame)
+musicIdBox.Size = UDim2.new(0.65, 0, 1, 0) 
+musicIdBox.Position = UDim2.new(0.15, 0, 0, 0)
+musicIdBox.BackgroundTransparency = 1
+musicIdBox.PlaceholderText = "Nhập ID Nhạc..."
+musicIdBox.Text = ""
+musicIdBox.TextColor3 = Theme.Brand
+musicIdBox.Font = Enum.Font.GothamSemibold; musicIdBox.TextSize = 12; musicIdBox.TextXAlignment = Enum.TextXAlignment.Left; musicIdBox.ClearTextOnFocus = false; musicIdBox.ZIndex = 10
+
+local saveIdBtn = Instance.new("TextButton", musicInputFrame)
+saveIdBtn.Size = UDim2.new(0.2, 0, 1, 0)
+saveIdBtn.Position = UDim2.new(0.8, 0, 0, 0)
+saveIdBtn.BackgroundTransparency = 1
+saveIdBtn.Text = "💾 Lưu"
+saveIdBtn.TextColor3 = Theme.AccentOn
+saveIdBtn.Font = Enum.Font.GothamBold; saveIdBtn.TextSize = 11; saveIdBtn.ZIndex = 10
 
 local function getSongName(id)
     local s, info = pcall(function() return MarketplaceService:GetProductInfo(tonumber(id)) end)
@@ -687,7 +710,7 @@ local function playMusic(id)
     if soundId == "" then return end
     
     currentMusicId = soundId
-    nowPlayingLabel.Text = "⏳ Đang tải thông tin bài hát..."
+    nowPlayingLabel.Text = "⏳ Đang tải: " .. soundId .. "..."
     
     task.spawn(function()
         local name = getSongName(soundId)
@@ -698,9 +721,11 @@ local function playMusic(id)
 
     currentSound = Instance.new("Sound")
     currentSound.SoundId = "rbxassetid://" .. soundId
-    currentSound.Volume = State.MusicVolume / 10
+    -- KHÔNG CHIA CHO 10 NỮA, ĐỂ ÂM LƯỢNG CỰC ĐẠI THEO TÙY CHỈNH
+    currentSound.Volume = State.MusicVolume 
     currentSound.Parent = workspace
     
+    -- Tự động nhảy bài khi hết
     currentSound.Ended:Connect(function()
         if #savedMusicList > 0 then
             local currentIndex = 0
@@ -724,35 +749,38 @@ local function stopMusic()
     end
 end
 
-local musicInputFrame = Instance.new("Frame", page4)
-musicInputFrame.Size = UDim2.new(0.9, 0, 0, 48)
-musicInputFrame.BackgroundColor3 = Theme.ItemBg
-musicInputFrame.ZIndex = 10
-Instance.new("UICorner", musicInputFrame).CornerRadius = UDim.new(0, 8)
-local mStroke = Instance.new("UIStroke", musicInputFrame)
-mStroke.Color = Theme.Stroke; mStroke.Thickness = 1
+createDualButtons(page4, "▶ PHÁT NHẠC", Theme.AccentOn, function()
+    playMusic(musicIdBox.Text)
+end, "⏹ TẮT NHẠC", Theme.AccentOff, function()
+    stopMusic()
+end)
 
-local musicIcon = Instance.new("TextLabel", musicInputFrame)
-musicIcon.Size = UDim2.new(0.15, 0, 1, 0)
-musicIcon.BackgroundTransparency = 1; musicIcon.Text = "🎵"; musicIcon.TextSize = 18; musicIcon.ZIndex = 10
+createSlider(page4, "Âm lượng nhạc", 0, 10, State.MusicVolume, function(val)
+    State.MusicVolume = val
+    if currentSound then currentSound.Volume = val end
+end)
 
-local musicIdBox = Instance.new("TextBox", musicInputFrame)
-musicIdBox.Size = UDim2.new(0.65, 0, 1, 0) 
-musicIdBox.Position = UDim2.new(0.15, 0, 0, 0)
-musicIdBox.BackgroundTransparency = 1
-musicIdBox.PlaceholderText = "Nhập ID Nhạc..."
-musicIdBox.Text = ""
-musicIdBox.TextColor3 = Theme.Brand
-musicIdBox.Font = Enum.Font.GothamSemibold; musicIdBox.TextSize = 12; musicIdBox.TextXAlignment = Enum.TextXAlignment.Left; musicIdBox.ClearTextOnFocus = false; musicIdBox.ZIndex = 10
+local savedMusicContainer = Instance.new("Frame", page4)
+savedMusicContainer.BackgroundTransparency = 1
 
--- NÚT LƯU NHẠC (Thay cho Dán)
-local saveIdBtn = Instance.new("TextButton", musicInputFrame)
-saveIdBtn.Size = UDim2.new(0.2, 0, 1, 0)
-saveIdBtn.Position = UDim2.new(0.8, 0, 0, 0)
-saveIdBtn.BackgroundTransparency = 1
-saveIdBtn.Text = "💾 Lưu"
-saveIdBtn.TextColor3 = Theme.AccentOn
-saveIdBtn.Font = Enum.Font.GothamBold; saveIdBtn.TextSize = 11; saveIdBtn.ZIndex = 10
+local fileName = "MenuProMax_SavedMusic.json"
+local function loadMusicData()
+    pcall(function()
+        if isfile and isfile(fileName) then
+            local data = readfile(fileName)
+            local decoded = HttpService:JSONDecode(data)
+            if type(decoded) == "table" then savedMusicList = decoded end
+        end
+    end)
+end
+local function saveMusicData()
+    pcall(function()
+        if writefile then
+            writefile(fileName, HttpService:JSONEncode(savedMusicList))
+        end
+    end)
+end
+loadMusicData()
 
 local function renderSavedMusic()
     for _, child in pairs(savedMusicContainer:GetChildren()) do
@@ -812,18 +840,6 @@ saveIdBtn.MouseButton1Click:Connect(function()
     end
 end)
 
-createDualButtons(page4, "▶ PHÁT NHẠC", Theme.AccentOn, function()
-    playMusic(musicIdBox.Text)
-end, "⏹ TẮT NHẠC", Theme.AccentOff, function()
-    stopMusic()
-end)
-
-createSlider(page4, "Âm lượng nhạc", 0, 10, State.MusicVolume, function(val)
-    State.MusicVolume = val
-    if currentSound then currentSound.Volume = val / 10 end
-end)
-
-savedMusicContainer.BackgroundTransparency = 1
 renderSavedMusic()
 
 -- ==========================================
