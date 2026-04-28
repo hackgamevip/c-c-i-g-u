@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (Bản Cập Nhật - Fix Layout & Max Volume)
+-- MENU VIP PRO V38 (Bản Cập Nhật - Tối Ưu Layout Phát Nhạc)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -438,6 +438,7 @@ task.spawn(function()
     end
 end)
 
+
 -- ==========================================
 -- [TAB 2: NHÂN VẬT]
 -- ==========================================
@@ -660,16 +661,7 @@ local currentSound = nil
 local currentMusicId = ""
 local savedMusicList = {}
 
--- Chỉnh sửa Layout của Page 4
-local nowPlayingLabel = Instance.new("TextLabel", page4)
-nowPlayingLabel.Size = UDim2.new(0.9, 0, 0, 30)
-nowPlayingLabel.BackgroundTransparency = 1
-nowPlayingLabel.Text = "🎵 Chưa có bài hát nào đang phát"
-nowPlayingLabel.TextColor3 = Theme.Brand
-nowPlayingLabel.Font = Enum.Font.GothamBold
-nowPlayingLabel.TextSize = 12
-nowPlayingLabel.TextWrapped = true
-
+-- 1. Ô Nhập ID Nhạc
 local musicInputFrame = Instance.new("Frame", page4)
 musicInputFrame.Size = UDim2.new(0.9, 0, 0, 48)
 musicInputFrame.BackgroundColor3 = Theme.ItemBg
@@ -699,6 +691,16 @@ saveIdBtn.Text = "💾 Lưu"
 saveIdBtn.TextColor3 = Theme.AccentOn
 saveIdBtn.Font = Enum.Font.GothamBold; saveIdBtn.TextSize = 11; saveIdBtn.ZIndex = 10
 
+-- 2. Tên Bài Hát (Chuyển lên xen giữa như hình ảnh yêu cầu)
+local nowPlayingLabel = Instance.new("TextLabel", page4)
+nowPlayingLabel.Size = UDim2.new(0.9, 0, 0, 30)
+nowPlayingLabel.BackgroundTransparency = 1
+nowPlayingLabel.Text = "🎵 Chưa có bài hát nào đang phát"
+nowPlayingLabel.TextColor3 = Theme.Brand
+nowPlayingLabel.Font = Enum.Font.GothamBold
+nowPlayingLabel.TextSize = 12
+nowPlayingLabel.TextWrapped = true
+
 local function getSongName(id)
     local s, info = pcall(function() return MarketplaceService:GetProductInfo(tonumber(id)) end)
     if s and info then return info.Name else return "ID: " .. tostring(id) end
@@ -721,11 +723,9 @@ local function playMusic(id)
 
     currentSound = Instance.new("Sound")
     currentSound.SoundId = "rbxassetid://" .. soundId
-    -- KHÔNG CHIA CHO 10 NỮA, ĐỂ ÂM LƯỢNG CỰC ĐẠI THEO TÙY CHỈNH
-    currentSound.Volume = State.MusicVolume 
+    currentSound.Volume = State.MusicVolume -- Âm lượng khuyếch đại max cấp độ 10
     currentSound.Parent = workspace
     
-    -- Tự động nhảy bài khi hết
     currentSound.Ended:Connect(function()
         if #savedMusicList > 0 then
             local currentIndex = 0
@@ -749,17 +749,20 @@ local function stopMusic()
     end
 end
 
+-- 3. Nút Phát/Tắt
 createDualButtons(page4, "▶ PHÁT NHẠC", Theme.AccentOn, function()
     playMusic(musicIdBox.Text)
 end, "⏹ TẮT NHẠC", Theme.AccentOff, function()
     stopMusic()
 end)
 
+-- 4. Thanh Âm Lượng
 createSlider(page4, "Âm lượng nhạc", 0, 10, State.MusicVolume, function(val)
     State.MusicVolume = val
     if currentSound then currentSound.Volume = val end
 end)
 
+-- 5. Danh Sách Bài Hát
 local savedMusicContainer = Instance.new("Frame", page4)
 savedMusicContainer.BackgroundTransparency = 1
 
