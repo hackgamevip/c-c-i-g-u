@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (Bản Cập Nhật - Dán Nhanh & Lưu Nhạc)
+-- MENU VIP PRO V38 (Bản Cập Nhật - Máy Phát Nhạc Thông Minh)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -12,6 +12,7 @@ local ProximityPromptService = game:GetService("ProximityPromptService")
 local VirtualUser = game:GetService("VirtualUser")
 local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
+local MarketplaceService = game:GetService("MarketplaceService")
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -57,7 +58,6 @@ pcall(function()
 end)
 gui.Parent = guiParent
 
--- [LỚP PHỦ MÀN HÌNH ĐEN/TRẮNG]
 local screenOverlay = Instance.new("Frame", gui)
 screenOverlay.Size = UDim2.new(2, 0, 2, 0)
 screenOverlay.Position = UDim2.new(-0.5, 0, -0.5, 0)
@@ -65,7 +65,6 @@ screenOverlay.BackgroundColor3 = Color3.new(0,0,0)
 screenOverlay.ZIndex = 0
 screenOverlay.Visible = false
 
--- [NÚT MỞ MENU]
 local openBtn = Instance.new("TextButton", gui)
 openBtn.Size = UDim2.new(0, 110, 0, 40)
 openBtn.Position = UDim2.new(0, 15, 0, 15)
@@ -101,7 +100,6 @@ UIS.InputChanged:Connect(function(input)
 end)
 UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then btnDragToggle = false end end)
 
--- [KHUNG CHÍNH MENU]
 local frame = Instance.new("Frame", gui)
 frame.Size = UDim2.new(0, 360, 0, 450)
 frame.Position = UDim2.new(0.5, -180, 0.5, -225)
@@ -129,7 +127,6 @@ titleLabel.ZIndex = 10
 local titleGradient = Instance.new("UIGradient", titleLabel)
 titleGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Theme.Brand), ColorSequenceKeypoint.new(1, Theme.BrandGradient)})
 
--- [AVATAR GÓC MENU]
 local avatarImg = Instance.new("ImageLabel", header)
 avatarImg.Size = UDim2.new(0, 32, 0, 32)
 avatarImg.Position = UDim2.new(0, 10, 0, 6)
@@ -142,7 +139,6 @@ Instance.new("UICorner", avatarImg).CornerRadius = UDim.new(1, 0)
 local avatarStroke = Instance.new("UIStroke", avatarImg)
 avatarStroke.Color = Theme.Brand; avatarStroke.Thickness = 1.5; avatarStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
--- [KÉO THẢ MENU]
 local dragToggle, dragStart, startPos
 header.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragToggle = true; dragStart = input.Position; startPos = frame.Position end
@@ -154,7 +150,6 @@ UIS.InputChanged:Connect(function(input)
 end)
 UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragToggle = false end end)
 
--- [HỆ THỐNG 6 TAB]
 local tabBar = Instance.new("Frame", frame)
 tabBar.Size = UDim2.new(1, 0, 0, 38); tabBar.Position = UDim2.new(0, 0, 0, 45)
 tabBar.BackgroundColor3 = Theme.TabBg; tabBar.BackgroundTransparency = 0; tabBar.BorderSizePixel = 0
@@ -357,7 +352,6 @@ end
 local playerInfoLabel = createInfoBox(page1, "👤", "THÔNG TIN NHÂN VẬT", 85)
 local serverInfoLabel, serverInfoFrame = createInfoBox(page1, "🌐", "THÔNG TIN MÁY CHỦ", 85)
 
--- NÚT COPY ID NHỎ GỌN TRONG GÓC
 local copyIdBtn = Instance.new("TextButton", serverInfoFrame)
 copyIdBtn.Size = UDim2.new(0, 24, 0, 24)
 copyIdBtn.Position = UDim2.new(1, -30, 1, -28) 
@@ -371,55 +365,31 @@ copyIdBtn.MouseButton1Click:Connect(function()
     pcall(function() 
         if setclipboard then 
             setclipboard(tostring(game.JobId))
-            local oldText = copyIdBtn.Text
-            copyIdBtn.Text = "✅"
-            task.wait(1)
-            copyIdBtn.Text = oldText
+            local oldText = copyIdBtn.Text; copyIdBtn.Text = "✅"; task.wait(1); copyIdBtn.Text = oldText
         end 
     end)
 end)
 
--- Ô DÁN ID ĐỂ THAM GIA LẠI
 local joinIdFrame = Instance.new("Frame", page1)
-joinIdFrame.Size = UDim2.new(0.9, 0, 0, 44)
-joinIdFrame.BackgroundColor3 = Theme.ItemBg
-joinIdFrame.ZIndex = 10
+joinIdFrame.Size = UDim2.new(0.9, 0, 0, 44); joinIdFrame.BackgroundColor3 = Theme.ItemBg; joinIdFrame.ZIndex = 10
 Instance.new("UICorner", joinIdFrame).CornerRadius = UDim.new(0, 8)
-local jStroke = Instance.new("UIStroke", joinIdFrame)
-jStroke.Color = Theme.Stroke; jStroke.Thickness = 1
+local jStroke = Instance.new("UIStroke", joinIdFrame); jStroke.Color = Theme.Stroke; jStroke.Thickness = 1
 
 local idBox = Instance.new("TextBox", joinIdFrame)
-idBox.Size = UDim2.new(0.65, 0, 1, 0)
-idBox.Position = UDim2.new(0.05, 0, 0, 0)
-idBox.BackgroundTransparency = 1
-idBox.PlaceholderText = "Dán ID Server vào đây..."
-idBox.Text = ""
-idBox.TextColor3 = Theme.Brand
-idBox.Font = Enum.Font.Gotham
-idBox.TextSize = 11
-idBox.TextXAlignment = Enum.TextXAlignment.Left
-idBox.ClearTextOnFocus = false
-idBox.ZIndex = 10
+idBox.Size = UDim2.new(0.65, 0, 1, 0); idBox.Position = UDim2.new(0.05, 0, 0, 0); idBox.BackgroundTransparency = 1
+idBox.PlaceholderText = "Dán ID Server vào đây..."; idBox.Text = ""; idBox.TextColor3 = Theme.Brand
+idBox.Font = Enum.Font.Gotham; idBox.TextSize = 11; idBox.TextXAlignment = Enum.TextXAlignment.Left; idBox.ClearTextOnFocus = false; idBox.ZIndex = 10
 
 local joinBtn = Instance.new("TextButton", joinIdFrame)
-joinBtn.Size = UDim2.new(0.25, 0, 0.65, 0)
-joinBtn.Position = UDim2.new(0.72, 0, 0.175, 0)
-joinBtn.BackgroundColor3 = Theme.AccentOn
-joinBtn.Text = "VÀO"
-joinBtn.TextColor3 = Color3.new(1, 1, 1)
-joinBtn.Font = Enum.Font.GothamBold
-joinBtn.TextSize = 11
-joinBtn.ZIndex = 10
+joinBtn.Size = UDim2.new(0.25, 0, 0.65, 0); joinBtn.Position = UDim2.new(0.72, 0, 0.175, 0)
+joinBtn.BackgroundColor3 = Theme.AccentOn; joinBtn.Text = "VÀO"; joinBtn.TextColor3 = Color3.new(1, 1, 1)
+joinBtn.Font = Enum.Font.GothamBold; joinBtn.TextSize = 11; joinBtn.ZIndex = 10
 Instance.new("UICorner", joinBtn).CornerRadius = UDim.new(0, 6)
 
 joinBtn.MouseButton1Click:Connect(function()
     clickAnimate(joinBtn)
     local targetId = idBox.Text:gsub("%s+", "")
-    if targetId ~= "" then
-        pcall(function()
-            TeleportService:TeleportToPlaceInstance(game.PlaceId, targetId, player)
-        end)
-    end
+    if targetId ~= "" then pcall(function() TeleportService:TeleportToPlaceInstance(game.PlaceId, targetId, player) end) end
 end)
 
 local extraInfoLabel = createInfoBox(page1, "⚙️", "TRẠNG THÁI", 80)
@@ -432,10 +402,7 @@ task.spawn(function()
         local hp, maxHp, ws, jp = 0, 0, 0, 0
         if player.Character and player.Character:FindFirstChild("Humanoid") then
             local hum = player.Character.Humanoid
-            hp = math.floor(hum.Health)
-            maxHp = math.floor(hum.MaxHealth)
-            ws = math.floor(hum.WalkSpeed)
-            jp = math.floor(hum.JumpPower)
+            hp = math.floor(hum.Health); maxHp = math.floor(hum.MaxHealth); ws = math.floor(hum.WalkSpeed); jp = math.floor(hum.JumpPower)
         end
         playerInfoLabel.Text = string.format(
             "<font color='#00C8FF'>Tên:</font> %s (@%s)\n<font color='#00C8FF'>Máu:</font> %d / %d\n<font color='#00C8FF'>Tốc độ:</font> %d\n<font color='#00C8FF'>Lực nhảy:</font> %d",
@@ -452,8 +419,7 @@ task.spawn(function()
             end
         end)
         
-        local pCount = #Players:GetPlayers()
-        local maxP = Players.MaxPlayers
+        local pCount = #Players:GetPlayers(); local maxP = Players.MaxPlayers
         local jobText = game.JobId ~= "" and string.sub(game.JobId, 1, 15).."..." or "N/A"
         
         serverInfoLabel.Text = string.format(
@@ -462,9 +428,7 @@ task.spawn(function()
         )
         
         local execTime = math.floor(workspace.DistributedGameTime)
-        local hours = math.floor(execTime / 3600)
-        local mins = math.floor((execTime % 3600) / 60)
-        local secs = execTime % 60
+        local hours = math.floor(execTime / 3600); local mins = math.floor((execTime % 3600) / 60); local secs = execTime % 60
         local timeString = string.format("%02d:%02d:%02d", hours, mins, secs)
         
         extraInfoLabel.Text = string.format(
@@ -473,7 +437,6 @@ task.spawn(function()
         )
     end
 end)
-
 
 -- ==========================================
 -- [TAB 2: NHÂN VẬT]
@@ -517,22 +480,16 @@ createToggle(page2, "👻 Xuất hồn", false, function(v)
     if v then
         if char and char:FindFirstChild("HumanoidRootPart") then
             char.Archivable = true
-            astralClone = char:Clone()
-            astralClone.Name = player.Name .. "_Thế_Thân"
-            astralClone.Parent = workspace
-            
+            astralClone = char:Clone(); astralClone.Name = player.Name .. "_Thế_Thân"; astralClone.Parent = workspace
             local cloneRoot = astralClone:FindFirstChild("HumanoidRootPart")
             if cloneRoot then cloneRoot.Anchored = true end
-            
             astralProps = {}
             for _, part in pairs(char:GetDescendants()) do
                 if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
                     astralProps[part] = {Transparency = part.Transparency, Material = part.Material}
-                    part.Transparency = 0.6
-                    part.Material = Enum.Material.ForceField
+                    part.Transparency = 0.6; part.Material = Enum.Material.ForceField
                 elseif part:IsA("Decal") or part:IsA("Texture") then
-                    astralProps[part] = {Transparency = part.Transparency}
-                    part.Transparency = 0.6
+                    astralProps[part] = {Transparency = part.Transparency}; part.Transparency = 0.6
                 end
             end
         end
@@ -542,8 +499,7 @@ createToggle(page2, "👻 Xuất hồn", false, function(v)
                 local cloneRoot = astralClone:FindFirstChild("HumanoidRootPart")
                 if cloneRoot then char.HumanoidRootPart.CFrame = cloneRoot.CFrame end
             end
-            astralClone:Destroy()
-            astralClone = nil
+            astralClone:Destroy(); astralClone = nil
         end
         for part, props in pairs(astralProps) do
             if part and part.Parent then for k, val in pairs(props) do pcall(function() part[k] = val end) end end
@@ -642,25 +598,17 @@ task.spawn(function()
             local root = player.Character.HumanoidRootPart
             for _, obj in pairs(workspace:GetDescendants()) do
                 if not State.AutoCollect then break end
-                
                 if obj:IsA("Tool") and obj:FindFirstChild("Handle") then
                     if (obj.Handle.Position - root.Position).Magnitude <= 50 then
                         pcall(function()
-                            if firetouchinterest then 
-                                firetouchinterest(root, obj.Handle, 0)
-                                task.wait(0.01)
-                                firetouchinterest(root, obj.Handle, 1) 
-                            else 
-                                obj.Handle.CFrame = root.CFrame 
-                            end
+                            if firetouchinterest then firetouchinterest(root, obj.Handle, 0); task.wait(0.01); firetouchinterest(root, obj.Handle, 1) 
+                            else obj.Handle.CFrame = root.CFrame end
                         end)
                     end
                 elseif obj:IsA("ProximityPrompt") and obj.Enabled then
                     local parentPart = obj.Parent
                     if parentPart and parentPart:IsA("BasePart") and (parentPart.Position - root.Position).Magnitude <= 50 then
-                        pcall(function()
-                            if fireproximityprompt then fireproximityprompt(obj) end
-                        end)
+                        pcall(function() if fireproximityprompt then fireproximityprompt(obj) end end)
                     end
                 end
             end
@@ -690,29 +638,89 @@ createDualButtons(page3, "🕊️ FLY V1", Theme.Brand, function() pcall(functio
 createButton(page3, "📂 TP SAVE V2 GUI", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
 
 -- ==========================================
--- [TAB 4: PHÁT NHẠC (MUSIC PLAYER)]
+-- [TAB 4: PHÁT NHẠC VÀ LƯU TRỮ VĨNH VIỄN]
 -- ==========================================
 
 local currentSound = nil
+local currentMusicId = ""
+local savedMusicList = {}
+local savedMusicContainer = Instance.new("Frame", page4) -- Sẽ thiết lập size sau
+
+-- Hệ thống File I/O vĩnh viễn
+local fileName = "MenuProMax_SavedMusic.json"
+local function loadMusicData()
+    pcall(function()
+        if isfile and isfile(fileName) then
+            local data = readfile(fileName)
+            local decoded = HttpService:JSONDecode(data)
+            if type(decoded) == "table" then savedMusicList = decoded end
+        end
+    end)
+end
+local function saveMusicData()
+    pcall(function()
+        if writefile then
+            writefile(fileName, HttpService:JSONEncode(savedMusicList))
+        end
+    end)
+end
+loadMusicData()
+
+-- Hiển thị bài hát đang phát
+local nowPlayingLabel = Instance.new("TextLabel", page4)
+nowPlayingLabel.Size = UDim2.new(0.9, 0, 0, 30)
+nowPlayingLabel.BackgroundTransparency = 1
+nowPlayingLabel.Text = "🎵 Chưa có bài hát nào đang phát"
+nowPlayingLabel.TextColor3 = Theme.Brand
+nowPlayingLabel.Font = Enum.Font.GothamBold
+nowPlayingLabel.TextSize = 12
+nowPlayingLabel.TextWrapped = true
+
+local function getSongName(id)
+    local s, info = pcall(function() return MarketplaceService:GetProductInfo(tonumber(id)) end)
+    if s and info then return info.Name else return "ID: " .. tostring(id) end
+end
 
 local function playMusic(id)
     if currentSound then currentSound:Destroy() end
     local soundId = tostring(id):gsub("%s+", "")
     if soundId == "" then return end
     
+    currentMusicId = soundId
+    nowPlayingLabel.Text = "⏳ Đang tải thông tin bài hát..."
+    
+    task.spawn(function()
+        local name = getSongName(soundId)
+        if currentMusicId == soundId then
+            nowPlayingLabel.Text = "🎵 Đang phát: " .. name
+        end
+    end)
+
     currentSound = Instance.new("Sound")
     currentSound.SoundId = "rbxassetid://" .. soundId
     currentSound.Volume = State.MusicVolume / 10
-    currentSound.Looped = true
     currentSound.Parent = workspace
+    
+    currentSound.Ended:Connect(function()
+        if #savedMusicList > 0 then
+            local currentIndex = 0
+            for i, v in ipairs(savedMusicList) do
+                if v.id == currentMusicId then currentIndex = i; break end
+            end
+            local nextIndex = currentIndex + 1
+            if nextIndex > #savedMusicList then nextIndex = 1 end
+            playMusic(savedMusicList[nextIndex].id)
+        end
+    end)
+    
     currentSound:Play()
 end
 
 local function stopMusic()
     if currentSound then
-        currentSound:Stop()
-        currentSound:Destroy()
-        currentSound = nil
+        currentSound:Stop(); currentSound:Destroy(); currentSound = nil
+        currentMusicId = ""
+        nowPlayingLabel.Text = "⏹ Đã dừng phát nhạc"
     end
 end
 
@@ -726,10 +734,7 @@ mStroke.Color = Theme.Stroke; mStroke.Thickness = 1
 
 local musicIcon = Instance.new("TextLabel", musicInputFrame)
 musicIcon.Size = UDim2.new(0.15, 0, 1, 0)
-musicIcon.BackgroundTransparency = 1
-musicIcon.Text = "🎵"
-musicIcon.TextSize = 18
-musicIcon.ZIndex = 10
+musicIcon.BackgroundTransparency = 1; musicIcon.Text = "🎵"; musicIcon.TextSize = 18; musicIcon.ZIndex = 10
 
 local musicIdBox = Instance.new("TextBox", musicInputFrame)
 musicIdBox.Size = UDim2.new(0.65, 0, 1, 0) 
@@ -738,32 +743,73 @@ musicIdBox.BackgroundTransparency = 1
 musicIdBox.PlaceholderText = "Nhập ID Nhạc..."
 musicIdBox.Text = ""
 musicIdBox.TextColor3 = Theme.Brand
-musicIdBox.Font = Enum.Font.GothamSemibold
-musicIdBox.TextSize = 12
-musicIdBox.TextXAlignment = Enum.TextXAlignment.Left
-musicIdBox.ClearTextOnFocus = false
-musicIdBox.ZIndex = 10
+musicIdBox.Font = Enum.Font.GothamSemibold; musicIdBox.TextSize = 12; musicIdBox.TextXAlignment = Enum.TextXAlignment.Left; musicIdBox.ClearTextOnFocus = false; musicIdBox.ZIndex = 10
 
--- NÚT DÁN NHANH (PASTE)
-local pasteBtn = Instance.new("TextButton", musicInputFrame)
-pasteBtn.Size = UDim2.new(0.2, 0, 1, 0)
-pasteBtn.Position = UDim2.new(0.8, 0, 0, 0)
-pasteBtn.BackgroundTransparency = 1
-pasteBtn.Text = "📋 Dán"
-pasteBtn.TextColor3 = Theme.AccentOn
-pasteBtn.Font = Enum.Font.GothamBold
-pasteBtn.TextSize = 11
-pasteBtn.ZIndex = 10
+-- NÚT LƯU NHẠC (Thay cho Dán)
+local saveIdBtn = Instance.new("TextButton", musicInputFrame)
+saveIdBtn.Size = UDim2.new(0.2, 0, 1, 0)
+saveIdBtn.Position = UDim2.new(0.8, 0, 0, 0)
+saveIdBtn.BackgroundTransparency = 1
+saveIdBtn.Text = "💾 Lưu"
+saveIdBtn.TextColor3 = Theme.AccentOn
+saveIdBtn.Font = Enum.Font.GothamBold; saveIdBtn.TextSize = 11; saveIdBtn.ZIndex = 10
 
-pasteBtn.MouseButton1Click:Connect(function()
-    clickAnimate(pasteBtn)
-    pcall(function()
-        if getclipboard then
-            local cbText = tostring(getclipboard())
-            local numbers = string.match(cbText, "%d+")
-            musicIdBox.Text = numbers and numbers or cbText
-        end
-    end)
+local function renderSavedMusic()
+    for _, child in pairs(savedMusicContainer:GetChildren()) do
+        if child:IsA("Frame") then child:Destroy() end
+    end
+    
+    local yOffset = 0
+    for i, data in ipairs(savedMusicList) do
+        local item = Instance.new("Frame", savedMusicContainer)
+        item.Size = UDim2.new(1, 0, 0, 48); item.Position = UDim2.new(0, 0, 0, yOffset)
+        item.BackgroundColor3 = Theme.ItemBg; item.ZIndex = 10
+        Instance.new("UICorner", item).CornerRadius = UDim.new(0, 8)
+        local stroke = Instance.new("UIStroke", item); stroke.Color = Theme.Stroke; stroke.Thickness = 1
+        
+        local nameBox = Instance.new("TextLabel", item)
+        nameBox.Size = UDim2.new(0.55, 0, 1, 0); nameBox.Position = UDim2.new(0.05, 0, 0, 0)
+        nameBox.Text = "🎶 " .. data.name
+        nameBox.TextColor3 = Theme.TextTitle; nameBox.Font = Enum.Font.GothamSemibold; nameBox.TextSize = 11
+        nameBox.BackgroundTransparency = 1; nameBox.TextXAlignment = Enum.TextXAlignment.Left; nameBox.TextWrapped = true; nameBox.ZIndex = 10
+        
+        local playBtn = Instance.new("TextButton", item)
+        playBtn.Size = UDim2.new(0.18, 0, 0.6, 0); playBtn.Position = UDim2.new(0.62, 0, 0.2, 0)
+        playBtn.Text = "▶"; playBtn.BackgroundColor3 = Theme.Brand; playBtn.TextColor3 = Color3.new(1,1,1)
+        playBtn.Font = Enum.Font.GothamBold; playBtn.TextSize = 11; playBtn.ZIndex = 10; Instance.new("UICorner", playBtn).CornerRadius = UDim.new(0, 6)
+        
+        local delBtn = Instance.new("TextButton", item)
+        delBtn.Size = UDim2.new(0.15, 0, 0.6, 0); delBtn.Position = UDim2.new(0.82, 0, 0.2, 0)
+        delBtn.Text = "X"; delBtn.BackgroundColor3 = Theme.AccentOff; delBtn.TextColor3 = Color3.new(1,1,1)
+        delBtn.Font = Enum.Font.GothamBold; delBtn.TextSize = 12; delBtn.ZIndex = 10; Instance.new("UICorner", delBtn).CornerRadius = UDim.new(0, 6)
+        
+        playBtn.MouseButton1Click:Connect(function() 
+            clickAnimate(playBtn); musicIdBox.Text = data.id; playMusic(data.id) 
+        end)
+        delBtn.MouseButton1Click:Connect(function() 
+            clickAnimate(delBtn)
+            table.remove(savedMusicList, i)
+            saveMusicData()
+            renderSavedMusic()
+        end)
+        yOffset = yOffset + 55
+    end
+    savedMusicContainer.Size = UDim2.new(0.9, 0, 0, yOffset)
+end
+
+saveIdBtn.MouseButton1Click:Connect(function()
+    clickAnimate(saveIdBtn)
+    local rawId = musicIdBox.Text:gsub("%s+", "")
+    if rawId ~= "" then
+        saveIdBtn.Text = "⏳..."
+        task.spawn(function()
+            local name = getSongName(rawId)
+            table.insert(savedMusicList, {id = rawId, name = name})
+            saveMusicData()
+            renderSavedMusic()
+            saveIdBtn.Text = "💾 Lưu"
+        end)
+    end
 end)
 
 createDualButtons(page4, "▶ PHÁT NHẠC", Theme.AccentOn, function()
@@ -777,48 +823,8 @@ createSlider(page4, "Âm lượng nhạc", 0, 10, State.MusicVolume, function(va
     if currentSound then currentSound.Volume = val / 10 end
 end)
 
--- TÍNH NĂNG LƯU ID NHẠC
-local savedMusicCount = 0
-local function createSavedMusicItem(name, id)
-    local item = Instance.new("Frame", page4)
-    item.Size = UDim2.new(0.9, 0, 0, 48); item.BackgroundColor3 = Theme.ItemBg; item.ZIndex = 10
-    Instance.new("UICorner", item).CornerRadius = UDim.new(0, 8)
-    local stroke = Instance.new("UIStroke", item); stroke.Color = Theme.Stroke; stroke.Thickness = 1
-    
-    local nameBox = Instance.new("TextBox", item)
-    nameBox.Size = UDim2.new(0.45, 0, 1, 0); nameBox.Position = UDim2.new(0.05, 0, 0, 0)
-    nameBox.Text = name; nameBox.TextColor3 = Theme.TextTitle; nameBox.Font = Enum.Font.GothamSemibold; nameBox.TextSize = 12
-    nameBox.BackgroundTransparency = 1; nameBox.TextXAlignment = Enum.TextXAlignment.Left; nameBox.ClearTextOnFocus = false; nameBox.ZIndex = 10
-    
-    local playBtn = Instance.new("TextButton", item)
-    playBtn.Size = UDim2.new(0.25, 0, 0.6, 0); playBtn.Position = UDim2.new(0.53, 0, 0.2, 0)
-    playBtn.Text = "▶"; playBtn.BackgroundColor3 = Theme.Brand; playBtn.TextColor3 = Color3.new(1,1,1)
-    playBtn.Font = Enum.Font.GothamBold; playBtn.TextSize = 11; playBtn.ZIndex = 10; Instance.new("UICorner", playBtn).CornerRadius = UDim.new(0, 6)
-    
-    local delBtn = Instance.new("TextButton", item)
-    delBtn.Size = UDim2.new(0.15, 0, 0.6, 0); delBtn.Position = UDim2.new(0.81, 0, 0.2, 0)
-    delBtn.Text = "X"; delBtn.BackgroundColor3 = Theme.AccentOff; delBtn.TextColor3 = Color3.new(1,1,1)
-    delBtn.Font = Enum.Font.GothamBold; delBtn.TextSize = 12; delBtn.ZIndex = 10; Instance.new("UICorner", delBtn).CornerRadius = UDim.new(0, 6)
-    
-    playBtn.MouseButton1Click:Connect(function() 
-        clickAnimate(playBtn)
-        musicIdBox.Text = tostring(id)
-        playMusic(id) 
-    end)
-    delBtn.MouseButton1Click:Connect(function() 
-        clickAnimate(delBtn)
-        task.wait(0.1)
-        item:Destroy() 
-    end)
-end
-
-createButton(page4, "💾 LƯU ID NHẠC ĐANG NHẬP", Theme.AccentOn, function()
-    local currentId = musicIdBox.Text:gsub("%s+", "")
-    if currentId ~= "" then
-        savedMusicCount = savedMusicCount + 1
-        createSavedMusicItem("Nhạc đã lưu " .. savedMusicCount, currentId)
-    end
-end)
+savedMusicContainer.BackgroundTransparency = 1
+renderSavedMusic()
 
 -- ==========================================
 -- [TAB 5: VỊ TRÍ TP SAVE]
