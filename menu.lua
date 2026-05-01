@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (Bản Cập Nhật - Fix Vị Trí Tên Bài Hát)
+-- MENU VIP PRO V38 (Bản Cập Nhật - Ép Cứng Layout & Chống Cache)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -22,7 +22,7 @@ local State = {
     InfJump = false, PlayerLight = false, ESP = false, AntiAfk = true, AntiStun = false, 
     WalkOnWater = false, XRay = false, LockPosition = false, AutoCollect = false,
     SpeedValue = 60, JumpValue = 120, LightRange = 60, LightBrightness = 3,
-    MusicVolume = 5 -- Mặc định âm lượng mức 5
+    MusicVolume = 5
 }
 
 -- [BẢNG MÀU CHỦ ĐẠO - PREMIUM DARK MODE]
@@ -40,13 +40,7 @@ local Theme = {
     BrandGradient = Color3.fromRGB(150, 100, 255) 
 }
 
--- [1. GIAO DIỆN CHÍNH]
-local gui = Instance.new("ScreenGui")
-gui.Name = "MobileProMax"
-gui.ResetOnSpawn = false
-gui.DisplayOrder = 99999
-gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
+-- [XÓA MENU CŨ NẾU BỊ CACHE/TRÙNG LẶP]
 local guiParent = player:WaitForChild("PlayerGui")
 pcall(function()
     if gethui and type(gethui) == "function" then
@@ -56,6 +50,19 @@ pcall(function()
         guiParent = game:GetService("CoreGui")
     end
 end)
+
+for _, v in pairs(guiParent:GetChildren()) do
+    if v.Name == "MobileProMax" then
+        v:Destroy()
+    end
+end
+
+-- [1. GIAO DIỆN CHÍNH]
+local gui = Instance.new("ScreenGui")
+gui.Name = "MobileProMax"
+gui.ResetOnSpawn = false
+gui.DisplayOrder = 99999
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = guiParent
 
 local screenOverlay = Instance.new("Frame", gui)
@@ -186,8 +193,10 @@ local function createPage()
     pg.Size = UDim2.new(1, 0, 1, 0); pg.BackgroundTransparency = 1
     pg.ScrollBarThickness = 3; pg.ScrollBarImageColor3 = Theme.Brand; pg.Visible = false; pg.BorderSizePixel = 0
     pg.ZIndex = 10
+    -- [QUAN TRỌNG: ÉP CỨNG VỊ TRÍ THEO LAYOUT ORDER]
     local layout = Instance.new("UIListLayout", pg)
     layout.HorizontalAlignment = Enum.HorizontalAlignment.Center; layout.Padding = UDim.new(0, 10)
+    layout.SortOrder = Enum.SortOrder.LayoutOrder -- Ép cứng theo LayoutOrder
     Instance.new("UIPadding", pg).PaddingTop = UDim.new(0, 10); Instance.new("UIPadding", pg).PaddingBottom = UDim.new(0, 30) 
     layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() 
         pg.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 60) 
@@ -224,7 +233,7 @@ openBtn.MouseButton1Click:Connect(function()
     frame:TweenPosition(opened and UDim2.new(0.5, -180, 0.5, -225) or UDim2.new(0.5, -180, 1.2, 0), "Out", "Back", 0.5)
 end)
 
--- [CÁC HÀM TẠO NÚT CƠ BẢN]
+-- [CÁC HÀM TẠO NÚT CƠ BẢN TRẢ VỀ FRAME ĐỂ SET LAYOUTORDER]
 local function createButton(parent, text, color, callback)
     local btnFrame = Instance.new("Frame", parent)
     btnFrame.Size = UDim2.new(0.9, 0, 0, 42); btnFrame.BackgroundTransparency = 1
@@ -239,14 +248,14 @@ local function createButton(parent, text, color, callback)
         clickAnimate(btn); TweenService:Create(stroke, TweenInfo.new(0.15), {Color = Theme.TextTitle}):Play()
         task.wait(0.15); TweenService:Create(stroke, TweenInfo.new(0.3), {Color = color}):Play(); callback()
     end)
-    return btn
+    return btnFrame
 end
 
 local function createDualButtons(parent, text1, color1, cb1, text2, color2, cb2)
-    local frame = Instance.new("Frame", parent)
-    frame.Size = UDim2.new(0.9, 0, 0, 42); frame.BackgroundTransparency = 1
+    local dFrame = Instance.new("Frame", parent)
+    dFrame.Size = UDim2.new(0.9, 0, 0, 42); dFrame.BackgroundTransparency = 1
     local function makeBtn(xPos, txt, col, cb)
-        local btn = Instance.new("TextButton", frame)
+        local btn = Instance.new("TextButton", dFrame)
         btn.Size = UDim2.new(0.48, 0, 1, 0); btn.Position = UDim2.new(xPos, 0, 0, 0)
         btn.BackgroundColor3 = Theme.ItemBg; btn.Text = ""; btn.AutoButtonColor = false; btn.ZIndex = 10
         Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
@@ -260,6 +269,7 @@ local function createDualButtons(parent, text1, color1, cb1, text2, color2, cb2)
         end)
     end
     makeBtn(0, text1, color1, cb1); makeBtn(0.52, text2, color2, cb2)
+    return dFrame
 end
 
 local function createToggle(parent, text, defaultState, callback)
@@ -288,6 +298,7 @@ local function createToggle(parent, text, defaultState, callback)
         TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = active and Color3.fromRGB(35, 45, 40) or Theme.ItemBg}):Play()
         callback(active)
     end)
+    return btnFrame
 end
 
 local function createSlider(parent, text, min, max, default, callback)
@@ -319,7 +330,7 @@ local function createSlider(parent, text, min, max, default, callback)
     UIS.InputChanged:Connect(function(input) if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then updateSlider(input) end end)
     UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end end)
     callback(default)
-    return bg
+    return frame
 end
 
 -- ==========================================
@@ -359,7 +370,6 @@ copyIdBtn.Text = "📋"
 copyIdBtn.BackgroundTransparency = 1
 copyIdBtn.TextSize = 14
 copyIdBtn.ZIndex = 11
-
 copyIdBtn.MouseButton1Click:Connect(function()
     clickAnimate(copyIdBtn)
     pcall(function() 
@@ -661,11 +671,12 @@ local currentSound = nil
 local currentMusicId = ""
 local savedMusicList = {}
 
--- 1. Ô Nhập ID Nhạc
+-- [1] Ô Nhập ID Nhạc
 local musicInputFrame = Instance.new("Frame", page4)
 musicInputFrame.Size = UDim2.new(0.9, 0, 0, 48)
 musicInputFrame.BackgroundColor3 = Theme.ItemBg
 musicInputFrame.ZIndex = 10
+musicInputFrame.LayoutOrder = 1 -- Ép thứ tự xuất hiện đầu tiên
 Instance.new("UICorner", musicInputFrame).CornerRadius = UDim.new(0, 8)
 local mStroke = Instance.new("UIStroke", musicInputFrame)
 mStroke.Color = Theme.Stroke; mStroke.Thickness = 1
@@ -692,14 +703,22 @@ saveIdBtn.Text = "💾 Lưu"
 saveIdBtn.TextColor3 = Theme.AccentOn
 saveIdBtn.Font = Enum.Font.GothamBold; saveIdBtn.TextSize = 11; saveIdBtn.ZIndex = 10
 
--- 2. Tên Bài Hát (Chuyển lên xen giữa ngay dưới ô nhập ID)
-local nowPlayingLabel = Instance.new("TextLabel", page4)
-nowPlayingLabel.Size = UDim2.new(0.9, 0, 0, 20) -- Làm mỏng lại chút cho đẹp
+-- [2] Tên Bài Hát Đang Phát (Nằm ngay dưới ô nhập, được đóng khung mờ)
+local nowPlayingFrame = Instance.new("Frame", page4)
+nowPlayingFrame.Size = UDim2.new(0.9, 0, 0, 32)
+nowPlayingFrame.BackgroundColor3 = Theme.ItemBg
+nowPlayingFrame.BackgroundTransparency = 0.5 -- Khung nền mờ nhìn thanh thoát
+nowPlayingFrame.ZIndex = 10
+nowPlayingFrame.LayoutOrder = 2 -- Ép thứ tự xuất hiện thứ 2
+Instance.new("UICorner", nowPlayingFrame).CornerRadius = UDim.new(0, 6)
+
+local nowPlayingLabel = Instance.new("TextLabel", nowPlayingFrame)
+nowPlayingLabel.Size = UDim2.new(1, 0, 1, 0)
 nowPlayingLabel.BackgroundTransparency = 1
 nowPlayingLabel.Text = "🎵 Chưa có bài hát nào đang phát"
 nowPlayingLabel.TextColor3 = Theme.Brand
-nowPlayingLabel.Font = Enum.Font.GothamBold
-nowPlayingLabel.TextSize = 11
+nowPlayingLabel.Font = Enum.Font.GothamSemibold
+nowPlayingLabel.TextSize = 11 -- Chữ nhỏ thanh thoát
 nowPlayingLabel.TextWrapped = true
 
 local function getSongName(id)
@@ -750,22 +769,25 @@ local function stopMusic()
     end
 end
 
--- 3. Nút Phát/Tắt
-createDualButtons(page4, "▶ PHÁT NHẠC", Theme.AccentOn, function()
+-- [3] Nút Phát/Tắt
+local playControlFrame = createDualButtons(page4, "▶ PHÁT NHẠC", Theme.AccentOn, function()
     playMusic(musicIdBox.Text)
 end, "⏹ TẮT NHẠC", Theme.AccentOff, function()
     stopMusic()
 end)
+playControlFrame.LayoutOrder = 3 -- Ép thứ tự xuất hiện thứ 3
 
--- 4. Thanh Âm Lượng
-createSlider(page4, "Âm lượng nhạc", 0, 10, State.MusicVolume, function(val)
+-- [4] Thanh Âm Lượng
+local volumeFrame = createSlider(page4, "Âm lượng nhạc", 0, 10, State.MusicVolume, function(val)
     State.MusicVolume = val
     if currentSound then currentSound.Volume = val end
 end)
+volumeFrame.LayoutOrder = 4 -- Ép thứ tự xuất hiện thứ 4
 
--- 5. Danh Sách Bài Hát
+-- [5] Danh Sách Bài Hát
 local savedMusicContainer = Instance.new("Frame", page4)
 savedMusicContainer.BackgroundTransparency = 1
+savedMusicContainer.LayoutOrder = 5 -- Ép thứ tự xuất hiện thứ 5 (Cuối cùng)
 
 local fileName = "MenuProMax_SavedMusic.json"
 local function loadMusicData()
