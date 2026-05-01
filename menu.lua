@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (Bản Cập Nhật - FIX LỖI FATAL ERROR)
+-- MENU VIP PRO V38 (Bản Cập Nhật - Sửa Tên Nhạc & Đổi Màu Chữ)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -196,7 +196,7 @@ local function createPage()
     
     local layout = Instance.new("UIListLayout", pg)
     layout.HorizontalAlignment = Enum.HorizontalAlignment.Center; layout.Padding = UDim.new(0, 10)
-    layout.SortOrder = Enum.SortOrder.LayoutOrder -- Ép cứng thứ tự
+    layout.SortOrder = Enum.SortOrder.LayoutOrder 
     
     Instance.new("UIPadding", pg).PaddingTop = UDim.new(0, 10); Instance.new("UIPadding", pg).PaddingBottom = UDim.new(0, 30) 
     layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() 
@@ -234,7 +234,6 @@ openBtn.MouseButton1Click:Connect(function()
     frame:TweenPosition(opened and UDim2.new(0.5, -180, 0.5, -225) or UDim2.new(0.5, -180, 1.2, 0), "Out", "Back", 0.5)
 end)
 
--- [HÀM TẠO NÚT CƠ BẢN - ĐÃ SỬA LỖI TRẢ VỀ FRAME ĐỂ SET LAYOUT]
 local function createButton(parent, text, color, callback)
     local btnFrame = Instance.new("Frame", parent)
     btnFrame.Size = UDim2.new(0.9, 0, 0, 42); btnFrame.BackgroundTransparency = 1
@@ -253,10 +252,10 @@ local function createButton(parent, text, color, callback)
 end
 
 local function createDualButtons(parent, text1, color1, cb1, text2, color2, cb2)
-    local frame = Instance.new("Frame", parent)
-    frame.Size = UDim2.new(0.9, 0, 0, 42); frame.BackgroundTransparency = 1
+    local dFrame = Instance.new("Frame", parent)
+    dFrame.Size = UDim2.new(0.9, 0, 0, 42); dFrame.BackgroundTransparency = 1
     local function makeBtn(xPos, txt, col, cb)
-        local btn = Instance.new("TextButton", frame)
+        local btn = Instance.new("TextButton", dFrame)
         btn.Size = UDim2.new(0.48, 0, 1, 0); btn.Position = UDim2.new(xPos, 0, 0, 0)
         btn.BackgroundColor3 = Theme.ItemBg; btn.Text = ""; btn.AutoButtonColor = false; btn.ZIndex = 10
         Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
@@ -270,7 +269,7 @@ local function createDualButtons(parent, text1, color1, cb1, text2, color2, cb2)
         end)
     end
     makeBtn(0, text1, color1, cb1); makeBtn(0.52, text2, color2, cb2)
-    return frame
+    return dFrame
 end
 
 local function createToggle(parent, text, defaultState, callback)
@@ -371,7 +370,6 @@ copyIdBtn.Text = "📋"
 copyIdBtn.BackgroundTransparency = 1
 copyIdBtn.TextSize = 14
 copyIdBtn.ZIndex = 11
-
 copyIdBtn.MouseButton1Click:Connect(function()
     clickAnimate(copyIdBtn)
     pcall(function() 
@@ -677,7 +675,7 @@ local musicInputFrame = Instance.new("Frame", page4)
 musicInputFrame.Size = UDim2.new(0.9, 0, 0, 48)
 musicInputFrame.BackgroundColor3 = Theme.ItemBg
 musicInputFrame.ZIndex = 10
-musicInputFrame.LayoutOrder = 1 -- Đã fix lỗi
+musicInputFrame.LayoutOrder = 1 
 Instance.new("UICorner", musicInputFrame).CornerRadius = UDim.new(0, 8)
 local mStroke = Instance.new("UIStroke", musicInputFrame)
 mStroke.Color = Theme.Stroke; mStroke.Thickness = 1
@@ -692,7 +690,8 @@ musicIdBox.Position = UDim2.new(0.15, 0, 0, 0)
 musicIdBox.BackgroundTransparency = 1
 musicIdBox.PlaceholderText = "Nhập ID Nhạc..."
 musicIdBox.Text = ""
-musicIdBox.TextColor3 = Theme.Brand
+-- [ĐÃ ĐỔI MÀU CHỮ Ô NHẬP ID]
+musicIdBox.TextColor3 = Theme.TextTitle 
 musicIdBox.Font = Enum.Font.GothamSemibold; musicIdBox.TextSize = 12; musicIdBox.TextXAlignment = Enum.TextXAlignment.Left; musicIdBox.ClearTextOnFocus = false; musicIdBox.ZIndex = 10
 
 local saveIdBtn = Instance.new("TextButton", musicInputFrame)
@@ -709,14 +708,14 @@ nowPlayingFrame.Size = UDim2.new(0.9, 0, 0, 32)
 nowPlayingFrame.BackgroundColor3 = Theme.ItemBg
 nowPlayingFrame.BackgroundTransparency = 0.5 
 nowPlayingFrame.ZIndex = 10
-nowPlayingFrame.LayoutOrder = 2 -- Đã fix lỗi
+nowPlayingFrame.LayoutOrder = 2 
 Instance.new("UICorner", nowPlayingFrame).CornerRadius = UDim.new(0, 6)
 
 local nowPlayingLabel = Instance.new("TextLabel", nowPlayingFrame)
 nowPlayingLabel.Size = UDim2.new(1, 0, 1, 0)
 nowPlayingLabel.BackgroundTransparency = 1
-nowPlayingLabel.Text = "🎵 Chưa có bài hát nào đang phát"
-nowPlayingLabel.TextColor3 = Theme.Brand
+nowPlayingLabel.RichText = true -- Phải bật RichText để phối 2 màu
+nowPlayingLabel.Text = "<font color='#FFFFFF'>🎵 Chưa có bài hát nào đang phát</font>"
 nowPlayingLabel.Font = Enum.Font.GothamSemibold
 nowPlayingLabel.TextSize = 11 
 nowPlayingLabel.TextWrapped = true
@@ -734,12 +733,13 @@ local function playMusic(id)
     if not soundId or soundId == "" then return end
     
     currentMusicId = soundId
-    nowPlayingLabel.Text = "⏳ Đang tải: " .. soundId .. "..."
+    -- [ĐÃ ĐỔI MÀU CHỮ: "Đang tải/Đang phát" màu trắng, Tên màu Brand]
+    nowPlayingLabel.Text = "<font color='#FFFFFF'>⏳ Đang tải:</font> <font color='#00C8FF'>" .. soundId .. "...</font>"
     
     task.spawn(function()
         local name = getSongName(soundId)
         if currentMusicId == soundId then
-            nowPlayingLabel.Text = "🎵 Đang phát: " .. name
+            nowPlayingLabel.Text = "<font color='#FFFFFF'>🎵 Đang phát:</font> <font color='#00C8FF'>" .. name .. "</font>"
         end
     end)
 
@@ -767,7 +767,7 @@ local function stopMusic()
     if currentSound then
         currentSound:Stop(); currentSound:Destroy(); currentSound = nil
         currentMusicId = ""
-        nowPlayingLabel.Text = "⏹ Đã dừng phát nhạc"
+        nowPlayingLabel.Text = "<font color='#FFFFFF'>⏹ Đã dừng phát nhạc</font>"
     end
 end
 
@@ -823,11 +823,25 @@ local function renderSavedMusic()
         Instance.new("UICorner", item).CornerRadius = UDim.new(0, 8)
         local stroke = Instance.new("UIStroke", item); stroke.Color = Theme.Stroke; stroke.Thickness = 1
         
-        local nameBox = Instance.new("TextLabel", item)
-        nameBox.Size = UDim2.new(0.55, 0, 1, 0); nameBox.Position = UDim2.new(0.05, 0, 0, 0)
-        nameBox.Text = "🎶 " .. data.name
+        local iconLabel = Instance.new("TextLabel", item)
+        iconLabel.Size = UDim2.new(0.08, 0, 1, 0)
+        iconLabel.BackgroundTransparency = 1; iconLabel.Text = "🎶"; iconLabel.TextColor3 = Theme.Brand; iconLabel.TextSize = 11; iconLabel.ZIndex = 10
+        
+        -- [ĐÃ SỬA: Đổi TextLabel thành TextBox để có thể sửa Tên Bài Hát]
+        local nameBox = Instance.new("TextBox", item)
+        nameBox.Size = UDim2.new(0.52, 0, 1, 0); nameBox.Position = UDim2.new(0.08, 0, 0, 0)
+        nameBox.Text = data.name
         nameBox.TextColor3 = Theme.TextTitle; nameBox.Font = Enum.Font.GothamSemibold; nameBox.TextSize = 11
-        nameBox.BackgroundTransparency = 1; nameBox.TextXAlignment = Enum.TextXAlignment.Left; nameBox.TextWrapped = true; nameBox.ZIndex = 10
+        nameBox.BackgroundTransparency = 1; nameBox.TextXAlignment = Enum.TextXAlignment.Left; nameBox.TextWrapped = true; nameBox.ClearTextOnFocus = false; nameBox.ZIndex = 10
+        
+        nameBox.FocusLost:Connect(function()
+            if nameBox.Text ~= "" then
+                data.name = nameBox.Text
+                saveMusicData()
+            else
+                nameBox.Text = data.name -- Nếu để trống thì trả lại tên cũ
+            end
+        end)
         
         local playBtn = Instance.new("TextButton", item)
         playBtn.Size = UDim2.new(0.18, 0, 0.6, 0); playBtn.Position = UDim2.new(0.62, 0, 0.2, 0)
