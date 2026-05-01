@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (Bản Cập Nhật - Tối Ưu Layout Phát Nhạc)
+-- MENU VIP PRO V38 (Bản Cập Nhật - Fix Vị Trí Tên Bài Hát)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -683,6 +683,7 @@ musicIdBox.Text = ""
 musicIdBox.TextColor3 = Theme.Brand
 musicIdBox.Font = Enum.Font.GothamSemibold; musicIdBox.TextSize = 12; musicIdBox.TextXAlignment = Enum.TextXAlignment.Left; musicIdBox.ClearTextOnFocus = false; musicIdBox.ZIndex = 10
 
+-- NÚT LƯU NHẠC
 local saveIdBtn = Instance.new("TextButton", musicInputFrame)
 saveIdBtn.Size = UDim2.new(0.2, 0, 1, 0)
 saveIdBtn.Position = UDim2.new(0.8, 0, 0, 0)
@@ -691,14 +692,14 @@ saveIdBtn.Text = "💾 Lưu"
 saveIdBtn.TextColor3 = Theme.AccentOn
 saveIdBtn.Font = Enum.Font.GothamBold; saveIdBtn.TextSize = 11; saveIdBtn.ZIndex = 10
 
--- 2. Tên Bài Hát (Chuyển lên xen giữa như hình ảnh yêu cầu)
+-- 2. Tên Bài Hát (Chuyển lên xen giữa ngay dưới ô nhập ID)
 local nowPlayingLabel = Instance.new("TextLabel", page4)
-nowPlayingLabel.Size = UDim2.new(0.9, 0, 0, 30)
+nowPlayingLabel.Size = UDim2.new(0.9, 0, 0, 20) -- Làm mỏng lại chút cho đẹp
 nowPlayingLabel.BackgroundTransparency = 1
 nowPlayingLabel.Text = "🎵 Chưa có bài hát nào đang phát"
 nowPlayingLabel.TextColor3 = Theme.Brand
 nowPlayingLabel.Font = Enum.Font.GothamBold
-nowPlayingLabel.TextSize = 12
+nowPlayingLabel.TextSize = 11
 nowPlayingLabel.TextWrapped = true
 
 local function getSongName(id)
