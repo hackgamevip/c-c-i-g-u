@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (Bản Cập Nhật - Ép Cứng Layout & Chống Cache)
+-- MENU VIP PRO V38 (Bản Cập Nhật - FIX LỖI FATAL ERROR)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -25,7 +25,7 @@ local State = {
     MusicVolume = 5
 }
 
--- [BẢNG MÀU CHỦ ĐẠO - PREMIUM DARK MODE]
+-- [BẢNG MÀU CHỦ ĐẠO]
 local Theme = {
     MainBg = Color3.fromRGB(20, 20, 26),      
     HeaderBg = Color3.fromRGB(26, 26, 34),    
@@ -40,7 +40,7 @@ local Theme = {
     BrandGradient = Color3.fromRGB(150, 100, 255) 
 }
 
--- [XÓA MENU CŨ NẾU BỊ CACHE/TRÙNG LẶP]
+-- [XÓA MENU CŨ CHỐNG LỖI CACHE]
 local guiParent = player:WaitForChild("PlayerGui")
 pcall(function()
     if gethui and type(gethui) == "function" then
@@ -193,10 +193,11 @@ local function createPage()
     pg.Size = UDim2.new(1, 0, 1, 0); pg.BackgroundTransparency = 1
     pg.ScrollBarThickness = 3; pg.ScrollBarImageColor3 = Theme.Brand; pg.Visible = false; pg.BorderSizePixel = 0
     pg.ZIndex = 10
-    -- [QUAN TRỌNG: ÉP CỨNG VỊ TRÍ THEO LAYOUT ORDER]
+    
     local layout = Instance.new("UIListLayout", pg)
     layout.HorizontalAlignment = Enum.HorizontalAlignment.Center; layout.Padding = UDim.new(0, 10)
-    layout.SortOrder = Enum.SortOrder.LayoutOrder -- Ép cứng theo LayoutOrder
+    layout.SortOrder = Enum.SortOrder.LayoutOrder -- Ép cứng thứ tự
+    
     Instance.new("UIPadding", pg).PaddingTop = UDim.new(0, 10); Instance.new("UIPadding", pg).PaddingBottom = UDim.new(0, 30) 
     layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() 
         pg.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 60) 
@@ -233,7 +234,7 @@ openBtn.MouseButton1Click:Connect(function()
     frame:TweenPosition(opened and UDim2.new(0.5, -180, 0.5, -225) or UDim2.new(0.5, -180, 1.2, 0), "Out", "Back", 0.5)
 end)
 
--- [CÁC HÀM TẠO NÚT CƠ BẢN TRẢ VỀ FRAME ĐỂ SET LAYOUTORDER]
+-- [HÀM TẠO NÚT CƠ BẢN - ĐÃ SỬA LỖI TRẢ VỀ FRAME ĐỂ SET LAYOUT]
 local function createButton(parent, text, color, callback)
     local btnFrame = Instance.new("Frame", parent)
     btnFrame.Size = UDim2.new(0.9, 0, 0, 42); btnFrame.BackgroundTransparency = 1
@@ -252,10 +253,10 @@ local function createButton(parent, text, color, callback)
 end
 
 local function createDualButtons(parent, text1, color1, cb1, text2, color2, cb2)
-    local dFrame = Instance.new("Frame", parent)
-    dFrame.Size = UDim2.new(0.9, 0, 0, 42); dFrame.BackgroundTransparency = 1
+    local frame = Instance.new("Frame", parent)
+    frame.Size = UDim2.new(0.9, 0, 0, 42); frame.BackgroundTransparency = 1
     local function makeBtn(xPos, txt, col, cb)
-        local btn = Instance.new("TextButton", dFrame)
+        local btn = Instance.new("TextButton", frame)
         btn.Size = UDim2.new(0.48, 0, 1, 0); btn.Position = UDim2.new(xPos, 0, 0, 0)
         btn.BackgroundColor3 = Theme.ItemBg; btn.Text = ""; btn.AutoButtonColor = false; btn.ZIndex = 10
         Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
@@ -269,7 +270,7 @@ local function createDualButtons(parent, text1, color1, cb1, text2, color2, cb2)
         end)
     end
     makeBtn(0, text1, color1, cb1); makeBtn(0.52, text2, color2, cb2)
-    return dFrame
+    return frame
 end
 
 local function createToggle(parent, text, defaultState, callback)
@@ -370,6 +371,7 @@ copyIdBtn.Text = "📋"
 copyIdBtn.BackgroundTransparency = 1
 copyIdBtn.TextSize = 14
 copyIdBtn.ZIndex = 11
+
 copyIdBtn.MouseButton1Click:Connect(function()
     clickAnimate(copyIdBtn)
     pcall(function() 
@@ -447,7 +449,6 @@ task.spawn(function()
         )
     end
 end)
-
 
 -- ==========================================
 -- [TAB 2: NHÂN VẬT]
@@ -676,7 +677,7 @@ local musicInputFrame = Instance.new("Frame", page4)
 musicInputFrame.Size = UDim2.new(0.9, 0, 0, 48)
 musicInputFrame.BackgroundColor3 = Theme.ItemBg
 musicInputFrame.ZIndex = 10
-musicInputFrame.LayoutOrder = 1 -- Ép thứ tự xuất hiện đầu tiên
+musicInputFrame.LayoutOrder = 1 -- Đã fix lỗi
 Instance.new("UICorner", musicInputFrame).CornerRadius = UDim.new(0, 8)
 local mStroke = Instance.new("UIStroke", musicInputFrame)
 mStroke.Color = Theme.Stroke; mStroke.Thickness = 1
@@ -694,7 +695,6 @@ musicIdBox.Text = ""
 musicIdBox.TextColor3 = Theme.Brand
 musicIdBox.Font = Enum.Font.GothamSemibold; musicIdBox.TextSize = 12; musicIdBox.TextXAlignment = Enum.TextXAlignment.Left; musicIdBox.ClearTextOnFocus = false; musicIdBox.ZIndex = 10
 
--- NÚT LƯU NHẠC
 local saveIdBtn = Instance.new("TextButton", musicInputFrame)
 saveIdBtn.Size = UDim2.new(0.2, 0, 1, 0)
 saveIdBtn.Position = UDim2.new(0.8, 0, 0, 0)
@@ -703,13 +703,13 @@ saveIdBtn.Text = "💾 Lưu"
 saveIdBtn.TextColor3 = Theme.AccentOn
 saveIdBtn.Font = Enum.Font.GothamBold; saveIdBtn.TextSize = 11; saveIdBtn.ZIndex = 10
 
--- [2] Tên Bài Hát Đang Phát (Nằm ngay dưới ô nhập, được đóng khung mờ)
+-- [2] Tên Bài Hát Đang Phát
 local nowPlayingFrame = Instance.new("Frame", page4)
 nowPlayingFrame.Size = UDim2.new(0.9, 0, 0, 32)
 nowPlayingFrame.BackgroundColor3 = Theme.ItemBg
-nowPlayingFrame.BackgroundTransparency = 0.5 -- Khung nền mờ nhìn thanh thoát
+nowPlayingFrame.BackgroundTransparency = 0.5 
 nowPlayingFrame.ZIndex = 10
-nowPlayingFrame.LayoutOrder = 2 -- Ép thứ tự xuất hiện thứ 2
+nowPlayingFrame.LayoutOrder = 2 -- Đã fix lỗi
 Instance.new("UICorner", nowPlayingFrame).CornerRadius = UDim.new(0, 6)
 
 local nowPlayingLabel = Instance.new("TextLabel", nowPlayingFrame)
@@ -718,18 +718,20 @@ nowPlayingLabel.BackgroundTransparency = 1
 nowPlayingLabel.Text = "🎵 Chưa có bài hát nào đang phát"
 nowPlayingLabel.TextColor3 = Theme.Brand
 nowPlayingLabel.Font = Enum.Font.GothamSemibold
-nowPlayingLabel.TextSize = 11 -- Chữ nhỏ thanh thoát
+nowPlayingLabel.TextSize = 11 
 nowPlayingLabel.TextWrapped = true
 
 local function getSongName(id)
-    local s, info = pcall(function() return MarketplaceService:GetProductInfo(tonumber(id)) end)
-    if s and info then return info.Name else return "ID: " .. tostring(id) end
+    local numId = tonumber(id)
+    if not numId then return "ID không hợp lệ!" end
+    local s, info = pcall(function() return MarketplaceService:GetProductInfo(numId) end)
+    if s and info then return info.Name else return "Tên bị ẩn hoặc ID sai" end
 end
 
 local function playMusic(id)
     if currentSound then currentSound:Destroy() end
-    local soundId = tostring(id):gsub("%s+", "")
-    if soundId == "" then return end
+    local soundId = tostring(id):match("%d+")
+    if not soundId or soundId == "" then return end
     
     currentMusicId = soundId
     nowPlayingLabel.Text = "⏳ Đang tải: " .. soundId .. "..."
@@ -743,7 +745,7 @@ local function playMusic(id)
 
     currentSound = Instance.new("Sound")
     currentSound.SoundId = "rbxassetid://" .. soundId
-    currentSound.Volume = State.MusicVolume -- Âm lượng khuyếch đại max cấp độ 10
+    currentSound.Volume = State.MusicVolume 
     currentSound.Parent = workspace
     
     currentSound.Ended:Connect(function()
@@ -775,19 +777,19 @@ local playControlFrame = createDualButtons(page4, "▶ PHÁT NHẠC", Theme.Acce
 end, "⏹ TẮT NHẠC", Theme.AccentOff, function()
     stopMusic()
 end)
-playControlFrame.LayoutOrder = 3 -- Ép thứ tự xuất hiện thứ 3
+playControlFrame.LayoutOrder = 3
 
 -- [4] Thanh Âm Lượng
 local volumeFrame = createSlider(page4, "Âm lượng nhạc", 0, 10, State.MusicVolume, function(val)
     State.MusicVolume = val
     if currentSound then currentSound.Volume = val end
 end)
-volumeFrame.LayoutOrder = 4 -- Ép thứ tự xuất hiện thứ 4
+volumeFrame.LayoutOrder = 4 
 
 -- [5] Danh Sách Bài Hát
 local savedMusicContainer = Instance.new("Frame", page4)
 savedMusicContainer.BackgroundTransparency = 1
-savedMusicContainer.LayoutOrder = 5 -- Ép thứ tự xuất hiện thứ 5 (Cuối cùng)
+savedMusicContainer.LayoutOrder = 5 
 
 local fileName = "MenuProMax_SavedMusic.json"
 local function loadMusicData()
@@ -853,8 +855,8 @@ end
 
 saveIdBtn.MouseButton1Click:Connect(function()
     clickAnimate(saveIdBtn)
-    local rawId = musicIdBox.Text:gsub("%s+", "")
-    if rawId ~= "" then
+    local rawId = musicIdBox.Text:match("%d+")
+    if rawId and rawId ~= "" then
         saveIdBtn.Text = "⏳..."
         task.spawn(function()
             local name = getSongName(rawId)
