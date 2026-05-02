@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V39.6 (Bản Cập Nhật - Fix ESP, Fix Anti-Stun)
+-- MENU VIP PRO V39.7 (Bản Cập Nhật - Tối ưu Siêu Tầm Đánh Vũ Khí)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -22,7 +22,7 @@ local State = {
     InfJump = false, PlayerLight = false, ESP = false, AntiAfk = true, AntiStun = false, 
     XRay = false, LockPosition = false, AutoCollect = false,
     SpinBot = false, SpinSpeed = 50, Hitbox = false, HitboxSize = 15, AutoClick = false, RGB = false,
-    Reach = false, ReachSize = 15,
+    Reach = false, ReachSize = 15, -- TÍNH NĂNG SIÊU TẦM ĐÁNH VŨ KHÍ
     SpeedValue = 60, JumpValue = 120, LightRange = 60, LightBrightness = 3,
     MusicVolume = 5
 }
@@ -130,7 +130,7 @@ headerCover.ZIndex = 10
 
 local titleLabel = Instance.new("TextLabel", header)
 titleLabel.Size = UDim2.new(1, 0, 1, 0); titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "MENU PRO MAX V39.6"
+titleLabel.Text = "MENU PRO MAX V39.7"
 titleLabel.TextColor3 = Theme.Brand; titleLabel.Font = Enum.Font.GothamBlack; titleLabel.TextSize = 14
 titleLabel.ZIndex = 10
 
@@ -440,7 +440,7 @@ task.spawn(function()
         local timeString = string.format("%02d:%02d:%02d", hours, mins, secs)
         
         extraInfoLabel.Text = string.format(
-            "<font color='#00C8FF'>Thời gian chơi:</font> %s\n<font color='#00C8FF'>Giờ hệ thống:</font> %s\n<font color='#00C8FF'>Phiên bản:</font> MENU VIP PRO V39.6",
+            "<font color='#00C8FF'>Thời gian chơi:</font> %s\n<font color='#00C8FF'>Giờ hệ thống:</font> %s\n<font color='#00C8FF'>Phiên bản:</font> MENU VIP PRO V39.7",
             timeString, os.date("%H:%M:%S")
         )
     end
@@ -462,7 +462,6 @@ createSlider(page2, "Lực nhảy", 50, 300, 120, function(val) State.JumpValue 
 
 createToggle(page2, "🛡️ Chống ngã & Chống văng", false, function(v) 
     State.AntiStun = v 
-    -- Tính năng này giờ được kiểm soát gắt gao trong vòng lặp RenderStepped bên dưới
 end)
 
 createToggle(page2, "🔒 Khóa vị trí", false, function(v) 
@@ -471,6 +470,7 @@ end)
 
 createToggle(page2, "🚀 Nhảy trên không", false, function(v) State.InfJump = v end) 
 
+-- TÍNH NĂNG MỚI: SIÊU TẦM ĐÁNH VŨ KHÍ (REACH TOÀN PHẦN)
 createToggle(page2, "⚔️ Phóng to Vũ Khí (Tầm đánh)", false, function(v) State.Reach = v end)
 createSlider(page2, "Kích thước vũ khí", 2, 100, 15, function(v) State.ReachSize = v end)
 
@@ -483,7 +483,7 @@ createSlider(page2, "Kích thước đối thủ", 2, 100, 15, function(v) State
 local originalPrompts = {}
 local originalToolSizes = {}
 
--- [HITBOX & REACH Ở LUỒNG CHẬM TRÁNH LAG]
+-- [HITBOX & SIÊU REACH]
 task.spawn(function()
     while task.wait(0.2) do
         -- LẤY ĐỒ NHANH
@@ -526,24 +526,34 @@ task.spawn(function()
             end
         end
 
-        -- REACH (TẦM ĐÁNH VŨ KHÍ)
+        -- TỐI ƯU HÓA SIÊU TẦM ĐÁNH VŨ KHÍ (ULTRA REACH)
         if State.Reach and player.Character then
             local tool = player.Character:FindFirstChildOfClass("Tool")
             if tool then
-                local handle = tool:FindFirstChild("Handle") or tool:FindFirstChild("Hitbox")
-                if handle and handle:IsA("BasePart") then
-                    if not originalToolSizes[handle] then
-                        originalToolSizes[handle] = handle.Size
+                for _, part in ipairs(tool:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        if not originalToolSizes[part] then
+                            originalToolSizes[part] = {
+                                Size = part.Size, 
+                                Trans = part.Transparency, 
+                                Massless = part.Massless, 
+                                CanCollide = part.CanCollide
+                            }
+                        end
+                        part.Size = Vector3.new(State.ReachSize, State.ReachSize, State.ReachSize)
+                        part.Massless = true
+                        part.CanCollide = false
+                        part.Transparency = 0.8 -- Làm mờ để không che mắt bạn
                     end
-                    handle.Size = Vector3.new(State.ReachSize, State.ReachSize, State.ReachSize)
-                    handle.Massless = true
-                    handle.CanCollide = false
                 end
             end
         else
-            for part, origSize in pairs(originalToolSizes) do
+            for part, origData in pairs(originalToolSizes) do
                 if part and part.Parent then
-                    part.Size = origSize
+                    part.Size = origData.Size
+                    part.Transparency = origData.Trans
+                    part.Massless = origData.Massless
+                    part.CanCollide = origData.CanCollide
                 end
             end
             originalToolSizes = {}
@@ -1170,7 +1180,7 @@ workspace.DescendantAdded:Connect(function(v)
     end
 end)
 
--- [FIX ESP HIỂN THỊ TRONG LUỒNG RENDERSTEPPED & FIX CHỐNG VĂNG]
+-- [BẢO TỒN HOẠT ĐỘNG LIÊN TỤC]
 RunService.RenderStepped:Connect(function()
     if State.RGB then
         local hue = tick() % 5 / 5
@@ -1189,12 +1199,10 @@ RunService.RenderStepped:Connect(function()
         if State.Speed then hum.WalkSpeed = State.SpeedValue end
         if State.Jump then hum.UseJumpPower = true; hum.JumpPower = State.JumpValue end
         
-        -- Cập nhật chống ngã liên tục 60 khung hình/giây
         if State.AntiStun then 
             hum.PlatformStand = false
             hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
             hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
-            -- Triệt tiêu lực văng, chống bay mất xác
             if root and root.RotVelocity.Magnitude > 50 then 
                 root.RotVelocity = Vector3.new(0, 0, 0) 
             end 
@@ -1212,7 +1220,7 @@ RunService.RenderStepped:Connect(function()
             else if light then light:Destroy() end end
         end
 
-        -- Cập nhật ESP tại đây để chữ di chuyển mượt theo người chơi
+        -- Cập nhật ESP mượt mà
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= player and p.Character and p.Character:FindFirstChild("Head") then
                 local tChar = p.Character; local head = tChar.Head
