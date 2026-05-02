@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V39.2 (Bản Cập Nhật - Fix Hitbox & AutoClick)
+-- MENU VIP PRO V39.3 (Bản Cập Nhật - Thêm Tầm Đánh Vũ Khí)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -22,6 +22,7 @@ local State = {
     InfJump = false, PlayerLight = false, ESP = false, AntiAfk = true, AntiStun = false, 
     XRay = false, LockPosition = false, AutoCollect = false,
     SpinBot = false, SpinSpeed = 50, Hitbox = false, HitboxSize = 15, AutoClick = false, RGB = false,
+    Reach = false, ReachSize = 15, -- TÍNH NĂNG MỚI: TẦM ĐÁNH
     SpeedValue = 60, JumpValue = 120, LightRange = 60, LightBrightness = 3,
     MusicVolume = 5
 }
@@ -129,7 +130,7 @@ headerCover.ZIndex = 10
 
 local titleLabel = Instance.new("TextLabel", header)
 titleLabel.Size = UDim2.new(1, 0, 1, 0); titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "MENU PRO MAX V39"
+titleLabel.Text = "MENU PRO MAX V39.3"
 titleLabel.TextColor3 = Theme.Brand; titleLabel.Font = Enum.Font.GothamBlack; titleLabel.TextSize = 14
 titleLabel.ZIndex = 10
 
@@ -439,7 +440,7 @@ task.spawn(function()
         local timeString = string.format("%02d:%02d:%02d", hours, mins, secs)
         
         extraInfoLabel.Text = string.format(
-            "<font color='#00C8FF'>Thời gian chơi:</font> %s\n<font color='#00C8FF'>Giờ hệ thống:</font> %s\n<font color='#00C8FF'>Phiên bản:</font> MENU VIP PRO V39",
+            "<font color='#00C8FF'>Thời gian chơi:</font> %s\n<font color='#00C8FF'>Giờ hệ thống:</font> %s\n<font color='#00C8FF'>Phiên bản:</font> MENU VIP PRO V39.3",
             timeString, os.date("%H:%M:%S")
         )
     end
@@ -449,8 +450,6 @@ end)
 -- [TAB 2: NHÂN VẬT]
 -- ==========================================
 
-local astralClone = nil
-local astralProps = {}
 createToggle(page2, "🏃 Chạy nhanh", false, function(v) 
     State.Speed = v; if not v and player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.WalkSpeed = 16 end
 end)
@@ -474,40 +473,42 @@ end)
 createToggle(page2, "🔒 Khóa vị trí", false, function(v) 
     State.LockPosition = v; if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then player.Character.HumanoidRootPart.Anchored = false end
 end)
-createToggle(page2, "🚀 Nhảy trên không", false, function(v) State.InfJump = v end) 
 
--- TÍNH NĂNG MỚI: TROLL / AFK & HITBOX
+-- TÍNH NĂNG MỚI: TẦM ĐÁNH VŨ KHÍ (GIẢI QUYẾT LỖI HITBOX)
+createToggle(page2, "⚔️ Phóng to Vũ Khí (Tầm đánh)", false, function(v) State.Reach = v end)
+createSlider(page2, "Kích thước vũ khí", 2, 100, 15, function(v) State.ReachSize = v end)
+
 createToggle(page2, "🌪️ Xoay vòng tròn (SpinBot)", false, function(v) State.SpinBot = v end)
 createSlider(page2, "Tốc độ xoay", 10, 100, 50, function(v) State.SpinSpeed = v end)
 
-createToggle(page2, "🎯 Phóng to Hitbox (Đánh xa)", false, function(v) State.Hitbox = v end)
-createSlider(page2, "Kích thước Hitbox", 2, 100, 15, function(v) State.HitboxSize = v end)
+createToggle(page2, "🎯 Phóng to đối thủ (Hitbox)", false, function(v) State.Hitbox = v end)
+createSlider(page2, "Kích thước đối thủ", 2, 100, 15, function(v) State.HitboxSize = v end)
 
 local originalPrompts = {}
-createToggle(page2, "🐿️ Lấy đồ nhanh", false, function(v) 
-    State.Instant = v
-    if v then 
-        for _, prompt in pairs(workspace:GetDescendants()) do 
-            if prompt:IsA("ProximityPrompt") then 
-                if not originalPrompts[prompt] then
-                    originalPrompts[prompt] = { HoldDuration = prompt.HoldDuration, MaxActivationDistance = prompt.MaxActivationDistance }
-                end
-                prompt.HoldDuration = 0; prompt.MaxActivationDistance = 25 
-            end 
-        end 
-    else
-        for prompt, data in pairs(originalPrompts) do
-            if prompt and prompt.Parent then
-                prompt.HoldDuration = data.HoldDuration; prompt.MaxActivationDistance = data.MaxActivationDistance
-            end
-        end
-        originalPrompts = {}
-    end
-end)
+local originalToolSizes = {}
 
-createToggle(page2, "🧲 Auto nhặt đồ xung quanh", false, function(v) State.AutoCollect = v end)
 task.spawn(function()
     while task.wait(0.2) do
+        -- LẤY ĐỒ NHANH
+        if State.Instant then
+            for _, prompt in pairs(workspace:GetDescendants()) do 
+                if prompt:IsA("ProximityPrompt") then 
+                    if not originalPrompts[prompt] then
+                        originalPrompts[prompt] = { HoldDuration = prompt.HoldDuration, MaxActivationDistance = prompt.MaxActivationDistance }
+                    end
+                    prompt.HoldDuration = 0; prompt.MaxActivationDistance = 25 
+                end 
+            end
+        else
+            for prompt, data in pairs(originalPrompts) do
+                if prompt and prompt.Parent then
+                    prompt.HoldDuration = data.HoldDuration; prompt.MaxActivationDistance = data.MaxActivationDistance
+                end
+            end
+            originalPrompts = {}
+        end
+
+        -- AUTO COLLECT
         if State.AutoCollect and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             local root = player.Character.HumanoidRootPart
             for _, obj in pairs(workspace:GetDescendants()) do
@@ -527,13 +528,42 @@ task.spawn(function()
                 end
             end
         end
+
+        -- REACH (TẦM ĐÁNH VŨ KHÍ)
+        if State.Reach and player.Character then
+            local tool = player.Character:FindFirstChildOfClass("Tool")
+            if tool then
+                local handle = tool:FindFirstChild("Handle") or tool:FindFirstChild("Hitbox")
+                if handle and handle:IsA("BasePart") then
+                    if not originalToolSizes[handle] then
+                        originalToolSizes[handle] = handle.Size
+                    end
+                    handle.Size = Vector3.new(State.ReachSize, State.ReachSize, State.ReachSize)
+                    handle.Massless = true
+                    handle.CanCollide = false
+                end
+            end
+        else
+            for part, origSize in pairs(originalToolSizes) do
+                if part and part.Parent then
+                    part.Size = origSize
+                end
+            end
+            originalToolSizes = {}
+        end
     end
 end)
 
+createToggle(page2, "🐿️ Lấy đồ nhanh", false, function(v) State.Instant = v end)
+createToggle(page2, "🧲 Auto nhặt đồ xung quanh", false, function(v) State.AutoCollect = v end)
+
+createToggle(page2, "🚀 Nhảy trên không", false, function(v) State.InfJump = v end) 
 createToggle(page2, "🚷 Đi xuyên tường", false, function(v) 
     State.Noclip = v; if not v and player.Character then for _, part in pairs(player.Character:GetDescendants()) do if part:IsA("BasePart") then part.CanCollide = true end end end
 end)
 
+local astralClone = nil
+local astralProps = {}
 createToggle(page2, "👻 Xuất hồn", false, function(v)
     local char = player.Character
     if v then
@@ -570,6 +600,7 @@ end)
 player.CharacterAdded:Connect(function()
     if astralClone then astralClone:Destroy(); astralClone = nil end
     astralProps = {}
+    originalToolSizes = {}
 end)
 
 local xrayMats = {}
@@ -649,7 +680,6 @@ local function rejoinServer()
     else TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, player) end
 end
 
--- TÍNH NĂNG MỚI (No Fog, AutoClick, FOV)
 createToggle(page3, "🌈 Chế độ RGB (Đèn LED Menu)", false, function(v) 
     State.RGB = v; 
     if not v then 
@@ -658,8 +688,8 @@ createToggle(page3, "🌈 Chế độ RGB (Đèn LED Menu)", false, function(v)
     end 
 end)
 
--- [ĐÃ FIX: AUTO CLICK CỐ ĐỊNH, CHÉM CHUẨN, KHÔNG BỊ KẸT KHI TẮT]
-createToggle(page3, "🖱️ Auto Click (Cố định)", false, function(v) State.AutoClick = v end)
+-- AUTO CLICK FIX CỐ ĐỊNH TÂM MÀN HÌNH
+createToggle(page3, "🖱️ Auto Click (Tự động đánh)", false, function(v) State.AutoClick = v end)
 task.spawn(function()
     while task.wait(0.1) do
         if State.AutoClick then
@@ -682,16 +712,10 @@ end)
 local origFog, origBright, origShadow
 createToggle(page3, "☀️ Xóa sương mù & Sáng Map", false, function(v) 
     if v then
-        origFog = Lighting.FogEnd
-        origBright = Lighting.Brightness
-        origShadow = Lighting.GlobalShadows
-        Lighting.FogEnd = 100000
-        Lighting.Brightness = 2
-        Lighting.GlobalShadows = false
+        origFog = Lighting.FogEnd; origBright = Lighting.Brightness; origShadow = Lighting.GlobalShadows
+        Lighting.FogEnd = 100000; Lighting.Brightness = 2; Lighting.GlobalShadows = false
     else
-        Lighting.FogEnd = origFog or 100000
-        Lighting.Brightness = origBright or 1
-        Lighting.GlobalShadows = origShadow
+        Lighting.FogEnd = origFog or 100000; Lighting.Brightness = origBright or 1; Lighting.GlobalShadows = origShadow
     end
 end)
 
@@ -710,7 +734,6 @@ createDualButtons(page3, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(f
 end) end)
 createDualButtons(page3, "🕊️ FLY V1", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end, 
 "🚀 FLY V3", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end) end)
-createButton(page3, "📂 TP SAVE V2 GUI", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
 
 -- ==========================================
 -- [TAB 4: PHÁT NHẠC VÀ LƯU TRỮ VĨNH VIỄN]
@@ -1122,13 +1145,6 @@ workspace.DescendantAdded:Connect(function(v)
     if State.XRay and v:IsA("BasePart") and not v:IsDescendantOf(player.Character) and v.Name ~= "Terrain" and v.Transparency < 1 then
         if not xrayMats[v] then xrayMats[v] = v.Transparency end; v.Transparency = 0.5
     end
-    if v:IsA("ProximityPrompt") and State.Instant then
-        if not originalPrompts[v] then
-            originalPrompts[v] = { HoldDuration = v.HoldDuration, MaxActivationDistance = v.MaxActivationDistance }
-        end
-        v.HoldDuration = 0
-        v.MaxActivationDistance = 25
-    end
 end)
 
 RunService.RenderStepped:Connect(function()
@@ -1154,7 +1170,6 @@ RunService.RenderStepped:Connect(function()
             root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(State.SpinSpeed), 0)
         end
 
-        -- [ĐÃ FIX LỖI KẸT VẬT LÝ KHI ĐỨNG TRONG HITBOX BẰNG MASSLESS & CANCOLLIDE]
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                 local hrp = p.Character.HumanoidRootPart
@@ -1162,7 +1177,7 @@ RunService.RenderStepped:Connect(function()
                     hrp.Size = Vector3.new(State.HitboxSize, State.HitboxSize, State.HitboxSize)
                     hrp.Transparency = 0.5
                     hrp.CanCollide = false
-                    hrp.Massless = true -- <== Chống kẹt vật lý khi bạn đứng bên trong
+                    hrp.Massless = true
                 else
                     hrp.Size = Vector3.new(2, 2, 1)
                     hrp.Transparency = 1
