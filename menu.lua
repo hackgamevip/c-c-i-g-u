@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V39.4 (Bản Cập Nhật - Fix Lỗi Đóng Băng Người Chơi)
+-- MENU VIP PRO V39.5 (Bản Cập Nhật - Fix Triệt Để Lỗi Hitbox Đóng Băng)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -22,7 +22,7 @@ local State = {
     InfJump = false, PlayerLight = false, ESP = false, AntiAfk = true, AntiStun = false, 
     XRay = false, LockPosition = false, AutoCollect = false,
     SpinBot = false, SpinSpeed = 50, Hitbox = false, HitboxSize = 15, AutoClick = false, RGB = false,
-    Reach = false, ReachSize = 15, 
+    Reach = false, ReachSize = 15, -- TÍNH NĂNG MỚI: TẦM ĐÁNH
     SpeedValue = 60, JumpValue = 120, LightRange = 60, LightBrightness = 3,
     MusicVolume = 5
 }
@@ -130,7 +130,7 @@ headerCover.ZIndex = 10
 
 local titleLabel = Instance.new("TextLabel", header)
 titleLabel.Size = UDim2.new(1, 0, 1, 0); titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "MENU PRO MAX V39.4"
+titleLabel.Text = "MENU PRO MAX V39.5"
 titleLabel.TextColor3 = Theme.Brand; titleLabel.Font = Enum.Font.GothamBlack; titleLabel.TextSize = 14
 titleLabel.ZIndex = 10
 
@@ -193,9 +193,11 @@ local function createPage()
     pg.Size = UDim2.new(1, 0, 1, 0); pg.BackgroundTransparency = 1
     pg.ScrollBarThickness = 3; pg.ScrollBarImageColor3 = Theme.Brand; pg.Visible = false; pg.BorderSizePixel = 0
     pg.ZIndex = 10
+    
     local layout = Instance.new("UIListLayout", pg)
     layout.HorizontalAlignment = Enum.HorizontalAlignment.Center; layout.Padding = UDim.new(0, 10)
     layout.SortOrder = Enum.SortOrder.LayoutOrder 
+    
     Instance.new("UIPadding", pg).PaddingTop = UDim.new(0, 10); Instance.new("UIPadding", pg).PaddingBottom = UDim.new(0, 30) 
     layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() 
         pg.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 60) 
@@ -438,7 +440,7 @@ task.spawn(function()
         local timeString = string.format("%02d:%02d:%02d", hours, mins, secs)
         
         extraInfoLabel.Text = string.format(
-            "<font color='#00C8FF'>Thời gian chơi:</font> %s\n<font color='#00C8FF'>Giờ hệ thống:</font> %s\n<font color='#00C8FF'>Phiên bản:</font> MENU VIP PRO V39.4",
+            "<font color='#00C8FF'>Thời gian chơi:</font> %s\n<font color='#00C8FF'>Giờ hệ thống:</font> %s\n<font color='#00C8FF'>Phiên bản:</font> MENU VIP PRO V39.5",
             timeString, os.date("%H:%M:%S")
         )
     end
@@ -487,6 +489,7 @@ createSlider(page2, "Kích thước đối thủ", 2, 100, 15, function(v) State
 local originalPrompts = {}
 local originalToolSizes = {}
 
+-- [FIX TRIỆT ĐỂ: TÁCH HITBOX RA KHỎI RENDERSTEPPED CHỐNG ĐÓNG BĂNG]
 task.spawn(function()
     while task.wait(0.2) do
         -- LẤY ĐỒ NHANH
@@ -552,27 +555,27 @@ task.spawn(function()
             originalToolSizes = {}
         end
 
-        -- HITBOX ĐỐI THỦ (Fix lỗi đứng im)
+        -- HITBOX ĐỐI THỦ (Fix hoàn toàn lỗi đứng im)
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                 local hrp = p.Character.HumanoidRootPart
-                if State.Hitbox then
-                    local targetSize = Vector3.new(State.HitboxSize, State.HitboxSize, State.HitboxSize)
-                    if hrp.Size ~= targetSize then
-                        hrp.Size = targetSize
-                        hrp.Transparency = 0.5
-                        hrp.CanCollide = false
-                        hrp.Massless = true
+                pcall(function()
+                    if State.Hitbox then
+                        local targetSize = Vector3.new(State.HitboxSize, State.HitboxSize, State.HitboxSize)
+                        if hrp.Size ~= targetSize then
+                            hrp.Size = targetSize
+                            hrp.Transparency = 0.5
+                            hrp.CanCollide = false
+                            -- TUYỆT ĐỐI KHÔNG DÙNG MASSLESS Ở ĐÂY ĐỂ TRÁNH LỖI VẬT LÝ SERVER
+                        end
+                    else
+                        if hrp.Size.X > 5 then -- Nếu đang to thì mới thu nhỏ lại
+                            hrp.Size = Vector3.new(2, 2, 1)
+                            hrp.Transparency = 1
+                            hrp.CanCollide = false
+                        end
                     end
-                else
-                    local defaultSize = Vector3.new(2, 2, 1)
-                    if hrp.Size ~= defaultSize then
-                        hrp.Size = defaultSize
-                        hrp.Transparency = 1
-                        hrp.CanCollide = false
-                        hrp.Massless = false
-                    end
-                end
+                end)
             end
         end
     end
@@ -709,6 +712,7 @@ createToggle(page3, "🌈 Chế độ RGB (Đèn LED Menu)", false, function(v)
     end 
 end)
 
+-- AUTO CLICK FIX CỐ ĐỊNH TÂM MÀN HÌNH
 createToggle(page3, "🖱️ Auto Click (Tự động đánh)", false, function(v) State.AutoClick = v end)
 task.spawn(function()
     while task.wait(0.1) do
@@ -718,8 +722,8 @@ task.spawn(function()
                     local tool = player.Character:FindFirstChildOfClass("Tool")
                     if tool then tool:Activate() end
                 end
-                -- Giữ nguyên chức năng click ảo hỗ trợ các executor
-                if mouse1click then mouse1click() end
+                local center = workspace.CurrentCamera.ViewportSize / 2
+                VirtualUser:ClickButton1(Vector2.new(center.X, center.Y), workspace.CurrentCamera.CFrame)
             end)
         end
     end
@@ -1182,39 +1186,6 @@ RunService.RenderStepped:Connect(function()
 
         if State.SpinBot and root then
             root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(State.SpinSpeed), 0)
-        end
-
-        for _, p in pairs(Players:GetPlayers()) do
-            if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                local hrp = p.Character.HumanoidRootPart
-                if State.Hitbox then
-                    hrp.Size = Vector3.new(State.HitboxSize, State.HitboxSize, State.HitboxSize)
-                    hrp.Transparency = 0.5
-                    hrp.CanCollide = false
-                    hrp.Massless = true
-                else
-                    hrp.Size = Vector3.new(2, 2, 1)
-                    hrp.Transparency = 1
-                    hrp.Massless = false
-                end
-            end
-            
-            if p ~= player and p.Character and p.Character:FindFirstChild("Head") then
-                local tChar = p.Character; local head = tChar.Head
-                if State.ESP then
-                    local bgui = head:FindFirstChild("MobileESP_Name")
-                    if not bgui then
-                        bgui = Instance.new("BillboardGui", head); bgui.Name = "MobileESP_Name"; bgui.Size = UDim2.new(0, 200, 0, 50); bgui.StudsOffset = Vector3.new(0, 2, 0); bgui.AlwaysOnTop = true; bgui.Adornee = head
-                        local tLabel = Instance.new("TextLabel", bgui); tLabel.Name = "NameLabel"; tLabel.Size = UDim2.new(1, 0, 1, 0); tLabel.BackgroundTransparency = 1; tLabel.TextColor3 = Color3.fromRGB(255, 60, 60); tLabel.TextStrokeTransparency = 0.2; tLabel.TextStrokeColor3 = Color3.new(0, 0, 0); tLabel.Font = Enum.Font.GothamBold; tLabel.TextSize = 11; tLabel.RichText = true 
-                    end
-                    if root and tChar:FindFirstChild("HumanoidRootPart") then
-                        local dist = math.floor((root.Position - tChar.HumanoidRootPart.Position).Magnitude)
-                        bgui.NameLabel.Text = p.DisplayName .. '\n<font color="#4CAF50">[' .. dist .. 'm]</font>'
-                    else bgui.NameLabel.Text = p.DisplayName end
-                else
-                    local bgui = head:FindFirstChild("MobileESP_Name"); if bgui then bgui:Destroy() end
-                end
-            end
         end
 
         if root then
