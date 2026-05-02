@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (Bản Cập Nhật - TP Save Vĩnh Viễn)
+-- MENU VIP PRO V38 (Bản Cập Nhật - FIX LỖI KHÔNG HIỆN MENU)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -234,7 +234,6 @@ openBtn.MouseButton1Click:Connect(function()
     frame:TweenPosition(opened and UDim2.new(0.5, -180, 0.5, -225) or UDim2.new(0.5, -180, 1.2, 0), "Out", "Back", 0.5)
 end)
 
--- [CÁC HÀM TẠO NÚT CƠ BẢN]
 local function createButton(parent, text, color, callback)
     local btnFrame = Instance.new("Frame", parent)
     btnFrame.Size = UDim2.new(0.9, 0, 0, 42); btnFrame.BackgroundTransparency = 1
@@ -337,7 +336,6 @@ end
 -- ==========================================
 -- [TAB 1: THÔNG TIN - DASHBOARD]
 -- ==========================================
-
 local function createInfoBox(parent, icon, titleText, heightOffset)
     local item = Instance.new("Frame", parent)
     item.Size = UDim2.new(0.9, 0, 0, heightOffset or 85) 
@@ -452,7 +450,6 @@ end)
 -- ==========================================
 -- [TAB 2: NHÂN VẬT]
 -- ==========================================
-
 local astralClone = nil
 local astralProps = {}
 createToggle(page2, "🏃 Chạy nhanh", false, function(v) 
@@ -480,7 +477,6 @@ createToggle(page2, "🔒 Khóa vị trí", false, function(v)
 end)
 createToggle(page2, "🚀 Nhảy trên không", false, function(v) State.InfJump = v end) 
 
--- LƯU VỊ TRÍ ĐỒ VÀ PHỤC HỒI KHI TẮT "LẤY ĐỒ NHANH"
 local originalPrompts = {}
 createToggle(page2, "🐿️ Lấy đồ nhanh", false, function(v) 
     State.Instant = v
@@ -595,8 +591,7 @@ createToggle(page2, "👀 Nhìn xuyên map", false, function(v)
 end)
 
 createToggle(page2, "🔴 ESP người chơi", false, function(v) State.ESP = v end)
-
-createToggle(page2, "💡 Ánh sáng quanh người chơi", false, function(v) 
+createToggle(page2, "💡 Ánh sáng quanh người", false, function(v) 
     State.PlayerLight = v; if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then 
         local light = player.Character.HumanoidRootPart:FindFirstChild("PlayerPointLight"); if light then light:Destroy() end 
     end
@@ -610,8 +605,6 @@ UIS.JumpRequest:Connect(function()
         if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end 
     end 
 end)
-
-ProximityPromptService.PromptButtonHoldBegan:Connect(function(prompt) if State.Instant then pcall(function() fireproximityprompt(prompt) end) end end)
 
 -- ==========================================
 -- [TAB 3: TIỆN ÍCH]
@@ -638,7 +631,6 @@ local function hopServer(sortOrder)
         if targetServer then break end
         nextCursor = data.nextPageCursor
     until not nextCursor
-    
     if targetServer then TeleportService:TeleportToPlaceInstance(game.PlaceId, targetServer.id, player) end
 end
 
@@ -653,20 +645,16 @@ createToggle(page3, "⬜ Màn hình trắng (Treo máy)", false, function(v) scr
 createToggle(page3, "🛡️ Chống AFK", true, function(v) State.AntiAfk = v end)
 
 createDualButtons(page3, "🌞 SÁNG (FAKE)", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12 end, "🌚 TỐI (FAKE)", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0 end)
-
 createDualButtons(page3, "🔄 VÀO LẠI SV", Theme.AccentOn, rejoinServer, "🎲 ĐỔI SV NGẪU NHIÊN", Theme.Brand, function() hopServer("Desc") end)
 createDualButtons(page3, "📉 ĐỔI SV ÍT NGƯỜI", Color3.fromRGB(52, 152, 219), function() hopServer("Asc") end, "📈 ĐỔI SV NHIỀU NGƯỜI", Color3.fromRGB(231, 76, 60), function() hopServer("Desc") end)
-
 createDualButtons(page3, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) end, 
 "🔨 LẤY BTOOLS", Theme.Brand, function() pcall(function() 
     local b1 = Instance.new("HopperBin", player.Backpack); b1.BinType = Enum.BinType.Clone
     local b2 = Instance.new("HopperBin", player.Backpack); b2.BinType = Enum.BinType.Hammer
     local b3 = Instance.new("HopperBin", player.Backpack); b3.BinType = Enum.BinType.Grab
 end) end)
-
 createDualButtons(page3, "🕊️ FLY V1", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end, 
-"🚀 FLY V3 X", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end) end)
-
+"🚀 FLY V3", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end) end)
 createButton(page3, "📂 TP SAVE V2 GUI", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
 
 -- ==========================================
@@ -708,6 +696,24 @@ saveIdBtn.Text = "💾 Lưu"
 saveIdBtn.TextColor3 = Theme.AccentOn
 saveIdBtn.Font = Enum.Font.GothamBold; saveIdBtn.TextSize = 11; saveIdBtn.ZIndex = 10
 
+-- [2] Tên Bài Hát Đang Phát
+local nowPlayingFrame = Instance.new("Frame", page4)
+nowPlayingFrame.Size = UDim2.new(0.9, 0, 0, 32)
+nowPlayingFrame.BackgroundColor3 = Theme.ItemBg
+nowPlayingFrame.BackgroundTransparency = 0.5 
+nowPlayingFrame.ZIndex = 10
+nowPlayingFrame.LayoutOrder = 2 
+Instance.new("UICorner", nowPlayingFrame).CornerRadius = UDim.new(0, 6)
+
+local nowPlayingLabel = Instance.new("TextLabel", nowPlayingFrame)
+nowPlayingLabel.Size = UDim2.new(1, 0, 1, 0)
+nowPlayingLabel.BackgroundTransparency = 1
+nowPlayingLabel.RichText = true 
+nowPlayingLabel.Text = "<font color='#FFFFFF'>🎵 Chưa có bài hát nào đang phát</font>"
+nowPlayingLabel.Font = Enum.Font.GothamSemibold
+nowPlayingLabel.TextSize = 11 
+nowPlayingLabel.TextWrapped = true
+
 local function getSongName(id)
     local numId = tonumber(id)
     if not numId then return "ID không hợp lệ!" end
@@ -721,15 +727,12 @@ local function playMusic(id)
     if not soundId or soundId == "" then return end
     
     currentMusicId = soundId
+    nowPlayingLabel.Text = "<font color='#FFFFFF'>⏳ Đang tải:</font> <font color='#00C8FF'>" .. soundId .. "...</font>"
     
     task.spawn(function()
         local name = getSongName(soundId)
         if currentMusicId == soundId then
-            -- TÌM VÀ CẬP NHẬT TÊN BÀI HÁT TRONG LABEL NẾU CÓ
-            local label = page4:FindFirstChild("NowPlayingLabel")
-            if label then
-                label.Text = "<font color='#FFFFFF'>🎵 Đang phát: </font><font color='#00C8FF'>" .. name .. "</font>"
-            end
+            nowPlayingLabel.Text = "<font color='#FFFFFF'>🎵 Đang phát:</font> <font color='#00C8FF'>" .. name .. "</font>"
         end
     end)
 
@@ -757,57 +760,17 @@ local function stopMusic()
     if currentSound then
         currentSound:Stop(); currentSound:Destroy(); currentSound = nil
         currentMusicId = ""
-        local label = page4:FindFirstChild("NowPlayingLabel")
-        if label then label.Text = "<font color='#FFFFFF'>⏹ Đã dừng phát nhạc</font>" end
+        nowPlayingLabel.Text = "<font color='#FFFFFF'>⏹ Đã dừng phát nhạc</font>"
     end
 end
 
--- [2] Nút Phát/Tắt
+-- [3] Nút Phát/Tắt
 local playControlFrame = createDualButtons(page4, "▶️PHÁT NHẠC", Theme.AccentOn, function()
-    local label = page4:FindFirstChild("NowPlayingLabel")
-    if label then label.Text = "<font color='#FFFFFF'>⏳ Đang tải nhạc...</font>" end
     playMusic(musicIdBox.Text)
 end, "⏸️ TẮT NHẠC", Theme.AccentOff, function()
     stopMusic()
 end)
-playControlFrame.LayoutOrder = 2
-
--- [3] Tên Bài Hát Đang Phát (Nằm ngay dưới Phát/Tắt theo yêu cầu)
-local nowPlayingFrame = Instance.new("Frame", page4)
-nowPlayingFrame.Name = "NowPlayingLabel" -- Đặt tên để dễ tìm
-nowPlayingFrame.Size = UDim2.new(0.9, 0, 0, 25)
-nowPlayingFrame.BackgroundColor3 = Theme.ItemBg
-nowPlayingFrame.BackgroundTransparency = 1 
-nowPlayingFrame.ZIndex = 10
-nowPlayingFrame.LayoutOrder = 3
-
-local nowPlayingLabel = Instance.new("TextLabel", nowPlayingFrame)
-nowPlayingLabel.Size = UDim2.new(1, 0, 1, 0)
-nowPlayingLabel.BackgroundTransparency = 1
-nowPlayingLabel.RichText = true 
-nowPlayingLabel.Text = "<font color='#FFFFFF'>🎵 Chưa có bài hát nào đang phát</font>"
-nowPlayingLabel.Font = Enum.Font.GothamSemibold
-nowPlayingLabel.TextSize = 11 
-nowPlayingLabel.TextWrapped = true
-nowPlayingLabel.Name = "Text"
-
--- Gắn label vào frame để nó cập nhật đúng
-nowPlayingFrame.Changed:Connect(function()
-    if nowPlayingFrame.Text then nowPlayingLabel.Text = nowPlayingFrame.Text end
-end)
--- Hack trick để gán text trực tiếp qua Frame
-local mt = getmetatable(nowPlayingFrame) or {}
-setmetatable(nowPlayingFrame, {
-    __index = function(t, k)
-        if k == "Text" then return nowPlayingLabel.Text end
-        return mt.__index and mt.__index(t, k) or Instance.new("Frame")[k]
-    end,
-    __newindex = function(t, k, v)
-        if k == "Text" then nowPlayingLabel.Text = v else
-            pcall(function() Instance.new("Frame")[k] = v end)
-        end
-    end
-})
+playControlFrame.LayoutOrder = 3
 
 -- [4] Thanh Âm Lượng
 local volumeFrame = createSlider(page4, "Âm lượng ♪", 0, 10, State.MusicVolume, function(val)
@@ -883,10 +846,7 @@ local function renderSavedMusic()
         delBtn.Font = Enum.Font.GothamBold; delBtn.TextSize = 12; delBtn.ZIndex = 10; Instance.new("UICorner", delBtn).CornerRadius = UDim.new(0, 6)
         
         playBtn.MouseButton1Click:Connect(function() 
-            clickAnimate(playBtn); musicIdBox.Text = data.id
-            local label = page4:FindFirstChild("NowPlayingLabel")
-            if label then label.Text = "<font color='#FFFFFF'>⏳ Đang tải nhạc...</font>" end
-            playMusic(data.id) 
+            clickAnimate(playBtn); musicIdBox.Text = data.id; playMusic(data.id) 
         end)
         delBtn.MouseButton1Click:Connect(function() 
             clickAnimate(delBtn)
@@ -1004,7 +964,7 @@ local function renderSavedTps()
     savedTpContainer.Size = UDim2.new(1, 0, 0, yOffset)
 end
 
-local tpControlFrame = createDualButtons(page5, "📍 LƯU VỊ TRÍ VĨNH VIỄN", Theme.AccentOn, function()
+local tpControlFrame = createDualButtons(page5, "📍 LƯU VỊ TRÍ", Theme.AccentOn, function()
     if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
         local root = player.Character.HumanoidRootPart
         local cf = {root.CFrame:GetComponents()}
@@ -1089,6 +1049,20 @@ RunService.Stepped:Connect(function()
     end
 end)
 
+-- [BẢO TỒN TÍNH NĂNG KHI CÓ VẬT MỚI TẠO RA]
+workspace.DescendantAdded:Connect(function(v)
+    if State.XRay and v:IsA("BasePart") and not v:IsDescendantOf(player.Character) and v.Name ~= "Terrain" and v.Transparency < 1 then
+        if not xrayMats[v] then xrayMats[v] = v.Transparency end; v.Transparency = 0.5
+    end
+    if v:IsA("ProximityPrompt") and State.Instant then
+        if not originalPrompts[v] then
+            originalPrompts[v] = { HoldDuration = v.HoldDuration, MaxActivationDistance = v.MaxActivationDistance }
+        end
+        v.HoldDuration = 0
+        v.MaxActivationDistance = 25
+    end
+end)
+
 RunService.RenderStepped:Connect(function()
     local char = player.Character
     if char and char:FindFirstChildOfClass("Humanoid") then
@@ -1138,19 +1112,5 @@ RunService.RenderStepped:Connect(function()
                 end
             end
         end
-    end
-end)
-
--- [BẢO TỒN LẤY ĐỒ NHANH KHI CÓ VẬT PHẨM MỚI XUẤT HIỆN]
-workspace.DescendantAdded:Connect(function(v)
-    if State.XRay and v:IsA("BasePart") and not v:IsDescendantOf(player.Character) and v.Name ~= "Terrain" and v.Transparency < 1 then
-        if not xrayMats[v] then xrayMats[v] = v.Transparency end; v.Transparency = 0.5
-    end
-    if v:IsA("ProximityPrompt") and State.Instant then
-        if not originalPrompts[v] then
-            originalPrompts[v] = { HoldDuration = v.HoldDuration, MaxActivationDistance = v.MaxActivationDistance }
-        end
-        v.HoldDuration = 0
-        v.MaxActivationDistance = 25
     end
 end)
