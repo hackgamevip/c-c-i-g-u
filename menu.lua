@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V39 (Bản Siêu Cập Nhật - Hitbox, RGB, Freecam, No Fog...)
+-- MENU VIP PRO V39.1 (Bản Cập Nhật - Tùy chỉnh Hitbox, Fix AutoClick & Freecam)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -21,7 +21,7 @@ local State = {
     Instant = false, Noclip = false, LowGfx = false, Speed = false, Jump = false,
     InfJump = false, PlayerLight = false, ESP = false, AntiAfk = true, AntiStun = false, 
     XRay = false, LockPosition = false, AutoCollect = false,
-    SpinBot = false, SpinSpeed = 50, Hitbox = false, AutoClick = false, RGB = false,
+    SpinBot = false, SpinSpeed = 50, Hitbox = false, HitboxSize = 15, AutoClick = false, RGB = false,
     SpeedValue = 60, JumpValue = 120, LightRange = 60, LightBrightness = 3,
     MusicVolume = 5
 }
@@ -73,18 +73,17 @@ screenOverlay.BackgroundColor3 = Color3.new(0,0,0)
 screenOverlay.ZIndex = 0
 screenOverlay.Visible = false
 
--- [NÚT MỞ MENU ICON NHỎ GỌN TRONG SUỐT]
 local openBtn = Instance.new("TextButton", gui)
 openBtn.Size = UDim2.new(0, 45, 0, 45)
 openBtn.Position = UDim2.new(0, 15, 0, 15)
 openBtn.Text = "🚀"
 openBtn.BackgroundColor3 = Theme.MainBg
-openBtn.BackgroundTransparency = 0.3 -- Bán trong suốt
+openBtn.BackgroundTransparency = 0.3
 openBtn.TextColor3 = Theme.Brand
 openBtn.Font = Enum.Font.GothamBold
 openBtn.TextSize = 22
 openBtn.ZIndex = 10
-Instance.new("UICorner", openBtn).CornerRadius = UDim.new(1, 0) -- Hình tròn hoàn hảo
+Instance.new("UICorner", openBtn).CornerRadius = UDim.new(1, 0)
 local openStroke = Instance.new("UIStroke", openBtn)
 openStroke.Color = Theme.Brand; openStroke.Thickness = 2; openStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
@@ -193,11 +192,9 @@ local function createPage()
     pg.Size = UDim2.new(1, 0, 1, 0); pg.BackgroundTransparency = 1
     pg.ScrollBarThickness = 3; pg.ScrollBarImageColor3 = Theme.Brand; pg.Visible = false; pg.BorderSizePixel = 0
     pg.ZIndex = 10
-    
     local layout = Instance.new("UIListLayout", pg)
     layout.HorizontalAlignment = Enum.HorizontalAlignment.Center; layout.Padding = UDim.new(0, 10)
     layout.SortOrder = Enum.SortOrder.LayoutOrder 
-    
     Instance.new("UIPadding", pg).PaddingTop = UDim.new(0, 10); Instance.new("UIPadding", pg).PaddingBottom = UDim.new(0, 30) 
     layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() 
         pg.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 60) 
@@ -478,11 +475,12 @@ createToggle(page2, "🔒 Khóa vị trí", false, function(v)
 end)
 createToggle(page2, "🚀 Nhảy trên không", false, function(v) State.InfJump = v end) 
 
--- TÍNH NĂNG MỚI: TROLL / AFK
+-- TÍNH NĂNG MỚI: TROLL / AFK & HITBOX
 createToggle(page2, "🌪️ Xoay vòng tròn (SpinBot)", false, function(v) State.SpinBot = v end)
 createSlider(page2, "Tốc độ xoay", 10, 100, 50, function(v) State.SpinSpeed = v end)
 
 createToggle(page2, "🎯 Phóng to Hitbox (Đánh xa)", false, function(v) State.Hitbox = v end)
+createSlider(page2, "Kích thước Hitbox", 2, 100, 15, function(v) State.HitboxSize = v end)
 
 local originalPrompts = {}
 createToggle(page2, "🐿️ Lấy đồ nhanh", false, function(v) 
@@ -651,12 +649,29 @@ local function rejoinServer()
 end
 
 -- TÍNH NĂNG MỚI (No Fog, AutoClick, Freecam, FOV)
-createToggle(page3, "🌈 Chế độ RGB (LED Menu)", false, function(v) State.RGB = v; if not v then titleLabel.TextColor3 = Theme.Brand; frameStroke.Color = Theme.Stroke end end)
-createToggle(page3, "🖱️ Auto Clicker", false, function(v) State.AutoClick = v end)
+createToggle(page3, "🌈 Chế độ RGB (Đèn LED Menu)", false, function(v) 
+    State.RGB = v; 
+    if not v then 
+        titleLabel.TextColor3 = Theme.Brand; 
+        frameStroke.Color = Theme.Stroke 
+    end 
+end)
+
+-- SỬA AUTO CLICK: Sử dụng Tool:Activate() rất mượt mà trên mobile
+createToggle(page3, "🖱️ Auto Click (Tự động đánh)", false, function(v) State.AutoClick = v end)
 task.spawn(function()
     while task.wait(0.1) do
         if State.AutoClick then
-            VirtualUser:ClickButton1(Vector2.new(0,0))
+            pcall(function()
+                if player.Character then
+                    local tool = player.Character:FindFirstChildOfClass("Tool")
+                    if tool then
+                        tool:Activate()
+                    end
+                end
+                -- Hỗ trợ thêm cho executor xịn
+                if mouse1click then mouse1click() end
+            end)
         end
     end
 end)
@@ -681,8 +696,9 @@ createToggle(page3, "☀️ Xóa sương mù & Sáng Map", false, function(v)
     end
 end)
 
+-- SỬA FREECAM MỚI CHO MOBILE
 createButton(page3, "🚁 Bật Camera Tự Do (Freecam)", Theme.AccentOn, function()
-    pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/10-X-O/10-X-O/main/Freecam.lua"))() end)
+    pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/Bebo-Mods/BeboScripts/main/FreeCam.lua"))() end)
 end)
 
 createToggle(page3, "⬛ Màn hình đen (Giảm lag)", false, function(v) screenOverlay.BackgroundColor3 = Color3.new(0, 0, 0); screenOverlay.Visible = v end)
@@ -710,21 +726,21 @@ local currentSound = nil
 local currentMusicId = ""
 local savedMusicList = {}
 
-local musicInputFrame = Instance.new("Frame", page4)
-musicInputFrame.Size = UDim2.new(0.9, 0, 0, 48)
-musicInputFrame.BackgroundColor3 = Theme.ItemBg
-musicInputFrame.ZIndex = 10
-musicInputFrame.LayoutOrder = 1 
-Instance.new("UICorner", musicInputFrame).CornerRadius = UDim.new(0, 8)
-local mStroke = Instance.new("UIStroke", musicInputFrame)
+local musicControlFrame = Instance.new("Frame", page4)
+musicControlFrame.Size = UDim2.new(0.9, 0, 0, 85) 
+musicControlFrame.BackgroundColor3 = Theme.ItemBg
+musicControlFrame.ZIndex = 10
+musicControlFrame.LayoutOrder = 1
+Instance.new("UICorner", musicControlFrame).CornerRadius = UDim.new(0, 8)
+local mStroke = Instance.new("UIStroke", musicControlFrame)
 mStroke.Color = Theme.Stroke; mStroke.Thickness = 1
 
-local musicIcon = Instance.new("TextLabel", musicInputFrame)
-musicIcon.Size = UDim2.new(0.15, 0, 1, 0)
+local musicIcon = Instance.new("TextLabel", musicControlFrame)
+musicIcon.Size = UDim2.new(0.15, 0, 0, 40)
 musicIcon.BackgroundTransparency = 1; musicIcon.Text = "🎵"; musicIcon.TextSize = 18; musicIcon.ZIndex = 10
 
-local musicIdBox = Instance.new("TextBox", musicInputFrame)
-musicIdBox.Size = UDim2.new(0.65, 0, 1, 0) 
+local musicIdBox = Instance.new("TextBox", musicControlFrame)
+musicIdBox.Size = UDim2.new(0.65, 0, 0, 40) 
 musicIdBox.Position = UDim2.new(0.15, 0, 0, 0)
 musicIdBox.BackgroundTransparency = 1
 musicIdBox.PlaceholderText = "Nhập ID Nhạc..."
@@ -732,30 +748,30 @@ musicIdBox.Text = ""
 musicIdBox.TextColor3 = Theme.TextTitle 
 musicIdBox.Font = Enum.Font.GothamSemibold; musicIdBox.TextSize = 12; musicIdBox.TextXAlignment = Enum.TextXAlignment.Left; musicIdBox.ClearTextOnFocus = false; musicIdBox.ZIndex = 10
 
-local saveIdBtn = Instance.new("TextButton", musicInputFrame)
-saveIdBtn.Size = UDim2.new(0.2, 0, 1, 0)
+local saveIdBtn = Instance.new("TextButton", musicControlFrame)
+saveIdBtn.Size = UDim2.new(0.2, 0, 0, 40)
 saveIdBtn.Position = UDim2.new(0.8, 0, 0, 0)
 saveIdBtn.BackgroundTransparency = 1
 saveIdBtn.Text = "💾 Lưu"
 saveIdBtn.TextColor3 = Theme.AccentOn
 saveIdBtn.Font = Enum.Font.GothamBold; saveIdBtn.TextSize = 11; saveIdBtn.ZIndex = 10
 
-local nowPlayingFrame = Instance.new("Frame", page4)
-nowPlayingFrame.Size = UDim2.new(0.9, 0, 0, 32)
-nowPlayingFrame.BackgroundColor3 = Theme.ItemBg
-nowPlayingFrame.BackgroundTransparency = 0.5 
-nowPlayingFrame.ZIndex = 10
-nowPlayingFrame.LayoutOrder = 2 
-Instance.new("UICorner", nowPlayingFrame).CornerRadius = UDim.new(0, 6)
+local divLine = Instance.new("Frame", musicControlFrame)
+divLine.Size = UDim2.new(0.9, 0, 0, 1)
+divLine.Position = UDim2.new(0.05, 0, 0, 40)
+divLine.BackgroundColor3 = Theme.Stroke
+divLine.BorderSizePixel = 0; divLine.ZIndex = 10
 
-local nowPlayingLabel = Instance.new("TextLabel", nowPlayingFrame)
-nowPlayingLabel.Size = UDim2.new(1, 0, 1, 0)
+local nowPlayingLabel = Instance.new("TextLabel", musicControlFrame)
+nowPlayingLabel.Size = UDim2.new(0.9, 0, 0, 45)
+nowPlayingLabel.Position = UDim2.new(0.05, 0, 0, 40)
 nowPlayingLabel.BackgroundTransparency = 1
 nowPlayingLabel.RichText = true 
 nowPlayingLabel.Text = "<font color='#FFFFFF'>🎵 Chưa có bài hát nào đang phát</font>"
 nowPlayingLabel.Font = Enum.Font.GothamSemibold
 nowPlayingLabel.TextSize = 11 
 nowPlayingLabel.TextWrapped = true
+nowPlayingLabel.ZIndex = 10
 
 local function getSongName(id)
     local numId = tonumber(id)
@@ -812,17 +828,17 @@ local playControlFrame = createDualButtons(page4, "▶️ PHÁT NHẠC", Theme.A
 end, "⏸️ TẮT NHẠC", Theme.AccentOff, function()
     stopMusic()
 end)
-playControlFrame.LayoutOrder = 3
+playControlFrame.LayoutOrder = 2
 
 local volumeFrame = createSlider(page4, "Âm lượng ♪", 0, 10, State.MusicVolume, function(val)
     State.MusicVolume = val
     if currentSound then currentSound.Volume = val end
 end)
-volumeFrame.LayoutOrder = 4 
+volumeFrame.LayoutOrder = 3
 
 local savedMusicContainer = Instance.new("Frame", page4)
 savedMusicContainer.BackgroundTransparency = 1
-savedMusicContainer.LayoutOrder = 5 
+savedMusicContainer.LayoutOrder = 4
 
 local fileName = "MenuProMax_SavedMusic.json"
 local function loadMusicData()
@@ -1148,7 +1164,7 @@ RunService.RenderStepped:Connect(function()
             if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                 local hrp = p.Character.HumanoidRootPart
                 if State.Hitbox then
-                    hrp.Size = Vector3.new(15, 15, 15)
+                    hrp.Size = Vector3.new(State.HitboxSize, State.HitboxSize, State.HitboxSize)
                     hrp.Transparency = 0.5
                     hrp.CanCollide = false
                 else
