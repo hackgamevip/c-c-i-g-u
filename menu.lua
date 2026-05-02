@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V39.1 (Bản Cập Nhật - Tùy chỉnh Hitbox, Fix AutoClick & Freecam)
+-- MENU VIP PRO V39.2 (Bản Cập Nhật - Fix Hitbox & AutoClick)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -192,9 +192,11 @@ local function createPage()
     pg.Size = UDim2.new(1, 0, 1, 0); pg.BackgroundTransparency = 1
     pg.ScrollBarThickness = 3; pg.ScrollBarImageColor3 = Theme.Brand; pg.Visible = false; pg.BorderSizePixel = 0
     pg.ZIndex = 10
+    
     local layout = Instance.new("UIListLayout", pg)
     layout.HorizontalAlignment = Enum.HorizontalAlignment.Center; layout.Padding = UDim.new(0, 10)
     layout.SortOrder = Enum.SortOrder.LayoutOrder 
+    
     Instance.new("UIPadding", pg).PaddingTop = UDim.new(0, 10); Instance.new("UIPadding", pg).PaddingBottom = UDim.new(0, 30) 
     layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() 
         pg.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 60) 
@@ -332,7 +334,6 @@ end
 -- ==========================================
 -- [TAB 1: THÔNG TIN - DASHBOARD]
 -- ==========================================
-
 local function createInfoBox(parent, icon, titleText, heightOffset)
     local item = Instance.new("Frame", parent)
     item.Size = UDim2.new(0.9, 0, 0, heightOffset or 85) 
@@ -648,7 +649,7 @@ local function rejoinServer()
     else TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, player) end
 end
 
--- TÍNH NĂNG MỚI (No Fog, AutoClick, Freecam, FOV)
+-- TÍNH NĂNG MỚI (No Fog, AutoClick, FOV)
 createToggle(page3, "🌈 Chế độ RGB (Đèn LED Menu)", false, function(v) 
     State.RGB = v; 
     if not v then 
@@ -657,20 +658,18 @@ createToggle(page3, "🌈 Chế độ RGB (Đèn LED Menu)", false, function(v)
     end 
 end)
 
--- SỬA AUTO CLICK: Sử dụng Tool:Activate() rất mượt mà trên mobile
-createToggle(page3, "🖱️ Auto Click (Tự động đánh)", false, function(v) State.AutoClick = v end)
+-- [ĐÃ FIX: AUTO CLICK CỐ ĐỊNH, CHÉM CHUẨN, KHÔNG BỊ KẸT KHI TẮT]
+createToggle(page3, "🖱️ Auto Click (Cố định)", false, function(v) State.AutoClick = v end)
 task.spawn(function()
     while task.wait(0.1) do
         if State.AutoClick then
             pcall(function()
                 if player.Character then
                     local tool = player.Character:FindFirstChildOfClass("Tool")
-                    if tool then
-                        tool:Activate()
-                    end
+                    if tool then tool:Activate() end
                 end
-                -- Hỗ trợ thêm cho executor xịn
-                if mouse1click then mouse1click() end
+                local center = workspace.CurrentCamera.ViewportSize / 2
+                VirtualUser:ClickButton1(Vector2.new(center.X, center.Y), workspace.CurrentCamera.CFrame)
             end)
         end
     end
@@ -694,11 +693,6 @@ createToggle(page3, "☀️ Xóa sương mù & Sáng Map", false, function(v)
         Lighting.Brightness = origBright or 1
         Lighting.GlobalShadows = origShadow
     end
-end)
-
--- SỬA FREECAM MỚI CHO MOBILE
-createButton(page3, "🚁 Bật Camera Tự Do (Freecam)", Theme.AccentOn, function()
-    pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/Bebo-Mods/BeboScripts/main/FreeCam.lua"))() end)
 end)
 
 createToggle(page3, "⬛ Màn hình đen (Giảm lag)", false, function(v) screenOverlay.BackgroundColor3 = Color3.new(0, 0, 0); screenOverlay.Visible = v end)
@@ -1160,6 +1154,7 @@ RunService.RenderStepped:Connect(function()
             root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(State.SpinSpeed), 0)
         end
 
+        -- [ĐÃ FIX LỖI KẸT VẬT LÝ KHI ĐỨNG TRONG HITBOX BẰNG MASSLESS & CANCOLLIDE]
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                 local hrp = p.Character.HumanoidRootPart
@@ -1167,9 +1162,11 @@ RunService.RenderStepped:Connect(function()
                     hrp.Size = Vector3.new(State.HitboxSize, State.HitboxSize, State.HitboxSize)
                     hrp.Transparency = 0.5
                     hrp.CanCollide = false
+                    hrp.Massless = true -- <== Chống kẹt vật lý khi bạn đứng bên trong
                 else
                     hrp.Size = Vector3.new(2, 2, 1)
                     hrp.Transparency = 1
+                    hrp.Massless = false
                 end
             end
             
