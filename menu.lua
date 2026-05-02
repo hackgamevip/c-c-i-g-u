@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (Bản Cập Nhật - FIX LỖI KHÔNG HIỆN MENU)
+-- MENU VIP PRO V38 (Bản Cập Nhật - FIX XRAY & ĐI MẶT NƯỚC)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -336,6 +336,7 @@ end
 -- ==========================================
 -- [TAB 1: THÔNG TIN - DASHBOARD]
 -- ==========================================
+
 local function createInfoBox(parent, icon, titleText, heightOffset)
     local item = Instance.new("Frame", parent)
     item.Size = UDim2.new(0.9, 0, 0, heightOffset or 85) 
@@ -450,6 +451,7 @@ end)
 -- ==========================================
 -- [TAB 2: NHÂN VẬT]
 -- ==========================================
+
 local astralClone = nil
 local astralProps = {}
 createToggle(page2, "🏃 Chạy nhanh", false, function(v) 
@@ -477,6 +479,7 @@ createToggle(page2, "🔒 Khóa vị trí", false, function(v)
 end)
 createToggle(page2, "🚀 Nhảy trên không", false, function(v) State.InfJump = v end) 
 
+-- LƯU VỊ TRÍ ĐỒ VÀ PHỤC HỒI KHI TẮT "LẤY ĐỒ NHANH"
 local originalPrompts = {}
 createToggle(page2, "🐿️ Lấy đồ nhanh", false, function(v) 
     State.Instant = v
@@ -568,24 +571,30 @@ end)
 local waterPart = Instance.new("Part"); waterPart.Size = Vector3.new(10, 1, 10); waterPart.Transparency = 1; waterPart.Anchored = true; waterPart.CanCollide = true
 createToggle(page2, "🌊 Đi trên mặt nước", false, function(v) State.WalkOnWater = v end)
 
+-- [SỬA LẠI XRAY ĐỂ CHỐNG LỖI HOẠT ẢNH KHI BẬT/TẮT LIÊN TỤC]
 local xrayMats = {}
+local xrayTick = 0
 createToggle(page2, "👀 Nhìn xuyên map", false, function(v) 
     State.XRay = v 
+    xrayTick = xrayTick + 1
+    local currentTick = xrayTick
     task.spawn(function()
         if v then
             for i, obj in ipairs(workspace:GetDescendants()) do
+                if currentTick ~= xrayTick then return end -- Tắt ngay nếu bị bấm lặp lại
                 if obj:IsA("BasePart") and not obj:IsDescendantOf(player.Character) and obj.Name ~= "Terrain" and obj.Transparency < 1 then
                     if not xrayMats[obj] then xrayMats[obj] = obj.Transparency end; obj.Transparency = 0.5
                 end
-                if i % 500 == 0 then task.wait() end 
+                if i % 300 == 0 then task.wait() end 
             end
         else
             local count = 0
             for obj, origTrans in pairs(xrayMats) do
+                if currentTick ~= xrayTick then return end
                 if obj and obj.Parent then obj.Transparency = origTrans end
-                count = count + 1; if count % 500 == 0 then task.wait() end
+                count = count + 1; if count % 300 == 0 then task.wait() end
             end
-            xrayMats = {}
+            if currentTick == xrayTick then xrayMats = {} end
         end
     end)
 end)
@@ -665,22 +674,22 @@ local currentSound = nil
 local currentMusicId = ""
 local savedMusicList = {}
 
--- [1] Ô Nhập ID Nhạc
-local musicInputFrame = Instance.new("Frame", page4)
-musicInputFrame.Size = UDim2.new(0.9, 0, 0, 48)
-musicInputFrame.BackgroundColor3 = Theme.ItemBg
-musicInputFrame.ZIndex = 10
-musicInputFrame.LayoutOrder = 1 
-Instance.new("UICorner", musicInputFrame).CornerRadius = UDim.new(0, 8)
-local mStroke = Instance.new("UIStroke", musicInputFrame)
+-- [MỤC 1] BỘ ĐIỀU KHIỂN & TÊN BÀI HÁT
+local musicControlFrame = Instance.new("Frame", page4)
+musicControlFrame.Size = UDim2.new(0.9, 0, 0, 85) -- Ô to chứa cả Nhập ID, Tên bài, Nút phát
+musicControlFrame.BackgroundColor3 = Theme.ItemBg
+musicControlFrame.ZIndex = 10
+musicControlFrame.LayoutOrder = 1
+Instance.new("UICorner", musicControlFrame).CornerRadius = UDim.new(0, 8)
+local mStroke = Instance.new("UIStroke", musicControlFrame)
 mStroke.Color = Theme.Stroke; mStroke.Thickness = 1
 
-local musicIcon = Instance.new("TextLabel", musicInputFrame)
-musicIcon.Size = UDim2.new(0.15, 0, 1, 0)
+local musicIcon = Instance.new("TextLabel", musicControlFrame)
+musicIcon.Size = UDim2.new(0.15, 0, 0, 40)
 musicIcon.BackgroundTransparency = 1; musicIcon.Text = "🎵"; musicIcon.TextSize = 18; musicIcon.ZIndex = 10
 
-local musicIdBox = Instance.new("TextBox", musicInputFrame)
-musicIdBox.Size = UDim2.new(0.65, 0, 1, 0) 
+local musicIdBox = Instance.new("TextBox", musicControlFrame)
+musicIdBox.Size = UDim2.new(0.65, 0, 0, 40) 
 musicIdBox.Position = UDim2.new(0.15, 0, 0, 0)
 musicIdBox.BackgroundTransparency = 1
 musicIdBox.PlaceholderText = "Nhập ID Nhạc..."
@@ -688,31 +697,31 @@ musicIdBox.Text = ""
 musicIdBox.TextColor3 = Theme.TextTitle 
 musicIdBox.Font = Enum.Font.GothamSemibold; musicIdBox.TextSize = 12; musicIdBox.TextXAlignment = Enum.TextXAlignment.Left; musicIdBox.ClearTextOnFocus = false; musicIdBox.ZIndex = 10
 
-local saveIdBtn = Instance.new("TextButton", musicInputFrame)
-saveIdBtn.Size = UDim2.new(0.2, 0, 1, 0)
+local saveIdBtn = Instance.new("TextButton", musicControlFrame)
+saveIdBtn.Size = UDim2.new(0.2, 0, 0, 40)
 saveIdBtn.Position = UDim2.new(0.8, 0, 0, 0)
 saveIdBtn.BackgroundTransparency = 1
 saveIdBtn.Text = "💾 Lưu"
 saveIdBtn.TextColor3 = Theme.AccentOn
 saveIdBtn.Font = Enum.Font.GothamBold; saveIdBtn.TextSize = 11; saveIdBtn.ZIndex = 10
 
--- [2] Tên Bài Hát Đang Phát
-local nowPlayingFrame = Instance.new("Frame", page4)
-nowPlayingFrame.Size = UDim2.new(0.9, 0, 0, 32)
-nowPlayingFrame.BackgroundColor3 = Theme.ItemBg
-nowPlayingFrame.BackgroundTransparency = 0.5 
-nowPlayingFrame.ZIndex = 10
-nowPlayingFrame.LayoutOrder = 2 
-Instance.new("UICorner", nowPlayingFrame).CornerRadius = UDim.new(0, 6)
+local divLine = Instance.new("Frame", musicControlFrame)
+divLine.Size = UDim2.new(0.9, 0, 0, 1)
+divLine.Position = UDim2.new(0.05, 0, 0, 40)
+divLine.BackgroundColor3 = Theme.Stroke
+divLine.BorderSizePixel = 0; divLine.ZIndex = 10
 
-local nowPlayingLabel = Instance.new("TextLabel", nowPlayingFrame)
-nowPlayingLabel.Size = UDim2.new(1, 0, 1, 0)
+-- NƠI HIỂN THỊ TÊN BÀI HÁT ĐANG PHÁT (Được khóa vị trí ngay dưới Ô nhập ID)
+local nowPlayingLabel = Instance.new("TextLabel", musicControlFrame)
+nowPlayingLabel.Size = UDim2.new(0.9, 0, 0, 45)
+nowPlayingLabel.Position = UDim2.new(0.05, 0, 0, 40)
 nowPlayingLabel.BackgroundTransparency = 1
 nowPlayingLabel.RichText = true 
 nowPlayingLabel.Text = "<font color='#FFFFFF'>🎵 Chưa có bài hát nào đang phát</font>"
 nowPlayingLabel.Font = Enum.Font.GothamSemibold
 nowPlayingLabel.TextSize = 11 
 nowPlayingLabel.TextWrapped = true
+nowPlayingLabel.ZIndex = 10
 
 local function getSongName(id)
     local numId = tonumber(id)
@@ -764,25 +773,25 @@ local function stopMusic()
     end
 end
 
--- [3] Nút Phát/Tắt
-local playControlFrame = createDualButtons(page4, "▶️PHÁT NHẠC", Theme.AccentOn, function()
+-- [MỤC 2] Nút Phát/Tắt
+local playControlFrame = createDualButtons(page4, "▶️ PHÁT NHẠC", Theme.AccentOn, function()
     playMusic(musicIdBox.Text)
 end, "⏸️ TẮT NHẠC", Theme.AccentOff, function()
     stopMusic()
 end)
-playControlFrame.LayoutOrder = 3
+playControlFrame.LayoutOrder = 2
 
--- [4] Thanh Âm Lượng
+-- [MỤC 3] Thanh Âm Lượng
 local volumeFrame = createSlider(page4, "Âm lượng ♪", 0, 10, State.MusicVolume, function(val)
     State.MusicVolume = val
     if currentSound then currentSound.Volume = val end
 end)
-volumeFrame.LayoutOrder = 4 
+volumeFrame.LayoutOrder = 3
 
--- [5] Danh Sách Bài Hát
+-- [MỤC 4] Danh Sách Bài Hát Lưu Trữ
 local savedMusicContainer = Instance.new("Frame", page4)
 savedMusicContainer.BackgroundTransparency = 1
-savedMusicContainer.LayoutOrder = 5 
+savedMusicContainer.LayoutOrder = 4
 
 local fileName = "MenuProMax_SavedMusic.json"
 local function loadMusicData()
@@ -964,7 +973,7 @@ local function renderSavedTps()
     savedTpContainer.Size = UDim2.new(1, 0, 0, yOffset)
 end
 
-local tpControlFrame = createDualButtons(page5, "📍 LƯU VỊ TRÍ", Theme.AccentOn, function()
+local tpControlFrame = createDualButtons(page5, "📍 LƯU VỊ TRÍ VĨNH VIỄN", Theme.AccentOn, function()
     if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
         local root = player.Character.HumanoidRootPart
         local cf = {root.CFrame:GetComponents()}
