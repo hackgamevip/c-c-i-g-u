@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V39.7 (Bản Cập Nhật - Tối ưu Siêu Tầm Đánh Vũ Khí)
+-- MENU VIP PRO V39.8 (Bản Cập Nhật - Fix Triệt Để Chống Văng Xa)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -22,7 +22,7 @@ local State = {
     InfJump = false, PlayerLight = false, ESP = false, AntiAfk = true, AntiStun = false, 
     XRay = false, LockPosition = false, AutoCollect = false,
     SpinBot = false, SpinSpeed = 50, Hitbox = false, HitboxSize = 15, AutoClick = false, RGB = false,
-    Reach = false, ReachSize = 15, -- TÍNH NĂNG SIÊU TẦM ĐÁNH VŨ KHÍ
+    Reach = false, ReachSize = 15,
     SpeedValue = 60, JumpValue = 120, LightRange = 60, LightBrightness = 3,
     MusicVolume = 5
 }
@@ -130,7 +130,7 @@ headerCover.ZIndex = 10
 
 local titleLabel = Instance.new("TextLabel", header)
 titleLabel.Size = UDim2.new(1, 0, 1, 0); titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "MENU PRO MAX V39.7"
+titleLabel.Text = "MENU PRO MAX V39.8"
 titleLabel.TextColor3 = Theme.Brand; titleLabel.Font = Enum.Font.GothamBlack; titleLabel.TextSize = 14
 titleLabel.ZIndex = 10
 
@@ -440,7 +440,7 @@ task.spawn(function()
         local timeString = string.format("%02d:%02d:%02d", hours, mins, secs)
         
         extraInfoLabel.Text = string.format(
-            "<font color='#00C8FF'>Thời gian chơi:</font> %s\n<font color='#00C8FF'>Giờ hệ thống:</font> %s\n<font color='#00C8FF'>Phiên bản:</font> MENU VIP PRO V39.7",
+            "<font color='#00C8FF'>Thời gian chơi:</font> %s\n<font color='#00C8FF'>Giờ hệ thống:</font> %s\n<font color='#00C8FF'>Phiên bản:</font> MENU VIP PRO V39.8",
             timeString, os.date("%H:%M:%S")
         )
     end
@@ -1167,19 +1167,6 @@ RunService.Stepped:Connect(function()
     end
 end)
 
-workspace.DescendantAdded:Connect(function(v)
-    if State.XRay and v:IsA("BasePart") and not v:IsDescendantOf(player.Character) and v.Name ~= "Terrain" and v.Transparency < 1 then
-        if not xrayMats[v] then xrayMats[v] = v.Transparency end; v.Transparency = 0.5
-    end
-    if v:IsA("ProximityPrompt") and State.Instant then
-        if not originalPrompts[v] then
-            originalPrompts[v] = { HoldDuration = v.HoldDuration, MaxActivationDistance = v.MaxActivationDistance }
-        end
-        v.HoldDuration = 0
-        v.MaxActivationDistance = 25
-    end
-end)
-
 -- [BẢO TỒN HOẠT ĐỘNG LIÊN TỤC]
 RunService.RenderStepped:Connect(function()
     if State.RGB then
@@ -1199,12 +1186,18 @@ RunService.RenderStepped:Connect(function()
         if State.Speed then hum.WalkSpeed = State.SpeedValue end
         if State.Jump then hum.UseJumpPower = true; hum.JumpPower = State.JumpValue end
         
+        -- Cập nhật fix chống ngã + chống văng xa
         if State.AntiStun then 
             hum.PlatformStand = false
             hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
             hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
-            if root and root.RotVelocity.Magnitude > 50 then 
-                root.RotVelocity = Vector3.new(0, 0, 0) 
+            if root then 
+                root.RotVelocity = Vector3.new(0, 0, 0)
+                local currentWalkSpeed = hum.WalkSpeed
+                local horizontalVelocity = Vector3.new(root.Velocity.X, 0, root.Velocity.Z)
+                if horizontalVelocity.Magnitude > (currentWalkSpeed + 35) then 
+                    root.Velocity = Vector3.new(0, root.Velocity.Y, 0) 
+                end
             end 
         end
 
