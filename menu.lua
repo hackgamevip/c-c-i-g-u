@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V39.8 (Bản Cập Nhật - Fix Triệt Để Chống Văng Xa)
+-- MENU VIP PRO V39.9 (Bản Cập Nhật - Thêm Đánh Nhanh Tốc Độ Cao)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -22,7 +22,7 @@ local State = {
     InfJump = false, PlayerLight = false, ESP = false, AntiAfk = true, AntiStun = false, 
     XRay = false, LockPosition = false, AutoCollect = false,
     SpinBot = false, SpinSpeed = 50, Hitbox = false, HitboxSize = 15, AutoClick = false, RGB = false,
-    Reach = false, ReachSize = 15,
+    Reach = false, ReachSize = 15, FastAttack = false, -- TÍNH NĂNG MỚI: ĐÁNH NHANH
     SpeedValue = 60, JumpValue = 120, LightRange = 60, LightBrightness = 3,
     MusicVolume = 5
 }
@@ -130,7 +130,7 @@ headerCover.ZIndex = 10
 
 local titleLabel = Instance.new("TextLabel", header)
 titleLabel.Size = UDim2.new(1, 0, 1, 0); titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "MENU PRO MAX V39.8"
+titleLabel.Text = "MENU PRO MAX V39.9"
 titleLabel.TextColor3 = Theme.Brand; titleLabel.Font = Enum.Font.GothamBlack; titleLabel.TextSize = 14
 titleLabel.ZIndex = 10
 
@@ -440,7 +440,7 @@ task.spawn(function()
         local timeString = string.format("%02d:%02d:%02d", hours, mins, secs)
         
         extraInfoLabel.Text = string.format(
-            "<font color='#00C8FF'>Thời gian chơi:</font> %s\n<font color='#00C8FF'>Giờ hệ thống:</font> %s\n<font color='#00C8FF'>Phiên bản:</font> MENU VIP PRO V39.8",
+            "<font color='#00C8FF'>Thời gian chơi:</font> %s\n<font color='#00C8FF'>Giờ hệ thống:</font> %s\n<font color='#00C8FF'>Phiên bản:</font> MENU VIP PRO V39.9",
             timeString, os.date("%H:%M:%S")
         )
     end
@@ -470,9 +470,11 @@ end)
 
 createToggle(page2, "🚀 Nhảy trên không", false, function(v) State.InfJump = v end) 
 
--- TÍNH NĂNG MỚI: SIÊU TẦM ĐÁNH VŨ KHÍ (REACH TOÀN PHẦN)
 createToggle(page2, "⚔️ Phóng to Vũ Khí (Tầm đánh)", false, function(v) State.Reach = v end)
 createSlider(page2, "Kích thước vũ khí", 2, 100, 15, function(v) State.ReachSize = v end)
+
+-- [TÍNH NĂNG MỚI: ĐÁNH NHANH BÀN THỜ]
+createToggle(page2, "⚡ Đánh nhanh (Fast Attack)", false, function(v) State.FastAttack = v end)
 
 createToggle(page2, "🌪️ Xoay vòng tròn (SpinBot)", false, function(v) State.SpinBot = v end)
 createSlider(page2, "Tốc độ xoay", 10, 100, 50, function(v) State.SpinSpeed = v end)
@@ -483,10 +485,8 @@ createSlider(page2, "Kích thước đối thủ", 2, 100, 15, function(v) State
 local originalPrompts = {}
 local originalToolSizes = {}
 
--- [HITBOX & SIÊU REACH]
 task.spawn(function()
     while task.wait(0.2) do
-        -- LẤY ĐỒ NHANH
         if State.Instant then
             for _, prompt in pairs(workspace:GetDescendants()) do 
                 if prompt:IsA("ProximityPrompt") then 
@@ -505,7 +505,6 @@ task.spawn(function()
             originalPrompts = {}
         end
 
-        -- AUTO COLLECT
         if State.AutoCollect and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             local root = player.Character.HumanoidRootPart
             for _, obj in pairs(workspace:GetDescendants()) do
@@ -526,7 +525,6 @@ task.spawn(function()
             end
         end
 
-        -- TỐI ƯU HÓA SIÊU TẦM ĐÁNH VŨ KHÍ (ULTRA REACH)
         if State.Reach and player.Character then
             local tool = player.Character:FindFirstChildOfClass("Tool")
             if tool then
@@ -543,7 +541,7 @@ task.spawn(function()
                         part.Size = Vector3.new(State.ReachSize, State.ReachSize, State.ReachSize)
                         part.Massless = true
                         part.CanCollide = false
-                        part.Transparency = 0.8 -- Làm mờ để không che mắt bạn
+                        part.Transparency = 0.8 
                     end
                 end
             end
@@ -559,7 +557,6 @@ task.spawn(function()
             originalToolSizes = {}
         end
 
-        -- HITBOX ĐỐI THỦ
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                 local hrp = p.Character.HumanoidRootPart
@@ -758,8 +755,7 @@ createDualButtons(page3, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(f
     local b2 = Instance.new("HopperBin", player.Backpack); b2.BinType = Enum.BinType.Hammer
     local b3 = Instance.new("HopperBin", player.Backpack); b3.BinType = Enum.BinType.Grab
 end) end)
-createDualButtons(page3, "🕊️ FLY V1", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end, 
-"🚀 FLY V3", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end) end)
+createButton(page3, "📂 TP SAVE V2 GUI", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
 
 -- ==========================================
 -- [TAB 4: PHÁT NHẠC VÀ LƯU TRỮ VĨNH VIỄN]
@@ -1167,6 +1163,12 @@ RunService.Stepped:Connect(function()
     end
 end)
 
+workspace.DescendantAdded:Connect(function(v)
+    if State.XRay and v:IsA("BasePart") and not v:IsDescendantOf(player.Character) and v.Name ~= "Terrain" and v.Transparency < 1 then
+        if not xrayMats[v] then xrayMats[v] = v.Transparency end; v.Transparency = 0.5
+    end
+end)
+
 -- [BẢO TỒN HOẠT ĐỘNG LIÊN TỤC]
 RunService.RenderStepped:Connect(function()
     if State.RGB then
@@ -1186,7 +1188,17 @@ RunService.RenderStepped:Connect(function()
         if State.Speed then hum.WalkSpeed = State.SpeedValue end
         if State.Jump then hum.UseJumpPower = true; hum.JumpPower = State.JumpValue end
         
-        -- Cập nhật fix chống ngã + chống văng xa
+        -- [TÍNH NĂNG MỚI] CƠ CHẾ ĐÁNH NHANH X5 HOẠT ẢNH
+        if State.FastAttack then
+            pcall(function()
+                local tool = char:FindFirstChildOfClass("Tool")
+                if tool then tool:Activate() end
+                for _, anim in pairs(hum:GetPlayingAnimationTracks()) do
+                    anim:AdjustSpeed(5) 
+                end
+            end)
+        end
+        
         if State.AntiStun then 
             hum.PlatformStand = false
             hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
