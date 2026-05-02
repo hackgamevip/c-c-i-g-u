@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V39.5 (Bản Cập Nhật - Fix Triệt Để Lỗi Hitbox Đóng Băng)
+-- MENU VIP PRO V39.6 (Bản Cập Nhật - Fix ESP, Fix Anti-Stun)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -22,7 +22,7 @@ local State = {
     InfJump = false, PlayerLight = false, ESP = false, AntiAfk = true, AntiStun = false, 
     XRay = false, LockPosition = false, AutoCollect = false,
     SpinBot = false, SpinSpeed = 50, Hitbox = false, HitboxSize = 15, AutoClick = false, RGB = false,
-    Reach = false, ReachSize = 15, -- TÍNH NĂNG MỚI: TẦM ĐÁNH
+    Reach = false, ReachSize = 15,
     SpeedValue = 60, JumpValue = 120, LightRange = 60, LightBrightness = 3,
     MusicVolume = 5
 }
@@ -130,7 +130,7 @@ headerCover.ZIndex = 10
 
 local titleLabel = Instance.new("TextLabel", header)
 titleLabel.Size = UDim2.new(1, 0, 1, 0); titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "MENU PRO MAX V39.5"
+titleLabel.Text = "MENU PRO MAX V39.6"
 titleLabel.TextColor3 = Theme.Brand; titleLabel.Font = Enum.Font.GothamBlack; titleLabel.TextSize = 14
 titleLabel.ZIndex = 10
 
@@ -440,7 +440,7 @@ task.spawn(function()
         local timeString = string.format("%02d:%02d:%02d", hours, mins, secs)
         
         extraInfoLabel.Text = string.format(
-            "<font color='#00C8FF'>Thời gian chơi:</font> %s\n<font color='#00C8FF'>Giờ hệ thống:</font> %s\n<font color='#00C8FF'>Phiên bản:</font> MENU VIP PRO V39.5",
+            "<font color='#00C8FF'>Thời gian chơi:</font> %s\n<font color='#00C8FF'>Giờ hệ thống:</font> %s\n<font color='#00C8FF'>Phiên bản:</font> MENU VIP PRO V39.6",
             timeString, os.date("%H:%M:%S")
         )
     end
@@ -462,12 +462,7 @@ createSlider(page2, "Lực nhảy", 50, 300, 120, function(val) State.JumpValue 
 
 createToggle(page2, "🛡️ Chống ngã & Chống văng", false, function(v) 
     State.AntiStun = v 
-    if player.Character and player.Character:FindFirstChild("Humanoid") then
-        local hum = player.Character.Humanoid
-        hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, not v)
-        hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, not v)
-        hum:SetStateEnabled(Enum.HumanoidStateType.Physics, not v)
-    end
+    -- Tính năng này giờ được kiểm soát gắt gao trong vòng lặp RenderStepped bên dưới
 end)
 
 createToggle(page2, "🔒 Khóa vị trí", false, function(v) 
@@ -476,7 +471,6 @@ end)
 
 createToggle(page2, "🚀 Nhảy trên không", false, function(v) State.InfJump = v end) 
 
--- TÍNH NĂNG MỚI: TẦM ĐÁNH VŨ KHÍ (REACH)
 createToggle(page2, "⚔️ Phóng to Vũ Khí (Tầm đánh)", false, function(v) State.Reach = v end)
 createSlider(page2, "Kích thước vũ khí", 2, 100, 15, function(v) State.ReachSize = v end)
 
@@ -489,7 +483,7 @@ createSlider(page2, "Kích thước đối thủ", 2, 100, 15, function(v) State
 local originalPrompts = {}
 local originalToolSizes = {}
 
--- [FIX TRIỆT ĐỂ: TÁCH HITBOX RA KHỎI RENDERSTEPPED CHỐNG ĐÓNG BĂNG]
+-- [HITBOX & REACH Ở LUỒNG CHẬM TRÁNH LAG]
 task.spawn(function()
     while task.wait(0.2) do
         -- LẤY ĐỒ NHANH
@@ -555,7 +549,7 @@ task.spawn(function()
             originalToolSizes = {}
         end
 
-        -- HITBOX ĐỐI THỦ (Fix hoàn toàn lỗi đứng im)
+        -- HITBOX ĐỐI THỦ
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                 local hrp = p.Character.HumanoidRootPart
@@ -566,10 +560,9 @@ task.spawn(function()
                             hrp.Size = targetSize
                             hrp.Transparency = 0.5
                             hrp.CanCollide = false
-                            -- TUYỆT ĐỐI KHÔNG DÙNG MASSLESS Ở ĐÂY ĐỂ TRÁNH LỖI VẬT LÝ SERVER
                         end
                     else
-                        if hrp.Size.X > 5 then -- Nếu đang to thì mới thu nhỏ lại
+                        if hrp.Size.X > 5 then 
                             hrp.Size = Vector3.new(2, 2, 1)
                             hrp.Transparency = 1
                             hrp.CanCollide = false
@@ -712,7 +705,6 @@ createToggle(page3, "🌈 Chế độ RGB (Đèn LED Menu)", false, function(v)
     end 
 end)
 
--- AUTO CLICK FIX CỐ ĐỊNH TÂM MÀN HÌNH
 createToggle(page3, "🖱️ Auto Click (Tự động đánh)", false, function(v) State.AutoClick = v end)
 task.spawn(function()
     while task.wait(0.1) do
@@ -1165,6 +1157,20 @@ RunService.Stepped:Connect(function()
     end
 end)
 
+workspace.DescendantAdded:Connect(function(v)
+    if State.XRay and v:IsA("BasePart") and not v:IsDescendantOf(player.Character) and v.Name ~= "Terrain" and v.Transparency < 1 then
+        if not xrayMats[v] then xrayMats[v] = v.Transparency end; v.Transparency = 0.5
+    end
+    if v:IsA("ProximityPrompt") and State.Instant then
+        if not originalPrompts[v] then
+            originalPrompts[v] = { HoldDuration = v.HoldDuration, MaxActivationDistance = v.MaxActivationDistance }
+        end
+        v.HoldDuration = 0
+        v.MaxActivationDistance = 25
+    end
+end)
+
+-- [FIX ESP HIỂN THỊ TRONG LUỒNG RENDERSTEPPED & FIX CHỐNG VĂNG]
 RunService.RenderStepped:Connect(function()
     if State.RGB then
         local hue = tick() % 5 / 5
@@ -1182,7 +1188,17 @@ RunService.RenderStepped:Connect(function()
         
         if State.Speed then hum.WalkSpeed = State.SpeedValue end
         if State.Jump then hum.UseJumpPower = true; hum.JumpPower = State.JumpValue end
-        if State.AntiStun then hum.PlatformStand = false; if root then root.RotVelocity = Vector3.new(0, 0, 0) end end
+        
+        -- Cập nhật chống ngã liên tục 60 khung hình/giây
+        if State.AntiStun then 
+            hum.PlatformStand = false
+            hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+            hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+            -- Triệt tiêu lực văng, chống bay mất xác
+            if root and root.RotVelocity.Magnitude > 50 then 
+                root.RotVelocity = Vector3.new(0, 0, 0) 
+            end 
+        end
 
         if State.SpinBot and root then
             root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(State.SpinSpeed), 0)
@@ -1194,6 +1210,26 @@ RunService.RenderStepped:Connect(function()
                 if not light then light = Instance.new("PointLight", root); light.Name = "PlayerPointLight"; light.Shadows = false end 
                 light.Brightness = State.LightBrightness; light.Range = State.LightRange
             else if light then light:Destroy() end end
+        end
+
+        -- Cập nhật ESP tại đây để chữ di chuyển mượt theo người chơi
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= player and p.Character and p.Character:FindFirstChild("Head") then
+                local tChar = p.Character; local head = tChar.Head
+                if State.ESP then
+                    local bgui = head:FindFirstChild("MobileESP_Name")
+                    if not bgui then
+                        bgui = Instance.new("BillboardGui", head); bgui.Name = "MobileESP_Name"; bgui.Size = UDim2.new(0, 200, 0, 50); bgui.StudsOffset = Vector3.new(0, 2, 0); bgui.AlwaysOnTop = true; bgui.Adornee = head
+                        local tLabel = Instance.new("TextLabel", bgui); tLabel.Name = "NameLabel"; tLabel.Size = UDim2.new(1, 0, 1, 0); tLabel.BackgroundTransparency = 1; tLabel.TextColor3 = Color3.fromRGB(255, 60, 60); tLabel.TextStrokeTransparency = 0.2; tLabel.TextStrokeColor3 = Color3.new(0, 0, 0); tLabel.Font = Enum.Font.GothamBold; tLabel.TextSize = 11; tLabel.RichText = true 
+                    end
+                    if root and tChar:FindFirstChild("HumanoidRootPart") then
+                        local dist = math.floor((root.Position - tChar.HumanoidRootPart.Position).Magnitude)
+                        bgui.NameLabel.Text = p.DisplayName .. '\n<font color="#4CAF50">[' .. dist .. 'm]</font>'
+                    else bgui.NameLabel.Text = p.DisplayName end
+                else
+                    local bgui = head:FindFirstChild("MobileESP_Name"); if bgui then bgui:Destroy() end
+                end
+            end
         end
     end
 end)
