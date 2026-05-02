@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V39.3 (Bản Cập Nhật - Thêm Tầm Đánh Vũ Khí)
+-- MENU VIP PRO V39.4 (Bản Cập Nhật - Fix Lỗi Đóng Băng Người Chơi)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -22,7 +22,7 @@ local State = {
     InfJump = false, PlayerLight = false, ESP = false, AntiAfk = true, AntiStun = false, 
     XRay = false, LockPosition = false, AutoCollect = false,
     SpinBot = false, SpinSpeed = 50, Hitbox = false, HitboxSize = 15, AutoClick = false, RGB = false,
-    Reach = false, ReachSize = 15, -- TÍNH NĂNG MỚI: TẦM ĐÁNH
+    Reach = false, ReachSize = 15, 
     SpeedValue = 60, JumpValue = 120, LightRange = 60, LightBrightness = 3,
     MusicVolume = 5
 }
@@ -130,7 +130,7 @@ headerCover.ZIndex = 10
 
 local titleLabel = Instance.new("TextLabel", header)
 titleLabel.Size = UDim2.new(1, 0, 1, 0); titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "MENU PRO MAX V39.3"
+titleLabel.Text = "MENU PRO MAX V39.4"
 titleLabel.TextColor3 = Theme.Brand; titleLabel.Font = Enum.Font.GothamBlack; titleLabel.TextSize = 14
 titleLabel.ZIndex = 10
 
@@ -193,11 +193,9 @@ local function createPage()
     pg.Size = UDim2.new(1, 0, 1, 0); pg.BackgroundTransparency = 1
     pg.ScrollBarThickness = 3; pg.ScrollBarImageColor3 = Theme.Brand; pg.Visible = false; pg.BorderSizePixel = 0
     pg.ZIndex = 10
-    
     local layout = Instance.new("UIListLayout", pg)
     layout.HorizontalAlignment = Enum.HorizontalAlignment.Center; layout.Padding = UDim.new(0, 10)
     layout.SortOrder = Enum.SortOrder.LayoutOrder 
-    
     Instance.new("UIPadding", pg).PaddingTop = UDim.new(0, 10); Instance.new("UIPadding", pg).PaddingBottom = UDim.new(0, 30) 
     layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() 
         pg.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 60) 
@@ -440,7 +438,7 @@ task.spawn(function()
         local timeString = string.format("%02d:%02d:%02d", hours, mins, secs)
         
         extraInfoLabel.Text = string.format(
-            "<font color='#00C8FF'>Thời gian chơi:</font> %s\n<font color='#00C8FF'>Giờ hệ thống:</font> %s\n<font color='#00C8FF'>Phiên bản:</font> MENU VIP PRO V39.3",
+            "<font color='#00C8FF'>Thời gian chơi:</font> %s\n<font color='#00C8FF'>Giờ hệ thống:</font> %s\n<font color='#00C8FF'>Phiên bản:</font> MENU VIP PRO V39.4",
             timeString, os.date("%H:%M:%S")
         )
     end
@@ -474,7 +472,9 @@ createToggle(page2, "🔒 Khóa vị trí", false, function(v)
     State.LockPosition = v; if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then player.Character.HumanoidRootPart.Anchored = false end
 end)
 
--- TÍNH NĂNG MỚI: TẦM ĐÁNH VŨ KHÍ (GIẢI QUYẾT LỖI HITBOX)
+createToggle(page2, "🚀 Nhảy trên không", false, function(v) State.InfJump = v end) 
+
+-- TÍNH NĂNG MỚI: TẦM ĐÁNH VŨ KHÍ (REACH)
 createToggle(page2, "⚔️ Phóng to Vũ Khí (Tầm đánh)", false, function(v) State.Reach = v end)
 createSlider(page2, "Kích thước vũ khí", 2, 100, 15, function(v) State.ReachSize = v end)
 
@@ -551,19 +551,40 @@ task.spawn(function()
             end
             originalToolSizes = {}
         end
+
+        -- HITBOX ĐỐI THỦ (Fix lỗi đứng im)
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                local hrp = p.Character.HumanoidRootPart
+                if State.Hitbox then
+                    local targetSize = Vector3.new(State.HitboxSize, State.HitboxSize, State.HitboxSize)
+                    if hrp.Size ~= targetSize then
+                        hrp.Size = targetSize
+                        hrp.Transparency = 0.5
+                        hrp.CanCollide = false
+                        hrp.Massless = true
+                    end
+                else
+                    local defaultSize = Vector3.new(2, 2, 1)
+                    if hrp.Size ~= defaultSize then
+                        hrp.Size = defaultSize
+                        hrp.Transparency = 1
+                        hrp.CanCollide = false
+                        hrp.Massless = false
+                    end
+                end
+            end
+        end
     end
 end)
 
 createToggle(page2, "🐿️ Lấy đồ nhanh", false, function(v) State.Instant = v end)
 createToggle(page2, "🧲 Auto nhặt đồ xung quanh", false, function(v) State.AutoCollect = v end)
 
-createToggle(page2, "🚀 Nhảy trên không", false, function(v) State.InfJump = v end) 
 createToggle(page2, "🚷 Đi xuyên tường", false, function(v) 
     State.Noclip = v; if not v and player.Character then for _, part in pairs(player.Character:GetDescendants()) do if part:IsA("BasePart") then part.CanCollide = true end end end
 end)
 
-local astralClone = nil
-local astralProps = {}
 createToggle(page2, "👻 Xuất hồn", false, function(v)
     local char = player.Character
     if v then
@@ -688,7 +709,6 @@ createToggle(page3, "🌈 Chế độ RGB (Đèn LED Menu)", false, function(v)
     end 
 end)
 
--- AUTO CLICK FIX CỐ ĐỊNH TÂM MÀN HÌNH
 createToggle(page3, "🖱️ Auto Click (Tự động đánh)", false, function(v) State.AutoClick = v end)
 task.spawn(function()
     while task.wait(0.1) do
@@ -698,8 +718,8 @@ task.spawn(function()
                     local tool = player.Character:FindFirstChildOfClass("Tool")
                     if tool then tool:Activate() end
                 end
-                local center = workspace.CurrentCamera.ViewportSize / 2
-                VirtualUser:ClickButton1(Vector2.new(center.X, center.Y), workspace.CurrentCamera.CFrame)
+                -- Giữ nguyên chức năng click ảo hỗ trợ các executor
+                if mouse1click then mouse1click() end
             end)
         end
     end
@@ -1138,12 +1158,6 @@ RunService.Stepped:Connect(function()
     local char = player.Character
     if State.Noclip and char then
         for _, v in pairs(char:GetDescendants()) do if v:IsA("BasePart") and v.CanCollide then v.CanCollide = false end end 
-    end
-end)
-
-workspace.DescendantAdded:Connect(function(v)
-    if State.XRay and v:IsA("BasePart") and not v:IsDescendantOf(player.Character) and v.Name ~= "Terrain" and v.Transparency < 1 then
-        if not xrayMats[v] then xrayMats[v] = v.Transparency end; v.Transparency = 0.5
     end
 end)
 
