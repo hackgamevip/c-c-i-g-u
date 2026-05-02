@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V38 (Bản Cập Nhật - Sửa Tên Nhạc & Đổi Màu Chữ)
+-- MENU VIP PRO V38 (Bản Cập Nhật - Fix Lấy Đồ Nhanh & Đổi Tab)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -234,6 +234,7 @@ openBtn.MouseButton1Click:Connect(function()
     frame:TweenPosition(opened and UDim2.new(0.5, -180, 0.5, -225) or UDim2.new(0.5, -180, 1.2, 0), "Out", "Back", 0.5)
 end)
 
+-- [CÁC HÀM TẠO NÚT CƠ BẢN]
 local function createButton(parent, text, color, callback)
     local btnFrame = Instance.new("Frame", parent)
     btnFrame.Size = UDim2.new(0.9, 0, 0, 42); btnFrame.BackgroundTransparency = 1
@@ -454,6 +455,7 @@ end)
 
 local astralClone = nil
 local astralProps = {}
+
 createToggle(page2, "🏃 Chạy nhanh", false, function(v) 
     State.Speed = v; if not v and player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.WalkSpeed = 16 end
 end)
@@ -477,10 +479,70 @@ end)
 createToggle(page2, "🔒 Khóa vị trí", false, function(v) 
     State.LockPosition = v; if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then player.Character.HumanoidRootPart.Anchored = false end
 end)
+
 createToggle(page2, "🚀 Nhảy trên không", false, function(v) State.InfJump = v end) 
+
+-- [ĐÃ SỬA: LƯU LẠI THÔNG TIN VẬT PHẨM ĐỂ TRẢ VỀ BÌNH THƯỜNG KHI TẮT]
+local originalPrompts = {}
 createToggle(page2, "🐿️ Lấy đồ nhanh", false, function(v) 
-    State.Instant = v; if v then for _, prompt in pairs(workspace:GetDescendants()) do if prompt:IsA("ProximityPrompt") then prompt.HoldDuration = 0; prompt.MaxActivationDistance = 25 end end end
+    State.Instant = v
+    if v then 
+        for _, prompt in pairs(workspace:GetDescendants()) do 
+            if prompt:IsA("ProximityPrompt") then 
+                if not originalPrompts[prompt] then
+                    originalPrompts[prompt] = {
+                        HoldDuration = prompt.HoldDuration,
+                        MaxActivationDistance = prompt.MaxActivationDistance
+                    }
+                end
+                prompt.HoldDuration = 0
+                prompt.MaxActivationDistance = 25 
+            end 
+        end 
+    else
+        for prompt, data in pairs(originalPrompts) do
+            if prompt and prompt.Parent then
+                prompt.HoldDuration = data.HoldDuration
+                prompt.MaxActivationDistance = data.MaxActivationDistance
+            end
+        end
+        originalPrompts = {}
+    end
 end)
+
+-- [ĐÃ DỜI AUTO COLLECT SANG TAB NHÂN VẬT]
+createToggle(page2, "🧲 Auto nhặt đồ xung quanh", false, function(v) State.AutoCollect = v end)
+task.spawn(function()
+    while task.wait(0.2) do
+        if State.AutoCollect and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local root = player.Character.HumanoidRootPart
+            for _, obj in pairs(workspace:GetDescendants()) do
+                if not State.AutoCollect then break end
+                if obj:IsA("Tool") and obj:FindFirstChild("Handle") then
+                    if (obj.Handle.Position - root.Position).Magnitude <= 50 then
+                        pcall(function()
+                            if firetouchinterest then 
+                                firetouchinterest(root, obj.Handle, 0)
+                                task.wait(0.01)
+                                firetouchinterest(root, obj.Handle, 1) 
+                            else 
+                                obj.Handle.CFrame = root.CFrame 
+                            end
+                        end)
+                    end
+                elseif obj:IsA("ProximityPrompt") and obj.Enabled then
+                    local parentPart = obj.Parent
+                    if parentPart and parentPart:IsA("BasePart") and (parentPart.Position - root.Position).Magnitude <= 50 then
+                        pcall(function()
+                            if fireproximityprompt then fireproximityprompt(obj) end
+                        end)
+                    end
+                end
+            end
+        end
+    end
+end)
+
 createToggle(page2, "🚷 Đi xuyên tường", false, function(v) 
     State.Noclip = v; if not v and player.Character then for _, part in pairs(player.Character:GetDescendants()) do if part:IsA("BasePart") then part.CanCollide = true end end end
 end)
@@ -561,7 +623,7 @@ createToggle(page2, "💡 Ánh sáng quanh người chơi", false, function(v)
         local light = player.Character.HumanoidRootPart:FindFirstChild("PlayerPointLight"); if light then light:Destroy() end 
     end
 end)
-createSlider(page2, "Phạm vi sáng", 50, 2000, 60, function(val) State.LightRange = val end)
+createSlider(page2, "Phạm vi sáng", 50, 1000, 60, function(val) State.LightRange = val end)
 createSlider(page2, "Độ sáng", 0, 5, 3, function(val) State.LightBrightness = val end)
 
 UIS.JumpRequest:Connect(function() 
@@ -607,39 +669,6 @@ local function rejoinServer()
         player:Kick("\nĐang vào lại server..."); task.wait(); TeleportService:Teleport(game.PlaceId, player)
     else TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, player) end
 end
-
-createToggle(page3, "🧲 Auto nhặt đồ xung quanh", false, function(v) State.AutoCollect = v end)
-task.spawn(function()
-    while task.wait(0.2) do
-        if State.AutoCollect and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local root = player.Character.HumanoidRootPart
-            for _, obj in pairs(workspace:GetDescendants()) do
-                if not State.AutoCollect then break end
-                
-                if obj:IsA("Tool") and obj:FindFirstChild("Handle") then
-                    if (obj.Handle.Position - root.Position).Magnitude <= 50 then
-                        pcall(function()
-                            if firetouchinterest then 
-                                firetouchinterest(root, obj.Handle, 0)
-                                task.wait(0.01)
-                                firetouchinterest(root, obj.Handle, 1) 
-                            else 
-                                obj.Handle.CFrame = root.CFrame 
-                            end
-                        end)
-                    end
-                elseif obj:IsA("ProximityPrompt") and obj.Enabled then
-                    local parentPart = obj.Parent
-                    if parentPart and parentPart:IsA("BasePart") and (parentPart.Position - root.Position).Magnitude <= 50 then
-                        pcall(function()
-                            if fireproximityprompt then fireproximityprompt(obj) end
-                        end)
-                    end
-                end
-            end
-        end
-    end
-end)
 
 createToggle(page3, "⬛ Màn hình đen (Giảm lag)", false, function(v) screenOverlay.BackgroundColor3 = Color3.new(0, 0, 0); screenOverlay.Visible = v end)
 createToggle(page3, "⬜ Màn hình trắng (Treo máy)", false, function(v) screenOverlay.BackgroundColor3 = Color3.new(1, 1, 1); screenOverlay.Visible = v end)
@@ -690,7 +719,6 @@ musicIdBox.Position = UDim2.new(0.15, 0, 0, 0)
 musicIdBox.BackgroundTransparency = 1
 musicIdBox.PlaceholderText = "Nhập ID Nhạc..."
 musicIdBox.Text = ""
--- [ĐÃ ĐỔI MÀU CHỮ Ô NHẬP ID]
 musicIdBox.TextColor3 = Theme.TextTitle 
 musicIdBox.Font = Enum.Font.GothamSemibold; musicIdBox.TextSize = 12; musicIdBox.TextXAlignment = Enum.TextXAlignment.Left; musicIdBox.ClearTextOnFocus = false; musicIdBox.ZIndex = 10
 
@@ -714,7 +742,7 @@ Instance.new("UICorner", nowPlayingFrame).CornerRadius = UDim.new(0, 6)
 local nowPlayingLabel = Instance.new("TextLabel", nowPlayingFrame)
 nowPlayingLabel.Size = UDim2.new(1, 0, 1, 0)
 nowPlayingLabel.BackgroundTransparency = 1
-nowPlayingLabel.RichText = true -- Phải bật RichText để phối 2 màu
+nowPlayingLabel.RichText = true 
 nowPlayingLabel.Text = "<font color='#FFFFFF'>🎵 Chưa có bài hát nào đang phát</font>"
 nowPlayingLabel.Font = Enum.Font.GothamSemibold
 nowPlayingLabel.TextSize = 11 
@@ -733,13 +761,12 @@ local function playMusic(id)
     if not soundId or soundId == "" then return end
     
     currentMusicId = soundId
-    -- [ĐÃ ĐỔI MÀU CHỮ: "Đang tải/Đang phát" màu trắng, Tên màu Brand]
     nowPlayingLabel.Text = "<font color='#FFFFFF'>⏳ Đang tải:</font> <font color='#00C8FF'>" .. soundId .. "...</font>"
     
     task.spawn(function()
         local name = getSongName(soundId)
         if currentMusicId == soundId then
-            nowPlayingLabel.Text = "<font color='#FFFFFF'>🎵 Đang phát:</font> <font color='#00C8FF'>" .. name .. "</font>"
+            nowPlayingLabel.Text = "<font color='#FFFFFF'>🎵 Đang phát:</font> <font color='#FFFF00'>" .. name .. "</font>"
         end
     end)
 
@@ -772,7 +799,7 @@ local function stopMusic()
 end
 
 -- [3] Nút Phát/Tắt
-local playControlFrame = createDualButtons(page4, "▶ PHÁT NHẠC", Theme.AccentOn, function()
+local playControlFrame = createDualButtons(page4, "▶️PHÁT NHẠC", Theme.AccentOn, function()
     playMusic(musicIdBox.Text)
 end, "⏹ TẮT NHẠC", Theme.AccentOff, function()
     stopMusic()
@@ -780,7 +807,7 @@ end)
 playControlFrame.LayoutOrder = 3
 
 -- [4] Thanh Âm Lượng
-local volumeFrame = createSlider(page4, "Âm lượng nhạc", 0, 10, State.MusicVolume, function(val)
+local volumeFrame = createSlider(page4, "Âm lượng ♪", 0, 10, State.MusicVolume, function(val)
     State.MusicVolume = val
     if currentSound then currentSound.Volume = val end
 end)
@@ -827,7 +854,6 @@ local function renderSavedMusic()
         iconLabel.Size = UDim2.new(0.08, 0, 1, 0)
         iconLabel.BackgroundTransparency = 1; iconLabel.Text = "🎶"; iconLabel.TextColor3 = Theme.Brand; iconLabel.TextSize = 11; iconLabel.ZIndex = 10
         
-        -- [ĐÃ SỬA: Đổi TextLabel thành TextBox để có thể sửa Tên Bài Hát]
         local nameBox = Instance.new("TextBox", item)
         nameBox.Size = UDim2.new(0.52, 0, 1, 0); nameBox.Position = UDim2.new(0.08, 0, 0, 0)
         nameBox.Text = data.name
@@ -839,7 +865,7 @@ local function renderSavedMusic()
                 data.name = nameBox.Text
                 saveMusicData()
             else
-                nameBox.Text = data.name -- Nếu để trống thì trả lại tên cũ
+                nameBox.Text = data.name 
             end
         end)
         
@@ -983,6 +1009,20 @@ RunService.Stepped:Connect(function()
     end
 end)
 
+-- [BẢO TỒN LẤY ĐỒ NHANH]
+workspace.DescendantAdded:Connect(function(v)
+    if State.XRay and v:IsA("BasePart") and not v:IsDescendantOf(player.Character) and v.Name ~= "Terrain" and v.Transparency < 1 then
+        if not xrayMats[v] then xrayMats[v] = v.Transparency end; v.Transparency = 0.5
+    end
+    if v:IsA("ProximityPrompt") and State.Instant then
+        if not originalPrompts[v] then
+            originalPrompts[v] = { HoldDuration = v.HoldDuration, MaxActivationDistance = v.MaxActivationDistance }
+        end
+        v.HoldDuration = 0
+        v.MaxActivationDistance = 25
+    end
+end)
+
 RunService.RenderStepped:Connect(function()
     local char = player.Character
     if char and char:FindFirstChildOfClass("Humanoid") then
@@ -1033,11 +1073,4 @@ RunService.RenderStepped:Connect(function()
             end
         end
     end
-end)
-
-workspace.DescendantAdded:Connect(function(v)
-    if State.XRay and v:IsA("BasePart") and not v:IsDescendantOf(player.Character) and v.Name ~= "Terrain" and v.Transparency < 1 then
-        if not xrayMats[v] then xrayMats[v] = v.Transparency end; v.Transparency = 0.5
-    end
-    if State.Instant and v:IsA("ProximityPrompt") then v.HoldDuration = 0; v.MaxActivationDistance = 25 end
 end)
