@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V42.3 (Bản Hoàn Thiện - Fix RGB Toàn Bộ, Avatar & Vị Trí)
+-- MENU VIP PRO V42.4 (Bản Fix Lỗi Cú Pháp - Hoạt động 100%)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -27,7 +27,7 @@ local State = {
     MusicVolume = 5
 }
 
---
+-- [BẢNG MÀU CHỦ ĐẠO]
 local Theme = {
     MainBg = Color3.fromRGB(20, 20, 26),      
     HeaderBg = Color3.fromRGB(26, 26, 34),    
@@ -45,7 +45,7 @@ local Theme = {
 -- Mảng lưu trữ tất cả các viền (Stroke) để đổi màu RGB
 local RGBElements = {}
 
---
+-- [XÓA MENU CŨ CHỐNG LỖI CACHE]
 local guiParent = player:WaitForChild("PlayerGui")
 pcall(function()
     if gethui and type(gethui) == "function" then
@@ -62,7 +62,7 @@ for _, v in pairs(guiParent:GetChildren()) do
     end
 end
 
---
+-- [1. GIAO DIỆN CHÍNH]
 local gui = Instance.new("ScreenGui")
 gui.Name = "MobileProMax"
 gui.ResetOnSpawn = false
@@ -121,7 +121,6 @@ frame.BackgroundTransparency = 0.05
 frame.ZIndex = 10
 Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 18)
 local frameStroke = Instance.new("UIStroke", frame); frameStroke.Color = Theme.Stroke; frameStroke.Thickness = 2
--- Thêm viền chính vào mảng RGB để đèn LED có tác dụng trên toàn bộ viền menu
 table.insert(RGBElements, {Type = "Frame", Stroke = frameStroke})
 
 local header = Instance.new("Frame", frame)
@@ -133,21 +132,17 @@ local headerCover = Instance.new("Frame", header)
 headerCover.Size = UDim2.new(1, 0, 0, 15); headerCover.Position = UDim2.new(0, 0, 1, -15)
 headerCover.BackgroundColor3 = Theme.HeaderBg; headerCover.BackgroundTransparency = 0; headerCover.BorderSizePixel = 0
 headerCover.ZIndex = 10
--- Thêm viền tiêu đề vào mảng RGB
 local headerStroke = Instance.new("UIStroke", header); headerStroke.Color = Theme.Stroke; headerStroke.Thickness = 1.5; headerStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 table.insert(RGBElements, {Type = "Header", Stroke = headerStroke})
 
 local titleLabel = Instance.new("TextLabel", header)
 titleLabel.Size = UDim2.new(1, 0, 1, 0); titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "MENU PRO MAX V42.3"
--- Sửa màu chữ tiêu đề thành màu sáng hơn để nổi bật
+titleLabel.Text = "MENU PRO MAX V42.4"
 titleLabel.TextColor3 = Theme.TextTitle; titleLabel.Font = Enum.Font.GothamBlack; titleLabel.TextSize = 14
 titleLabel.ZIndex = 10
 
 local avatarImg = Instance.new("ImageLabel", header)
--- ĐÃ SỬA: Tăng kích thước Avatar to hơn một tí (từ 32 lên 40)
 avatarImg.Size = UDim2.new(0, 40, 0, 40)
--- ĐÃ SỬA: Điều chỉnh vị trí Avatar to hơn để không bị kẹt mép trên
 avatarImg.Position = UDim2.new(0, 10, 0, 1)
 avatarImg.BackgroundTransparency = 1
 avatarImg.ZIndex = 10
@@ -181,7 +176,6 @@ local function createTab(name, x, width)
     btn.Font = Enum.Font.GothamBold; btn.TextSize = 8 
     btn.ZIndex = 10
     
-    -- Thêm viền cho mỗi tab vào mảng RGB để đèn LED áp dụng cho toàn bộ viền menu
     local tabStroke = Instance.new("UIStroke", btn); tabStroke.Color = Theme.Stroke; tabStroke.Thickness = 1.5; tabStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     table.insert(RGBElements, {Type = "Tab", Stroke = tabStroke})
 
@@ -257,7 +251,6 @@ openBtn.MouseButton1Click:Connect(function()
         openStroke.Color = opened and Theme.AccentOff or Theme.Brand
         TweenService:Create(openStroke, TweenInfo.new(0.3), {Color = opened and Theme.AccentOff or Theme.Brand}):Play()
     end
-    -- ĐÃ SỬA: Cập nhật TweenPosition theo vị trí menu đã hạ thấp
     frame:TweenPosition(opened and UDim2.new(0.5, -210, 0.6, -250) or UDim2.new(0.5, -210, 1.2, 0), "Out", "Back", 0.5)
 end)
 
@@ -487,14 +480,14 @@ task.spawn(function()
         local timeString = string.format("%02d:%02d:%02d", hours, mins, secs)
         
         extraInfoLabel.Text = string.format(
-            "<font color='#00C8FF'>Thời gian chơi:</font> %s\n<font color='#00C8FF'>Giờ hệ thống:</font> %s\n<font color='#00C8FF'>Phiên bản:</font> MENU VIP PRO V42.3",
+            "<font color='#00C8FF'>Thời gian chơi:</font> %s\n<font color='#00C8FF'>Giờ hệ thống:</font> %s\n<font color='#00C8FF'>Phiên bản:</font> MENU VIP PRO V42.4",
             timeString, os.date("%H:%M:%S")
         )
     end
 end)
 
 -- ==========================================
---
+-- [TAB 2: NHÂN VẬT (BẬT/TẮT CƠ BẢN)]
 -- ==========================================
 
 createToggle(page2, "🛡️ Chống ngã & Chống văng", false, function(v) State.AntiStun = v end)
@@ -580,7 +573,7 @@ end)
 createToggle(page2, "🔴 ESP người chơi", false, function(v) State.ESP = v end)
 
 -- ==========================================
---
+-- [TAB 3: PLAYER (TÍNH NĂNG ĐIỀU CHỈNH CHỈ SỐ)]
 -- ==========================================
 
 createToggle(page3, "🏃 Chạy nhanh", false, function(v) 
@@ -746,7 +739,7 @@ UIS.JumpRequest:Connect(function()
 end)
 
 -- ==========================================
---
+-- [TAB 4: TIỆN ÍCH]
 -- ==========================================
 
 local function hopServer(sortOrder)
@@ -779,12 +772,11 @@ local function rejoinServer()
     else TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, player) end
 end
 
--- ĐÃ MỞ RỘNG: Chế độ RGB áp dụng cho TOÀN BỘ viền của menu, bao gồm cả tiêu đề và tất cả các tab
+-- ĐÃ FIX: Lỗi Cú Pháp (} -> end) Đã Được Loại Bỏ Hoàn Toàn
 createToggle(page4, "🌈 Chế độ RGB (Đèn LED Menu)", false, function(v) 
     State.RGB = v; 
     if not v then 
-        -- Khi tắt, reset lại toàn bộ màu gốc cho các phần tử RGB
-        titleLabel.TextColor3 = Theme.TextTitle; -- Giữ nguyên màu chữ sáng
+        titleLabel.TextColor3 = Theme.TextTitle; 
         
         frameStroke.Color = Theme.Stroke 
         headerStroke.Color = Theme.Stroke
@@ -793,7 +785,7 @@ createToggle(page4, "🌈 Chế độ RGB (Đèn LED Menu)", false, function(v)
             openStroke.Color = Theme.AccentOff
         else
             openStroke.Color = Theme.Brand
-        }
+        end
         
         for _, obj in pairs(RGBElements) do
             if obj.Stroke and obj.Stroke.Parent then
@@ -843,7 +835,6 @@ createDualButtons(page4, "🌞 SÁNG (FAKE)", Color3.fromRGB(243, 156, 18), func
 createDualButtons(page4, "🔄 VÀO LẠI SV", Theme.AccentOn, rejoinServer, "🎲 ĐỔI SV NGẪU NHIÊN", Theme.Brand, function() hopServer("Desc") end)
 createDualButtons(page4, "📉 ĐỔI SV ÍT NGƯỜI", Color3.fromRGB(52, 152, 219), function() hopServer("Asc") end, "📈 ĐỔI SV NHIỀU NGƯỜI", Color3.fromRGB(231, 76, 60), function() hopServer("Desc") end)
 
--- ĐÃ THAY: Nút "Lấy btools" được thay thế bằng "TP SAVE V2 GUI" và nằm trong tab "TIỆN ÍCH"
 createDualButtons(page4, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) end, 
 "📂 TP SAVE V2 GUI", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
 
@@ -851,7 +842,7 @@ createDualButtons(page4, "🕊️ FLY V1", Theme.Brand, function() pcall(functio
 "🚀 FLY V3", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end) end)
 
 -- ==========================================
---
+-- [TAB 5: PHÁT NHẠC VÀ LƯU TRỮ VĨNH VIỄN]
 -- ==========================================
 
 local currentSound = nil
@@ -1067,7 +1058,7 @@ end)
 renderSavedMusic()
 
 -- ==========================================
---
+-- [TAB 6: VỊ TRÍ TP SAVE]
 -- ==========================================
 local tpFileName = "MenuProMax_SavedTPs.json"
 local savedTpList = {}
@@ -1193,7 +1184,7 @@ tpControlFrame2.LayoutOrder = 2
 renderSavedTps()
 
 -- ==========================================
---
+-- [TAB 7: TP NGƯỜI CHƠI]
 -- ==========================================
 local function updatePlayerList()
     for _, child in pairs(page7:GetChildren()) do if child.Name == "PaddingFrame" then child:Destroy() end end
@@ -1254,12 +1245,15 @@ player.Idled:Connect(function()
     if State.AntiAfk then VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame); task.wait(1); VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame) end
 end)
 
---
+-- [BẢO TỒN HOẠT ĐỘNG LIÊN TỤC]
 RunService.RenderStepped:Connect(function()
-    -- CẬP NHẬT RGB CHO TẤT CẢ VIỀN TRONG MENU, bao gồm cả tiêu đề và tất cả các tab
     if State.RGB then
         local hue = tick() % 5 / 5
         local color = Color3.fromHSV(hue, 1, 1)
+        
+        -- ĐÃ SỬA VÀ THÊM VÀO: Đổi màu cả tiêu đề
+        titleLabel.TextColor3 = color
+        
         frameStroke.Color = color
         headerStroke.Color = color
         avatarStroke.Color = color
