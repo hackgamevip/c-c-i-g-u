@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V42.6 (Bản Chuẩn - Căn chỉnh Menu & Xóa Khung Viền Thừa)
+-- MENU VIP PRO V42.7 (Bản Fix - Thêm Viền RGB Cho TP PLAYER)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -114,7 +114,6 @@ UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputT
 
 local frame = Instance.new("Frame", gui)
 frame.Size = UDim2.new(0, 420, 0, 500)
--- ĐÃ FIX: Hạ menu xuống một tí (0.53 thay vì 0.5) để không bị che bởi UI hệ thống, nhưng không bị tụt xuống sâu.
 frame.Position = UDim2.new(0.5, -210, 0.53, -250)
 frame.BackgroundColor3 = Theme.MainBg
 frame.BackgroundTransparency = 0.05 
@@ -137,13 +136,13 @@ table.insert(RGBElements, {Type = "Header", Stroke = headerStroke})
 
 local titleLabel = Instance.new("TextLabel", header)
 titleLabel.Size = UDim2.new(1, 0, 1, 0); titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "MENU PRO MAX V42.6"
+titleLabel.Text = "MENU PRO MAX V42.7"
 titleLabel.TextColor3 = Theme.TextTitle; titleLabel.Font = Enum.Font.GothamBlack; titleLabel.TextSize = 14
 titleLabel.ZIndex = 10
 
 local avatarImg = Instance.new("ImageLabel", header)
 avatarImg.Size = UDim2.new(0, 40, 0, 40)
-avatarImg.Position = UDim2.new(0, 10, 0, 4) -- Căn chuẩn mép viền
+avatarImg.Position = UDim2.new(0, 10, 0, 4) 
 avatarImg.BackgroundTransparency = 1
 avatarImg.ZIndex = 10
 pcall(function()
@@ -248,7 +247,6 @@ openBtn.MouseButton1Click:Connect(function()
         openStroke.Color = opened and Theme.AccentOff or Theme.Brand
         TweenService:Create(openStroke, TweenInfo.new(0.3), {Color = opened and Theme.AccentOff or Theme.Brand}):Play()
     end
-    -- ĐÃ FIX: Khớp với vị trí 0.53 mới
     frame:TweenPosition(opened and UDim2.new(0.5, -210, 0.53, -250) or UDim2.new(0.5, -210, 1.2, 0), "Out", "Back", 0.5)
 end)
 
@@ -317,7 +315,9 @@ local function createToggle(parent, text, defaultState, callback)
     local active = defaultState or false
     status.Text = active and "ON" or "OFF"
     status.TextColor3 = active and Theme.AccentOn or Theme.AccentOff
-    stroke.Color = active and Theme.AccentOn or Theme.Stroke
+    
+    local initColor = State.RGB and Color3.fromHSV(tick() % 5 / 5, 1, 1) or (active and Theme.AccentOn or Theme.Stroke)
+    stroke.Color = initColor
     btn.BackgroundColor3 = active and Color3.fromRGB(35, 45, 40) or Theme.ItemBg
     
     table.insert(RGBElements, {Type = "Toggle", Stroke = stroke, State = function() return active end})
@@ -340,7 +340,10 @@ local function createSlider(parent, text, min, max, default, callback)
     local bg = Instance.new("Frame", frame)
     bg.Size = UDim2.new(1, 0, 1, 0); bg.BackgroundColor3 = Theme.ItemBg; bg.ZIndex = 10
     Instance.new("UICorner", bg).CornerRadius = UDim.new(0, 10)
-    local stroke = Instance.new("UIStroke", bg); stroke.Color = Theme.Stroke; stroke.Thickness = 1.5
+    
+    local stroke = Instance.new("UIStroke", bg); 
+    stroke.Color = State.RGB and Color3.fromHSV(tick() % 5 / 5, 1, 1) or Theme.Stroke; 
+    stroke.Thickness = 1.5
     table.insert(RGBElements, {Type = "Slider", Stroke = stroke})
     
     local titleLabel = Instance.new("TextLabel", bg)
@@ -376,7 +379,10 @@ local function createInfoBox(parent, icon, titleText, heightOffset)
     item.Size = UDim2.new(0.9, 0, 0, heightOffset or 85) 
     item.BackgroundColor3 = Theme.ItemBg; item.ZIndex = 10
     Instance.new("UICorner", item).CornerRadius = UDim.new(0, 8)
-    local stroke = Instance.new("UIStroke", item); stroke.Color = Theme.Stroke; stroke.Thickness = 1.5
+    
+    local stroke = Instance.new("UIStroke", item); 
+    stroke.Color = State.RGB and Color3.fromHSV(tick() % 5 / 5, 1, 1) or Theme.Stroke; 
+    stroke.Thickness = 1.5
     table.insert(RGBElements, {Type = "Info", Stroke = stroke})
     
     local title = Instance.new("TextLabel", item)
@@ -418,7 +424,9 @@ end)
 local joinIdFrame = Instance.new("Frame", page1)
 joinIdFrame.Size = UDim2.new(0.9, 0, 0, 44); joinIdFrame.BackgroundColor3 = Theme.ItemBg; joinIdFrame.ZIndex = 10
 Instance.new("UICorner", joinIdFrame).CornerRadius = UDim.new(0, 8)
-local jStroke = Instance.new("UIStroke", joinIdFrame); jStroke.Color = Theme.Stroke; jStroke.Thickness = 1.5
+local jStroke = Instance.new("UIStroke", joinIdFrame); 
+jStroke.Color = State.RGB and Color3.fromHSV(tick() % 5 / 5, 1, 1) or Theme.Stroke; 
+jStroke.Thickness = 1.5
 table.insert(RGBElements, {Type = "Info", Stroke = jStroke})
 
 local idBox = Instance.new("TextBox", joinIdFrame)
@@ -478,7 +486,7 @@ task.spawn(function()
         local timeString = string.format("%02d:%02d:%02d", hours, mins, secs)
         
         extraInfoLabel.Text = string.format(
-            "<font color='#00C8FF'>Thời gian chơi:</font> %s\n<font color='#00C8FF'>Giờ hệ thống:</font> %s\n<font color='#00C8FF'>Phiên bản:</font> MENU VIP PRO V42.6",
+            "<font color='#00C8FF'>Thời gian chơi:</font> %s\n<font color='#00C8FF'>Giờ hệ thống:</font> %s\n<font color='#00C8FF'>Phiên bản:</font> MENU VIP PRO V42.7",
             timeString, os.date("%H:%M:%S")
         )
     end
@@ -790,7 +798,7 @@ createToggle(page4, "🌈 Chế độ RGB (Đèn LED Menu)", false, function(v)
                     obj.Stroke.Color = obj.State() and Theme.AccentOn or Theme.Stroke
                 elseif obj.Type == "Button" then
                     obj.Stroke.Color = obj.DefaultColor
-                elseif obj.Type == "Slider" or obj.Type == "Info" then
+                elseif obj.Type == "Slider" or obj.Type == "Info" or obj.Type == "Container" then
                     obj.Stroke.Color = Theme.Stroke
                 end
             end
@@ -991,7 +999,9 @@ local function renderSavedMusic()
         item.Size = UDim2.new(1, 0, 0, 48); item.Position = UDim2.new(0, 0, 0, yOffset)
         item.BackgroundColor3 = Theme.ItemBg; item.ZIndex = 10
         Instance.new("UICorner", item).CornerRadius = UDim.new(0, 8)
-        local stroke = Instance.new("UIStroke", item); stroke.Color = Theme.Stroke; stroke.Thickness = 1.5
+        
+        local strokeColor = State.RGB and Color3.fromHSV(tick() % 5 / 5, 1, 1) or Theme.Stroke
+        local stroke = Instance.new("UIStroke", item); stroke.Color = strokeColor; stroke.Thickness = 1.5
         table.insert(RGBElements, {Type = "Info", Stroke = stroke})
         
         local iconLabel = Instance.new("TextLabel", item)
@@ -1105,7 +1115,9 @@ local function renderSavedTps()
         item.BackgroundColor3 = Theme.ItemBg
         item.ZIndex = 10
         Instance.new("UICorner", item).CornerRadius = UDim.new(0, 8)
-        local stroke = Instance.new("UIStroke", item); stroke.Color = Theme.Stroke; stroke.Thickness = 1.5
+        
+        local strokeColor = State.RGB and Color3.fromHSV(tick() % 5 / 5, 1, 1) or Theme.Stroke
+        local stroke = Instance.new("UIStroke", item); stroke.Color = strokeColor; stroke.Thickness = 1.5
         table.insert(RGBElements, {Type = "Info", Stroke = stroke})
         
         local nameBox = Instance.new("TextBox", item)
@@ -1191,7 +1203,11 @@ local function updatePlayerList()
             local btn = Instance.new("TextButton", pFrame)
             btn.Name = "PlayerBtn_TP"; btn.Size = UDim2.new(1, 0, 1, 0); btn.BackgroundColor3 = Theme.ItemBg; btn.Text = ""; btn.AutoButtonColor = false; btn.ZIndex = 10
             Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
-            local stroke = Instance.new("UIStroke", btn); stroke.Color = Theme.Stroke; stroke.Thickness = 1.5
+            
+            local currentColor = State.RGB and Color3.fromHSV(tick() % 5 / 5, 1, 1) or Theme.Stroke
+            
+            -- ĐÃ THÊM: Cập nhật viền cho nút người chơi
+            local stroke = Instance.new("UIStroke", btn); stroke.Color = currentColor; stroke.Thickness = 1.5
             table.insert(RGBElements, {Type = "Info", Stroke = stroke})
             
             local nLabel = Instance.new("TextLabel", btn)
@@ -1211,10 +1227,12 @@ local function updatePlayerList()
             targetAvatar.ZIndex = 10
             Instance.new("UICorner", targetAvatar).CornerRadius = UDim.new(1, 0)
             
+            -- ĐÃ THÊM: Cập nhật viền cho Avatar người chơi
             local targetStroke = Instance.new("UIStroke", targetAvatar)
-            targetStroke.Color = Theme.Stroke
+            targetStroke.Color = currentColor
             targetStroke.Thickness = 1.5
             targetStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+            table.insert(RGBElements, {Type = "Info", Stroke = targetStroke})
 
             task.spawn(function()
                 pcall(function()
