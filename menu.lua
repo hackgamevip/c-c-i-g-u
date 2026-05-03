@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V42.1 (Bản Fix - Mở rộng thanh cuộn đáy Menu)
+-- MENU VIP PRO V42.2 (Bản Cập Nhật - Full Viền RGB, Fix Avatar & Bố Cục)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -41,6 +41,9 @@ local Theme = {
     Brand = Color3.fromRGB(0, 200, 255),      
     BrandGradient = Color3.fromRGB(150, 100, 255) 
 }
+
+-- Mảng lưu trữ tất cả các viền (Stroke) để đổi màu RGB
+local RGBElements = {}
 
 -- [XÓA MENU CŨ CHỐNG LỖI CACHE]
 local guiParent = player:WaitForChild("PlayerGui")
@@ -116,7 +119,7 @@ frame.BackgroundColor3 = Theme.MainBg
 frame.BackgroundTransparency = 0.05 
 frame.ZIndex = 10
 Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 18)
-local frameStroke = Instance.new("UIStroke", frame); frameStroke.Color = Theme.Stroke; frameStroke.Thickness = 1
+local frameStroke = Instance.new("UIStroke", frame); frameStroke.Color = Theme.Stroke; frameStroke.Thickness = 2
 
 local header = Instance.new("Frame", frame)
 header.Size = UDim2.new(1, 0, 0, 45)
@@ -130,13 +133,14 @@ headerCover.ZIndex = 10
 
 local titleLabel = Instance.new("TextLabel", header)
 titleLabel.Size = UDim2.new(1, 0, 1, 0); titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "MENU PRO MAX V42.1"
+titleLabel.Text = "MENU PRO MAX V42.2"
 titleLabel.TextColor3 = Theme.Brand; titleLabel.Font = Enum.Font.GothamBlack; titleLabel.TextSize = 14
 titleLabel.ZIndex = 10
 
 local avatarImg = Instance.new("ImageLabel", header)
 avatarImg.Size = UDim2.new(0, 32, 0, 32)
-avatarImg.Position = UDim2.new(0, 10, 0, 6)
+-- Đã hạ Avatar xuống 3px (từ 6 xuống 9) để không bị kẹt mép trên
+avatarImg.Position = UDim2.new(0, 10, 0, 9)
 avatarImg.BackgroundTransparency = 1
 avatarImg.ZIndex = 10
 pcall(function()
@@ -201,7 +205,6 @@ local function createPage()
     
     Instance.new("UIPadding", pg).PaddingTop = UDim.new(0, 10); Instance.new("UIPadding", pg).PaddingBottom = UDim.new(0, 30) 
     layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() 
-        -- ĐÃ SỬA: Tăng khoảng trống từ 60 lên 120 để cuộn xuống đáy thoải mái hơn
         pg.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 120) 
     end)
     return pg
@@ -237,8 +240,10 @@ local opened = true
 openBtn.MouseButton1Click:Connect(function()
     clickAnimate(openBtn)
     opened = not opened
-    openStroke.Color = opened and Theme.AccentOff or Theme.Brand
-    TweenService:Create(openStroke, TweenInfo.new(0.3), {Color = opened and Theme.AccentOff or Theme.Brand}):Play()
+    if not State.RGB then
+        openStroke.Color = opened and Theme.AccentOff or Theme.Brand
+        TweenService:Create(openStroke, TweenInfo.new(0.3), {Color = opened and Theme.AccentOff or Theme.Brand}):Play()
+    end
     frame:TweenPosition(opened and UDim2.new(0.5, -210, 0.5, -250) or UDim2.new(0.5, -210, 1.2, 0), "Out", "Back", 0.5)
 end)
 
@@ -248,13 +253,18 @@ local function createButton(parent, text, color, callback)
     local btn = Instance.new("TextButton", btnFrame)
     btn.Size = UDim2.new(1, 0, 1, 0); btn.BackgroundColor3 = Theme.ItemBg; btn.Text = ""; btn.AutoButtonColor = false; btn.ZIndex = 10
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
-    local stroke = Instance.new("UIStroke", btn); stroke.Color = color; stroke.Thickness = 1; stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    local stroke = Instance.new("UIStroke", btn); stroke.Color = color; stroke.Thickness = 1.5; stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    table.insert(RGBElements, {Type = "Button", Stroke = stroke, DefaultColor = color})
+    
     local title = Instance.new("TextLabel", btn)
     title.Size = UDim2.new(1, 0, 1, 0); title.BackgroundTransparency = 1; title.Text = text
     title.TextColor3 = color; title.Font = Enum.Font.GothamBold; title.TextSize = 13; title.ZIndex = 10
     btn.MouseButton1Click:Connect(function()
-        clickAnimate(btn); TweenService:Create(stroke, TweenInfo.new(0.15), {Color = Theme.TextTitle}):Play()
-        task.wait(0.15); TweenService:Create(stroke, TweenInfo.new(0.3), {Color = color}):Play(); callback()
+        clickAnimate(btn); 
+        if not State.RGB then TweenService:Create(stroke, TweenInfo.new(0.15), {Color = Theme.TextTitle}):Play() end
+        task.wait(0.15); 
+        if not State.RGB then TweenService:Create(stroke, TweenInfo.new(0.3), {Color = color}):Play() end
+        callback()
     end)
     return btnFrame
 end
@@ -267,13 +277,18 @@ local function createDualButtons(parent, text1, color1, cb1, text2, color2, cb2)
         btn.Size = UDim2.new(0.48, 0, 1, 0); btn.Position = UDim2.new(xPos, 0, 0, 0)
         btn.BackgroundColor3 = Theme.ItemBg; btn.Text = ""; btn.AutoButtonColor = false; btn.ZIndex = 10
         Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
-        local stroke = Instance.new("UIStroke", btn); stroke.Color = col; stroke.Thickness = 1; stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+        local stroke = Instance.new("UIStroke", btn); stroke.Color = col; stroke.Thickness = 1.5; stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+        table.insert(RGBElements, {Type = "Button", Stroke = stroke, DefaultColor = col})
+        
         local title = Instance.new("TextLabel", btn)
         title.Size = UDim2.new(1, 0, 1, 0); title.BackgroundTransparency = 1; title.Text = txt
         title.TextColor3 = col; title.Font = Enum.Font.GothamBold; title.TextSize = 11; title.ZIndex = 10
         btn.MouseButton1Click:Connect(function()
-            clickAnimate(btn); TweenService:Create(stroke, TweenInfo.new(0.15), {Color = Theme.TextTitle}):Play()
-            task.wait(0.15); TweenService:Create(stroke, TweenInfo.new(0.3), {Color = col}):Play(); cb()
+            clickAnimate(btn); 
+            if not State.RGB then TweenService:Create(stroke, TweenInfo.new(0.15), {Color = Theme.TextTitle}):Play() end
+            task.wait(0.15); 
+            if not State.RGB then TweenService:Create(stroke, TweenInfo.new(0.3), {Color = col}):Play() end
+            cb()
         end)
     end
     makeBtn(0, text1, color1, cb1); makeBtn(0.52, text2, color2, cb2)
@@ -286,7 +301,8 @@ local function createToggle(parent, text, defaultState, callback)
     local btn = Instance.new("TextButton", btnFrame)
     btn.Size = UDim2.new(1, 0, 1, 0); btn.Text = ""; btn.AutoButtonColor = false; btn.ZIndex = 10
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
-    local stroke = Instance.new("UIStroke", btn); stroke.Thickness = 1
+    local stroke = Instance.new("UIStroke", btn); stroke.Thickness = 1.5
+    
     local title = Instance.new("TextLabel", btn)
     title.Size = UDim2.new(0.7, 0, 1, 0); title.Position = UDim2.new(0.05, 0, 0, 0)
     title.BackgroundTransparency = 1; title.Text = text; title.TextColor3 = Theme.TextTitle; title.Font = Enum.Font.GothamSemibold; title.TextSize = 13; title.TextXAlignment = Enum.TextXAlignment.Left; title.ZIndex = 10
@@ -299,10 +315,14 @@ local function createToggle(parent, text, defaultState, callback)
     stroke.Color = active and Theme.AccentOn or Theme.Stroke
     btn.BackgroundColor3 = active and Color3.fromRGB(35, 45, 40) or Theme.ItemBg
     
+    table.insert(RGBElements, {Type = "Toggle", Stroke = stroke, State = function() return active end})
+
     btn.MouseButton1Click:Connect(function()
         clickAnimate(btn); active = not active; status.Text = active and "ON" or "OFF"
         TweenService:Create(status, TweenInfo.new(0.2), {TextColor3 = active and Theme.AccentOn or Theme.AccentOff}):Play()
-        TweenService:Create(stroke, TweenInfo.new(0.2), {Color = active and Theme.AccentOn or Theme.Stroke}):Play()
+        if not State.RGB then
+            TweenService:Create(stroke, TweenInfo.new(0.2), {Color = active and Theme.AccentOn or Theme.Stroke}):Play()
+        end
         TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = active and Color3.fromRGB(35, 45, 40) or Theme.ItemBg}):Play()
         callback(active)
     end)
@@ -315,7 +335,9 @@ local function createSlider(parent, text, min, max, default, callback)
     local bg = Instance.new("Frame", frame)
     bg.Size = UDim2.new(1, 0, 1, 0); bg.BackgroundColor3 = Theme.ItemBg; bg.ZIndex = 10
     Instance.new("UICorner", bg).CornerRadius = UDim.new(0, 10)
-    local stroke = Instance.new("UIStroke", bg); stroke.Color = Theme.Stroke; stroke.Thickness = 1
+    local stroke = Instance.new("UIStroke", bg); stroke.Color = Theme.Stroke; stroke.Thickness = 1.5
+    table.insert(RGBElements, {Type = "Slider", Stroke = stroke})
+    
     local titleLabel = Instance.new("TextLabel", bg)
     titleLabel.Size = UDim2.new(0.7, 0, 0.4, 0); titleLabel.Position = UDim2.new(0.05, 0, 0.1, 0)
     titleLabel.BackgroundTransparency = 1; titleLabel.Text = text; titleLabel.TextColor3 = Theme.TextDim; titleLabel.Font = Enum.Font.GothamSemibold; titleLabel.TextSize = 12; titleLabel.TextXAlignment = Enum.TextXAlignment.Left; titleLabel.ZIndex = 10
@@ -349,7 +371,8 @@ local function createInfoBox(parent, icon, titleText, heightOffset)
     item.Size = UDim2.new(0.9, 0, 0, heightOffset or 85) 
     item.BackgroundColor3 = Theme.ItemBg; item.ZIndex = 10
     Instance.new("UICorner", item).CornerRadius = UDim.new(0, 8)
-    local stroke = Instance.new("UIStroke", item); stroke.Color = Theme.Stroke; stroke.Thickness = 1
+    local stroke = Instance.new("UIStroke", item); stroke.Color = Theme.Stroke; stroke.Thickness = 1.5
+    table.insert(RGBElements, {Type = "Info", Stroke = stroke})
     
     local title = Instance.new("TextLabel", item)
     title.Size = UDim2.new(1, -20, 0, 25); title.Position = UDim2.new(0, 10, 0, 5)
@@ -390,7 +413,8 @@ end)
 local joinIdFrame = Instance.new("Frame", page1)
 joinIdFrame.Size = UDim2.new(0.9, 0, 0, 44); joinIdFrame.BackgroundColor3 = Theme.ItemBg; joinIdFrame.ZIndex = 10
 Instance.new("UICorner", joinIdFrame).CornerRadius = UDim.new(0, 8)
-local jStroke = Instance.new("UIStroke", joinIdFrame); jStroke.Color = Theme.Stroke; jStroke.Thickness = 1
+local jStroke = Instance.new("UIStroke", joinIdFrame); jStroke.Color = Theme.Stroke; jStroke.Thickness = 1.5
+table.insert(RGBElements, {Type = "Info", Stroke = jStroke})
 
 local idBox = Instance.new("TextBox", joinIdFrame)
 idBox.Size = UDim2.new(0.65, 0, 1, 0); idBox.Position = UDim2.new(0.05, 0, 0, 0); idBox.BackgroundTransparency = 1
@@ -449,7 +473,7 @@ task.spawn(function()
         local timeString = string.format("%02d:%02d:%02d", hours, mins, secs)
         
         extraInfoLabel.Text = string.format(
-            "<font color='#00C8FF'>Thời gian chơi:</font> %s\n<font color='#00C8FF'>Giờ hệ thống:</font> %s\n<font color='#00C8FF'>Phiên bản:</font> MENU VIP PRO V42.1",
+            "<font color='#00C8FF'>Thời gian chơi:</font> %s\n<font color='#00C8FF'>Giờ hệ thống:</font> %s\n<font color='#00C8FF'>Phiên bản:</font> MENU VIP PRO V42.2",
             timeString, os.date("%H:%M:%S")
         )
     end
@@ -741,11 +765,31 @@ local function rejoinServer()
     else TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, player) end
 end
 
+-- TÍNH NĂNG RGB HOÀN HẢO CHO TOÀN BỘ MENU
 createToggle(page4, "🌈 Chế độ RGB (Đèn LED Menu)", false, function(v) 
     State.RGB = v; 
     if not v then 
+        -- Khi tắt, reset lại toàn bộ màu gốc
         titleLabel.TextColor3 = Theme.Brand; 
         frameStroke.Color = Theme.Stroke 
+        avatarStroke.Color = Theme.Brand
+        if opened then
+            openStroke.Color = Theme.AccentOff
+        else
+            openStroke.Color = Theme.Brand
+        end
+        
+        for _, obj in pairs(RGBElements) do
+            if obj.Stroke and obj.Stroke.Parent then
+                if obj.Type == "Toggle" then
+                    obj.Stroke.Color = obj.State() and Theme.AccentOn or Theme.Stroke
+                elseif obj.Type == "Button" then
+                    obj.Stroke.Color = obj.DefaultColor
+                elseif obj.Type == "Slider" or obj.Type == "Info" then
+                    obj.Stroke.Color = Theme.Stroke
+                end
+            end
+        end
     end 
 end)
 
@@ -783,15 +827,12 @@ createDualButtons(page4, "🌞 SÁNG (FAKE)", Color3.fromRGB(243, 156, 18), func
 createDualButtons(page4, "🔄 VÀO LẠI SV", Theme.AccentOn, rejoinServer, "🎲 ĐỔI SV NGẪU NHIÊN", Theme.Brand, function() hopServer("Desc") end)
 createDualButtons(page4, "📉 ĐỔI SV ÍT NGƯỜI", Color3.fromRGB(52, 152, 219), function() hopServer("Asc") end, "📈 ĐỔI SV NHIỀU NGƯỜI", Color3.fromRGB(231, 76, 60), function() hopServer("Desc") end)
 
+-- ĐÃ THAY NÚT LẤY BTOOLS BẰNG TP SAVE V2 GUI NHƯ YÊU CẦU
 createDualButtons(page4, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) end, 
-"🔨 LẤY BTOOLS", Theme.Brand, function() pcall(function() 
-    local b1 = Instance.new("HopperBin", player.Backpack); b1.BinType = Enum.BinType.Clone
-    local b2 = Instance.new("HopperBin", player.Backpack); b2.BinType = Enum.BinType.Hammer
-    local b3 = Instance.new("HopperBin", player.Backpack); b3.BinType = Enum.BinType.Grab
-end) end)
+"📂 TP SAVE V2 GUI", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
+
 createDualButtons(page4, "🕊️ FLY V1", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end, 
 "🚀 FLY V3", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end) end)
-createButton(page4, "📂 TP SAVE V2 GUI", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
 
 -- ==========================================
 -- [TAB 5: PHÁT NHẠC VÀ LƯU TRỮ VĨNH VIỄN]
@@ -808,7 +849,8 @@ musicControlFrame.ZIndex = 10
 musicControlFrame.LayoutOrder = 1
 Instance.new("UICorner", musicControlFrame).CornerRadius = UDim.new(0, 8)
 local mStroke = Instance.new("UIStroke", musicControlFrame)
-mStroke.Color = Theme.Stroke; mStroke.Thickness = 1
+mStroke.Color = Theme.Stroke; mStroke.Thickness = 1.5
+table.insert(RGBElements, {Type = "Info", Stroke = mStroke})
 
 local musicIcon = Instance.new("TextLabel", musicControlFrame)
 musicIcon.Size = UDim2.new(0.15, 0, 0, 40)
@@ -945,7 +987,8 @@ local function renderSavedMusic()
         item.Size = UDim2.new(1, 0, 0, 48); item.Position = UDim2.new(0, 0, 0, yOffset)
         item.BackgroundColor3 = Theme.ItemBg; item.ZIndex = 10
         Instance.new("UICorner", item).CornerRadius = UDim.new(0, 8)
-        local stroke = Instance.new("UIStroke", item); stroke.Color = Theme.Stroke; stroke.Thickness = 1
+        local stroke = Instance.new("UIStroke", item); stroke.Color = Theme.Stroke; stroke.Thickness = 1.5
+        table.insert(RGBElements, {Type = "Info", Stroke = stroke})
         
         local iconLabel = Instance.new("TextLabel", item)
         iconLabel.Size = UDim2.new(0.08, 0, 1, 0)
@@ -1058,7 +1101,8 @@ local function renderSavedTps()
         item.BackgroundColor3 = Theme.ItemBg
         item.ZIndex = 10
         Instance.new("UICorner", item).CornerRadius = UDim.new(0, 8)
-        local stroke = Instance.new("UIStroke", item); stroke.Color = Theme.Stroke; stroke.Thickness = 1
+        local stroke = Instance.new("UIStroke", item); stroke.Color = Theme.Stroke; stroke.Thickness = 1.5
+        table.insert(RGBElements, {Type = "Info", Stroke = stroke})
         
         local nameBox = Instance.new("TextBox", item)
         nameBox.Size = UDim2.new(0.45, 0, 1, 0); nameBox.Position = UDim2.new(0.05, 0, 0, 0)
@@ -1143,7 +1187,8 @@ local function updatePlayerList()
             local btn = Instance.new("TextButton", pFrame)
             btn.Name = "PlayerBtn_TP"; btn.Size = UDim2.new(1, 0, 1, 0); btn.BackgroundColor3 = Theme.ItemBg; btn.Text = ""; btn.AutoButtonColor = false; btn.ZIndex = 10
             Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
-            local stroke = Instance.new("UIStroke", btn); stroke.Color = Theme.Stroke; stroke.Thickness = 1
+            local stroke = Instance.new("UIStroke", btn); stroke.Color = Theme.Stroke; stroke.Thickness = 1.5
+            table.insert(RGBElements, {Type = "Info", Stroke = stroke})
             
             local nLabel = Instance.new("TextLabel", btn)
             nLabel.Size = UDim2.new(0.7, 0, 0.5, 0); nLabel.Position = UDim2.new(0.05, 0, 0.05, 0); nLabel.BackgroundTransparency = 1
@@ -1164,7 +1209,7 @@ local function updatePlayerList()
             
             local targetStroke = Instance.new("UIStroke", targetAvatar)
             targetStroke.Color = Theme.Stroke
-            targetStroke.Thickness = 1
+            targetStroke.Thickness = 1.5
             targetStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
             task.spawn(function()
@@ -1176,9 +1221,10 @@ local function updatePlayerList()
             btn.MouseButton1Click:Connect(function()
                 clickAnimate(btn)
                 if p.Character and p.Character:FindFirstChild("HumanoidRootPart") and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                    TweenService:Create(stroke, TweenInfo.new(0.3), {Color = Theme.AccentOn}):Play()
+                    if not State.RGB then TweenService:Create(stroke, TweenInfo.new(0.3), {Color = Theme.AccentOn}):Play() end
                     player.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame
-                    task.wait(0.5); TweenService:Create(stroke, TweenInfo.new(0.3), {Color = Theme.Stroke}):Play()
+                    task.wait(0.5); 
+                    if not State.RGB then TweenService:Create(stroke, TweenInfo.new(0.3), {Color = Theme.Stroke}):Play() end
                 end
             end)
         end
@@ -1194,11 +1240,20 @@ end)
 
 -- [BẢO TỒN HOẠT ĐỘNG LIÊN TỤC]
 RunService.RenderStepped:Connect(function()
+    -- CẬP NHẬT RGB CHO TẤT CẢ VIỀN TRONG MENU
     if State.RGB then
         local hue = tick() % 5 / 5
         local color = Color3.fromHSV(hue, 1, 1)
         titleLabel.TextColor3 = color
         frameStroke.Color = color
+        avatarStroke.Color = color
+        openStroke.Color = color
+        
+        for _, obj in pairs(RGBElements) do
+            if obj.Stroke and obj.Stroke.Parent then
+                obj.Stroke.Color = color
+            end
+        end
     end
 
     local char = player.Character
