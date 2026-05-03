@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V42.7 (Bản Fix - Thêm Viền RGB Cho TP PLAYER)
+-- MENU VIP PRO V42.7 
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -44,8 +44,6 @@ local Theme = {
 
 -- Mảng lưu trữ tất cả các viền (Stroke) để đổi màu RGB
 local RGBElements = {}
-
--- [XÓA MENU CŨ CHỐNG LỖI CACHE]
 local guiParent = player:WaitForChild("PlayerGui")
 pcall(function()
     if gethui and type(gethui) == "function" then
@@ -80,7 +78,7 @@ screenOverlay.Visible = false
 local openBtn = Instance.new("TextButton", gui)
 openBtn.Size = UDim2.new(0, 45, 0, 45)
 openBtn.Position = UDim2.new(0, 15, 0, 15)
-openBtn.Text = "🚀"
+openBtn.Text = "🇻🇳"
 openBtn.BackgroundColor3 = Theme.MainBg
 openBtn.BackgroundTransparency = 0.3
 openBtn.TextColor3 = Theme.Brand
@@ -137,7 +135,7 @@ table.insert(RGBElements, {Type = "Header", Stroke = headerStroke})
 local titleLabel = Instance.new("TextLabel", header)
 titleLabel.Size = UDim2.new(1, 0, 1, 0); titleLabel.BackgroundTransparency = 1
 titleLabel.Text = "MENU PRO MAX V42.7"
-titleLabel.TextColor3 = Theme.TextTitle; titleLabel.Font = Enum.Font.GothamBlack; titleLabel.TextSize = 14
+titleLabel.TextColor3 = Theme.TextTitle; titleLabel.Font = Enum.Font.GothamBlack; titleLabel.TextSize = 16
 titleLabel.ZIndex = 10
 
 local avatarImg = Instance.new("ImageLabel", header)
@@ -184,10 +182,10 @@ local function createTab(name, x, width)
 end
 
 local tab1, ind1 = createTab("THÔNG TIN", 0.00, 0.14)
-local tab2, ind2 = createTab("NHÂN VẬT",  0.14, 0.14)
+local tab2, ind2 = createTab("TÍNH NĂNG", 0.14, 0.14)
 local tab3, ind3 = createTab("PLAYER",    0.28, 0.14)
 local tab4, ind4 = createTab("TIỆN ÍCH",  0.42, 0.14)
-local tab5, ind5 = createTab("NHẠC",      0.56, 0.12) 
+local tab5, ind5 = createTab("NHẠC ID",   0.56, 0.12) 
 local tab6, ind6 = createTab("TP SAVE",   0.68, 0.15)
 local tab7, ind7 = createTab("TP PLAYER", 0.83, 0.17)
 
@@ -407,7 +405,7 @@ local serverInfoLabel, serverInfoFrame = createInfoBox(page1, "🌐", "THÔNG TI
 local copyIdBtn = Instance.new("TextButton", serverInfoFrame)
 copyIdBtn.Size = UDim2.new(0, 24, 0, 24)
 copyIdBtn.Position = UDim2.new(1, -30, 1, -28) 
-copyIdBtn.Text = "📋"
+copyIdBtn.Text = "📜"
 copyIdBtn.BackgroundTransparency = 1
 copyIdBtn.TextSize = 14
 copyIdBtn.ZIndex = 11
@@ -459,7 +457,7 @@ task.spawn(function()
             hp = math.floor(hum.Health); maxHp = math.floor(hum.MaxHealth); ws = math.floor(hum.WalkSpeed); jp = math.floor(hum.JumpPower)
         end
         playerInfoLabel.Text = string.format(
-            "<font color='#00C8FF'>Tên:</font> %s (@%s)\n<font color='#00C8FF'>Máu:</font> %d / %d\n<font color='#00C8FF'>Tốc độ:</font> %d\n<font color='#00C8FF'>Lực nhảy:</font> %d",
+            "<font color='#FF3300'>Tên:</font> %s (@%s)\n<font color='#FF3300'>Máu:</font> %d / %d\n<font color='#FF3300'>Tốc độ:</font> %d\n<font color='#FF3300'>Lực nhảy:</font> %d",
             player.DisplayName, player.Name, hp, maxHp, ws, jp
         )
         
@@ -477,7 +475,7 @@ task.spawn(function()
         local jobText = game.JobId ~= "" and string.sub(game.JobId, 1, 15).."..." or "N/A"
         
         serverInfoLabel.Text = string.format(
-            "<font color='#00C8FF'>FPS:</font> %d\n<font color='#00C8FF'>Ping:</font> %s\n<font color='#00C8FF'>Người chơi:</font> %d / %d\n<font color='#00C8FF'>ID SV:</font> %s",
+            "<font color='#FF3300'>FPS:</font> %d\n<font color='#FF3300'>Ping:</font> %s\n<font color='#FF3300'>Người chơi:</font> %d / %d\n<font color='#FF3300'>ID SV:</font> %s",
             fps, ping, pCount, maxP, jobText
         )
         
@@ -486,7 +484,7 @@ task.spawn(function()
         local timeString = string.format("%02d:%02d:%02d", hours, mins, secs)
         
         extraInfoLabel.Text = string.format(
-            "<font color='#00C8FF'>Thời gian chơi:</font> %s\n<font color='#00C8FF'>Giờ hệ thống:</font> %s\n<font color='#00C8FF'>Phiên bản:</font> MENU VIP PRO V42.7",
+            "<font color='#FF3300'>Thời gian chơi:</font> %s\n<font color='#FF3300'>Giờ hệ thống:</font> %s\n<font color='#FF3300'>Phiên bản:</font> MENU VIP PRO V42.7",
             timeString, os.date("%H:%M:%S")
         )
     end
@@ -496,12 +494,12 @@ end)
 -- [TAB 2: NHÂN VẬT (BẬT/TẮT CƠ BẢN)]
 -- ==========================================
 
-createToggle(page2, "🛡️ Chống ngã & Chống văng", false, function(v) State.AntiStun = v end)
+createToggle(page2, "🛡️ Chống ngã", false, function(v) State.AntiStun = v end)
 createToggle(page2, "🔒 Khóa vị trí", false, function(v) 
     State.LockPosition = v; if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then player.Character.HumanoidRootPart.Anchored = false end
 end)
 createToggle(page2, "🚀 Nhảy trên không", false, function(v) State.InfJump = v end) 
-createToggle(page2, "⚡ Đánh nhanh (Fast Attack)", false, function(v) State.FastAttack = v end)
+createToggle(page2, "⚡ Đánh nhanh", false, function(v) State.FastAttack = v end)
 createToggle(page2, "🐿️ Lấy đồ nhanh", false, function(v) State.Instant = v end)
 createToggle(page2, "🧲 Auto nhặt đồ xung quanh", false, function(v) State.AutoCollect = v end)
 createToggle(page2, "🚷 Đi xuyên tường", false, function(v) 
@@ -592,13 +590,13 @@ createToggle(page3, "🦘 Nhảy cao", false, function(v)
 end)
 createSlider(page3, "Lực nhảy", 50, 300, 120, function(val) State.JumpValue = val end)
 
-createToggle(page3, "⚔️ Phóng to Vũ Khí (Tầm đánh)", false, function(v) State.Reach = v end)
+createToggle(page3, "⚔️ Đánh xa", false, function(v) State.Reach = v end)
 createSlider(page3, "Kích thước vũ khí", 2, 100, 15, function(v) State.ReachSize = v end)
 
 createToggle(page3, "🌪️ Xoay vòng tròn (SpinBot)", false, function(v) State.SpinBot = v end)
 createSlider(page3, "Tốc độ xoay", 10, 100, 50, function(v) State.SpinSpeed = v end)
 
-createToggle(page3, "🎯 Phóng to đối thủ (Hitbox)", false, function(v) State.Hitbox = v end)
+createToggle(page3, "🎯 Hitbox", false, function(v) State.Hitbox = v end)
 createSlider(page3, "Kích thước đối thủ", 2, 100, 15, function(v) State.HitboxSize = v end)
 
 createToggle(page3, "💡 Ánh sáng quanh người", false, function(v) 
@@ -806,7 +804,7 @@ createToggle(page4, "🌈 Chế độ RGB (Đèn LED Menu)", false, function(v)
     end 
 end)
 
-createToggle(page4, "🖱️ Auto Click (Tự động đánh)", false, function(v) State.AutoClick = v end)
+createToggle(page4, "🖱️ Auto Click", false, function(v) State.AutoClick = v end)
 task.spawn(function()
     while task.wait(0.1) do
         if State.AutoClick then
@@ -823,7 +821,7 @@ task.spawn(function()
 end)
 
 local origFog, origBright, origShadow
-createToggle(page4, "☀️ Xóa sương mù & Sáng Map", false, function(v) 
+createToggle(page4, "☀️ Xóa sương mù", false, function(v) 
     if v then
         origFog = Lighting.FogEnd; origBright = Lighting.Brightness; origShadow = Lighting.GlobalShadows
         Lighting.FogEnd = 100000; Lighting.Brightness = 2; Lighting.GlobalShadows = false
@@ -832,11 +830,11 @@ createToggle(page4, "☀️ Xóa sương mù & Sáng Map", false, function(v)
     end
 end)
 
-createToggle(page4, "⬛ Màn hình đen (Giảm lag)", false, function(v) screenOverlay.BackgroundColor3 = Color3.new(0, 0, 0); screenOverlay.Visible = v end)
+createToggle(page4, "⬛ Màn hình đen (Treo máy)", false, function(v) screenOverlay.BackgroundColor3 = Color3.new(0, 0, 0); screenOverlay.Visible = v end)
 createToggle(page4, "⬜ Màn hình trắng (Treo máy)", false, function(v) screenOverlay.BackgroundColor3 = Color3.new(1, 1, 1); screenOverlay.Visible = v end)
 createToggle(page4, "🛡️ Chống AFK", true, function(v) State.AntiAfk = v end)
 
-createDualButtons(page4, "🌞 SÁNG (FAKE)", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12 end, "🌚 TỐI (FAKE)", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0 end)
+createDualButtons(page4, "🌞 Trời SÁNG (FAKE)", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12 end, "🌚 Trời TỐI (FAKE)", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0 end)
 createDualButtons(page4, "🔄 VÀO LẠI SV", Theme.AccentOn, rejoinServer, "🎲 ĐỔI SV NGẪU NHIÊN", Theme.Brand, function() hopServer("Desc") end)
 createDualButtons(page4, "📉 ĐỔI SV ÍT NGƯỜI", Color3.fromRGB(52, 152, 219), function() hopServer("Asc") end, "📈 ĐỔI SV NHIỀU NGƯỜI", Color3.fromRGB(231, 76, 60), function() hopServer("Desc") end)
 
@@ -844,7 +842,7 @@ createDualButtons(page4, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(f
 "📂 TP SAVE V2 GUI", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
 
 createDualButtons(page4, "🕊️ FLY V1", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end, 
-"🚀 FLY V3", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end) end)
+"🕊️ FLY V3", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end) end)
 
 -- ==========================================
 -- [TAB 5: PHÁT NHẠC VÀ LƯU TRỮ VĨNH VIỄN]
@@ -866,7 +864,7 @@ table.insert(RGBElements, {Type = "Info", Stroke = mStroke})
 
 local musicIcon = Instance.new("TextLabel", musicControlFrame)
 musicIcon.Size = UDim2.new(0.15, 0, 0, 40)
-musicIcon.BackgroundTransparency = 1; musicIcon.Text = "🎵"; musicIcon.TextSize = 18; musicIcon.ZIndex = 10
+musicIcon.BackgroundTransparency = 1; musicIcon.Text = "🎼"; musicIcon.TextSize = 18; musicIcon.ZIndex = 10
 
 local musicIdBox = Instance.new("TextBox", musicControlFrame)
 musicIdBox.Size = UDim2.new(0.65, 0, 0, 40) 
@@ -898,7 +896,7 @@ nowPlayingLabel.BackgroundTransparency = 1
 nowPlayingLabel.RichText = true 
 nowPlayingLabel.Text = "<font color='#FFFFFF'>🎵 Chưa có bài hát nào đang phát</font>"
 nowPlayingLabel.Font = Enum.Font.GothamSemibold
-nowPlayingLabel.TextSize = 11 
+nowPlayingLabel.TextSize = 13 
 nowPlayingLabel.TextWrapped = true
 nowPlayingLabel.ZIndex = 10
 
@@ -915,12 +913,12 @@ local function playMusic(id)
     if not soundId or soundId == "" then return end
     
     currentMusicId = soundId
-    nowPlayingLabel.Text = "<font color='#FFFFFF'>⏳ Đang tải:</font> <font color='#00C8FF'>" .. soundId .. "...</font>"
+    nowPlayingLabel.Text = "<font color='#FFFFFF'>⏳ Đang tải:</font> <font color='#FFFF00'>" .. soundId .. "...</font>"
     
     task.spawn(function()
         local name = getSongName(soundId)
         if currentMusicId == soundId then
-            nowPlayingLabel.Text = "<font color='#FFFFFF'>🎵 Đang phát:</font> <font color='#00C8FF'>" .. name .. "</font>"
+            nowPlayingLabel.Text = "<font color='#FFFFFF'>🎵 Đang phát:</font> <font color='#FFFF00'>" .. name .. "</font>"
         end
     end)
 
@@ -959,7 +957,7 @@ end, "⏸️ TẮT NHẠC", Theme.AccentOff, function()
 end)
 playControlFrame.LayoutOrder = 2
 
-local volumeFrame = createSlider(page5, "Âm lượng ♪", 0, 10, State.MusicVolume, function(val)
+local volumeFrame = createSlider(page5, "ÂM LƯỢNG 🎛️", 0, 10, State.MusicVolume, function(val)
     State.MusicVolume = val
     if currentSound then currentSound.Volume = val end
 end)
@@ -1025,12 +1023,12 @@ local function renderSavedMusic()
         
         local playBtn = Instance.new("TextButton", item)
         playBtn.Size = UDim2.new(0.18, 0, 0.6, 0); playBtn.Position = UDim2.new(0.62, 0, 0.2, 0)
-        playBtn.Text = "▶"; playBtn.BackgroundColor3 = Theme.Brand; playBtn.TextColor3 = Color3.new(1,1,1)
+        playBtn.Text = "▶️"; playBtn.BackgroundColor3 = Theme.Brand; playBtn.TextColor3 = Color3.new(1,1,1)
         playBtn.Font = Enum.Font.GothamBold; playBtn.TextSize = 11; playBtn.ZIndex = 10; Instance.new("UICorner", playBtn).CornerRadius = UDim.new(0, 6)
         
         local delBtn = Instance.new("TextButton", item)
         delBtn.Size = UDim2.new(0.15, 0, 0.6, 0); delBtn.Position = UDim2.new(0.82, 0, 0.2, 0)
-        delBtn.Text = "X"; delBtn.BackgroundColor3 = Theme.AccentOff; delBtn.TextColor3 = Color3.new(1,1,1)
+        delBtn.Text = "❌"; delBtn.BackgroundColor3 = Theme.AccentOff; delBtn.TextColor3 = Color3.new(1,1,1)
         delBtn.Font = Enum.Font.GothamBold; delBtn.TextSize = 12; delBtn.ZIndex = 10; Instance.new("UICorner", delBtn).CornerRadius = UDim.new(0, 6)
         
         playBtn.MouseButton1Click:Connect(function() 
@@ -1175,7 +1173,7 @@ end, "📍 LƯU VĨNH VIỄN", Theme.Brand, function()
     if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
         local root = player.Character.HumanoidRootPart
         local cf = {root.CFrame:GetComponents()}
-        local name = "Vị trí lưu " .. (#savedTpList + 1)
+        local name = "Vị vĩnh viễn" .. (#savedTpList + 1)
         table.insert(savedTpList, {name = name, cframe = cf, isTemp = false})
         saveTpData()
         renderSavedTps()
