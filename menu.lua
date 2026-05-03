@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V42.4 (Bản Fix Lỗi Cú Pháp - Hoạt động 100%)
+-- MENU VIP PRO V42.5 (Bản Fix - Khung RGB Khoanh Vùng, Avatar & Vị Trí)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -114,8 +114,8 @@ UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputT
 
 local frame = Instance.new("Frame", gui)
 frame.Size = UDim2.new(0, 420, 0, 500)
--- ĐÃ SỬA: Hạ menu thấp hơn một chút (từ 0.5 xuống 0.6) để lội ra một tí, tránh bị UI khác che
-frame.Position = UDim2.new(0.5, -210, 0.6, -250)
+-- ĐÃ FIX: Đưa Menu về lại đúng vị trí trung tâm, không bị tuột thấp
+frame.Position = UDim2.new(0.5, -210, 0.5, -250)
 frame.BackgroundColor3 = Theme.MainBg
 frame.BackgroundTransparency = 0.05 
 frame.ZIndex = 10
@@ -137,13 +137,14 @@ table.insert(RGBElements, {Type = "Header", Stroke = headerStroke})
 
 local titleLabel = Instance.new("TextLabel", header)
 titleLabel.Size = UDim2.new(1, 0, 1, 0); titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "MENU PRO MAX V42.4"
+titleLabel.Text = "MENU PRO MAX V42.5"
 titleLabel.TextColor3 = Theme.TextTitle; titleLabel.Font = Enum.Font.GothamBlack; titleLabel.TextSize = 14
 titleLabel.ZIndex = 10
 
 local avatarImg = Instance.new("ImageLabel", header)
 avatarImg.Size = UDim2.new(0, 40, 0, 40)
-avatarImg.Position = UDim2.new(0, 10, 0, 1)
+-- ĐÃ FIX: Hạ Avatar xuống mức 4px (thấp hơn 2mm) cho vừa khít mép viền
+avatarImg.Position = UDim2.new(0, 10, 0, 4)
 avatarImg.BackgroundTransparency = 1
 avatarImg.ZIndex = 10
 pcall(function()
@@ -176,8 +177,7 @@ local function createTab(name, x, width)
     btn.Font = Enum.Font.GothamBold; btn.TextSize = 8 
     btn.ZIndex = 10
     
-    local tabStroke = Instance.new("UIStroke", btn); tabStroke.Color = Theme.Stroke; tabStroke.Thickness = 1.5; tabStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    table.insert(RGBElements, {Type = "Tab", Stroke = tabStroke})
+    -- ĐÃ FIX: Xóa viền ở Tab theo yêu cầu của bạn, chỉ giữ lại hiệu ứng chỉ báo
 
     local indicator = Instance.new("Frame", btn)
     indicator.Size = UDim2.new(0.5, 0, 0, 3); indicator.Position = UDim2.new(0.25, 0, 1, -3)
@@ -195,10 +195,16 @@ local tab5, ind5 = createTab("NHẠC",      0.56, 0.12)
 local tab6, ind6 = createTab("TP SAVE",   0.68, 0.15)
 local tab7, ind7 = createTab("TP PLAYER", 0.83, 0.17)
 
+-- [ĐÃ FIX: TẠO KHUNG VIỀN LỚN BAO QUANH DANH SÁCH TÍNH NĂNG NHƯ ẢNH VẼ]
 local pageContainer = Instance.new("Frame", frame)
-pageContainer.Size = UDim2.new(1, 0, 1, -95); pageContainer.Position = UDim2.new(0, 0, 0, 88)
+pageContainer.Size = UDim2.new(0.96, 0, 1, -95); pageContainer.Position = UDim2.new(0.02, 0, 0, 88)
 pageContainer.BackgroundTransparency = 1
 pageContainer.ZIndex = 10
+Instance.new("UICorner", pageContainer).CornerRadius = UDim.new(0, 10)
+local pcStroke = Instance.new("UIStroke", pageContainer)
+pcStroke.Color = Theme.Stroke
+pcStroke.Thickness = 1.5
+table.insert(RGBElements, {Type = "Container", Stroke = pcStroke}) -- Thêm vào để nháy RGB
 
 local function createPage()
     local pg = Instance.new("ScrollingFrame", pageContainer)
@@ -251,7 +257,8 @@ openBtn.MouseButton1Click:Connect(function()
         openStroke.Color = opened and Theme.AccentOff or Theme.Brand
         TweenService:Create(openStroke, TweenInfo.new(0.3), {Color = opened and Theme.AccentOff or Theme.Brand}):Play()
     end
-    frame:TweenPosition(opened and UDim2.new(0.5, -210, 0.6, -250) or UDim2.new(0.5, -210, 1.2, 0), "Out", "Back", 0.5)
+    -- ĐÃ FIX: Giữ nguyên khung giữa
+    frame:TweenPosition(opened and UDim2.new(0.5, -210, 0.5, -250) or UDim2.new(0.5, -210, 1.2, 0), "Out", "Back", 0.5)
 end)
 
 local function createButton(parent, text, color, callback)
@@ -480,7 +487,7 @@ task.spawn(function()
         local timeString = string.format("%02d:%02d:%02d", hours, mins, secs)
         
         extraInfoLabel.Text = string.format(
-            "<font color='#00C8FF'>Thời gian chơi:</font> %s\n<font color='#00C8FF'>Giờ hệ thống:</font> %s\n<font color='#00C8FF'>Phiên bản:</font> MENU VIP PRO V42.4",
+            "<font color='#00C8FF'>Thời gian chơi:</font> %s\n<font color='#00C8FF'>Giờ hệ thống:</font> %s\n<font color='#00C8FF'>Phiên bản:</font> MENU VIP PRO V42.5",
             timeString, os.date("%H:%M:%S")
         )
     end
@@ -772,7 +779,6 @@ local function rejoinServer()
     else TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, player) end
 end
 
--- ĐÃ FIX: Lỗi Cú Pháp (} -> end) Đã Được Loại Bỏ Hoàn Toàn
 createToggle(page4, "🌈 Chế độ RGB (Đèn LED Menu)", false, function(v) 
     State.RGB = v; 
     if not v then 
@@ -793,7 +799,7 @@ createToggle(page4, "🌈 Chế độ RGB (Đèn LED Menu)", false, function(v)
                     obj.Stroke.Color = obj.State() and Theme.AccentOn or Theme.Stroke
                 elseif obj.Type == "Button" then
                     obj.Stroke.Color = obj.DefaultColor
-                elseif obj.Type == "Slider" or obj.Type == "Info" or obj.Type == "Header" or obj.Type == "Tab" then
+                elseif obj.Type == "Slider" or obj.Type == "Info" or obj.Type == "Container" then
                     obj.Stroke.Color = Theme.Stroke
                 end
             end
@@ -1247,13 +1253,12 @@ end)
 
 -- [BẢO TỒN HOẠT ĐỘNG LIÊN TỤC]
 RunService.RenderStepped:Connect(function()
+    -- CẬP NHẬT RGB CHO TẤT CẢ VIỀN TRONG MENU
     if State.RGB then
         local hue = tick() % 5 / 5
         local color = Color3.fromHSV(hue, 1, 1)
         
-        -- ĐÃ SỬA VÀ THÊM VÀO: Đổi màu cả tiêu đề
         titleLabel.TextColor3 = color
-        
         frameStroke.Color = color
         headerStroke.Color = color
         avatarStroke.Color = color
