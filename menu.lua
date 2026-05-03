@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V39.9 (Bản Cập Nhật - Thêm Đánh Nhanh Tốc Độ Cao)
+-- MENU VIP PRO V40 (Bản Trọn Vẹn - Khôi Phục Fly & Reset Hitbox)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -22,7 +22,7 @@ local State = {
     InfJump = false, PlayerLight = false, ESP = false, AntiAfk = true, AntiStun = false, 
     XRay = false, LockPosition = false, AutoCollect = false,
     SpinBot = false, SpinSpeed = 50, Hitbox = false, HitboxSize = 15, AutoClick = false, RGB = false,
-    Reach = false, ReachSize = 15, FastAttack = false, -- TÍNH NĂNG MỚI: ĐÁNH NHANH
+    Reach = false, ReachSize = 15, FastAttack = false,
     SpeedValue = 60, JumpValue = 120, LightRange = 60, LightBrightness = 3,
     MusicVolume = 5
 }
@@ -130,7 +130,7 @@ headerCover.ZIndex = 10
 
 local titleLabel = Instance.new("TextLabel", header)
 titleLabel.Size = UDim2.new(1, 0, 1, 0); titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "MENU PRO MAX V39.9"
+titleLabel.Text = "MENU PRO MAX V40"
 titleLabel.TextColor3 = Theme.Brand; titleLabel.Font = Enum.Font.GothamBlack; titleLabel.TextSize = 14
 titleLabel.ZIndex = 10
 
@@ -440,7 +440,7 @@ task.spawn(function()
         local timeString = string.format("%02d:%02d:%02d", hours, mins, secs)
         
         extraInfoLabel.Text = string.format(
-            "<font color='#00C8FF'>Thời gian chơi:</font> %s\n<font color='#00C8FF'>Giờ hệ thống:</font> %s\n<font color='#00C8FF'>Phiên bản:</font> MENU VIP PRO V39.9",
+            "<font color='#00C8FF'>Thời gian chơi:</font> %s\n<font color='#00C8FF'>Giờ hệ thống:</font> %s\n<font color='#00C8FF'>Phiên bản:</font> MENU VIP PRO V40",
             timeString, os.date("%H:%M:%S")
         )
     end
@@ -473,7 +473,6 @@ createToggle(page2, "🚀 Nhảy trên không", false, function(v) State.InfJump
 createToggle(page2, "⚔️ Phóng to Vũ Khí (Tầm đánh)", false, function(v) State.Reach = v end)
 createSlider(page2, "Kích thước vũ khí", 2, 100, 15, function(v) State.ReachSize = v end)
 
--- [TÍNH NĂNG MỚI: ĐÁNH NHANH BÀN THỜ]
 createToggle(page2, "⚡ Đánh nhanh (Fast Attack)", false, function(v) State.FastAttack = v end)
 
 createToggle(page2, "🌪️ Xoay vòng tròn (SpinBot)", false, function(v) State.SpinBot = v end)
@@ -485,8 +484,10 @@ createSlider(page2, "Kích thước đối thủ", 2, 100, 15, function(v) State
 local originalPrompts = {}
 local originalToolSizes = {}
 
+-- [HITBOX, REACH & AUTO LẤY ĐỒ]
 task.spawn(function()
     while task.wait(0.2) do
+        -- LẤY ĐỒ NHANH
         if State.Instant then
             for _, prompt in pairs(workspace:GetDescendants()) do 
                 if prompt:IsA("ProximityPrompt") then 
@@ -505,6 +506,7 @@ task.spawn(function()
             originalPrompts = {}
         end
 
+        -- AUTO COLLECT
         if State.AutoCollect and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             local root = player.Character.HumanoidRootPart
             for _, obj in pairs(workspace:GetDescendants()) do
@@ -525,6 +527,7 @@ task.spawn(function()
             end
         end
 
+        -- REACH (TẦM ĐÁNH VŨ KHÍ)
         if State.Reach and player.Character then
             local tool = player.Character:FindFirstChildOfClass("Tool")
             if tool then
@@ -557,11 +560,21 @@ task.spawn(function()
             originalToolSizes = {}
         end
 
+        -- HITBOX ĐỐI THỦ (RESET KHI CHẾT)
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                 local hrp = p.Character.HumanoidRootPart
+                local hum = p.Character:FindFirstChildOfClass("Humanoid")
                 pcall(function()
-                    if State.Hitbox then
+                    if hum and hum.Health <= 0 then
+                        -- Địch chết -> Reset ngay lập tức
+                        if hrp.Size.X > 5 then
+                            hrp.Size = Vector3.new(2, 2, 1)
+                            hrp.Transparency = 1
+                            hrp.CanCollide = true
+                        end
+                    elseif State.Hitbox then
+                        -- Địch còn sống và bật Hitbox
                         local targetSize = Vector3.new(State.HitboxSize, State.HitboxSize, State.HitboxSize)
                         if hrp.Size ~= targetSize then
                             hrp.Size = targetSize
@@ -569,6 +582,7 @@ task.spawn(function()
                             hrp.CanCollide = false
                         end
                     else
+                        -- Địch còn sống nhưng tắt Hitbox
                         if hrp.Size.X > 5 then 
                             hrp.Size = Vector3.new(2, 2, 1)
                             hrp.Transparency = 1
@@ -749,12 +763,19 @@ createToggle(page3, "🛡️ Chống AFK", true, function(v) State.AntiAfk = v e
 createDualButtons(page3, "🌞 SÁNG (FAKE)", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12 end, "🌚 TỐI (FAKE)", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0 end)
 createDualButtons(page3, "🔄 VÀO LẠI SV", Theme.AccentOn, rejoinServer, "🎲 ĐỔI SV NGẪU NHIÊN", Theme.Brand, function() hopServer("Desc") end)
 createDualButtons(page3, "📉 ĐỔI SV ÍT NGƯỜI", Color3.fromRGB(52, 152, 219), function() hopServer("Asc") end, "📈 ĐỔI SV NHIỀU NGƯỜI", Color3.fromRGB(231, 76, 60), function() hopServer("Desc") end)
+
+-- [KHÔI PHỤC NÚT BTOOLS VÀ LỆNH ADMIN]
 createDualButtons(page3, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) end, 
 "🔨 LẤY BTOOLS", Theme.Brand, function() pcall(function() 
     local b1 = Instance.new("HopperBin", player.Backpack); b1.BinType = Enum.BinType.Clone
     local b2 = Instance.new("HopperBin", player.Backpack); b2.BinType = Enum.BinType.Hammer
     local b3 = Instance.new("HopperBin", player.Backpack); b3.BinType = Enum.BinType.Grab
 end) end)
+
+-- [KHÔI PHỤC FLY VÀ TP SAVE GUI]
+createDualButtons(page3, "🕊️ FLY V1", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end, 
+"🚀 FLY V3", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end) end)
+
 createButton(page3, "📂 TP SAVE V2 GUI", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
 
 -- ==========================================
@@ -1188,7 +1209,7 @@ RunService.RenderStepped:Connect(function()
         if State.Speed then hum.WalkSpeed = State.SpeedValue end
         if State.Jump then hum.UseJumpPower = true; hum.JumpPower = State.JumpValue end
         
-        -- [TÍNH NĂNG MỚI] CƠ CHẾ ĐÁNH NHANH X5 HOẠT ẢNH
+        -- CƠ CHẾ ĐÁNH NHANH X5 HOẠT ẢNH
         if State.FastAttack then
             pcall(function()
                 local tool = char:FindFirstChildOfClass("Tool")
@@ -1199,6 +1220,7 @@ RunService.RenderStepped:Connect(function()
             end)
         end
         
+        -- FIX CHỐNG NGÃ + CHỐNG VĂNG XA
         if State.AntiStun then 
             hum.PlatformStand = false
             hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
@@ -1225,7 +1247,7 @@ RunService.RenderStepped:Connect(function()
             else if light then light:Destroy() end end
         end
 
-        -- Cập nhật ESP mượt mà
+        -- ESP
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= player and p.Character and p.Character:FindFirstChild("Head") then
                 local tChar = p.Character; local head = tChar.Head
