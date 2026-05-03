@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V42 (Bản Cập Nhật - Giao Diện Rộng & Tab PLAYER)
+-- MENU VIP PRO V42 
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -42,7 +42,7 @@ local Theme = {
     BrandGradient = Color3.fromRGB(150, 100, 255) 
 }
 
--- [XÓA MENU CŨ CHỐNG LỖI CACHE]
+-- 
 local guiParent = player:WaitForChild("PlayerGui")
 pcall(function()
     if gethui and type(gethui) == "function" then
@@ -846,7 +846,7 @@ nowPlayingLabel.BackgroundTransparency = 1
 nowPlayingLabel.RichText = true 
 nowPlayingLabel.Text = "<font color='#FFFFFF'>🎵 Chưa có bài hát nào đang phát</font>"
 nowPlayingLabel.Font = Enum.Font.GothamSemibold
-nowPlayingLabel.TextSize = 11 
+nowPlayingLabel.TextSize = 12 
 nowPlayingLabel.TextWrapped = true
 nowPlayingLabel.ZIndex = 10
 
