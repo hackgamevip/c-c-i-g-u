@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V42 
+-- MENU VIP PRO V42.1 (Bản Fix - Mở rộng thanh cuộn đáy Menu)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -42,7 +42,7 @@ local Theme = {
     BrandGradient = Color3.fromRGB(150, 100, 255) 
 }
 
--- 
+-- [XÓA MENU CŨ CHỐNG LỖI CACHE]
 local guiParent = player:WaitForChild("PlayerGui")
 pcall(function()
     if gethui and type(gethui) == "function" then
@@ -109,7 +109,6 @@ UIS.InputChanged:Connect(function(input)
 end)
 UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then btnDragToggle = false end end)
 
--- [MỞ RỘNG KHUNG MENU (420x500)]
 local frame = Instance.new("Frame", gui)
 frame.Size = UDim2.new(0, 420, 0, 500)
 frame.Position = UDim2.new(0.5, -210, 0.5, -250)
@@ -131,7 +130,7 @@ headerCover.ZIndex = 10
 
 local titleLabel = Instance.new("TextLabel", header)
 titleLabel.Size = UDim2.new(1, 0, 1, 0); titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "MENU PRO MAX V42"
+titleLabel.Text = "MENU PRO MAX V42.1"
 titleLabel.TextColor3 = Theme.Brand; titleLabel.Font = Enum.Font.GothamBlack; titleLabel.TextSize = 14
 titleLabel.ZIndex = 10
 
@@ -177,7 +176,6 @@ local function createTab(name, x, width)
     return btn, indicator
 end
 
--- [CẬP NHẬT 7 TAB]
 local tab1, ind1 = createTab("THÔNG TIN", 0.00, 0.14)
 local tab2, ind2 = createTab("NHÂN VẬT",  0.14, 0.14)
 local tab3, ind3 = createTab("PLAYER",    0.28, 0.14)
@@ -203,18 +201,19 @@ local function createPage()
     
     Instance.new("UIPadding", pg).PaddingTop = UDim.new(0, 10); Instance.new("UIPadding", pg).PaddingBottom = UDim.new(0, 30) 
     layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() 
-        pg.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 60) 
+        -- ĐÃ SỬA: Tăng khoảng trống từ 60 lên 120 để cuộn xuống đáy thoải mái hơn
+        pg.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 120) 
     end)
     return pg
 end
 
-local page1 = createPage() -- THÔNG TIN
-local page2 = createPage() -- NHÂN VẬT (Bật/Tắt)
-local page3 = createPage() -- PLAYER (Thanh Trượt)
-local page4 = createPage() -- TIỆN ÍCH
-local page5 = createPage() -- PHÁT NHẠC
-local page6 = createPage() -- TP SAVE
-local page7 = createPage() -- TP PLAYER
+local page1 = createPage() 
+local page2 = createPage() 
+local page3 = createPage() 
+local page4 = createPage() 
+local page5 = createPage() 
+local page6 = createPage() 
+local page7 = createPage() 
 
 local function showTab(pg, tb, ind)
     for _, p in pairs({page1, page2, page3, page4, page5, page6, page7}) do p.Visible = false end
@@ -450,7 +449,7 @@ task.spawn(function()
         local timeString = string.format("%02d:%02d:%02d", hours, mins, secs)
         
         extraInfoLabel.Text = string.format(
-            "<font color='#00C8FF'>Thời gian chơi:</font> %s\n<font color='#00C8FF'>Giờ hệ thống:</font> %s\n<font color='#00C8FF'>Phiên bản:</font> MENU VIP PRO V42",
+            "<font color='#00C8FF'>Thời gian chơi:</font> %s\n<font color='#00C8FF'>Giờ hệ thống:</font> %s\n<font color='#00C8FF'>Phiên bản:</font> MENU VIP PRO V42.1",
             timeString, os.date("%H:%M:%S")
         )
     end
@@ -577,7 +576,6 @@ createSlider(page3, "👁️ Mở rộng góc nhìn (FOV)", 70, 120, 70, functio
     workspace.CurrentCamera.FieldOfView = val
 end)
 
--- [CÁC VÒNG LẶP XỬ LÝ (GIỮ NGUYÊN HOẠT ĐỘNG HOÀN HẢO TỪ BẢN TRƯỚC)]
 local originalPrompts = {}
 local originalToolSizes = {}
 
@@ -846,7 +844,7 @@ nowPlayingLabel.BackgroundTransparency = 1
 nowPlayingLabel.RichText = true 
 nowPlayingLabel.Text = "<font color='#FFFFFF'>🎵 Chưa có bài hát nào đang phát</font>"
 nowPlayingLabel.Font = Enum.Font.GothamSemibold
-nowPlayingLabel.TextSize = 12 
+nowPlayingLabel.TextSize = 11 
 nowPlayingLabel.TextWrapped = true
 nowPlayingLabel.ZIndex = 10
 
