@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V42.7 
+-- MENU VIP PRO V42.7 (Đã Fix Lỗi & Tối Ưu)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -140,7 +140,7 @@ titleLabel.ZIndex = 10
 
 local avatarImg = Instance.new("ImageLabel", header)
 avatarImg.Size = UDim2.new(0, 40, 0, 40)
-avatarImg.Position = UDim2.new(0, 10, 0, 4) 
+avatarImg.Position = UDim2.new(0, 10, 0, 8) 
 avatarImg.BackgroundTransparency = 1
 avatarImg.ZIndex = 10
 pcall(function()
@@ -170,7 +170,7 @@ local function createTab(name, x, width)
     local btn = Instance.new("TextButton", tabBar)
     btn.Size = UDim2.new(width, 0, 1, 0); btn.Position = UDim2.new(x, 0, 0, 0)
     btn.Text = name; btn.BackgroundTransparency = 1; btn.TextColor3 = Theme.TextDim
-    btn.Font = Enum.Font.GothamBold; btn.TextSize = 8 
+    btn.BorderSizePixel = 0; btn.Font = Enum.Font.GothamBold; btn.TextSize = 8 
     btn.ZIndex = 10
 
     local indicator = Instance.new("Frame", btn)
@@ -1173,7 +1173,7 @@ end, "📍 LƯU VĨNH VIỄN", Theme.Brand, function()
     if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
         local root = player.Character.HumanoidRootPart
         local cf = {root.CFrame:GetComponents()}
-        local name = "Vị vĩnh viễn" .. (#savedTpList + 1)
+        local name = "Vị trí vĩnh viễn " .. (#savedTpList + 1)
         table.insert(savedTpList, {name = name, cframe = cf, isTemp = false})
         saveTpData()
         renderSavedTps()
@@ -1194,6 +1194,15 @@ renderSavedTps()
 -- [TAB 7: TP NGƯỜI CHƠI]
 -- ==========================================
 local function updatePlayerList()
+    -- Dọn dẹp mảng RGBElements để chống tràn bộ nhớ (Memory Leak)
+    local cleanRGB = {}
+    for _, obj in ipairs(RGBElements) do
+        if obj.Stroke and obj.Stroke.Parent then
+            table.insert(cleanRGB, obj)
+        end
+    end
+    RGBElements = cleanRGB
+    
     for _, child in pairs(page7:GetChildren()) do if child.Name == "PaddingFrame" then child:Destroy() end end
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= player then
@@ -1204,7 +1213,7 @@ local function updatePlayerList()
             
             local currentColor = State.RGB and Color3.fromHSV(tick() % 5 / 5, 1, 1) or Theme.Stroke
             
-            -- ĐÃ THÊM: Cập nhật viền cho nút người chơi
+            -- Cập nhật viền cho nút người chơi
             local stroke = Instance.new("UIStroke", btn); stroke.Color = currentColor; stroke.Thickness = 1.5
             table.insert(RGBElements, {Type = "Info", Stroke = stroke})
             
@@ -1225,7 +1234,7 @@ local function updatePlayerList()
             targetAvatar.ZIndex = 10
             Instance.new("UICorner", targetAvatar).CornerRadius = UDim.new(1, 0)
             
-            -- ĐÃ THÊM: Cập nhật viền cho Avatar người chơi
+            -- Cập nhật viền cho Avatar người chơi
             local targetStroke = Instance.new("UIStroke", targetAvatar)
             targetStroke.Color = currentColor
             targetStroke.Thickness = 1.5
@@ -1322,6 +1331,15 @@ RunService.RenderStepped:Connect(function()
                 if not light then light = Instance.new("PointLight", root); light.Name = "PlayerPointLight"; light.Shadows = false end 
                 light.Brightness = State.LightBrightness; light.Range = State.LightRange
             else if light then light:Destroy() end end
+        end
+        
+        -- SỬA LỖI NOCLIP: Ép xuyên tường liên tục trong mỗi frame
+        if State.Noclip and char then
+            for _, part in pairs(char:GetDescendants()) do
+                if part:IsA("BasePart") and part.CanCollide then
+                    part.CanCollide = false
+                end
+            end
         end
 
         for _, p in pairs(Players:GetPlayers()) do
