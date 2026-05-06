@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V42.7 (Đã Fix Lỗi & Tối Ưu)
+-- MENU VIP PRO V42.7 (Đã Tích Hợp Hitbox V2 & Tối Ưu Mượt)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -611,49 +611,80 @@ createSlider(page3, "👁️ Mở rộng góc nhìn (FOV)", 70, 120, 70, functio
     workspace.CurrentCamera.FieldOfView = val
 end)
 
+-- ==========================================
+-- TỐI ƯU HÓA: TÍNH NĂNG LẤY ĐỒ NHANH (INSTANT)
+-- ==========================================
 local originalPrompts = {}
 local originalToolSizes = {}
 
 task.spawn(function()
-    while task.wait(0.2) do
+    while task.wait(2) do
         pcall(function()
             if State.Instant then
-                for _, prompt in pairs(workspace:GetDescendants()) do 
-                    if prompt:IsA("ProximityPrompt") then 
-                        if not originalPrompts[prompt] then
-                            originalPrompts[prompt] = { HoldDuration = prompt.HoldDuration, MaxActivationDistance = prompt.MaxActivationDistance }
+                local count = 0
+                for _, obj in ipairs(workspace:GetDescendants()) do
+                    count = count + 1
+                    if count % 1000 == 0 then task.wait() end 
+                    
+                    if obj:IsA("ProximityPrompt") then 
+                        if not originalPrompts[obj] then
+                            originalPrompts[obj] = { HoldDuration = obj.HoldDuration, MaxActivationDistance = obj.MaxActivationDistance }
                         end
-                        prompt.HoldDuration = 0; prompt.MaxActivationDistance = 25 
+                        obj.HoldDuration = 0
+                        obj.MaxActivationDistance = 25 
                     end 
                 end
             else
-                for prompt, data in pairs(originalPrompts) do
-                    if prompt and prompt.Parent then
-                        prompt.HoldDuration = data.HoldDuration; prompt.MaxActivationDistance = data.MaxActivationDistance
+                if next(originalPrompts) then
+                    local count = 0
+                    for prompt, data in pairs(originalPrompts) do
+                        count = count + 1
+                        if count % 200 == 0 then task.wait() end
+                        
+                        if prompt and prompt.Parent then
+                            prompt.HoldDuration = data.HoldDuration
+                            prompt.MaxActivationDistance = data.MaxActivationDistance
+                        end
                     end
+                    originalPrompts = {}
                 end
-                originalPrompts = {}
             end
         end)
     end
 end)
 
+-- ==========================================
+-- TỐI ƯU HÓA: AUTO NHẶT ĐỒ XUNG QUANH (AUTO COLLECT)
+-- ==========================================
 task.spawn(function()
     while task.wait(0.2) do
         pcall(function()
             if State.AutoCollect and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                 local root = player.Character.HumanoidRootPart
-                for _, obj in pairs(workspace:GetDescendants()) do
+                local rootPos = root.Position
+                
+                local overlapParams = OverlapParams.new()
+                overlapParams.FilterDescendantsInstances = {player.Character}
+                overlapParams.FilterType = Enum.RaycastFilterType.Exclude
+
+                local partsNearby = workspace:GetPartBoundsInRadius(rootPos, 50, overlapParams)
+                
+                for _, part in ipairs(partsNearby) do
                     if not State.AutoCollect then break end
-                    if obj:IsA("Tool") and obj:FindFirstChild("Handle") then
-                        if (obj.Handle.Position - root.Position).Magnitude <= 50 then
-                            if firetouchinterest then firetouchinterest(root, obj.Handle, 0); task.wait(0.01); firetouchinterest(root, obj.Handle, 1) 
-                            else obj.Handle.CFrame = root.CFrame end
+                    
+                    if part.Name == "Handle" and part.Parent and part.Parent:IsA("Tool") then
+                        if firetouchinterest then 
+                            firetouchinterest(root, part, 0)
+                            task.wait(0.01)
+                            firetouchinterest(root, part, 1) 
+                        else 
+                            part.CFrame = root.CFrame 
                         end
-                    elseif obj:IsA("ProximityPrompt") and obj.Enabled then
-                        local parentPart = obj.Parent
-                        if parentPart and parentPart:IsA("BasePart") and (parentPart.Position - root.Position).Magnitude <= 50 then
-                            if fireproximityprompt then fireproximityprompt(obj) end
+                    end
+                    
+                    for _, child in ipairs(part:GetDescendants()) do
+                        if child:IsA("ProximityPrompt") and child.Enabled then
+                            if fireproximityprompt then fireproximityprompt(child) end
                         end
                     end
                 end
@@ -700,6 +731,9 @@ task.spawn(function()
     end
 end)
 
+-- ==========================================
+-- TỐI ƯU HÓA & NÂNG CẤP HITBOX V2
+-- ==========================================
 task.spawn(function()
     while task.wait(0.1) do
         pcall(function()
@@ -708,25 +742,41 @@ task.spawn(function()
                     if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                         local hrp = p.Character.HumanoidRootPart
                         local hum = p.Character:FindFirstChildOfClass("Humanoid")
+                        
+                        -- Kiểm tra nếu địch còn sống
                         if hum and hum.Health > 0 then
-                            hrp.Size = Vector3.new(State.HitboxSize, State.HitboxSize, State.HitboxSize)
-                            hrp.Transparency = 0.5
-                            hrp.CanCollide = false
-                        elseif hum and hum.Health <= 0 then
-                            hrp.Size = Vector3.new(2, 2, 1)
-                            hrp.Transparency = 1
-                            hrp.CanCollide = true
+                            -- Chỉ update nếu size hiện tại khác với size trên thanh trượt
+                            if hrp.Size.X ~= State.HitboxSize then
+                                hrp.Size = Vector3.new(State.HitboxSize, State.HitboxSize, State.HitboxSize)
+                                hrp.Transparency = 0.7 
+                                hrp.Color = Color3.fromRGB(255, 50, 50) 
+                                hrp.Material = Enum.Material.Neon 
+                                hrp.CanCollide = false
+                                hrp.Massless = true 
+                            end
+                        else
+                            -- SỬA LỖI: Địch chết lập tức reset hitbox về như cũ
+                            if hrp.Size.X ~= 2 then
+                                hrp.Size = Vector3.new(2, 2, 1)
+                                hrp.Transparency = 1
+                                hrp.Material = Enum.Material.Plastic
+                                hrp.CanCollide = true
+                                hrp.Massless = false
+                            end
                         end
                     end
                 end
             else
+                -- Khi TẮT Hitbox -> Trả mọi thứ về mặc định
                 for _, p in pairs(Players:GetPlayers()) do
                     if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                         local hrp = p.Character.HumanoidRootPart
-                        if hrp.Size.X > 5 then 
+                        if hrp.Size.X ~= 2 then 
                             hrp.Size = Vector3.new(2, 2, 1)
                             hrp.Transparency = 1
+                            hrp.Material = Enum.Material.Plastic
                             hrp.CanCollide = true
+                            hrp.Massless = false
                         end
                     end
                 end
@@ -1028,7 +1078,7 @@ local function renderSavedMusic()
         
         local delBtn = Instance.new("TextButton", item)
         delBtn.Size = UDim2.new(0.15, 0, 0.6, 0); delBtn.Position = UDim2.new(0.82, 0, 0.2, 0)
-        delBtn.Text = "✖️"; delBtn.BackgroundColor3 = Theme.AccentOff; delBtn.TextColor3 = Color3.new(1,1,1)
+        delBtn.Text = "❌"; delBtn.BackgroundColor3 = Theme.AccentOff; delBtn.TextColor3 = Color3.new(1,1,1)
         delBtn.Font = Enum.Font.GothamBold; delBtn.TextSize = 12; delBtn.ZIndex = 10; Instance.new("UICorner", delBtn).CornerRadius = UDim.new(0, 6)
         
         playBtn.MouseButton1Click:Connect(function() 
