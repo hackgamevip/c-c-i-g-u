@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V43.2 (Clean UI Gốc + Bỏ Lưu Nhạc + Chỉ Lưu TP Vĩnh Viễn)
+-- MENU VIP PRO V43 (Chuẩn cấu trúc - Fix lỗi cuộn - Full Tính Năng)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -149,8 +149,7 @@ end)
 UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then btnDragToggle = false end end)
 
 local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 420, 0, 500)
-frame.Position = UDim2.new(0.5, -210, 0.58, -250) -- Đã hạ thấp menu xuống một chút để tránh che đầu
+frame.Size = UDim2.new(0, 420, 0, 500); frame.Position = UDim2.new(0.5, -210, 0.58, -250)
 frame.BackgroundColor3 = Theme.MainBg; frame.BackgroundTransparency = 0.05; frame.ZIndex = 10
 Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 18)
 local frameStroke = Instance.new("UIStroke", frame); frameStroke.Color = Theme.Stroke; frameStroke.Thickness = 2
@@ -166,7 +165,7 @@ table.insert(RGBElements, {Type = "Header", Stroke = headerStroke})
 
 local titleLabel = Instance.new("TextLabel", header)
 titleLabel.Size = UDim2.new(1, 0, 1, 0); titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "MENU PRO MAX V43.2"
+titleLabel.Text = "MENU PRO MAX V43"
 titleLabel.TextColor3 = Theme.TextTitle; titleLabel.Font = Enum.Font.GothamBlack; titleLabel.TextSize = 16; titleLabel.ZIndex = 10
 
 local avatarImg = Instance.new("ImageLabel", header)
@@ -213,7 +212,6 @@ local tab7, ind7 = createTab("TP PLAYER", 0.83, 0.17)
 local pageContainer = Instance.new("Frame", frame)
 pageContainer.Size = UDim2.new(1, 0, 1, -95); pageContainer.Position = UDim2.new(0, 0, 0, 88); pageContainer.BackgroundTransparency = 1; pageContainer.ZIndex = 10
 
--- Cấu trúc UI Gốc: Mọi tab đều là ScrollingFrame
 local function createPage()
     local pg = Instance.new("ScrollingFrame", pageContainer)
     pg.Size = UDim2.new(1, 0, 1, 0); pg.BackgroundTransparency = 1
@@ -225,7 +223,20 @@ local function createPage()
     return pg
 end
 
-local page1, page2, page3, page4, page5, page6, page7 = createPage(), createPage(), createPage(), createPage(), createPage(), createPage(), createPage()
+-- TẠO PAGE: Tab 5 & 6 là Khung Cố Định (Frame) để điều khiển nằm yên, chỉ danh sách cuộn
+local page1, page2, page3, page4 = createPage(), createPage(), createPage(), createPage()
+
+local page5 = Instance.new("Frame", pageContainer)
+page5.Size = UDim2.new(1, 0, 1, 0); page5.BackgroundTransparency = 1; page5.Visible = false; page5.ZIndex = 10
+local l5 = Instance.new("UIListLayout", page5); l5.HorizontalAlignment = Enum.HorizontalAlignment.Center; l5.Padding = UDim.new(0, 10); l5.SortOrder = Enum.SortOrder.LayoutOrder
+Instance.new("UIPadding", page5).PaddingTop = UDim.new(0, 10)
+
+local page6 = Instance.new("Frame", pageContainer)
+page6.Size = UDim2.new(1, 0, 1, 0); page6.BackgroundTransparency = 1; page6.Visible = false; page6.ZIndex = 10
+local l6 = Instance.new("UIListLayout", page6); l6.HorizontalAlignment = Enum.HorizontalAlignment.Center; l6.Padding = UDim.new(0, 10); l6.SortOrder = Enum.SortOrder.LayoutOrder
+Instance.new("UIPadding", page6).PaddingTop = UDim.new(0, 10)
+
+local page7 = createPage()
 
 local function showTab(pg, tb, ind)
     for _, p in pairs({page1, page2, page3, page4, page5, page6, page7}) do p.Visible = false end
@@ -254,6 +265,51 @@ openBtn.MouseButton1Click:Connect(function()
     end
     frame:TweenPosition(opened and UDim2.new(0.5, -210, 0.58, -250) or UDim2.new(0.5, -210, 1.2, 0), "Out", "Back", 0.5)
 end)
+
+-- ==========================================
+-- HÀM TẠO ACCORDION CÓ THANH CUỘN BÊN TRONG (Chuẩn không trôi nút)
+-- ==========================================
+local function createScrollableAccordion(parent, text, expandedSize)
+    local wrapper = Instance.new("Frame", parent)
+    wrapper.Size = UDim2.new(0.9, 0, 0, 42); wrapper.BackgroundTransparency = 1; wrapper.ClipsDescendants = true
+    
+    local btn = Instance.new("TextButton", wrapper)
+    btn.Size = UDim2.new(1, 0, 0, 42); btn.BackgroundColor3 = Theme.ItemBg; btn.Text = ""; btn.ZIndex = 11
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
+    local stroke = Instance.new("UIStroke", btn); stroke.Color = Theme.Stroke; stroke.Thickness = 1.5
+    table.insert(RGBElements, {Type = "Info", Stroke = stroke})
+    
+    local title = Instance.new("TextLabel", btn)
+    title.Size = UDim2.new(0.8, 0, 1, 0); title.Position = UDim2.new(0.05, 0, 0, 0); title.BackgroundTransparency = 1
+    title.Text = text; title.TextColor3 = Theme.Brand; title.Font = Enum.Font.GothamBold; title.TextSize = 13; title.TextXAlignment = Enum.TextXAlignment.Left; title.ZIndex = 12
+    
+    local icon = Instance.new("TextLabel", btn)
+    icon.Size = UDim2.new(0.1, 0, 1, 0); icon.Position = UDim2.new(0.85, 0, 0, 0); icon.BackgroundTransparency = 1
+    icon.Text = "▼"; icon.TextColor3 = Theme.TextDim; icon.Font = Enum.Font.GothamBold; icon.TextSize = 14; icon.ZIndex = 12
+    
+    -- Vùng chứa danh sách dạng cuộn
+    local contentContainer = Instance.new("ScrollingFrame", wrapper)
+    contentContainer.Size = UDim2.new(1, 0, 1, -48); contentContainer.Position = UDim2.new(0, 0, 0, 48)
+    contentContainer.BackgroundTransparency = 1; contentContainer.ScrollBarThickness = 3
+    contentContainer.ScrollBarImageColor3 = Theme.Brand; contentContainer.BorderSizePixel = 0; contentContainer.ZIndex = 12
+    
+    local layout = Instance.new("UIListLayout", contentContainer)
+    layout.SortOrder = Enum.SortOrder.LayoutOrder; layout.Padding = UDim.new(0, 8)
+    
+    layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        contentContainer.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 20)
+    end)
+    
+    local expanded = false
+    btn.MouseButton1Click:Connect(function()
+        clickAnimate(btn); expanded = not expanded
+        icon.Text = expanded and "▲" or "▼"; icon.TextColor3 = expanded and Theme.AccentOn or Theme.TextDim
+        local targetSize = expanded and expandedSize or UDim2.new(0.9, 0, 0, 42)
+        TweenService:Create(wrapper, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = targetSize}):Play()
+    end)
+    
+    return contentContainer, wrapper
+end
 
 local function createToggle(parent, text, varName, callback)
     local btnFrame = Instance.new("Frame", parent)
@@ -418,7 +474,7 @@ task.spawn(function()
         serverInfoLabel.Text = string.format("<font color='#FF3300'>FPS:</font> %d\n<font color='#FF3300'>Ping:</font> %s\n<font color='#FF3300'>Người chơi:</font> %d / %d\n<font color='#FF3300'>ID SV:</font> %s", fps, ping, pCount, maxP, jobText)
         local execTime = math.floor(workspace.DistributedGameTime); local hours = math.floor(execTime / 3600); local mins = math.floor((execTime % 3600) / 60); local secs = execTime % 60
         local timeString = string.format("%02d:%02d:%02d", hours, mins, secs)
-        extraInfoLabel.Text = string.format("<font color='#FF3300'>Thời gian chơi:</font> %s\n<font color='#FF3300'>Giờ hệ thống:</font> %s\n<font color='#FF3300'>Phiên bản:</font> MENU VIP PRO V43.2", timeString, os.date("%H:%M:%S"))
+        extraInfoLabel.Text = string.format("<font color='#FF3300'>Thời gian chơi:</font> %s\n<font color='#FF3300'>Giờ hệ thống:</font> %s\n<font color='#FF3300'>Phiên bản:</font> MENU VIP PRO V43", timeString, os.date("%H:%M:%S"))
     end
 end)
 
@@ -574,7 +630,7 @@ task.spawn(function()
 end)
 
 -- ==========================================
--- [TAB 4: TIỆN ÍCH] (ĐÃ KHÔI PHỤC FULL NÚT)
+-- [TAB 4: TIỆN ÍCH] (ĐÃ KHÔI PHỤC FULL NÚT MÀ KHÔNG BỊ TRÔI)
 -- ==========================================
 createToggle(page4, "💾 Tự động Lưu Cài Đặt", "AutoSave", function(v) if v then saveConfig() end end)
 createToggle(page4, "🌈 Chế độ RGB", "RGB", function(v) 
@@ -633,13 +689,13 @@ end
 createDualButtons(page4, "🌞 Trời SÁNG", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12 end, "🌚 Trời TỐI", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0 end)
 createDualButtons(page4, "🔄 VÀO LẠI SV", Theme.AccentOn, rejoinServer, "🎲 ĐỔI SV NGẪU NHIÊN", Theme.Brand, function() hopServer("Desc") end)
 createDualButtons(page4, "📉 ĐỔI SV ÍT NGƯỜI", Color3.fromRGB(52, 152, 219), function() hopServer("Asc") end, "📈 ĐỔI SV NHIỀU NGƯỜI", Color3.fromRGB(231, 76, 60), function() hopServer("Desc") end)
-createDualButtons(page4, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) end, "📂 TP SAVE V2", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
+createDualButtons(page4, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) end, "📂 TP SAVE V2 GUI", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
 createDualButtons(page4, "🕊️ FLY V1", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end, "🕊️ FLY V3", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end) end)
 
 -- ==========================================
--- [TAB 5: NHẠC ID] (XOÁ TÍNH NĂNG LƯU NHẠC THEO YÊU CẦU)
+-- [TAB 5: PHÁT NHẠC VÀ LƯU TRỮ VĨNH VIỄN]
 -- ==========================================
-local currentSound = nil; local currentMusicId = ""
+local currentSound = nil; local currentMusicId = ""; local savedMusicList = {}
 
 local musicControlFrame = Instance.new("Frame", page5)
 musicControlFrame.Size = UDim2.new(0.9, 0, 0, 85); musicControlFrame.BackgroundColor3 = Theme.ItemBg; musicControlFrame.ZIndex = 10; musicControlFrame.LayoutOrder = 1
@@ -648,13 +704,12 @@ local mStroke = Instance.new("UIStroke", musicControlFrame); mStroke.Color = The
 
 local musicIcon = Instance.new("TextLabel", musicControlFrame)
 musicIcon.Size = UDim2.new(0.15, 0, 0, 40); musicIcon.BackgroundTransparency = 1; musicIcon.Text = "🎼"; musicIcon.TextSize = 18; musicIcon.ZIndex = 10
-
 local musicIdBox = Instance.new("TextBox", musicControlFrame)
-musicIdBox.Size = UDim2.new(0.8, 0, 0, 40); musicIdBox.Position = UDim2.new(0.15, 0, 0, 0); musicIdBox.BackgroundTransparency = 1; musicIdBox.PlaceholderText = "Nhập ID Nhạc..."; musicIdBox.Text = ""; musicIdBox.TextColor3 = Theme.TextTitle; musicIdBox.Font = Enum.Font.GothamSemibold; musicIdBox.TextSize = 12; musicIdBox.TextXAlignment = Enum.TextXAlignment.Left; musicIdBox.ClearTextOnFocus = false; musicIdBox.ZIndex = 10
-
+musicIdBox.Size = UDim2.new(0.65, 0, 0, 40); musicIdBox.Position = UDim2.new(0.15, 0, 0, 0); musicIdBox.BackgroundTransparency = 1; musicIdBox.PlaceholderText = "Nhập ID Nhạc..."; musicIdBox.Text = ""; musicIdBox.TextColor3 = Theme.TextTitle; musicIdBox.Font = Enum.Font.GothamSemibold; musicIdBox.TextSize = 12; musicIdBox.TextXAlignment = Enum.TextXAlignment.Left; musicIdBox.ClearTextOnFocus = false; musicIdBox.ZIndex = 10
+local saveIdBtn = Instance.new("TextButton", musicControlFrame)
+saveIdBtn.Size = UDim2.new(0.2, 0, 0, 40); saveIdBtn.Position = UDim2.new(0.8, 0, 0, 0); saveIdBtn.BackgroundTransparency = 1; saveIdBtn.Text = "💾 Lưu"; saveIdBtn.TextColor3 = Theme.AccentOn; saveIdBtn.Font = Enum.Font.GothamBold; saveIdBtn.TextSize = 11; saveIdBtn.ZIndex = 10
 local divLine = Instance.new("Frame", musicControlFrame)
 divLine.Size = UDim2.new(0.9, 0, 0, 1); divLine.Position = UDim2.new(0.05, 0, 0, 40); divLine.BackgroundColor3 = Theme.Stroke; divLine.BorderSizePixel = 0; divLine.ZIndex = 10
-
 local nowPlayingLabel = Instance.new("TextLabel", musicControlFrame)
 nowPlayingLabel.Size = UDim2.new(0.9, 0, 0, 45); nowPlayingLabel.Position = UDim2.new(0.05, 0, 0, 40); nowPlayingLabel.BackgroundTransparency = 1; nowPlayingLabel.RichText = true; nowPlayingLabel.Text = "<font color='#FFFFFF'>🎵 Chưa có bài hát nào đang phát</font>"; nowPlayingLabel.Font = Enum.Font.GothamSemibold; nowPlayingLabel.TextSize = 13; nowPlayingLabel.TextWrapped = true; nowPlayingLabel.ZIndex = 10
 
@@ -674,6 +729,13 @@ local function playMusic(id)
         if currentMusicId == soundId then nowPlayingLabel.Text = "<font color='#FFFFFF'>🎵 Đang phát:</font> <font color='#FFFF00'>" .. name .. "</font>" end
     end)
     currentSound = Instance.new("Sound"); currentSound.SoundId = "rbxassetid://" .. soundId; currentSound.Volume = State.MusicVolume; currentSound.Parent = workspace
+    currentSound.Ended:Connect(function()
+        if #savedMusicList > 0 then
+            local currentIndex = 0; for i, v in ipairs(savedMusicList) do if v.id == currentMusicId then currentIndex = i; break end end
+            local nextIndex = currentIndex + 1; if nextIndex > #savedMusicList then nextIndex = 1 end
+            playMusic(savedMusicList[nextIndex].id)
+        end
+    end)
     currentSound:Play()
 end
 
@@ -683,13 +745,48 @@ end
 
 local playControlFrame = createDualButtons(page5, "▶️ PHÁT NHẠC", Theme.AccentOn, function() playMusic(musicIdBox.Text) end, "⏸️ TẮT NHẠC", Theme.AccentOff, function() stopMusic() end)
 playControlFrame.LayoutOrder = 2
-
 local volumeFrame = createSlider(page5, "ÂM LƯỢNG 🎛️", 0, 10, "MusicVolume", function(val) if currentSound then currentSound.Volume = val end end)
 volumeFrame.LayoutOrder = 3
 
+-- [SỬ DỤNG SCROLLABLE ACCORDION (Khung tự co giãn và tự cuộn được)]
+local savedMusicContent, savedMusicWrapper = createScrollableAccordion(page5, "📂 DANH SÁCH NHẠC ĐÃ LƯU", UDim2.new(0.9, 0, 1, -215))
+savedMusicWrapper.LayoutOrder = 4
+
+local fileName = "MenuProMax_SavedMusic.json"
+local function loadMusicData() pcall(function() if isfile and isfile(fileName) then local data = readfile(fileName); local decoded = HttpService:JSONDecode(data); if type(decoded) == "table" then savedMusicList = decoded end end end) end
+local function saveMusicData() pcall(function() if writefile then writefile(fileName, HttpService:JSONEncode(savedMusicList)) end end) end
+loadMusicData()
+
+local function renderSavedMusic()
+    for _, child in pairs(savedMusicContent:GetChildren()) do if child:IsA("Frame") then child:Destroy() end end
+    local yOffset = 0
+    for i, data in ipairs(savedMusicList) do
+        local item = Instance.new("Frame", savedMusicContent)
+        item.Size = UDim2.new(1, 0, 0, 48); item.Position = UDim2.new(0, 0, 0, yOffset); item.BackgroundColor3 = Theme.ItemBg; item.ZIndex = 10; Instance.new("UICorner", item).CornerRadius = UDim.new(0, 8)
+        local stroke = Instance.new("UIStroke", item); stroke.Color = State.RGB and Color3.fromHSV(tick() % 5 / 5, 1, 1) or Theme.Stroke; stroke.Thickness = 1.5; table.insert(RGBElements, {Type = "Info", Stroke = stroke})
+        
+        local iconLabel = Instance.new("TextLabel", item); iconLabel.Size = UDim2.new(0.08, 0, 1, 0); iconLabel.BackgroundTransparency = 1; iconLabel.Text = "🎶"; iconLabel.TextColor3 = Theme.Brand; iconLabel.TextSize = 11; iconLabel.ZIndex = 10
+        local nameBox = Instance.new("TextBox", item); nameBox.Size = UDim2.new(0.52, 0, 1, 0); nameBox.Position = UDim2.new(0.08, 0, 0, 0); nameBox.Text = data.name; nameBox.TextColor3 = Theme.TextTitle; nameBox.Font = Enum.Font.GothamSemibold; nameBox.TextSize = 11; nameBox.BackgroundTransparency = 1; nameBox.TextXAlignment = Enum.TextXAlignment.Left; nameBox.TextWrapped = true; nameBox.ClearTextOnFocus = false; nameBox.ZIndex = 10
+        nameBox.FocusLost:Connect(function() if nameBox.Text ~= "" then data.name = nameBox.Text; saveMusicData() else nameBox.Text = data.name end end)
+        
+        local playBtn = Instance.new("TextButton", item); playBtn.Size = UDim2.new(0.18, 0, 0.6, 0); playBtn.Position = UDim2.new(0.62, 0, 0.2, 0); playBtn.Text = "▶️"; playBtn.BackgroundColor3 = Theme.Brand; playBtn.TextColor3 = Color3.new(1,1,1); playBtn.Font = Enum.Font.GothamBold; playBtn.TextSize = 11; playBtn.ZIndex = 10; Instance.new("UICorner", playBtn).CornerRadius = UDim.new(0, 6)
+        local delBtn = Instance.new("TextButton", item); delBtn.Size = UDim2.new(0.15, 0, 0.6, 0); delBtn.Position = UDim2.new(0.82, 0, 0.2, 0); delBtn.Text = "❌"; delBtn.BackgroundColor3 = Theme.AccentOff; delBtn.TextColor3 = Color3.new(1,1,1); delBtn.Font = Enum.Font.GothamBold; delBtn.TextSize = 12; delBtn.ZIndex = 10; Instance.new("UICorner", delBtn).CornerRadius = UDim.new(0, 6)
+        
+        playBtn.MouseButton1Click:Connect(function() clickAnimate(playBtn); musicIdBox.Text = data.id; playMusic(data.id) end)
+        delBtn.MouseButton1Click:Connect(function() clickAnimate(delBtn); table.remove(savedMusicList, i); saveMusicData(); renderSavedMusic() end)
+        yOffset = yOffset + 55
+    end
+end
+saveIdBtn.MouseButton1Click:Connect(function()
+    clickAnimate(saveIdBtn); local rawId = musicIdBox.Text:match("%d+"); if rawId and rawId ~= "" then
+        saveIdBtn.Text = "⏳..."
+        task.spawn(function() local name = getSongName(rawId); table.insert(savedMusicList, {id = rawId, name = name}); saveMusicData(); renderSavedMusic(); saveIdBtn.Text = "💾 Lưu" end)
+    end
+end)
+renderSavedMusic()
 
 -- ==========================================
--- [TAB 6: VỊ TRÍ TP SAVE] (CHỈ GIỮ LẠI LƯU VĨNH VIỄN)
+-- [TAB 6: VỊ TRÍ TP SAVE] (Full 2 nút Lưu Tạm và Lưu Vĩnh Viễn)
 -- ==========================================
 local tpFileName = "MenuProMax_SavedTPs.json"
 local savedTpList = {}
@@ -697,9 +794,15 @@ local function loadTpData() pcall(function() if isfile and isfile(tpFileName) th
 local function saveTpData() pcall(function() if writefile then local dataToSave = {}; for _, v in ipairs(savedTpList) do if not v.isTemp then table.insert(dataToSave, v) end end; writefile(tpFileName, HttpService:JSONEncode(dataToSave)) end end) end
 loadTpData()
 
-local tpControlFrame1 = createButton(page6, "📍 LƯU VỊ TRÍ VĨNH VIỄN", Theme.Brand, function()
+local tpControlFrame1 = createDualButtons(page6, "📍 LƯU TẠM", Theme.AccentOn, function()
     if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        local root = player.Character.HumanoidRootPart; local cf = {root.CFrame:GetComponents()}; local name = "Vị trí " .. (#savedTpList + 1)
+        local root = player.Character.HumanoidRootPart; local cf = {root.CFrame:GetComponents()}; local name = "Vị trí tạm " .. (#savedTpList + 1)
+        table.insert(savedTpList, {name = name, cframe = cf, isTemp = true})
+        if renderSavedTps then renderSavedTps() end
+    end
+end, "📍 LƯU VĨNH VIỄN", Theme.Brand, function()
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        local root = player.Character.HumanoidRootPart; local cf = {root.CFrame:GetComponents()}; local name = "Vị trí vĩnh viễn " .. (#savedTpList + 1)
         table.insert(savedTpList, {name = name, cframe = cf, isTemp = false}); saveTpData()
         if renderSavedTps then renderSavedTps() end
     end
@@ -709,16 +812,16 @@ tpControlFrame1.LayoutOrder = 1
 local tpControlFrame2 = createButton(page6, "🗑️ XÓA TẤT CẢ", Theme.AccentOff, function() savedTpList = {}; saveTpData(); if renderSavedTps then renderSavedTps() end end)
 tpControlFrame2.LayoutOrder = 2
 
-local savedTpContainer = Instance.new("Frame", page6)
-savedTpContainer.BackgroundTransparency = 1
-savedTpContainer.LayoutOrder = 3 
+-- [SỬ DỤNG SCROLLABLE ACCORDION CHO TP SAVE]
+local savedTpContent, savedTpWrapper = createScrollableAccordion(page6, "📂 VỊ TRÍ TP ĐÃ LƯU", UDim2.new(0.9, 0, 1, -114))
+savedTpWrapper.LayoutOrder = 3 
 
 function renderSavedTps()
-    for _, child in pairs(savedTpContainer:GetChildren()) do if child:IsA("Frame") then child:Destroy() end end
+    for _, child in pairs(savedTpContent:GetChildren()) do if child:IsA("Frame") then child:Destroy() end end
     local yOffset = 0
     for i, data in ipairs(savedTpList) do
-        local item = Instance.new("Frame", savedTpContainer)
-        item.Size = UDim2.new(0.9, 0, 0, 48); item.Position = UDim2.new(0.05, 0, 0, yOffset); item.BackgroundColor3 = Theme.ItemBg; item.ZIndex = 10; Instance.new("UICorner", item).CornerRadius = UDim.new(0, 8)
+        local item = Instance.new("Frame", savedTpContent)
+        item.Size = UDim2.new(1, 0, 0, 48); item.Position = UDim2.new(0, 0, 0, yOffset); item.BackgroundColor3 = Theme.ItemBg; item.ZIndex = 10; Instance.new("UICorner", item).CornerRadius = UDim.new(0, 8)
         local stroke = Instance.new("UIStroke", item); stroke.Color = State.RGB and Color3.fromHSV(tick() % 5 / 5, 1, 1) or Theme.Stroke; stroke.Thickness = 1.5; table.insert(RGBElements, {Type = "Info", Stroke = stroke})
         
         local nameBox = Instance.new("TextBox", item)
@@ -732,7 +835,6 @@ function renderSavedTps()
         delBtn.MouseButton1Click:Connect(function() clickAnimate(delBtn); table.remove(savedTpList, i); saveTpData(); renderSavedTps() end)
         yOffset = yOffset + 55
     end
-    savedTpContainer.Size = UDim2.new(1, 0, 0, yOffset)
 end
 renderSavedTps()
 
