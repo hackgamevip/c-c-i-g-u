@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V42.7 (Chuẩn cấu trúc gốc + Fix Tàng Hình + Nút Lưu ON/OFF)
+-- MENU VIP PRO V42.7 (Đã xoá Tàng Hình, FOV, Đi Trên Nước)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -20,11 +20,11 @@ local camera = workspace.CurrentCamera
 local State = {
     Instant = false, Noclip = false, LowGfx = false, Speed = false, Jump = false,
     InfJump = false, PlayerLight = false, ESP = false, AntiAfk = true, AntiStun = false, 
-    XRay = false, LockPosition = false, AutoCollect = false, WaterWalk = false,
+    XRay = false, LockPosition = false, AutoCollect = false,
     SpinBot = false, SpinSpeed = 50, Hitbox = false, HitboxSize = 15, AutoClick = false, RGB = false,
-    Reach = false, ReachSize = 15, FastAttack = false, FastAttackSpeed = 5, Invisible = false, AutoSave = false, Astral = false,
+    Reach = false, ReachSize = 15, FastAttack = false, FastAttackSpeed = 5, AutoSave = false, Astral = false,
     SpeedValue = 60, JumpValue = 120, LightRange = 60, LightBrightness = 3,
-    MusicVolume = 5, FOVValue = 70
+    MusicVolume = 5
 }
 
 -- [BẢNG MÀU CHỦ ĐẠO]
@@ -540,30 +540,6 @@ createToggle(page2, "🧲 Auto nhặt đồ xung quanh", "AutoCollect")
 createToggle(page2, "🚷 Đi xuyên tường", "Noclip", function(v) 
     if not v and player.Character then for _, part in pairs(player.Character:GetDescendants()) do if part:IsA("BasePart") then part.CanCollide = true end end end
 end)
-createToggle(page2, "🌊 Đi trên mặt nước", "WaterWalk")
-
--- FIX 100% LỖI KHỐI MÀU TRẮNG KHI TÀNG HÌNH (Chỉ nhớ những cái nào vốn đang hiện)
-local invisOriginals = {}
-createToggle(page2, "👻 Tàng hình (Local)", "Invisible", function(v) 
-    if player.Character then 
-        if v then
-            invisOriginals = {}
-            for _, p in pairs(player.Character:GetDescendants()) do 
-                if (p:IsA("BasePart") and p.Name ~= "HumanoidRootPart") or p:IsA("Decal") or p:IsA("Texture") then
-                    if p.Transparency < 1 then
-                        invisOriginals[p] = p.Transparency
-                    end
-                    p.Transparency = 1
-                end 
-            end 
-        else
-            for p, orig in pairs(invisOriginals) do
-                if p and p.Parent then p.Transparency = orig end
-            end
-            invisOriginals = {}
-        end
-    end 
-end)
 
 local astralClone = nil
 local astralProps = {}
@@ -604,21 +580,6 @@ player.CharacterAdded:Connect(function(char)
     if astralClone then astralClone:Destroy(); astralClone = nil end
     astralProps = {}
     originalToolSizes = {}
-    invisOriginals = {}
-    
-    if State.Invisible then
-        task.wait(0.5)
-        if char then
-            for _, p in pairs(char:GetDescendants()) do 
-                if (p:IsA("BasePart") and p.Name ~= "HumanoidRootPart") or p:IsA("Decal") or p:IsA("Texture") then
-                    if p.Transparency < 1 then
-                        invisOriginals[p] = p.Transparency
-                    end
-                    p.Transparency = 1
-                end 
-            end 
-        end
-    end
 end)
 
 local xrayMats = {}
@@ -682,10 +643,6 @@ createToggle(page3, "💡 Ánh sáng quanh người", "PlayerLight", function(v)
 end)
 createSlider(page3, "Phạm vi sáng", 50, 1000, "LightRange")
 createSlider(page3, "Độ sáng", 0, 5, "LightBrightness")
-
-createSlider(page3, "👁️ Mở rộng góc nhìn (FOV)", 70, 500, "FOVValue", function(val)
-    workspace.CurrentCamera.FieldOfView = val
-end)
 
 -- ==========================================
 -- THUẬT TOÁN CACHE CHỐNG LAG 100% (Lấy Đồ Nhanh & Auto Collect)
@@ -814,30 +771,6 @@ task.spawn(function()
                 originalToolSizes = {}
             end
         end)
-    end
-end)
-
--- NỀN TẢNG WATER WALK (ĐI TRÊN MẶT NƯỚC)
-local wwPart = Instance.new("Part")
-wwPart.Size = Vector3.new(10, 1, 10)
-wwPart.Transparency = 1
-wwPart.Anchored = true
-wwPart.CanCollide = true
-task.spawn(function()
-    while task.wait(0.1) do
-        if State.WaterWalk and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local hrp = player.Character.HumanoidRootPart
-            local ray = Ray.new(hrp.Position, Vector3.new(0, -5, 0))
-            local hit, pos, norm, mat = workspace:FindPartOnRayWithIgnoreList(ray, {player.Character})
-            if mat == Enum.Material.Water then
-                wwPart.Position = Vector3.new(hrp.Position.X, pos.Y - 0.5, hrp.Position.Z)
-                wwPart.Parent = workspace
-            else 
-                wwPart.Parent = nil 
-            end
-        else 
-            wwPart.Parent = nil 
-        end
     end
 end)
 
