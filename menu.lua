@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V42.7 (Tối Ưu Max Cấp + Tự Động Lưu + TÀNG HÌNH SERVER)
+-- MENU VIP PRO V42.7 (Chuẩn cấu trúc gốc + Fix Tàng Hình + Nút Lưu ON/OFF)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -20,10 +20,9 @@ local camera = workspace.CurrentCamera
 local State = {
     Instant = false, Noclip = false, LowGfx = false, Speed = false, Jump = false,
     InfJump = false, PlayerLight = false, ESP = false, AntiAfk = true, AntiStun = false, 
-    XRay = false, LockPosition = false, AutoCollect = false, WaterWalk = false, 
-    LocalInvis = false, ServerInvis = false,
+    XRay = false, LockPosition = false, AutoCollect = false, WaterWalk = false,
     SpinBot = false, SpinSpeed = 50, Hitbox = false, HitboxSize = 15, AutoClick = false, RGB = false,
-    Reach = false, ReachSize = 15, FastAttack = false, FastAttackSpeed = 5, AutoSave = false,
+    Reach = false, ReachSize = 15, FastAttack = false, FastAttackSpeed = 5, Invisible = false, AutoSave = false, Astral = false,
     SpeedValue = 60, JumpValue = 120, LightRange = 60, LightBrightness = 3,
     MusicVolume = 5, FOVValue = 70
 }
@@ -61,18 +60,25 @@ for _, v in pairs(guiParent:GetChildren()) do
     end
 end
 
--- TẢI CẤU HÌNH MENU TỪ LẦN CHƠI TRƯỚC
+-- ==========================================
+-- HỆ THỐNG LƯU TRỮ CÀI ĐẶT
+-- ==========================================
 local configFileName = "MenuProMax_Config_V42.7.json"
+
 pcall(function()
     if isfile and isfile(configFileName) then
         local data = HttpService:JSONDecode(readfile(configFileName))
-        for k, v in pairs(data) do if State[k] ~= nil then State[k] = v end end
+        for k, v in pairs(data) do 
+            if State[k] ~= nil then State[k] = v end 
+        end
     end
 end)
 
 local function saveConfig()
     pcall(function()
-        if writefile then writefile(configFileName, HttpService:JSONEncode(State)) end
+        if writefile then
+            writefile(configFileName, HttpService:JSONEncode(State))
+        end
     end)
 end
 
@@ -83,43 +89,6 @@ gui.ResetOnSpawn = false
 gui.DisplayOrder = 99999
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = guiParent
-
--- ==========================================
--- HỆ THỐNG THÔNG BÁO GÓC MÀN HÌNH
--- ==========================================
-local notifContainer = Instance.new("Frame", gui)
-notifContainer.Size = UDim2.new(0, 200, 1, -100)
-notifContainer.Position = UDim2.new(1, -210, 0, 50)
-notifContainer.BackgroundTransparency = 1
-notifContainer.ZIndex = 9999
-local notifLayout = Instance.new("UIListLayout", notifContainer)
-notifLayout.SortOrder = Enum.SortOrder.LayoutOrder
-notifLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
-notifLayout.Padding = UDim.new(0, 8)
-
-local function Notify(text)
-    local f = Instance.new("Frame", notifContainer)
-    f.Size = UDim2.new(1, 0, 0, 45)
-    f.BackgroundColor3 = Theme.ItemBg
-    f.BackgroundTransparency = 1
-    Instance.new("UICorner", f).CornerRadius = UDim.new(0, 8)
-    local stroke = Instance.new("UIStroke", f)
-    stroke.Color = Theme.Brand; stroke.Thickness = 1.5; stroke.Transparency = 1
-    local t = Instance.new("TextLabel", f)
-    t.Size = UDim2.new(1, -15, 1, 0); t.Position = UDim2.new(0, 10, 0, 0)
-    t.BackgroundTransparency = 1; t.Text = text
-    t.TextColor3 = Theme.TextTitle; t.Font = Enum.Font.GothamSemibold
-    t.TextSize = 11; t.TextWrapped = true; t.TextTransparency = 1; t.TextXAlignment = Enum.TextXAlignment.Left
-    TweenService:Create(f, TweenInfo.new(0.3), {BackgroundTransparency = 0.1}):Play()
-    TweenService:Create(stroke, TweenInfo.new(0.3), {Transparency = 0}):Play()
-    TweenService:Create(t, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
-    task.delay(2.5, function()
-        TweenService:Create(f, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
-        TweenService:Create(stroke, TweenInfo.new(0.3), {Transparency = 1}):Play()
-        TweenService:Create(t, TweenInfo.new(0.3), {TextTransparency = 1}):Play()
-        task.wait(0.3); f:Destroy()
-    end)
-end
 
 local screenOverlay = Instance.new("Frame", gui)
 screenOverlay.Size = UDim2.new(2, 0, 2, 0)
@@ -385,10 +354,8 @@ local function createToggle(parent, text, varName, callback)
         end
         TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = active and Color3.fromRGB(35, 45, 40) or Theme.ItemBg}):Play()
         
-        if varName ~= "AutoSave" then Notify(text .. " -> " .. (active and "BẬT" or "TẮT")) end
-        
         if callback then callback(active) end
-        if State.AutoSave then saveConfig() end
+        if State.AutoSave and varName ~= "AutoSave" then saveConfig() end
     end)
     
     if active and callback then task.spawn(callback, active) end
@@ -577,13 +544,13 @@ createToggle(page2, "🌊 Đi trên mặt nước", "WaterWalk")
 
 -- FIX 100% LỖI KHỐI MÀU TRẮNG KHI TÀNG HÌNH (Chỉ nhớ những cái nào vốn đang hiện)
 local invisOriginals = {}
-createToggle(page2, "👻 Tàng hình (Local)", "LocalInvis", function(v) 
+createToggle(page2, "👻 Tàng hình (Local)", "Invisible", function(v) 
     if player.Character then 
         if v then
             invisOriginals = {}
             for _, p in pairs(player.Character:GetDescendants()) do 
                 if (p:IsA("BasePart") and p.Name ~= "HumanoidRootPart") or p:IsA("Decal") or p:IsA("Texture") then
-                    if p.Transparency < 1 then -- Chỉ nhớ những bộ phận vốn dĩ có màu
+                    if p.Transparency < 1 then
                         invisOriginals[p] = p.Transparency
                     end
                     p.Transparency = 1
@@ -596,43 +563,6 @@ createToggle(page2, "👻 Tàng hình (Local)", "LocalInvis", function(v)
             invisOriginals = {}
         end
     end 
-end)
-
--- THÊM TÍNH NĂNG TÀNG HÌNH CHO SERVER THEO YÊU CẦU 
-local InvisClone = nil
-local RealChar = nil
-local InvisLoop = nil
-createToggle(page2, "👻 Tàng hình (Server)", "ServerInvis", function(v)
-    if v then
-        local char = player.Character
-        if char and char:FindFirstChild("HumanoidRootPart") then
-            RealChar = char
-            RealChar.Archivable = true
-            InvisClone = RealChar:Clone()
-            InvisClone.Name = player.Name .. "_Clone"
-            InvisClone.Parent = workspace
-            
-            InvisClone.HumanoidRootPart.CFrame = RealChar.HumanoidRootPart.CFrame
-            player.Character = InvisClone
-            workspace.CurrentCamera.CameraSubject = InvisClone:FindFirstChild("Humanoid")
-            
-            InvisLoop = RunService.RenderStepped:Connect(function()
-                if RealChar and RealCharacter:FindFirstChild("HumanoidRootPart") then
-                    -- Đẩy xác thật lên trời để không ai thấy
-                    RealChar.HumanoidRootPart.CFrame = CFrame.new(0, 999999, 0)
-                end
-            end)
-        end
-    else
-        if InvisLoop then InvisLoop:Disconnect() InvisLoop = nil end
-        if InvisClone and RealChar and RealChar:FindFirstChild("HumanoidRootPart") then
-            RealChar.HumanoidRootPart.CFrame = InvisClone.HumanoidRootPart.CFrame
-            player.Character = RealChar
-            workspace.CurrentCamera.CameraSubject = RealChar:FindFirstChild("Humanoid")
-            InvisClone:Destroy()
-            InvisClone = nil
-        end
-    end
 end)
 
 local astralClone = nil
@@ -672,13 +602,11 @@ end)
 
 player.CharacterAdded:Connect(function(char)
     if astralClone then astralClone:Destroy(); astralClone = nil end
-    if InvisClone then InvisClone:Destroy(); InvisClone = nil end
-    if InvisLoop then InvisLoop:Disconnect(); InvisLoop = nil end
     astralProps = {}
     originalToolSizes = {}
     invisOriginals = {}
     
-    if State.LocalInvis then
+    if State.Invisible then
         task.wait(0.5)
         if char then
             for _, p in pairs(char:GetDescendants()) do 
@@ -958,10 +886,10 @@ task.spawn(function()
 end)
 
 -- ==========================================
--- [TAB 4: TIỆN ÍCH]
+-- [TAB 4: TIỆN ÍCH] LƯU MENU ON/OFF
 -- ==========================================
 
-createToggle(page4, "💾 Tự động Lưu Menu", "AutoSave", function(v)
+createToggle(page4, "💾 Tự động Lưu Cài Đặt", "AutoSave", function(v)
     if v then 
         saveConfig() 
     end
