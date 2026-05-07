@@ -1,6 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V42.7 (Tối Ưu Max Cấp + Fix Triệt Để Hitbox Kẹt Người)
--- [ĐÃ THÊM: LƯU MENU, MA KHÍ < >, THÔNG BÁO, TÀNG HÌNH, NÂNG MAX CHỈ SỐ]
+-- MENU VIP PRO V42.7 (Tối Ưu Max Cấp + Tự Động Lưu + Fix Tàng Hình)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -21,10 +20,9 @@ local camera = workspace.CurrentCamera
 local State = {
     Instant = false, Noclip = false, LowGfx = false, Speed = false, Jump = false,
     InfJump = false, PlayerLight = false, ESP = false, AntiAfk = true, AntiStun = false, 
-    XRay = false, LockPosition = false, AutoCollect = false,
+    XRay = false, LockPosition = false, AutoCollect = false, WaterWalk = false, Invisible = false,
     SpinBot = false, SpinSpeed = 50, Hitbox = false, HitboxSize = 15, AutoClick = false, RGB = false,
-    Reach = false, ReachSize = 15, FastAttack = false, FastAttackSpeed = 5,
-    Aura = false, AuraColorIndex = 1, WaterWalk = false, Invisible = false,
+    Reach = false, ReachSize = 15, FastAttack = false, FastAttackSpeed = 5, AutoSave = false,
     SpeedValue = 60, JumpValue = 120, LightRange = 60, LightBrightness = 3,
     MusicVolume = 5
 }
@@ -60,6 +58,21 @@ for _, v in pairs(guiParent:GetChildren()) do
     if v.Name == "MobileProMax" then
         v:Destroy()
     end
+end
+
+-- TẢI CẤU HÌNH MENU TỪ LẦN CHƠI TRƯỚC
+local configFileName = "MenuProMax_Config_V42.7.json"
+pcall(function()
+    if isfile and isfile(configFileName) then
+        local data = HttpService:JSONDecode(readfile(configFileName))
+        for k, v in pairs(data) do if State[k] ~= nil then State[k] = v end end
+    end
+end)
+
+local function saveConfig()
+    pcall(function()
+        if writefile then writefile(configFileName, HttpService:JSONEncode(State)) end
+    end)
 end
 
 -- [1. GIAO DIỆN CHÍNH]
@@ -335,7 +348,7 @@ local function createDualButtons(parent, text1, color1, cb1, text2, color2, cb2)
     return dFrame
 end
 
-local function createToggle(parent, text, defaultState, callback)
+local function createToggle(parent, text, varName, callback)
     local btnFrame = Instance.new("Frame", parent)
     btnFrame.Size = UDim2.new(0.9, 0, 0, 44); btnFrame.BackgroundTransparency = 1
     local btn = Instance.new("TextButton", btnFrame)
@@ -349,7 +362,8 @@ local function createToggle(parent, text, defaultState, callback)
     local status = Instance.new("TextLabel", btn)
     status.Size = UDim2.new(0.2, 0, 1, 0); status.Position = UDim2.new(0.75, 0, 0, 0)
     status.BackgroundTransparency = 1; status.Font = Enum.Font.GothamBold; status.TextSize = 12; status.TextXAlignment = Enum.TextXAlignment.Right; status.ZIndex = 10
-    local active = defaultState or false
+    
+    local active = State[varName] or false
     status.Text = active and "ON" or "OFF"
     status.TextColor3 = active and Theme.AccentOn or Theme.AccentOff
     
@@ -357,22 +371,33 @@ local function createToggle(parent, text, defaultState, callback)
     stroke.Color = initColor
     btn.BackgroundColor3 = active and Color3.fromRGB(35, 45, 40) or Theme.ItemBg
     
-    table.insert(RGBElements, {Type = "Toggle", Stroke = stroke, State = function() return active end})
+    table.insert(RGBElements, {Type = "Toggle", Stroke = stroke, State = function() return State[varName] end})
 
     btn.MouseButton1Click:Connect(function()
-        clickAnimate(btn); active = not active; status.Text = active and "ON" or "OFF"
+        clickAnimate(btn)
+        State[varName] = not State[varName]
+        active = State[varName]
+        status.Text = active and "ON" or "OFF"
         TweenService:Create(status, TweenInfo.new(0.2), {TextColor3 = active and Theme.AccentOn or Theme.AccentOff}):Play()
         if not State.RGB then
             TweenService:Create(stroke, TweenInfo.new(0.2), {Color = active and Theme.AccentOn or Theme.Stroke}):Play()
         end
         TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = active and Color3.fromRGB(35, 45, 40) or Theme.ItemBg}):Play()
-        Notify(text .. " -> " .. (active and "BẬT" or "TẮT"))
-        callback(active)
+        
+        -- Nếu là các tính năng ẩn chứ không phải AutoSave thì thông báo
+        if varName ~= "AutoSave" then Notify(text .. " -> " .. (active and "BẬT" or "TẮT")) end
+        
+        if callback then callback(active) end
+        if State.AutoSave then saveConfig() end
     end)
+    
+    -- Chạy lần đầu nếu State đã lưu là True
+    if active and callback then task.spawn(callback, active) end
+    
     return btnFrame
 end
 
-local function createSlider(parent, text, min, max, default, callback)
+local function createSlider(parent, text, min, max, varName, callback)
     local frame = Instance.new("Frame", parent)
     frame.Size = UDim2.new(0.9, 0, 0, 48); frame.BackgroundTransparency = 1
     local bg = Instance.new("Frame", frame)
@@ -389,72 +414,28 @@ local function createSlider(parent, text, min, max, default, callback)
     titleLabel.BackgroundTransparency = 1; titleLabel.Text = text; titleLabel.TextColor3 = Theme.TextDim; titleLabel.Font = Enum.Font.GothamSemibold; titleLabel.TextSize = 12; titleLabel.TextXAlignment = Enum.TextXAlignment.Left; titleLabel.ZIndex = 10
     local valLabel = Instance.new("TextLabel", bg)
     valLabel.Size = UDim2.new(0.25, 0, 0.4, 0); valLabel.Position = UDim2.new(0.7, 0, 0.1, 0)
-    valLabel.BackgroundTransparency = 1; valLabel.Text = tostring(default); valLabel.TextColor3 = Theme.Brand; valLabel.Font = Enum.Font.GothamBold; valLabel.TextSize = 12; valLabel.TextXAlignment = Enum.TextXAlignment.Right; valLabel.ZIndex = 10
+    valLabel.BackgroundTransparency = 1; valLabel.Text = tostring(State[varName]); valLabel.TextColor3 = Theme.Brand; valLabel.Font = Enum.Font.GothamBold; valLabel.TextSize = 12; valLabel.TextXAlignment = Enum.TextXAlignment.Right; valLabel.ZIndex = 10
     local track = Instance.new("Frame", bg)
     track.Size = UDim2.new(0.9, 0, 0.15, 0); track.Position = UDim2.new(0.05, 0, 0.65, 0); track.BackgroundColor3 = Theme.MainBg; track.ZIndex = 10
     Instance.new("UICorner", track).CornerRadius = UDim.new(1, 0)
     local fill = Instance.new("Frame", track)
-    fill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0); fill.BackgroundColor3 = Theme.AccentOn; fill.ZIndex = 10
+    fill.Size = UDim2.new((State[varName] - min) / (max - min), 0, 1, 0); fill.BackgroundColor3 = Theme.AccentOn; fill.ZIndex = 10
     Instance.new("UICorner", fill).CornerRadius = UDim.new(1, 0)
+    
     local dragging = false
     local function updateSlider(input)
         local pos = math.clamp((input.Position.X - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
         local value = math.floor(min + ((max - min) * pos))
-        valLabel.Text = tostring(value); TweenService:Create(fill, TweenInfo.new(0.1), {Size = UDim2.new(pos, 0, 1, 0)}):Play(); callback(value)
+        valLabel.Text = tostring(value); TweenService:Create(fill, TweenInfo.new(0.1), {Size = UDim2.new(pos, 0, 1, 0)}):Play()
+        State[varName] = value
+        if callback then callback(value) end
+        if State.AutoSave then saveConfig() end
     end
     track.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = true; updateSlider(input) end end)
     UIS.InputChanged:Connect(function(input) if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then updateSlider(input) end end)
     UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end end)
-    callback(default)
-    return frame
-end
-
-local function createCycler(parent, text, options, varName, callback)
-    local frame = Instance.new("Frame", parent)
-    frame.Size = UDim2.new(0.9, 0, 0, 42); frame.BackgroundTransparency = 1
     
-    local bg = Instance.new("Frame", frame)
-    bg.Size = UDim2.new(1, 0, 1, 0); bg.BackgroundColor3 = Theme.ItemBg
-    Instance.new("UICorner", bg).CornerRadius = UDim.new(0, 10)
-    local stroke = Instance.new("UIStroke", bg); stroke.Color = Theme.Stroke; stroke.Thickness = 1.5
-    table.insert(RGBElements, {Type = "Info", Stroke = stroke})
-
-    local title = Instance.new("TextLabel", bg)
-    title.Size = UDim2.new(0.4, 0, 1, 0); title.Position = UDim2.new(0.05, 0, 0, 0)
-    title.BackgroundTransparency = 1; title.Text = text; title.TextColor3 = Theme.TextTitle
-    title.Font = Enum.Font.GothamSemibold; title.TextSize = 13; title.TextXAlignment = Enum.TextXAlignment.Left
-    
-    local valLabel = Instance.new("TextLabel", bg)
-    valLabel.Size = UDim2.new(0.3, 0, 1, 0); valLabel.Position = UDim2.new(0.55, 0, 0, 0)
-    valLabel.BackgroundTransparency = 1; valLabel.Text = options[State[varName]]; valLabel.TextColor3 = Theme.Brand
-    valLabel.Font = Enum.Font.GothamBold; valLabel.TextSize = 12
-
-    local btnLeft = Instance.new("TextButton", bg)
-    btnLeft.Size = UDim2.new(0, 30, 0, 30); btnLeft.Position = UDim2.new(0.45, 0, 0.5, -15)
-    btnLeft.Text = "<"; btnLeft.BackgroundTransparency = 1; btnLeft.TextColor3 = Theme.AccentOn
-    btnLeft.Font = Enum.Font.GothamBold; btnLeft.TextSize = 16
-    
-    local btnRight = Instance.new("TextButton", bg)
-    btnRight.Size = UDim2.new(0, 30, 0, 30); btnRight.Position = UDim2.new(0.85, 0, 0.5, -15)
-    btnRight.Text = ">"; btnRight.BackgroundTransparency = 1; btnRight.TextColor3 = Theme.AccentOn
-    btnRight.Font = Enum.Font.GothamBold; btnRight.TextSize = 16
-
-    local function update()
-        valLabel.Text = options[State[varName]]
-        Notify(text .. " -> " .. options[State[varName]])
-        if callback then callback(State[varName]) end
-    end
-    
-    btnLeft.MouseButton1Click:Connect(function()
-        clickAnimate(btnLeft)
-        State[varName] = State[varName] - 1; if State[varName] < 1 then State[varName] = #options end; update()
-    end)
-    
-    btnRight.MouseButton1Click:Connect(function()
-        clickAnimate(btnRight)
-        State[varName] = State[varName] + 1; if State[varName] > #options then State[varName] = 1 end; update()
-    end)
-    
+    if callback then task.spawn(callback, State[varName]) end
     return frame
 end
 
@@ -583,35 +564,42 @@ end)
 -- [TAB 2: NHÂN VẬT (BẬT/TẮT CƠ BẢN)]
 -- ==========================================
 
-createToggle(page2, "🛡️ Chống ngã", false, function(v) State.AntiStun = v end)
-createToggle(page2, "🔒 Khóa vị trí", false, function(v) 
-    State.LockPosition = v; if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then player.Character.HumanoidRootPart.Anchored = false end
+createToggle(page2, "🛡️ Chống ngã", "AntiStun")
+createToggle(page2, "🔒 Khóa vị trí", "LockPosition", function(v) 
+    if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then player.Character.HumanoidRootPart.Anchored = false end
 end)
-createToggle(page2, "🚀 Nhảy trên không", false, function(v) State.InfJump = v end) 
-createToggle(page2, "⚡ Đánh nhanh", false, function(v) State.FastAttack = v end)
-createToggle(page2, "🐿️ Lấy đồ nhanh", false, function(v) State.Instant = v end)
-createToggle(page2, "🧲 Auto nhặt đồ xung quanh", false, function(v) State.AutoCollect = v end)
-createToggle(page2, "🚷 Đi xuyên tường", false, function(v) 
-    State.Noclip = v; if not v and player.Character then for _, part in pairs(player.Character:GetDescendants()) do if part:IsA("BasePart") then part.CanCollide = true end end end
+createToggle(page2, "🚀 Nhảy trên không", "InfJump") 
+createToggle(page2, "🐿️ Lấy đồ nhanh", "Instant")
+createToggle(page2, "🧲 Auto nhặt đồ xung quanh", "AutoCollect")
+createToggle(page2, "🚷 Đi xuyên tường", "Noclip", function(v) 
+    if not v and player.Character then for _, part in pairs(player.Character:GetDescendants()) do if part:IsA("BasePart") then part.CanCollide = true end end end
 end)
-createToggle(page2, "🌊 Đi trên mặt nước", false, function(v) State.WaterWalk = v end)
-createToggle(page2, "👻 Tàng hình (Local)", false, function(v) 
-    State.Invisible = v
+createToggle(page2, "🌊 Đi trên mặt nước", "WaterWalk")
+
+-- FIX LỖI TÀNG HÌNH KHỐI TRẮNG (Chỉ đổi đúng cái áo/vũ khí, không đổi HumanoidRootPart)
+local invisOriginals = {}
+createToggle(page2, "👻 Tàng hình (Local)", "Invisible", function(v) 
     if player.Character then 
-        for _, p in pairs(player.Character:GetDescendants()) do 
-            if p:IsA("BasePart") and p.Name ~= "HumanoidRootPart" then p.Transparency = v and 1 or 0 
-            elseif p:IsA("Decal") or p:IsA("Texture") then p.Transparency = v and 1 or 0 end 
-        end 
+        if v then
+            invisOriginals = {}
+            for _, p in pairs(player.Character:GetDescendants()) do 
+                if (p:IsA("BasePart") and p.Name ~= "HumanoidRootPart") or p:IsA("Decal") or p:IsA("Texture") then
+                    invisOriginals[p] = p.Transparency
+                    p.Transparency = 1
+                end 
+            end 
+        else
+            for p, orig in pairs(invisOriginals) do
+                if p and p.Parent then p.Transparency = orig end
+            end
+            invisOriginals = {}
+        end
     end 
 end)
 
-local AuraColors = {Color3.new(1,0,0), Color3.new(0,0,1), Color3.new(0,1,0), Color3.new(0.5,0,1), Color3.new(0,0,0), Color3.new(1,1,1)}
-createToggle(page2, "🔥 Bật Ma Khí (Aura)", false, function(v) State.Aura = v end)
-createCycler(page2, "Màu Ma Khí", {"Đỏ", "Xanh dương", "Xanh lá", "Tím", "Đen", "Trắng"}, "AuraColorIndex")
-
 local astralClone = nil
 local astralProps = {}
-createToggle(page2, "👻 Xuất hồn", false, function(v)
+createToggle(page2, "👻 Xuất hồn", "Astral", function(v)
     local char = player.Character
     if v then
         if char and char:FindFirstChild("HumanoidRootPart") then
@@ -644,16 +632,29 @@ createToggle(page2, "👻 Xuất hồn", false, function(v)
     end
 end)
 
-player.CharacterAdded:Connect(function()
+player.CharacterAdded:Connect(function(char)
     if astralClone then astralClone:Destroy(); astralClone = nil end
     astralProps = {}
     originalToolSizes = {}
+    invisOriginals = {}
+    
+    -- Nếu đang bật tàng hình thì hồi sinh phải tàng hình lại (giữ lại code fix trắng)
+    if State.Invisible then
+        task.wait(0.5)
+        if char then
+            for _, p in pairs(char:GetDescendants()) do 
+                if (p:IsA("BasePart") and p.Name ~= "HumanoidRootPart") or p:IsA("Decal") or p:IsA("Texture") then
+                    invisOriginals[p] = p.Transparency
+                    p.Transparency = 1
+                end 
+            end 
+        end
+    end
 end)
 
 local xrayMats = {}
 local xrayTick = 0
-createToggle(page2, "👀 Nhìn xuyên map", false, function(v) 
-    State.XRay = v 
+createToggle(page2, "👀 Nhìn xuyên map", "XRay", function(v) 
     xrayTick = xrayTick + 1
     local currentTick = xrayTick
     task.spawn(function()
@@ -677,45 +678,47 @@ createToggle(page2, "👀 Nhìn xuyên map", false, function(v)
     end)
 end)
 
-createToggle(page2, "🔴 ESP người chơi", false, function(v) State.ESP = v end)
+createToggle(page2, "🔴 ESP người chơi", "ESP")
 
 -- ==========================================
 -- [TAB 3: PLAYER (TÍNH NĂNG ĐIỀU CHỈNH CHỈ SỐ)]
 -- ==========================================
 
-createToggle(page3, "🏃 Chạy nhanh", false, function(v) 
-    State.Speed = v; if not v and player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.WalkSpeed = 16 end
+createToggle(page3, "🏃 Chạy nhanh", "Speed", function(v) 
+    if not v and player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.WalkSpeed = 16 end
 end)
-createSlider(page3, "Tốc độ chạy", 16, 1000, 60, function(val) State.SpeedValue = val end)
+createSlider(page3, "Tốc độ chạy", 16, 1000, "SpeedValue")
 
-createToggle(page3, "🦘 Nhảy cao", false, function(v) 
-    State.Jump = v; if not v and player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.UseJumpPower = true; player.Character.Humanoid.JumpPower = 50 end
+createToggle(page3, "🦘 Nhảy cao", "Jump", function(v) 
+    if not v and player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.UseJumpPower = true; player.Character.Humanoid.JumpPower = 50 end
 end)
-createSlider(page3, "Lực nhảy", 50, 1000, 120, function(val) State.JumpValue = val end)
+createSlider(page3, "Lực nhảy", 50, 1000, "JumpValue")
 
-createSlider(page3, "Tốc độ đánh (Max=20)", 1, 20, 5, function(v) State.FastAttackSpeed = v end)
+-- SỬA THANH TRƯỢT ĐÁNH NHANH (Fast Attack Speed) THEO ĐÚNG Ý BẠN
+createToggle(page3, "⚡ Đánh nhanh", "FastAttack")
+createSlider(page3, "Mức độ Đánh nhanh", 1, 20, "FastAttackSpeed")
 
-createToggle(page3, "⚔️ Đánh xa", false, function(v) State.Reach = v end)
-createSlider(page3, "Kích thước vũ khí", 2, 300, 15, function(v) State.ReachSize = v end)
+createToggle(page3, "⚔️ Đánh xa", "Reach")
+createSlider(page3, "Kích thước vũ khí", 2, 300, "ReachSize")
 
-createToggle(page3, "🌪️ Xoay vòng tròn (SpinBot)", false, function(v) State.SpinBot = v end)
-createSlider(page3, "Tốc độ xoay", 10, 100, 50, function(v) State.SpinSpeed = v end)
+createToggle(page3, "🌪️ Xoay vòng tròn (SpinBot)", "SpinBot")
+createSlider(page3, "Tốc độ xoay", 10, 100, "SpinSpeed")
 
-createToggle(page3, "🎯 Hitbox", false, function(v) State.Hitbox = v end)
-createSlider(page3, "Kích thước đối thủ", 2, 100, 15, function(v) State.HitboxSize = v end)
+createToggle(page3, "🎯 Hitbox", "Hitbox")
+createSlider(page3, "Kích thước đối thủ", 2, 100, "HitboxSize")
 
-createToggle(page3, "💡 Ánh sáng quanh người", false, function(v) 
-    State.PlayerLight = v; if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then 
+createToggle(page3, "💡 Ánh sáng quanh người", "PlayerLight", function(v) 
+    if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then 
         local light = player.Character.HumanoidRootPart:FindFirstChild("PlayerPointLight"); if light then light:Destroy() end 
     end
 end)
-createSlider(page3, "Phạm vi sáng", 50, 1000, 60, function(val) State.LightRange = val end)
-createSlider(page3, "Độ sáng", 0, 5, 3, function(val) State.LightBrightness = val end)
+createSlider(page3, "Phạm vi sáng", 50, 1000, "LightRange")
+createSlider(page3, "Độ sáng", 0, 5, "LightBrightness")
 
-createSlider(page3, "👁️ Mở rộng góc nhìn (FOV)", 70, 500, 70, function(val)
+createSlider(page3, "👁️ Mở rộng góc nhìn (FOV)", 70, 500, "FOVValue", function(val)
     workspace.CurrentCamera.FieldOfView = val
 end)
-
+State.FOVValue = State.FOVValue or 70
 
 -- ==========================================
 -- THUẬT TOÁN CACHE CHỐNG LAG 100% (Lấy Đồ Nhanh & Auto Collect)
@@ -724,7 +727,6 @@ local cachedPrompts = {}
 local originalPrompts = {}
 local originalToolSizes = {}
 
--- 1. Quét ngầm 1 lần duy nhất lúc bật script
 task.spawn(function()
     local count = 0
     for _, obj in ipairs(workspace:GetDescendants()) do
@@ -732,18 +734,16 @@ task.spawn(function()
             table.insert(cachedPrompts, obj)
         end
         count = count + 1
-        if count % 1000 == 0 then task.wait() end -- Tránh bị đơ game lúc load
+        if count % 1000 == 0 then task.wait() end 
     end
 end)
 
--- 2. Tự động ghi chép thêm nếu game có đồ vật mới rớt ra
 workspace.DescendantAdded:Connect(function(obj)
     if obj:IsA("ProximityPrompt") then
         table.insert(cachedPrompts, obj)
     end
 end)
 
--- XỬ LÝ: LẤY ĐỒ NHANH (INSTANT PROMPT)
 task.spawn(function()
     while task.wait(1) do
         if State.Instant then
@@ -759,7 +759,7 @@ task.spawn(function()
                     prompt.HoldDuration = 0
                     prompt.MaxActivationDistance = 25 
                 else
-                    table.remove(cachedPrompts, i) -- Dọn rác khi đồ vật biến mất
+                    table.remove(cachedPrompts, i) 
                 end
             end
         else
@@ -776,7 +776,6 @@ task.spawn(function()
     end
 end)
 
--- XỬ LÝ: AUTO NHẶT ĐỒ XUNG QUANH
 task.spawn(function()
     while task.wait(0.5) do
         pcall(function()
@@ -784,7 +783,6 @@ task.spawn(function()
                 local root = player.Character.HumanoidRootPart
                 local rootPos = root.Position
                 
-                -- Bấm tự động ProximityPrompt từ sổ ghi chép (Không quét map)
                 for _, prompt in ipairs(cachedPrompts) do
                     if prompt.Parent and prompt.Parent:IsA("BasePart") then
                         if prompt.Enabled and (prompt.Parent.Position - rootPos).Magnitude <= 50 then
@@ -793,7 +791,6 @@ task.spawn(function()
                     end
                 end
 
-                -- Gom các Tool (Kiếm, Súng rớt dưới đất) bằng Raycast
                 local overlapParams = OverlapParams.new()
                 overlapParams.FilterDescendantsInstances = {player.Character}
                 overlapParams.FilterType = Enum.RaycastFilterType.Exclude
@@ -878,10 +875,10 @@ task.spawn(function()
 end)
 
 -- ==========================================
--- HITBOX V2 (Chỉ quản lý hiển thị Size/Màu sắc để chống giật)
+-- HITBOX V2 
 -- ==========================================
 task.spawn(function()
-    while task.wait(0.2) do -- Chạy mỗi 0.2s là đủ mượt, giảm tải CPU
+    while task.wait(0.2) do
         pcall(function()
             if State.Hitbox then
                 for _, p in pairs(Players:GetPlayers()) do
@@ -889,18 +886,14 @@ task.spawn(function()
                         local hrp = p.Character.HumanoidRootPart
                         local hum = p.Character:FindFirstChildOfClass("Humanoid")
                         
-                        -- Nếu địch còn sống
                         if hum and hum.Health > 0 then
-                            -- Chỉ update đồ hoạ và Size 1 lần duy nhất để không bị lag
                             if hrp.Size.X ~= State.HitboxSize then
                                 hrp.Size = Vector3.new(State.HitboxSize, State.HitboxSize, State.HitboxSize)
                                 hrp.Transparency = 0.7 
                                 hrp.Color = Color3.fromRGB(255, 50, 50) 
                                 hrp.Material = Enum.Material.Neon 
-                                -- ĐÃ XÓA Massless ở đây để tránh lỗi Humanoid bị hỏng vật lý
                             end
                         else
-                            -- Khi địch chết -> Thu hồi Hitbox
                             if hrp.Size.X ~= 2 then
                                 hrp.Size = Vector3.new(2, 2, 1)
                                 hrp.Transparency = 1
@@ -910,7 +903,6 @@ task.spawn(function()
                     end
                 end
             else
-                -- Khi TẮT Menu Hitbox -> Trả mọi thứ về mặc định
                 for _, p in pairs(Players:GetPlayers()) do
                     if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                         local hrp = p.Character.HumanoidRootPart
@@ -926,45 +918,19 @@ task.spawn(function()
     end
 end)
 
-UIS.JumpRequest:Connect(function() 
-    if State.InfJump and player.Character then 
-        local hum = player.Character:FindFirstChildOfClass("Humanoid") 
-        if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end 
-    end 
+-- ==========================================
+-- [TAB 4: TIỆN ÍCH] LƯU MENU MỚI
+-- ==========================================
+
+-- TÍNH NĂNG 1: NÚT TỰ ĐỘNG LƯU MENU (ON/OFF TOGGLE)
+createToggle(page4, "💾 Tự động Lưu Cài Đặt", "AutoSave", function(v)
+    if v then 
+        saveConfig() 
+        Notify("Đã Kích Hoạt Tự Động Lưu!") 
+    else 
+        Notify("Đã Tắt Tự Động Lưu!") 
+    end
 end)
-
--- ==========================================
--- [TAB 4: TIỆN ÍCH]
--- ==========================================
-
-local configFileName = "MenuProMax_Config_V42.7.json"
-local function saveConfig()
-    pcall(function()
-        if writefile then
-            writefile(configFileName, HttpService:JSONEncode(State))
-            Notify("💾 Đã lưu cấu hình hiện tại!")
-        else 
-            Notify("⚠️ Executor của bạn không hỗ trợ writefile") 
-        end
-    end)
-end
-
-local function loadConfig()
-    pcall(function()
-        if isfile and isfile(configFileName) then
-            local data = HttpService:JSONDecode(readfile(configFileName))
-            for k, v in pairs(data) do 
-                if State[k] ~= nil then State[k] = v end 
-            end
-            Notify("📂 Đã tải cấu hình! (Hiệu ứng đã áp dụng)")
-        else 
-            Notify("⚠️ Không tìm thấy file cấu hình!") 
-        end
-    end)
-end
-
-createDualButtons(page4, "💾 LƯU CÀI ĐẶT", Theme.AccentOn, saveConfig, "📂 TẢI CÀI ĐẶT", Theme.Brand, loadConfig)
-
 
 local function hopServer(sortOrder)
     local api = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=" .. sortOrder .. "&limit=100"
@@ -996,8 +962,7 @@ local function rejoinServer()
     else TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, player) end
 end
 
-createToggle(page4, "🌈 Chế độ RGB (Đèn LED Menu)", false, function(v) 
-    State.RGB = v; 
+createToggle(page4, "🌈 Chế độ RGB (Đèn LED Menu)", "RGB", function(v) 
     if not v then 
         titleLabel.TextColor3 = Theme.TextTitle; 
         
@@ -1024,7 +989,7 @@ createToggle(page4, "🌈 Chế độ RGB (Đèn LED Menu)", false, function(v)
     end 
 end)
 
-createToggle(page4, "🖱️ Auto Click", false, function(v) State.AutoClick = v end)
+createToggle(page4, "🖱️ Auto Click", "AutoClick")
 task.spawn(function()
     while task.wait(0.1) do
         if State.AutoClick then
@@ -1041,7 +1006,7 @@ task.spawn(function()
 end)
 
 local origFog, origBright, origShadow
-createToggle(page4, "☀️ Xóa sương mù", false, function(v) 
+createToggle(page4, "☀️ Xóa sương mù", "NoFog", function(v) 
     if v then
         origFog = Lighting.FogEnd; origBright = Lighting.Brightness; origShadow = Lighting.GlobalShadows
         Lighting.FogEnd = 100000; Lighting.Brightness = 2; Lighting.GlobalShadows = false
@@ -1050,19 +1015,19 @@ createToggle(page4, "☀️ Xóa sương mù", false, function(v)
     end
 end)
 
-createToggle(page4, "⬛ Màn hình đen (Treo máy)", false, function(v) screenOverlay.BackgroundColor3 = Color3.new(0, 0, 0); screenOverlay.Visible = v end)
-createToggle(page4, "⬜ Màn hình trắng (Treo máy)", false, function(v) screenOverlay.BackgroundColor3 = Color3.new(1, 1, 1); screenOverlay.Visible = v end)
-createToggle(page4, "🛡️ Chống AFK", true, function(v) State.AntiAfk = v end)
+createToggle(page4, "⬛ Màn hình đen (Treo máy)", "BlackScreen", function(v) screenOverlay.BackgroundColor3 = Color3.new(0, 0, 0); screenOverlay.Visible = v end)
+createToggle(page4, "⬜ Màn hình trắng (Treo máy)", "WhiteScreen", function(v) screenOverlay.BackgroundColor3 = Color3.new(1, 1, 1); screenOverlay.Visible = v end)
+createToggle(page4, "🛡️ Chống AFK", "AntiAfk")
 
-createDualButtons(page4, "🌞 Trời SÁNG (FAKE)", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12 end, "🌚 Trời TỐI (FAKE)", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0 end)
-createDualButtons(page4, "🔄 VÀO LẠI SV", Theme.AccentOn, rejoinServer, "🎲 ĐỔI SV NGẪU NHIÊN", Theme.Brand, function() hopServer("Desc") end)
-createDualButtons(page4, "📉 ĐỔI SV ÍT NGƯỜI", Color3.fromRGB(52, 152, 219), function() hopServer("Asc") end, "📈 ĐỔI SV NHIỀU NGƯỜI", Color3.fromRGB(231, 76, 60), function() hopServer("Desc") end)
+createDualButtons(page4, "🌞 Trời SÁNG (FAKE)", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12; Notify("Trời đã SÁNG") end, "🌚 Trời TỐI (FAKE)", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0; Notify("Trời đã TỐI") end)
+createDualButtons(page4, "🔄 VÀO LẠI SV", Theme.AccentOn, rejoinServer, "🎲 ĐỔI SV NGẪU NHIÊN", Theme.Brand, function() hopServer("Desc"); Notify("Đang tìm server...") end)
+createDualButtons(page4, "📉 ĐỔI SV ÍT NGƯỜI", Color3.fromRGB(52, 152, 219), function() hopServer("Asc"); Notify("Đang tìm server...") end, "📈 ĐỔI SV NHIỀU NGƯỜI", Color3.fromRGB(231, 76, 60), function() hopServer("Desc"); Notify("Đang tìm server...") end)
 
-createDualButtons(page4, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) end, 
-"📂 TP SAVE V2 GUI", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
+createDualButtons(page4, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end); Notify("Đã nạp Infinite Yield!") end, 
+"📂 TP SAVE V2 GUI", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end); Notify("Đã nạp TP Save GUI") end)
 
-createDualButtons(page4, "🕊️ FLY V1", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end, 
-"🕊️ FLY V3", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end) end)
+createDualButtons(page4, "🕊️ FLY V1", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end); Notify("Đã bật Fly V1") end, 
+"🕊️ FLY V3", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end); Notify("Đã bật Fly V3") end)
 
 -- ==========================================
 -- [TAB 5: PHÁT NHẠC VÀ LƯU TRỮ VĨNH VIỄN]
@@ -1177,8 +1142,7 @@ end, "⏸️ TẮT NHẠC", Theme.AccentOff, function()
 end)
 playControlFrame.LayoutOrder = 2
 
-local volumeFrame = createSlider(page5, "ÂM LƯỢNG 🎛️", 0, 10, State.MusicVolume, function(val)
-    State.MusicVolume = val
+local volumeFrame = createSlider(page5, "ÂM LƯỢNG 🎛️", 0, 10, "MusicVolume", function(val)
     if currentSound then currentSound.Volume = val end
 end)
 volumeFrame.LayoutOrder = 3
@@ -1368,6 +1332,7 @@ local function renderSavedTps()
             if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then 
                 local cf = CFrame.new(unpack(data.cframe))
                 player.Character.HumanoidRootPart.CFrame = cf
+                Notify("Đã dịch chuyển tới: " .. data.name)
             end 
         end)
         delBtn.MouseButton1Click:Connect(function() 
@@ -1414,7 +1379,6 @@ renderSavedTps()
 -- [TAB 7: TP NGƯỜI CHƠI]
 -- ==========================================
 local function updatePlayerList()
-    -- Dọn dẹp mảng RGBElements để chống tràn bộ nhớ (Memory Leak)
     local cleanRGB = {}
     for _, obj in ipairs(RGBElements) do
         if obj.Stroke and obj.Stroke.Parent then
@@ -1433,7 +1397,6 @@ local function updatePlayerList()
             
             local currentColor = State.RGB and Color3.fromHSV(tick() % 5 / 5, 1, 1) or Theme.Stroke
             
-            -- Cập nhật viền cho nút người chơi
             local stroke = Instance.new("UIStroke", btn); stroke.Color = currentColor; stroke.Thickness = 1.5
             table.insert(RGBElements, {Type = "Info", Stroke = stroke})
             
@@ -1454,11 +1417,8 @@ local function updatePlayerList()
             targetAvatar.ZIndex = 10
             Instance.new("UICorner", targetAvatar).CornerRadius = UDim.new(1, 0)
             
-            -- Cập nhật viền cho Avatar người chơi
             local targetStroke = Instance.new("UIStroke", targetAvatar)
-            targetStroke.Color = currentColor
-            targetStroke.Thickness = 1.5
-            targetStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+            targetStroke.Color = currentColor; targetStroke.Thickness = 1.5; targetStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
             table.insert(RGBElements, {Type = "Info", Stroke = targetStroke})
 
             task.spawn(function()
@@ -1472,6 +1432,7 @@ local function updatePlayerList()
                 if p.Character and p.Character:FindFirstChild("HumanoidRootPart") and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                     if not State.RGB then TweenService:Create(stroke, TweenInfo.new(0.3), {Color = Theme.AccentOn}):Play() end
                     player.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame
+                    Notify("Đã TP tới: " .. p.DisplayName)
                     task.wait(0.5); 
                     if not State.RGB then TweenService:Create(stroke, TweenInfo.new(0.3), {Color = Theme.Stroke}):Play() end
                 end
@@ -1489,7 +1450,6 @@ end)
 
 -- [BẢO TỒN HOẠT ĐỘNG LIÊN TỤC]
 RunService.RenderStepped:Connect(function()
-    -- CẬP NHẬT RGB CHO TẤT CẢ VIỀN TRONG MENU
     if State.RGB then
         local hue = tick() % 5 / 5
         local color = Color3.fromHSV(hue, 1, 1)
@@ -1545,35 +1505,14 @@ RunService.RenderStepped:Connect(function()
             root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(State.SpinSpeed), 0)
         end
 
-        -- XỬ LÝ MA KHÍ (AURA) VÀ PLAYER LIGHT
         if root then
             local light = root:FindFirstChild("PlayerPointLight")
             if State.PlayerLight then 
                 if not light then light = Instance.new("PointLight", root); light.Name = "PlayerPointLight"; light.Shadows = false end 
                 light.Brightness = State.LightBrightness; light.Range = State.LightRange
             else if light then light:Destroy() end end
-            
-            if State.Aura then
-                local emitter = root:FindFirstChild("MaKhiAura")
-                if not emitter then
-                    emitter = Instance.new("ParticleEmitter", root)
-                    emitter.Name = "MaKhiAura"
-                    emitter.Texture = "rbxassetid://899756149" 
-                    emitter.Size = NumberSequence.new({NumberSequenceKeypoint.new(0, 2), NumberSequenceKeypoint.new(1, 4)})
-                    emitter.Rate = 25
-                    emitter.Speed = NumberRange.new(2, 4)
-                    emitter.Lifetime = NumberRange.new(1, 1.5)
-                    emitter.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.2), NumberSequenceKeypoint.new(1, 1)})
-                end
-                emitter.Color = ColorSequence.new(AuraColors[State.AuraColorIndex] or Color3.new(1,0,0))
-                emitter.Enabled = true
-            else
-                local emitter = root:FindFirstChild("MaKhiAura")
-                if emitter then emitter.Enabled = false end 
-            end
         end
         
-        -- SỬA LỖI NOCLIP: Ép xuyên tường liên tục trong mỗi frame
         if State.Noclip and char then
             for _, part in pairs(char:GetDescendants()) do
                 if part:IsA("BasePart") and part.CanCollide then
@@ -1582,8 +1521,7 @@ RunService.RenderStepped:Connect(function()
             end
         end
 
-        -- [FIX TUYỆT ĐỐI] HITBOX LÀM KẸT NGƯỜI CHƠI KHÁC:
-        -- Phải ép tắt va chạm liên tục ở RenderStepped để đè bẹp hệ thống vật lý của game
+        -- ÉP TẮT VA CHẠM HITBOX
         if State.Hitbox then
             for _, p in pairs(Players:GetPlayers()) do
                 if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
