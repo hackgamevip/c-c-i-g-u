@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V42.7 (Tối Ưu Max Cấp + Tự Động Lưu + Fix Tàng Hình)
+-- MENU VIP PRO V42.7 (Chuẩn cấu trúc gốc + Fix Tàng Hình + Nút Lưu ON/OFF)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -20,11 +20,11 @@ local camera = workspace.CurrentCamera
 local State = {
     Instant = false, Noclip = false, LowGfx = false, Speed = false, Jump = false,
     InfJump = false, PlayerLight = false, ESP = false, AntiAfk = true, AntiStun = false, 
-    XRay = false, LockPosition = false, AutoCollect = false, WaterWalk = false, Invisible = false,
+    XRay = false, LockPosition = false, AutoCollect = false,
     SpinBot = false, SpinSpeed = 50, Hitbox = false, HitboxSize = 15, AutoClick = false, RGB = false,
-    Reach = false, ReachSize = 15, FastAttack = false, FastAttackSpeed = 5, AutoSave = false,
+    Reach = false, ReachSize = 15, FastAttack = false, FastAttackSpeed = 5, Invisible = false, AutoSave = false,
     SpeedValue = 60, JumpValue = 120, LightRange = 60, LightBrightness = 3,
-    MusicVolume = 5
+    MusicVolume = 5, FOVValue = 70
 }
 
 -- [BẢNG MÀU CHỦ ĐẠO]
@@ -60,18 +60,25 @@ for _, v in pairs(guiParent:GetChildren()) do
     end
 end
 
--- TẢI CẤU HÌNH MENU TỪ LẦN CHƠI TRƯỚC
+-- ==========================================
+-- HỆ THỐNG LƯU TRỮ CÀI ĐẶT
+-- ==========================================
 local configFileName = "MenuProMax_Config_V42.7.json"
+
 pcall(function()
     if isfile and isfile(configFileName) then
         local data = HttpService:JSONDecode(readfile(configFileName))
-        for k, v in pairs(data) do if State[k] ~= nil then State[k] = v end end
+        for k, v in pairs(data) do 
+            if State[k] ~= nil then State[k] = v end 
+        end
     end
 end)
 
 local function saveConfig()
     pcall(function()
-        if writefile then writefile(configFileName, HttpService:JSONEncode(State)) end
+        if writefile then
+            writefile(configFileName, HttpService:JSONEncode(State))
+        end
     end)
 end
 
@@ -82,43 +89,6 @@ gui.ResetOnSpawn = false
 gui.DisplayOrder = 99999
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = guiParent
-
--- ==========================================
--- HỆ THỐNG THÔNG BÁO GÓC MÀN HÌNH
--- ==========================================
-local notifContainer = Instance.new("Frame", gui)
-notifContainer.Size = UDim2.new(0, 200, 1, -100)
-notifContainer.Position = UDim2.new(1, -210, 0, 50)
-notifContainer.BackgroundTransparency = 1
-notifContainer.ZIndex = 9999
-local notifLayout = Instance.new("UIListLayout", notifContainer)
-notifLayout.SortOrder = Enum.SortOrder.LayoutOrder
-notifLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
-notifLayout.Padding = UDim.new(0, 8)
-
-local function Notify(text)
-    local f = Instance.new("Frame", notifContainer)
-    f.Size = UDim2.new(1, 0, 0, 45)
-    f.BackgroundColor3 = Theme.ItemBg
-    f.BackgroundTransparency = 1
-    Instance.new("UICorner", f).CornerRadius = UDim.new(0, 8)
-    local stroke = Instance.new("UIStroke", f)
-    stroke.Color = Theme.Brand; stroke.Thickness = 1.5; stroke.Transparency = 1
-    local t = Instance.new("TextLabel", f)
-    t.Size = UDim2.new(1, -15, 1, 0); t.Position = UDim2.new(0, 10, 0, 0)
-    t.BackgroundTransparency = 1; t.Text = text
-    t.TextColor3 = Theme.TextTitle; t.Font = Enum.Font.GothamSemibold
-    t.TextSize = 11; t.TextWrapped = true; t.TextTransparency = 1; t.TextXAlignment = Enum.TextXAlignment.Left
-    TweenService:Create(f, TweenInfo.new(0.3), {BackgroundTransparency = 0.1}):Play()
-    TweenService:Create(stroke, TweenInfo.new(0.3), {Transparency = 0}):Play()
-    TweenService:Create(t, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
-    task.delay(2.5, function()
-        TweenService:Create(f, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
-        TweenService:Create(stroke, TweenInfo.new(0.3), {Transparency = 1}):Play()
-        TweenService:Create(t, TweenInfo.new(0.3), {TextTransparency = 1}):Play()
-        task.wait(0.3); f:Destroy()
-    end)
-end
 
 local screenOverlay = Instance.new("Frame", gui)
 screenOverlay.Size = UDim2.new(2, 0, 2, 0)
@@ -348,7 +318,8 @@ local function createDualButtons(parent, text1, color1, cb1, text2, color2, cb2)
     return dFrame
 end
 
-local function createToggle(parent, text, varName, callback)
+-- QUAY VỀ HÀM GỐC 100% CỦA BẠN (TRÁNH LỖI LỆNH)
+local function createToggle(parent, text, defaultState, callback)
     local btnFrame = Instance.new("Frame", parent)
     btnFrame.Size = UDim2.new(0.9, 0, 0, 44); btnFrame.BackgroundTransparency = 1
     local btn = Instance.new("TextButton", btnFrame)
@@ -362,8 +333,7 @@ local function createToggle(parent, text, varName, callback)
     local status = Instance.new("TextLabel", btn)
     status.Size = UDim2.new(0.2, 0, 1, 0); status.Position = UDim2.new(0.75, 0, 0, 0)
     status.BackgroundTransparency = 1; status.Font = Enum.Font.GothamBold; status.TextSize = 12; status.TextXAlignment = Enum.TextXAlignment.Right; status.ZIndex = 10
-    
-    local active = State[varName] or false
+    local active = defaultState or false
     status.Text = active and "ON" or "OFF"
     status.TextColor3 = active and Theme.AccentOn or Theme.AccentOff
     
@@ -371,33 +341,21 @@ local function createToggle(parent, text, varName, callback)
     stroke.Color = initColor
     btn.BackgroundColor3 = active and Color3.fromRGB(35, 45, 40) or Theme.ItemBg
     
-    table.insert(RGBElements, {Type = "Toggle", Stroke = stroke, State = function() return State[varName] end})
+    table.insert(RGBElements, {Type = "Toggle", Stroke = stroke, State = function() return active end})
 
     btn.MouseButton1Click:Connect(function()
-        clickAnimate(btn)
-        State[varName] = not State[varName]
-        active = State[varName]
-        status.Text = active and "ON" or "OFF"
+        clickAnimate(btn); active = not active; status.Text = active and "ON" or "OFF"
         TweenService:Create(status, TweenInfo.new(0.2), {TextColor3 = active and Theme.AccentOn or Theme.AccentOff}):Play()
         if not State.RGB then
             TweenService:Create(stroke, TweenInfo.new(0.2), {Color = active and Theme.AccentOn or Theme.Stroke}):Play()
         end
         TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = active and Color3.fromRGB(35, 45, 40) or Theme.ItemBg}):Play()
-        
-        -- Nếu là các tính năng ẩn chứ không phải AutoSave thì thông báo
-        if varName ~= "AutoSave" then Notify(text .. " -> " .. (active and "BẬT" or "TẮT")) end
-        
-        if callback then callback(active) end
-        if State.AutoSave then saveConfig() end
+        callback(active)
     end)
-    
-    -- Chạy lần đầu nếu State đã lưu là True
-    if active and callback then task.spawn(callback, active) end
-    
     return btnFrame
 end
 
-local function createSlider(parent, text, min, max, varName, callback)
+local function createSlider(parent, text, min, max, default, callback)
     local frame = Instance.new("Frame", parent)
     frame.Size = UDim2.new(0.9, 0, 0, 48); frame.BackgroundTransparency = 1
     local bg = Instance.new("Frame", frame)
@@ -414,28 +372,23 @@ local function createSlider(parent, text, min, max, varName, callback)
     titleLabel.BackgroundTransparency = 1; titleLabel.Text = text; titleLabel.TextColor3 = Theme.TextDim; titleLabel.Font = Enum.Font.GothamSemibold; titleLabel.TextSize = 12; titleLabel.TextXAlignment = Enum.TextXAlignment.Left; titleLabel.ZIndex = 10
     local valLabel = Instance.new("TextLabel", bg)
     valLabel.Size = UDim2.new(0.25, 0, 0.4, 0); valLabel.Position = UDim2.new(0.7, 0, 0.1, 0)
-    valLabel.BackgroundTransparency = 1; valLabel.Text = tostring(State[varName]); valLabel.TextColor3 = Theme.Brand; valLabel.Font = Enum.Font.GothamBold; valLabel.TextSize = 12; valLabel.TextXAlignment = Enum.TextXAlignment.Right; valLabel.ZIndex = 10
+    valLabel.BackgroundTransparency = 1; valLabel.Text = tostring(default); valLabel.TextColor3 = Theme.Brand; valLabel.Font = Enum.Font.GothamBold; valLabel.TextSize = 12; valLabel.TextXAlignment = Enum.TextXAlignment.Right; valLabel.ZIndex = 10
     local track = Instance.new("Frame", bg)
     track.Size = UDim2.new(0.9, 0, 0.15, 0); track.Position = UDim2.new(0.05, 0, 0.65, 0); track.BackgroundColor3 = Theme.MainBg; track.ZIndex = 10
     Instance.new("UICorner", track).CornerRadius = UDim.new(1, 0)
     local fill = Instance.new("Frame", track)
-    fill.Size = UDim2.new((State[varName] - min) / (max - min), 0, 1, 0); fill.BackgroundColor3 = Theme.AccentOn; fill.ZIndex = 10
+    fill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0); fill.BackgroundColor3 = Theme.AccentOn; fill.ZIndex = 10
     Instance.new("UICorner", fill).CornerRadius = UDim.new(1, 0)
-    
     local dragging = false
     local function updateSlider(input)
         local pos = math.clamp((input.Position.X - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
         local value = math.floor(min + ((max - min) * pos))
-        valLabel.Text = tostring(value); TweenService:Create(fill, TweenInfo.new(0.1), {Size = UDim2.new(pos, 0, 1, 0)}):Play()
-        State[varName] = value
-        if callback then callback(value) end
-        if State.AutoSave then saveConfig() end
+        valLabel.Text = tostring(value); TweenService:Create(fill, TweenInfo.new(0.1), {Size = UDim2.new(pos, 0, 1, 0)}):Play(); callback(value)
     end
     track.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = true; updateSlider(input) end end)
     UIS.InputChanged:Connect(function(input) if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then updateSlider(input) end end)
     UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end end)
     
-    if callback then task.spawn(callback, State[varName]) end
     return frame
 end
 
@@ -564,42 +517,71 @@ end)
 -- [TAB 2: NHÂN VẬT (BẬT/TẮT CƠ BẢN)]
 -- ==========================================
 
-createToggle(page2, "🛡️ Chống ngã", "AntiStun")
-createToggle(page2, "🔒 Khóa vị trí", "LockPosition", function(v) 
-    if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then player.Character.HumanoidRootPart.Anchored = false end
+createToggle(page2, "🛡️ Chống ngã", State.AntiStun, function(v) 
+    State.AntiStun = v; 
+    if State.AutoSave then saveConfig() end 
 end)
-createToggle(page2, "🚀 Nhảy trên không", "InfJump") 
-createToggle(page2, "🐿️ Lấy đồ nhanh", "Instant")
-createToggle(page2, "🧲 Auto nhặt đồ xung quanh", "AutoCollect")
-createToggle(page2, "🚷 Đi xuyên tường", "Noclip", function(v) 
-    if not v and player.Character then for _, part in pairs(player.Character:GetDescendants()) do if part:IsA("BasePart") then part.CanCollide = true end end end
-end)
-createToggle(page2, "🌊 Đi trên mặt nước", "WaterWalk")
 
--- FIX LỖI TÀNG HÌNH KHỐI TRẮNG (Chỉ đổi đúng cái áo/vũ khí, không đổi HumanoidRootPart)
+createToggle(page2, "🔒 Khóa vị trí", State.LockPosition, function(v) 
+    State.LockPosition = v; 
+    if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then player.Character.HumanoidRootPart.Anchored = false end
+    if State.AutoSave then saveConfig() end 
+end)
+
+createToggle(page2, "🚀 Nhảy trên không", State.InfJump, function(v) 
+    State.InfJump = v; 
+    if State.AutoSave then saveConfig() end 
+end) 
+
+createToggle(page2, "🐿️ Lấy đồ nhanh", State.Instant, function(v) 
+    State.Instant = v; 
+    if State.AutoSave then saveConfig() end 
+end)
+
+createToggle(page2, "🧲 Auto nhặt đồ xung quanh", State.AutoCollect, function(v) 
+    State.AutoCollect = v; 
+    if State.AutoSave then saveConfig() end 
+end)
+
+createToggle(page2, "🚷 Đi xuyên tường", State.Noclip, function(v) 
+    State.Noclip = v; 
+    if not v and player.Character then for _, part in pairs(player.Character:GetDescendants()) do if part:IsA("BasePart") then part.CanCollide = true end end end
+    if State.AutoSave then saveConfig() end 
+end)
+
+-- [FIX 100% LỖI KHỐI MÀU TRẮNG KHI TÀNG HÌNH]
 local invisOriginals = {}
-createToggle(page2, "👻 Tàng hình (Local)", "Invisible", function(v) 
-    if player.Character then 
+createToggle(page2, "👻 Tàng hình (Local)", State.Invisible, function(v)
+    State.Invisible = v
+    if State.AutoSave then saveConfig() end
+    
+    local char = player.Character
+    if char then
         if v then
-            invisOriginals = {}
-            for _, p in pairs(player.Character:GetDescendants()) do 
-                if (p:IsA("BasePart") and p.Name ~= "HumanoidRootPart") or p:IsA("Decal") or p:IsA("Texture") then
-                    invisOriginals[p] = p.Transparency
-                    p.Transparency = 1
-                end 
-            end 
+            for _, p in pairs(char:GetDescendants()) do
+                if p:IsA("BasePart") or p:IsA("Decal") or p:IsA("Texture") then
+                    if not invisOriginals[p] then
+                        invisOriginals[p] = p.Transparency
+                    end
+                    if p.Name ~= "HumanoidRootPart" then
+                        p.Transparency = 1
+                    end
+                end
+            end
         else
-            for p, orig in pairs(invisOriginals) do
-                if p and p.Parent then p.Transparency = orig end
+            for p, trans in pairs(invisOriginals) do
+                if p and p.Parent then
+                    p.Transparency = trans
+                end
             end
             invisOriginals = {}
         end
-    end 
+    end
 end)
 
 local astralClone = nil
 local astralProps = {}
-createToggle(page2, "👻 Xuất hồn", "Astral", function(v)
+createToggle(page2, "👻 Xuất hồn", false, function(v)
     local char = player.Character
     if v then
         if char and char:FindFirstChild("HumanoidRootPart") then
@@ -636,25 +618,31 @@ player.CharacterAdded:Connect(function(char)
     if astralClone then astralClone:Destroy(); astralClone = nil end
     astralProps = {}
     originalToolSizes = {}
-    invisOriginals = {}
     
-    -- Nếu đang bật tàng hình thì hồi sinh phải tàng hình lại (giữ lại code fix trắng)
+    -- Khôi phục tàng hình nếu đang bật để chống lỗi
+    invisOriginals = {}
     if State.Invisible then
         task.wait(0.5)
         if char then
-            for _, p in pairs(char:GetDescendants()) do 
-                if (p:IsA("BasePart") and p.Name ~= "HumanoidRootPart") or p:IsA("Decal") or p:IsA("Texture") then
-                    invisOriginals[p] = p.Transparency
-                    p.Transparency = 1
-                end 
-            end 
+            for _, p in pairs(char:GetDescendants()) do
+                if p:IsA("BasePart") or p:IsA("Decal") or p:IsA("Texture") then
+                    if not invisOriginals[p] then
+                        invisOriginals[p] = p.Transparency
+                    end
+                    if p.Name ~= "HumanoidRootPart" then
+                        p.Transparency = 1
+                    end
+                end
+            end
         end
     end
 end)
 
 local xrayMats = {}
 local xrayTick = 0
-createToggle(page2, "👀 Nhìn xuyên map", "XRay", function(v) 
+createToggle(page2, "👀 Nhìn xuyên map", State.XRay, function(v) 
+    State.XRay = v 
+    if State.AutoSave then saveConfig() end 
     xrayTick = xrayTick + 1
     local currentTick = xrayTick
     task.spawn(function()
@@ -678,47 +666,79 @@ createToggle(page2, "👀 Nhìn xuyên map", "XRay", function(v)
     end)
 end)
 
-createToggle(page2, "🔴 ESP người chơi", "ESP")
+createToggle(page2, "🔴 ESP người chơi", State.ESP, function(v) 
+    State.ESP = v; 
+    if State.AutoSave then saveConfig() end 
+end)
 
 -- ==========================================
 -- [TAB 3: PLAYER (TÍNH NĂNG ĐIỀU CHỈNH CHỈ SỐ)]
 -- ==========================================
 
-createToggle(page3, "🏃 Chạy nhanh", "Speed", function(v) 
-    if not v and player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.WalkSpeed = 16 end
+createToggle(page3, "🏃 Chạy nhanh", State.Speed, function(v) 
+    State.Speed = v; if not v and player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.WalkSpeed = 16 end
+    if State.AutoSave then saveConfig() end
 end)
-createSlider(page3, "Tốc độ chạy", 16, 1000, "SpeedValue")
-
-createToggle(page3, "🦘 Nhảy cao", "Jump", function(v) 
-    if not v and player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.UseJumpPower = true; player.Character.Humanoid.JumpPower = 50 end
+createSlider(page3, "Tốc độ chạy", 16, 1000, State.SpeedValue, function(val) 
+    State.SpeedValue = val; if State.AutoSave then saveConfig() end 
 end)
-createSlider(page3, "Lực nhảy", 50, 1000, "JumpValue")
 
--- SỬA THANH TRƯỢT ĐÁNH NHANH (Fast Attack Speed) THEO ĐÚNG Ý BẠN
-createToggle(page3, "⚡ Đánh nhanh", "FastAttack")
-createSlider(page3, "Mức độ Đánh nhanh", 1, 20, "FastAttackSpeed")
+createToggle(page3, "🦘 Nhảy cao", State.Jump, function(v) 
+    State.Jump = v; if not v and player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.UseJumpPower = true; player.Character.Humanoid.JumpPower = 50 end
+    if State.AutoSave then saveConfig() end
+end)
+createSlider(page3, "Lực nhảy", 50, 1000, State.JumpValue, function(val) 
+    State.JumpValue = val; if State.AutoSave then saveConfig() end 
+end)
 
-createToggle(page3, "⚔️ Đánh xa", "Reach")
-createSlider(page3, "Kích thước vũ khí", 2, 300, "ReachSize")
+-- BẬT ĐÁNH NHANH + THANH CHỈNH TỐC ĐỘ 
+createToggle(page3, "⚡ Đánh nhanh", State.FastAttack, function(v) 
+    State.FastAttack = v; if State.AutoSave then saveConfig() end 
+end)
+createSlider(page3, "Mức độ Đánh nhanh", 1, 20, State.FastAttackSpeed, function(v) 
+    State.FastAttackSpeed = v; if State.AutoSave then saveConfig() end 
+end)
 
-createToggle(page3, "🌪️ Xoay vòng tròn (SpinBot)", "SpinBot")
-createSlider(page3, "Tốc độ xoay", 10, 100, "SpinSpeed")
+createToggle(page3, "⚔️ Đánh xa", State.Reach, function(v) 
+    State.Reach = v; if State.AutoSave then saveConfig() end 
+end)
+createSlider(page3, "Kích thước vũ khí", 2, 300, State.ReachSize, function(v) 
+    State.ReachSize = v; if State.AutoSave then saveConfig() end 
+end)
 
-createToggle(page3, "🎯 Hitbox", "Hitbox")
-createSlider(page3, "Kích thước đối thủ", 2, 100, "HitboxSize")
+createToggle(page3, "🌪️ Xoay vòng tròn (SpinBot)", State.SpinBot, function(v) 
+    State.SpinBot = v; if State.AutoSave then saveConfig() end 
+end)
+createSlider(page3, "Tốc độ xoay", 10, 100, State.SpinSpeed, function(v) 
+    State.SpinSpeed = v; if State.AutoSave then saveConfig() end 
+end)
 
-createToggle(page3, "💡 Ánh sáng quanh người", "PlayerLight", function(v) 
-    if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then 
+createToggle(page3, "🎯 Hitbox", State.Hitbox, function(v) 
+    State.Hitbox = v; if State.AutoSave then saveConfig() end 
+end)
+createSlider(page3, "Kích thước đối thủ", 2, 100, State.HitboxSize, function(v) 
+    State.HitboxSize = v; if State.AutoSave then saveConfig() end 
+end)
+
+createToggle(page3, "💡 Ánh sáng quanh người", State.PlayerLight, function(v) 
+    State.PlayerLight = v; if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then 
         local light = player.Character.HumanoidRootPart:FindFirstChild("PlayerPointLight"); if light then light:Destroy() end 
     end
+    if State.AutoSave then saveConfig() end
 end)
-createSlider(page3, "Phạm vi sáng", 50, 1000, "LightRange")
-createSlider(page3, "Độ sáng", 0, 5, "LightBrightness")
+createSlider(page3, "Phạm vi sáng", 50, 1000, State.LightRange, function(val) 
+    State.LightRange = val; if State.AutoSave then saveConfig() end 
+end)
+createSlider(page3, "Độ sáng", 0, 5, State.LightBrightness, function(val) 
+    State.LightBrightness = val; if State.AutoSave then saveConfig() end 
+end)
 
-createSlider(page3, "👁️ Mở rộng góc nhìn (FOV)", 70, 500, "FOVValue", function(val)
+createSlider(page3, "👁️ Mở rộng góc nhìn (FOV)", 70, 500, State.FOVValue, function(val)
     workspace.CurrentCamera.FieldOfView = val
+    State.FOVValue = val
+    if State.AutoSave then saveConfig() end
 end)
-State.FOVValue = State.FOVValue or 70
+
 
 -- ==========================================
 -- THUẬT TOÁN CACHE CHỐNG LAG 100% (Lấy Đồ Nhanh & Auto Collect)
@@ -850,30 +870,6 @@ task.spawn(function()
     end
 end)
 
--- NỀN TẢNG WATER WALK (ĐI TRÊN MẶT NƯỚC)
-local wwPart = Instance.new("Part")
-wwPart.Size = Vector3.new(10, 1, 10)
-wwPart.Transparency = 1
-wwPart.Anchored = true
-wwPart.CanCollide = true
-task.spawn(function()
-    while task.wait(0.1) do
-        if State.WaterWalk and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local hrp = player.Character.HumanoidRootPart
-            local ray = Ray.new(hrp.Position, Vector3.new(0, -5, 0))
-            local hit, pos, norm, mat = workspace:FindPartOnRayWithIgnoreList(ray, {player.Character})
-            if mat == Enum.Material.Water then
-                wwPart.Position = Vector3.new(hrp.Position.X, pos.Y - 0.5, hrp.Position.Z)
-                wwPart.Parent = workspace
-            else 
-                wwPart.Parent = nil 
-            end
-        else 
-            wwPart.Parent = nil 
-        end
-    end
-end)
-
 -- ==========================================
 -- HITBOX V2 
 -- ==========================================
@@ -919,17 +915,12 @@ task.spawn(function()
 end)
 
 -- ==========================================
--- [TAB 4: TIỆN ÍCH] LƯU MENU MỚI
+-- [TAB 4: TIỆN ÍCH] LƯU MENU ON/OFF
 -- ==========================================
 
--- TÍNH NĂNG 1: NÚT TỰ ĐỘNG LƯU MENU (ON/OFF TOGGLE)
-createToggle(page4, "💾 Tự động Lưu Cài Đặt", "AutoSave", function(v)
-    if v then 
-        saveConfig() 
-        Notify("Đã Kích Hoạt Tự Động Lưu!") 
-    else 
-        Notify("Đã Tắt Tự Động Lưu!") 
-    end
+createToggle(page4, "💾 Tự động Lưu Menu", State.AutoSave, function(v)
+    State.AutoSave = v
+    if v then saveConfig() end
 end)
 
 local function hopServer(sortOrder)
@@ -962,7 +953,8 @@ local function rejoinServer()
     else TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, player) end
 end
 
-createToggle(page4, "🌈 Chế độ RGB (Đèn LED Menu)", "RGB", function(v) 
+createToggle(page4, "🌈 Chế độ RGB (Đèn LED Menu)", State.RGB, function(v) 
+    State.RGB = v; 
     if not v then 
         titleLabel.TextColor3 = Theme.TextTitle; 
         
@@ -987,9 +979,13 @@ createToggle(page4, "🌈 Chế độ RGB (Đèn LED Menu)", "RGB", function(v)
             end
         end
     end 
+    if State.AutoSave then saveConfig() end 
 end)
 
-createToggle(page4, "🖱️ Auto Click", "AutoClick")
+createToggle(page4, "🖱️ Auto Click", State.AutoClick, function(v)
+    State.AutoClick = v; if State.AutoSave then saveConfig() end 
+end)
+
 task.spawn(function()
     while task.wait(0.1) do
         if State.AutoClick then
@@ -1006,7 +1002,7 @@ task.spawn(function()
 end)
 
 local origFog, origBright, origShadow
-createToggle(page4, "☀️ Xóa sương mù", "NoFog", function(v) 
+createToggle(page4, "☀️ Xóa sương mù", false, function(v) 
     if v then
         origFog = Lighting.FogEnd; origBright = Lighting.Brightness; origShadow = Lighting.GlobalShadows
         Lighting.FogEnd = 100000; Lighting.Brightness = 2; Lighting.GlobalShadows = false
@@ -1015,19 +1011,19 @@ createToggle(page4, "☀️ Xóa sương mù", "NoFog", function(v)
     end
 end)
 
-createToggle(page4, "⬛ Màn hình đen (Treo máy)", "BlackScreen", function(v) screenOverlay.BackgroundColor3 = Color3.new(0, 0, 0); screenOverlay.Visible = v end)
-createToggle(page4, "⬜ Màn hình trắng (Treo máy)", "WhiteScreen", function(v) screenOverlay.BackgroundColor3 = Color3.new(1, 1, 1); screenOverlay.Visible = v end)
-createToggle(page4, "🛡️ Chống AFK", "AntiAfk")
+createToggle(page4, "⬛ Màn hình đen (Treo máy)", false, function(v) screenOverlay.BackgroundColor3 = Color3.new(0, 0, 0); screenOverlay.Visible = v end)
+createToggle(page4, "⬜ Màn hình trắng (Treo máy)", false, function(v) screenOverlay.BackgroundColor3 = Color3.new(1, 1, 1); screenOverlay.Visible = v end)
+createToggle(page4, "🛡️ Chống AFK", State.AntiAfk, function(v) State.AntiAfk = v; if State.AutoSave then saveConfig() end end)
 
-createDualButtons(page4, "🌞 Trời SÁNG (FAKE)", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12; Notify("Trời đã SÁNG") end, "🌚 Trời TỐI (FAKE)", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0; Notify("Trời đã TỐI") end)
-createDualButtons(page4, "🔄 VÀO LẠI SV", Theme.AccentOn, rejoinServer, "🎲 ĐỔI SV NGẪU NHIÊN", Theme.Brand, function() hopServer("Desc"); Notify("Đang tìm server...") end)
-createDualButtons(page4, "📉 ĐỔI SV ÍT NGƯỜI", Color3.fromRGB(52, 152, 219), function() hopServer("Asc"); Notify("Đang tìm server...") end, "📈 ĐỔI SV NHIỀU NGƯỜI", Color3.fromRGB(231, 76, 60), function() hopServer("Desc"); Notify("Đang tìm server...") end)
+createDualButtons(page4, "🌞 Trời SÁNG (FAKE)", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12 end, "🌚 Trời TỐI (FAKE)", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0 end)
+createDualButtons(page4, "🔄 VÀO LẠI SV", Theme.AccentOn, rejoinServer, "🎲 ĐỔI SV NGẪU NHIÊN", Theme.Brand, function() hopServer("Desc") end)
+createDualButtons(page4, "📉 ĐỔI SV ÍT NGƯỜI", Color3.fromRGB(52, 152, 219), function() hopServer("Asc") end, "📈 ĐỔI SV NHIỀU NGƯỜI", Color3.fromRGB(231, 76, 60), function() hopServer("Desc") end)
 
-createDualButtons(page4, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end); Notify("Đã nạp Infinite Yield!") end, 
-"📂 TP SAVE V2 GUI", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end); Notify("Đã nạp TP Save GUI") end)
+createDualButtons(page4, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) end, 
+"📂 TP SAVE V2 GUI", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
 
-createDualButtons(page4, "🕊️ FLY V1", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end); Notify("Đã bật Fly V1") end, 
-"🕊️ FLY V3", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end); Notify("Đã bật Fly V3") end)
+createDualButtons(page4, "🕊️ FLY V1", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end, 
+"🕊️ FLY V3", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end) end)
 
 -- ==========================================
 -- [TAB 5: PHÁT NHẠC VÀ LƯU TRỮ VĨNH VIỄN]
@@ -1142,8 +1138,10 @@ end, "⏸️ TẮT NHẠC", Theme.AccentOff, function()
 end)
 playControlFrame.LayoutOrder = 2
 
-local volumeFrame = createSlider(page5, "ÂM LƯỢNG 🎛️", 0, 10, "MusicVolume", function(val)
+local volumeFrame = createSlider(page5, "ÂM LƯỢNG 🎛️", 0, 10, State.MusicVolume, function(val)
+    State.MusicVolume = val
     if currentSound then currentSound.Volume = val end
+    if State.AutoSave then saveConfig() end
 end)
 volumeFrame.LayoutOrder = 3
 
@@ -1332,7 +1330,6 @@ local function renderSavedTps()
             if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then 
                 local cf = CFrame.new(unpack(data.cframe))
                 player.Character.HumanoidRootPart.CFrame = cf
-                Notify("Đã dịch chuyển tới: " .. data.name)
             end 
         end)
         delBtn.MouseButton1Click:Connect(function() 
@@ -1418,7 +1415,9 @@ local function updatePlayerList()
             Instance.new("UICorner", targetAvatar).CornerRadius = UDim.new(1, 0)
             
             local targetStroke = Instance.new("UIStroke", targetAvatar)
-            targetStroke.Color = currentColor; targetStroke.Thickness = 1.5; targetStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+            targetStroke.Color = currentColor
+            targetStroke.Thickness = 1.5
+            targetStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
             table.insert(RGBElements, {Type = "Info", Stroke = targetStroke})
 
             task.spawn(function()
@@ -1432,7 +1431,6 @@ local function updatePlayerList()
                 if p.Character and p.Character:FindFirstChild("HumanoidRootPart") and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                     if not State.RGB then TweenService:Create(stroke, TweenInfo.new(0.3), {Color = Theme.AccentOn}):Play() end
                     player.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame
-                    Notify("Đã TP tới: " .. p.DisplayName)
                     task.wait(0.5); 
                     if not State.RGB then TweenService:Create(stroke, TweenInfo.new(0.3), {Color = Theme.Stroke}):Play() end
                 end
@@ -1521,7 +1519,6 @@ RunService.RenderStepped:Connect(function()
             end
         end
 
-        -- ÉP TẮT VA CHẠM HITBOX
         if State.Hitbox then
             for _, p in pairs(Players:GetPlayers()) do
                 if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
