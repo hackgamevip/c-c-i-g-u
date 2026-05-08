@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V43 (Đã xoá tính năng Lưu Nhạc và Lưu Tạm TP)
+-- MENU VIP PRO V43 (Đã khôi phục Lưu Nhạc & Viền Menu - Xoá Lưu Tạm TP)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -152,7 +152,8 @@ local frame = Instance.new("Frame", gui)
 frame.Size = UDim2.new(0, 420, 0, 500); frame.Position = UDim2.new(0.5, -210, 0.58, -250)
 frame.BackgroundColor3 = Theme.MainBg; frame.BackgroundTransparency = 0.05; frame.ZIndex = 10
 Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 18)
-local frameStroke = Instance.new("UIStroke", frame); frameStroke.Color = Theme.Stroke; frameStroke.Thickness = 2
+-- KHÔI PHỤC VIỀN MENU (UIStroke)
+local frameStroke = Instance.new("UIStroke", frame); frameStroke.Color = Theme.Stroke; frameStroke.Thickness = 2.5; frameStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 table.insert(RGBElements, {Type = "Frame", Stroke = frameStroke})
 
 local header = Instance.new("Frame", frame)
@@ -223,7 +224,6 @@ local function createPage()
     return pg
 end
 
--- TẠO PAGE: Tab 5 & 6 là Khung Cố Định (Frame) để điều khiển nằm yên, chỉ danh sách cuộn
 local page1, page2, page3, page4 = createPage(), createPage(), createPage(), createPage()
 
 local page5 = Instance.new("Frame", pageContainer)
@@ -267,7 +267,7 @@ openBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================
--- HÀM TẠO ACCORDION CÓ THANH CUỘN BÊN TRONG (Chuẩn không trôi nút)
+-- HÀM TẠO ACCORDION CÓ THANH CUỘN BÊN TRONG 
 -- ==========================================
 local function createScrollableAccordion(parent, text, expandedSize)
     local wrapper = Instance.new("Frame", parent)
@@ -287,7 +287,6 @@ local function createScrollableAccordion(parent, text, expandedSize)
     icon.Size = UDim2.new(0.1, 0, 1, 0); icon.Position = UDim2.new(0.85, 0, 0, 0); icon.BackgroundTransparency = 1
     icon.Text = "▼"; icon.TextColor3 = Theme.TextDim; icon.Font = Enum.Font.GothamBold; icon.TextSize = 14; icon.ZIndex = 12
     
-    -- Vùng chứa danh sách dạng cuộn
     local contentContainer = Instance.new("ScrollingFrame", wrapper)
     contentContainer.Size = UDim2.new(1, 0, 1, -48); contentContainer.Position = UDim2.new(0, 0, 0, 48)
     contentContainer.BackgroundTransparency = 1; contentContainer.ScrollBarThickness = 3
@@ -630,7 +629,7 @@ task.spawn(function()
 end)
 
 -- ==========================================
--- [TAB 4: TIỆN ÍCH] (ĐÃ KHÔI PHỤC FULL NÚT MÀ KHÔNG BỊ TRÔI)
+-- [TAB 4: TIỆN ÍCH]
 -- ==========================================
 createToggle(page4, "💾 Tự động Lưu Cài Đặt", "AutoSave", function(v) if v then saveConfig() end end)
 createToggle(page4, "🌈 Chế độ RGB", "RGB", function(v) 
@@ -641,7 +640,7 @@ createToggle(page4, "🌈 Chế độ RGB", "RGB", function(v)
             if obj.Stroke and obj.Stroke.Parent then
                 if obj.Type == "Toggle" then obj.Stroke.Color = obj.State() and Theme.AccentOn or Theme.Stroke
                 elseif obj.Type == "Button" then obj.Stroke.Color = obj.DefaultColor
-                elseif obj.Type == "Slider" or obj.Type == "Info" or obj.Type == "Container" then obj.Stroke.Color = Theme.Stroke end
+                elseif obj.Type == "Slider" or obj.Type == "Info" or obj.Type == "Container" or obj.Type == "Frame" then obj.Stroke.Color = Theme.Stroke end
             end
         end
     end 
@@ -693,9 +692,9 @@ createDualButtons(page4, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(f
 createDualButtons(page4, "🕊️ FLY V1", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end, "🕊️ FLY V3", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end) end)
 
 -- ==========================================
--- [TAB 5: PHÁT NHẠC (ĐÃ XOÁ DANH SÁCH LƯU TRỮ)]
+-- [TAB 5: KHÔI PHỤC TÍNH NĂNG NHẠC ID & LƯU NHẠC CŨ]
 -- ==========================================
-local currentSound = nil; local currentMusicId = ""
+local currentSound = nil; local currentMusicId = ""; local savedMusicList = {}
 
 local musicControlFrame = Instance.new("Frame", page5)
 musicControlFrame.Size = UDim2.new(0.9, 0, 0, 85); musicControlFrame.BackgroundColor3 = Theme.ItemBg; musicControlFrame.ZIndex = 10; musicControlFrame.LayoutOrder = 1
@@ -705,7 +704,11 @@ local mStroke = Instance.new("UIStroke", musicControlFrame); mStroke.Color = The
 local musicIcon = Instance.new("TextLabel", musicControlFrame)
 musicIcon.Size = UDim2.new(0.15, 0, 0, 40); musicIcon.BackgroundTransparency = 1; musicIcon.Text = "🎼"; musicIcon.TextSize = 18; musicIcon.ZIndex = 10
 local musicIdBox = Instance.new("TextBox", musicControlFrame)
-musicIdBox.Size = UDim2.new(0.85, 0, 0, 40); musicIdBox.Position = UDim2.new(0.15, 0, 0, 0); musicIdBox.BackgroundTransparency = 1; musicIdBox.PlaceholderText = "Nhập ID Nhạc..."; musicIdBox.Text = ""; musicIdBox.TextColor3 = Theme.TextTitle; musicIdBox.Font = Enum.Font.GothamSemibold; musicIdBox.TextSize = 12; musicIdBox.TextXAlignment = Enum.TextXAlignment.Left; musicIdBox.ClearTextOnFocus = false; musicIdBox.ZIndex = 10
+musicIdBox.Size = UDim2.new(0.65, 0, 0, 40); musicIdBox.Position = UDim2.new(0.15, 0, 0, 0); musicIdBox.BackgroundTransparency = 1; musicIdBox.PlaceholderText = "Nhập ID Nhạc..."; musicIdBox.Text = ""; musicIdBox.TextColor3 = Theme.TextTitle; musicIdBox.Font = Enum.Font.GothamSemibold; musicIdBox.TextSize = 12; musicIdBox.TextXAlignment = Enum.TextXAlignment.Left; musicIdBox.ClearTextOnFocus = false; musicIdBox.ZIndex = 10
+
+-- NÚT LƯU ĐÃ ĐƯỢC THÊM LẠI
+local saveIdBtn = Instance.new("TextButton", musicControlFrame)
+saveIdBtn.Size = UDim2.new(0.2, 0, 0, 40); saveIdBtn.Position = UDim2.new(0.8, 0, 0, 0); saveIdBtn.BackgroundTransparency = 1; saveIdBtn.Text = "💾 Lưu"; saveIdBtn.TextColor3 = Theme.AccentOn; saveIdBtn.Font = Enum.Font.GothamBold; saveIdBtn.TextSize = 11; saveIdBtn.ZIndex = 10
 
 local divLine = Instance.new("Frame", musicControlFrame)
 divLine.Size = UDim2.new(0.9, 0, 0, 1); divLine.Position = UDim2.new(0.05, 0, 0, 40); divLine.BackgroundColor3 = Theme.Stroke; divLine.BorderSizePixel = 0; divLine.ZIndex = 10
@@ -728,6 +731,13 @@ local function playMusic(id)
         if currentMusicId == soundId then nowPlayingLabel.Text = "<font color='#FFFFFF'>🎵 Đang phát:</font> <font color='#FFFF00'>" .. name .. "</font>" end
     end)
     currentSound = Instance.new("Sound"); currentSound.SoundId = "rbxassetid://" .. soundId; currentSound.Volume = State.MusicVolume; currentSound.Parent = workspace
+    currentSound.Ended:Connect(function()
+        if #savedMusicList > 0 then
+            local currentIndex = 0; for i, v in ipairs(savedMusicList) do if v.id == currentMusicId then currentIndex = i; break end end
+            local nextIndex = currentIndex + 1; if nextIndex > #savedMusicList then nextIndex = 1 end
+            playMusic(savedMusicList[nextIndex].id)
+        end
+    end)
     currentSound:Play()
 end
 
@@ -740,6 +750,42 @@ playControlFrame.LayoutOrder = 2
 local volumeFrame = createSlider(page5, "ÂM LƯỢNG 🎛️", 0, 10, "MusicVolume", function(val) if currentSound then currentSound.Volume = val end end)
 volumeFrame.LayoutOrder = 3
 
+-- KHÔI PHỤC DANH SÁCH LƯU NHẠC 
+local savedMusicContent, savedMusicWrapper = createScrollableAccordion(page5, "📂 DANH SÁCH NHẠC ĐÃ LƯU", UDim2.new(0.9, 0, 1, -215))
+savedMusicWrapper.LayoutOrder = 4
+
+local fileName = "MenuProMax_SavedMusic.json"
+local function loadMusicData() pcall(function() if isfile and isfile(fileName) then local data = readfile(fileName); local decoded = HttpService:JSONDecode(data); if type(decoded) == "table" then savedMusicList = decoded end end end) end
+local function saveMusicData() pcall(function() if writefile then writefile(fileName, HttpService:JSONEncode(savedMusicList)) end end) end
+loadMusicData()
+
+local function renderSavedMusic()
+    for _, child in pairs(savedMusicContent:GetChildren()) do if child:IsA("Frame") then child:Destroy() end end
+    local yOffset = 0
+    for i, data in ipairs(savedMusicList) do
+        local item = Instance.new("Frame", savedMusicContent)
+        item.Size = UDim2.new(1, 0, 0, 48); item.Position = UDim2.new(0, 0, 0, yOffset); item.BackgroundColor3 = Theme.ItemBg; item.ZIndex = 10; Instance.new("UICorner", item).CornerRadius = UDim.new(0, 8)
+        local stroke = Instance.new("UIStroke", item); stroke.Color = State.RGB and Color3.fromHSV(tick() % 5 / 5, 1, 1) or Theme.Stroke; stroke.Thickness = 1.5; table.insert(RGBElements, {Type = "Info", Stroke = stroke})
+        
+        local iconLabel = Instance.new("TextLabel", item); iconLabel.Size = UDim2.new(0.08, 0, 1, 0); iconLabel.BackgroundTransparency = 1; iconLabel.Text = "🎶"; iconLabel.TextColor3 = Theme.Brand; iconLabel.TextSize = 11; iconLabel.ZIndex = 10
+        local nameBox = Instance.new("TextBox", item); nameBox.Size = UDim2.new(0.52, 0, 1, 0); nameBox.Position = UDim2.new(0.08, 0, 0, 0); nameBox.Text = data.name; nameBox.TextColor3 = Theme.TextTitle; nameBox.Font = Enum.Font.GothamSemibold; nameBox.TextSize = 11; nameBox.BackgroundTransparency = 1; nameBox.TextXAlignment = Enum.TextXAlignment.Left; nameBox.TextWrapped = true; nameBox.ClearTextOnFocus = false; nameBox.ZIndex = 10
+        nameBox.FocusLost:Connect(function() if nameBox.Text ~= "" then data.name = nameBox.Text; saveMusicData() else nameBox.Text = data.name end end)
+        
+        local playBtn = Instance.new("TextButton", item); playBtn.Size = UDim2.new(0.18, 0, 0.6, 0); playBtn.Position = UDim2.new(0.62, 0, 0.2, 0); playBtn.Text = "▶️"; playBtn.BackgroundColor3 = Theme.Brand; playBtn.TextColor3 = Color3.new(1,1,1); playBtn.Font = Enum.Font.GothamBold; playBtn.TextSize = 11; playBtn.ZIndex = 10; Instance.new("UICorner", playBtn).CornerRadius = UDim.new(0, 6)
+        local delBtn = Instance.new("TextButton", item); delBtn.Size = UDim2.new(0.15, 0, 0.6, 0); delBtn.Position = UDim2.new(0.82, 0, 0.2, 0); delBtn.Text = "❌"; delBtn.BackgroundColor3 = Theme.AccentOff; delBtn.TextColor3 = Color3.new(1,1,1); delBtn.Font = Enum.Font.GothamBold; delBtn.TextSize = 12; delBtn.ZIndex = 10; Instance.new("UICorner", delBtn).CornerRadius = UDim.new(0, 6)
+        
+        playBtn.MouseButton1Click:Connect(function() clickAnimate(playBtn); musicIdBox.Text = data.id; playMusic(data.id) end)
+        delBtn.MouseButton1Click:Connect(function() clickAnimate(delBtn); table.remove(savedMusicList, i); saveMusicData(); renderSavedMusic() end)
+        yOffset = yOffset + 55
+    end
+end
+saveIdBtn.MouseButton1Click:Connect(function()
+    clickAnimate(saveIdBtn); local rawId = musicIdBox.Text:match("%d+"); if rawId and rawId ~= "" then
+        saveIdBtn.Text = "⏳..."
+        task.spawn(function() local name = getSongName(rawId); table.insert(savedMusicList, {id = rawId, name = name}); saveMusicData(); renderSavedMusic(); saveIdBtn.Text = "💾 Lưu" end)
+    end
+end)
+renderSavedMusic()
 
 -- ==========================================
 -- [TAB 6: VỊ TRÍ TP SAVE] (Chỉ còn LƯU VĨNH VIỄN)
@@ -762,7 +808,6 @@ tpControlFrame1.LayoutOrder = 1
 local tpControlFrame2 = createButton(page6, "🗑️ XÓA TẤT CẢ", Theme.AccentOff, function() savedTpList = {}; saveTpData(); if renderSavedTps then renderSavedTps() end end)
 tpControlFrame2.LayoutOrder = 2
 
--- [SỬ DỤNG SCROLLABLE ACCORDION CHO TP SAVE]
 local savedTpContent, savedTpWrapper = createScrollableAccordion(page6, "📂 VỊ TRÍ TP ĐÃ LƯU", UDim2.new(0.9, 0, 1, -114))
 savedTpWrapper.LayoutOrder = 3 
 
