@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V43 (Bản Chuẩn - Đã Fix Lỗi Nhân Đôi Code)
+-- MENU VIP PRO V43 (Bản Chuẩn - Đã Tích Hợp Viền Nút Mở Menu)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -122,13 +122,13 @@ local screenOverlay = Instance.new("Frame", gui)
 screenOverlay.Size = UDim2.new(2, 0, 2, 0); screenOverlay.Position = UDim2.new(-0.5, 0, -0.5, 0)
 screenOverlay.BackgroundColor3 = Color3.new(0,0,0); screenOverlay.ZIndex = 0; screenOverlay.Visible = false
 
--- NÚT MỞ MENU (ĐÃ BỎ VIỀN THEO YÊU CẦU)
+-- NÚT MỞ MENU (ĐÃ TÍCH HỢP VIỀN NHƯ YÊU CẦU)
 local openBtn = Instance.new("TextButton", gui)
 openBtn.Size = UDim2.new(0, 45, 0, 45); openBtn.Position = UDim2.new(0, 15, 0, 15)
 openBtn.Text = "🇻🇳"; openBtn.BackgroundColor3 = Theme.MainBg; openBtn.BackgroundTransparency = 0.3
 openBtn.TextColor3 = Theme.Brand; openBtn.Font = Enum.Font.GothamBold; openBtn.TextSize = 22; openBtn.ZIndex = 10
 Instance.new("UICorner", openBtn).CornerRadius = UDim.new(1, 0)
-local openStroke = Instance.new("UIStroke", openBtn); openStroke.Color = Theme.Brand; openStroke.Thickness = 0 
+local openStroke = Instance.new("UIStroke", openBtn); openStroke.Color = Theme.Brand; openStroke.Thickness = 2 -- Tạo viền dày 2px cho nút
 
 local function clickAnimate(obj)
     local scale = Instance.new("UIScale", obj)
@@ -596,7 +596,7 @@ createToggle(page4, "🌈 Chế độ RGB", "RGB", function(v)
             if obj.Stroke and obj.Stroke.Parent then
                 if obj.Type == "Toggle" then obj.Stroke.Color = obj.State() and Theme.AccentOn or Theme.Stroke
                 elseif obj.Type == "Button" then obj.Stroke.Color = obj.DefaultColor
-                elseif obj.Type == "Slider" or obj.Type == "Info" or obj.Type == "Container" or obj.Type == "Frame" then obj.Stroke.Color = Theme.Stroke end
+                elseif obj.Type == "Slider" or obj.Type == "Info" or obj.Type == "Container" then obj.Stroke.Color = Theme.Stroke end
             end
         end
     end 
@@ -703,7 +703,6 @@ playControlFrame.LayoutOrder = 2
 local volumeFrame = createSlider(page5, "ÂM LƯỢNG 🎛️", 0, 10, "MusicVolume", function(val) if currentSound then currentSound.Volume = val end end)
 volumeFrame.LayoutOrder = 3
 
--- Hiển thị trực tiếp danh sách nhạc đã lưu (đã bỏ accordion và điều chỉnh khoảng trống)
 local savedMusicContent = Instance.new("ScrollingFrame", page5)
 savedMusicContent.Size = UDim2.new(0.9, 0, 1, -265); savedMusicContent.BackgroundTransparency = 1
 savedMusicContent.ScrollBarThickness = 3; savedMusicContent.ScrollBarImageColor3 = Theme.Brand
@@ -754,7 +753,6 @@ local function loadTpData() pcall(function() if isfile and isfile(tpFileName) th
 local function saveTpData() pcall(function() if writefile then local dataToSave = {}; for _, v in ipairs(savedTpList) do if not v.isTemp then table.insert(dataToSave, v) end end; writefile(tpFileName, HttpService:JSONEncode(dataToSave)) end end) end
 loadTpData()
 
--- Gộp nút LƯU VĨNH VIỄN và XÓA TẤT CẢ về một hàng
 local tpControlFrame_New = createDualButtons(page6, "📍 LƯU VĨNH VIỄN", Theme.Brand, function()
     if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
         local root = player.Character.HumanoidRootPart; local cf = {root.CFrame:GetComponents()}; local name = "Vị trí vĩnh viễn " .. (#savedTpList + 1)
@@ -766,7 +764,6 @@ end, "🗑️ XÓA TẤT CẢ", Theme.AccentOff, function()
 end)
 tpControlFrame_New.LayoutOrder = 1 
 
--- Hiển thị trực tiếp danh sách TP đã lưu
 local savedTpContent = Instance.new("ScrollingFrame", page6)
 savedTpContent.Size = UDim2.new(0.9, 0, 1, -114); savedTpContent.BackgroundTransparency = 1
 savedTpContent.ScrollBarThickness = 3; savedTpContent.ScrollBarImageColor3 = Theme.Brand
