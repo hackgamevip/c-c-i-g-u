@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V43 (Bản Chuẩn - Đã Tích Hợp Viền Nút Mở Menu)
+-- MENU VIP PRO V1.12.1 (Nâng cấp ESP, RGB nút mở, Cập nhật Fly)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -56,7 +56,7 @@ for _, v in pairs(guiParent:GetChildren()) do
     if v.Name == "MobileProMax" then v:Destroy() end
 end
 
-local configFileName = "MenuProMax_Config_V43.json"
+local configFileName = "MenuProMax_Config_V1_12_1.json"
 pcall(function()
     if isfile and isfile(configFileName) then
         local data = HttpService:JSONDecode(readfile(configFileName))
@@ -122,13 +122,13 @@ local screenOverlay = Instance.new("Frame", gui)
 screenOverlay.Size = UDim2.new(2, 0, 2, 0); screenOverlay.Position = UDim2.new(-0.5, 0, -0.5, 0)
 screenOverlay.BackgroundColor3 = Color3.new(0,0,0); screenOverlay.ZIndex = 0; screenOverlay.Visible = false
 
--- NÚT MỞ MENU (ĐÃ TÍCH HỢP VIỀN NHƯ YÊU CẦU)
+-- NÚT MỞ MENU (ĐÃ TÍCH HỢP VIỀN NHIỀU MÀU KHI BẬT RGB)
 local openBtn = Instance.new("TextButton", gui)
 openBtn.Size = UDim2.new(0, 45, 0, 45); openBtn.Position = UDim2.new(0, 15, 0, 15)
 openBtn.Text = "🇻🇳"; openBtn.BackgroundColor3 = Theme.MainBg; openBtn.BackgroundTransparency = 0.3
 openBtn.TextColor3 = Theme.Brand; openBtn.Font = Enum.Font.GothamBold; openBtn.TextSize = 22; openBtn.ZIndex = 10
 Instance.new("UICorner", openBtn).CornerRadius = UDim.new(1, 0)
-local openStroke = Instance.new("UIStroke", openBtn); openStroke.Color = Theme.Brand; openStroke.Thickness = 2 -- Tạo viền dày 2px cho nút
+local openStroke = Instance.new("UIStroke", openBtn); openStroke.Color = Theme.Brand; openStroke.Thickness = State.RGB and 2 or 0 
 
 local function clickAnimate(obj)
     local scale = Instance.new("UIScale", obj)
@@ -166,7 +166,7 @@ table.insert(RGBElements, {Type = "Header", Stroke = headerStroke})
 
 local titleLabel = Instance.new("TextLabel", header)
 titleLabel.Size = UDim2.new(1, 0, 1, 0); titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "MENU PRO MAX V43"
+titleLabel.Text = "MENU PRO MAX V1.12.1"
 titleLabel.TextColor3 = Theme.TextTitle; titleLabel.Font = Enum.Font.GothamBlack; titleLabel.TextSize = 16; titleLabel.ZIndex = 10
 
 local avatarImg = Instance.new("ImageLabel", header)
@@ -224,6 +224,7 @@ local function createPage()
     return pg
 end
 
+-- TẠO PAGE: Tab 5 & 6 là Khung Cố Định (Frame) để điều khiển nằm yên, chỉ danh sách cuộn
 local page1, page2, page3, page4 = createPage(), createPage(), createPage(), createPage()
 
 local page5 = Instance.new("Frame", pageContainer)
@@ -260,8 +261,7 @@ local opened = true
 openBtn.MouseButton1Click:Connect(function()
     clickAnimate(openBtn); opened = not opened
     if not State.RGB then
-        openStroke.Color = opened and Theme.AccentOff or Theme.Brand
-        TweenService:Create(openStroke, TweenInfo.new(0.3), {Color = opened and Theme.AccentOff or Theme.Brand}):Play()
+        openStroke.Thickness = 0
     end
     frame:TweenPosition(opened and UDim2.new(0.5, -210, 0.58, -250) or UDim2.new(0.5, -210, 1.2, 0), "Out", "Back", 0.5)
 end)
@@ -429,7 +429,7 @@ task.spawn(function()
         serverInfoLabel.Text = string.format("<font color='#FF3300'>FPS:</font> %d\n<font color='#FF3300'>Ping:</font> %s\n<font color='#FF3300'>Người chơi:</font> %d / %d\n<font color='#FF3300'>ID SV:</font> %s", fps, ping, pCount, maxP, jobText)
         local execTime = math.floor(workspace.DistributedGameTime); local hours = math.floor(execTime / 3600); local mins = math.floor((execTime % 3600) / 60); local secs = execTime % 60
         local timeString = string.format("%02d:%02d:%02d", hours, mins, secs)
-        extraInfoLabel.Text = string.format("<font color='#FF3300'>Thời gian chơi:</font> %s\n<font color='#FF3300'>Giờ hệ thống:</font> %s\n<font color='#FF3300'>Phiên bản:</font> MENU VIP PRO V43", timeString, os.date("%H:%M:%S"))
+        extraInfoLabel.Text = string.format("<font color='#FF3300'>Thời gian chơi:</font> %s\n<font color='#FF3300'>Giờ hệ thống:</font> %s\n<font color='#FF3300'>Phiên bản:</font> MENU VIP PRO V1.12.1", timeString, os.date("%H:%M:%S"))
     end
 end)
 
@@ -592,6 +592,7 @@ createToggle(page4, "🌈 Chế độ RGB", "RGB", function(v)
     if not v then 
         titleLabel.TextColor3 = Theme.TextTitle; frameStroke.Color = Theme.Stroke; headerStroke.Color = Theme.Stroke; avatarStroke.Color = Theme.Brand
         openStroke.Color = opened and Theme.AccentOff or Theme.Brand
+        openStroke.Thickness = 0 -- Trở về không viền khi tắt RGB
         for _, obj in pairs(RGBElements) do
             if obj.Stroke and obj.Stroke.Parent then
                 if obj.Type == "Toggle" then obj.Stroke.Color = obj.State() and Theme.AccentOn or Theme.Stroke
@@ -599,6 +600,8 @@ createToggle(page4, "🌈 Chế độ RGB", "RGB", function(v)
                 elseif obj.Type == "Slider" or obj.Type == "Info" or obj.Type == "Container" then obj.Stroke.Color = Theme.Stroke end
             end
         end
+    else
+        openStroke.Thickness = 2 -- Hiện viền khi bật RGB
     end 
 end)
 createToggle(page4, "🖱️ Auto Click", "AutoClick")
@@ -645,7 +648,9 @@ createDualButtons(page4, "🌞 Trời SÁNG", Color3.fromRGB(243, 156, 18), func
 createDualButtons(page4, "🔄 VÀO LẠI SV", Theme.AccentOn, rejoinServer, "🎲 ĐỔI SV NGẪU NHIÊN", Theme.Brand, function() hopServer("Desc") end)
 createDualButtons(page4, "📉 ĐỔI SV ÍT NGƯỜI", Color3.fromRGB(52, 152, 219), function() hopServer("Asc") end, "📈 ĐỔI SV NHIỀU NGƯỜI", Color3.fromRGB(231, 76, 60), function() hopServer("Desc") end)
 createDualButtons(page4, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) end, "📂 TP SAVE V2 GUI", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
-createDualButtons(page4, "🕊️ FLY V1", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end, "🕊️ FLY V3", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end) end)
+
+-- Yêu cầu 1: Đã thay thế đoạn Script Fly V1 bằng Script mới bạn cung cấp
+createDualButtons(page4, "🕊️ FLY V1", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end, "🕊️ FLY V3", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end) end)
 
 -- ==========================================
 -- [TAB 5: PHÁT NHẠC VÀ LƯU TRỮ VĨNH VIỄN]
@@ -836,7 +841,9 @@ player.Idled:Connect(function() if State.AntiAfk then VirtualUser:Button2Down(Ve
 RunService.RenderStepped:Connect(function()
     if State.RGB then
         local hue = tick() % 5 / 5; local color = Color3.fromHSV(hue, 1, 1)
-        titleLabel.TextColor3 = color; frameStroke.Color = color; headerStroke.Color = color; avatarStroke.Color = color; openStroke.Color = color
+        titleLabel.TextColor3 = color; frameStroke.Color = color; headerStroke.Color = color; avatarStroke.Color = color
+        openStroke.Thickness = 2 -- Đảm bảo viền luôn hiển thị khi bật RGB
+        openStroke.Color = color
         for _, obj in pairs(RGBElements) do if obj.Stroke and obj.Stroke.Parent then obj.Stroke.Color = color end end
     end
 
@@ -876,19 +883,27 @@ RunService.RenderStepped:Connect(function()
         if State.Noclip and char then for _, part in pairs(char:GetDescendants()) do if part:IsA("BasePart") and part.CanCollide then part.CanCollide = false end end end
         if State.Hitbox then for _, p in pairs(Players:GetPlayers()) do if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then p.Character.HumanoidRootPart.CanCollide = false end end end
         
+        -- Cập nhật logic hiển thị ESP xa vô hạn & định dạng km
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= player and p.Character and p.Character:FindFirstChild("Head") then
                 local tChar = p.Character; local head = tChar.Head
                 if State.ESP then
                     local bgui = head:FindFirstChild("MobileESP_Name")
                     if not bgui then
-                        bgui = Instance.new("BillboardGui", head); bgui.Name = "MobileESP_Name"; bgui.Size = UDim2.new(0, 200, 0, 50); bgui.StudsOffset = Vector3.new(0, 2, 0); bgui.AlwaysOnTop = true; bgui.Adornee = head
+                        bgui = Instance.new("BillboardGui", head); bgui.Name = "MobileESP_Name"; bgui.Size = UDim2.new(0, 200, 0, 50); bgui.StudsOffset = Vector3.new(0, 2, 0); 
+                        bgui.AlwaysOnTop = true; bgui.MaxDistance = math.huge; bgui.Adornee = head
                         local tLabel = Instance.new("TextLabel", bgui); tLabel.Name = "NameLabel"; tLabel.Size = UDim2.new(1, 0, 1, 0); tLabel.BackgroundTransparency = 1; tLabel.TextColor3 = Color3.fromRGB(255, 60, 60); tLabel.TextStrokeTransparency = 0.2; tLabel.TextStrokeColor3 = Color3.new(0, 0, 0); tLabel.Font = Enum.Font.GothamBold; tLabel.TextSize = 11; tLabel.RichText = true 
                     end
                     if root and tChar:FindFirstChild("HumanoidRootPart") then
                         local dist = math.floor((root.Position - tChar.HumanoidRootPart.Position).Magnitude)
-                        bgui.NameLabel.Text = p.DisplayName .. '\n<font color="#4CAF50">[' .. dist .. 'm]</font>'
-                    else bgui.NameLabel.Text = p.DisplayName end
+                        local distText = dist .. "m"
+                        if dist >= 1000 then
+                            distText = string.format("%.1f km", dist / 1000)
+                        end
+                        bgui.NameLabel.Text = p.DisplayName .. '\n<font color="#4CAF50">[' .. distText .. ']</font>'
+                    else 
+                        bgui.NameLabel.Text = p.DisplayName 
+                    end
                 else
                     local bgui = head:FindFirstChild("MobileESP_Name"); if bgui then bgui:Destroy() end
                 end
