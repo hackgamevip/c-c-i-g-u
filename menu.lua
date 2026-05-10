@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V1.12.1 (Nâng cấp ESP, RGB nút mở, Cập nhật Fly)
+-- MENU VIP PRO V1.12.1 (Fix hiển thị viền nút mở Menu)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -122,13 +122,17 @@ local screenOverlay = Instance.new("Frame", gui)
 screenOverlay.Size = UDim2.new(2, 0, 2, 0); screenOverlay.Position = UDim2.new(-0.5, 0, -0.5, 0)
 screenOverlay.BackgroundColor3 = Color3.new(0,0,0); screenOverlay.ZIndex = 0; screenOverlay.Visible = false
 
--- NÚT MỞ MENU (ĐÃ TÍCH HỢP VIỀN NHIỀU MÀU KHI BẬT RGB)
+-- NÚT MỞ MENU (ĐÃ FIX ÉP VIỀN RA NGOÀI VÀ LUÔN HIỂN THỊ)
 local openBtn = Instance.new("TextButton", gui)
 openBtn.Size = UDim2.new(0, 45, 0, 45); openBtn.Position = UDim2.new(0, 15, 0, 15)
 openBtn.Text = "🇻🇳"; openBtn.BackgroundColor3 = Theme.MainBg; openBtn.BackgroundTransparency = 0.3
 openBtn.TextColor3 = Theme.Brand; openBtn.Font = Enum.Font.GothamBold; openBtn.TextSize = 22; openBtn.ZIndex = 10
 Instance.new("UICorner", openBtn).CornerRadius = UDim.new(1, 0)
-local openStroke = Instance.new("UIStroke", openBtn); openStroke.Color = Theme.Brand; openStroke.Thickness = State.RGB and 2 or 0 
+
+local openStroke = Instance.new("UIStroke", openBtn)
+openStroke.Color = Theme.Brand
+openStroke.Thickness = 2 
+openStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border -- Thuộc tính quan trọng để viền bo ngoài
 
 local function clickAnimate(obj)
     local scale = Instance.new("UIScale", obj)
@@ -261,7 +265,8 @@ local opened = true
 openBtn.MouseButton1Click:Connect(function()
     clickAnimate(openBtn); opened = not opened
     if not State.RGB then
-        openStroke.Thickness = 0
+        openStroke.Color = opened and Theme.AccentOff or Theme.Brand
+        TweenService:Create(openStroke, TweenInfo.new(0.3), {Color = opened and Theme.AccentOff or Theme.Brand}):Play()
     end
     frame:TweenPosition(opened and UDim2.new(0.5, -210, 0.58, -250) or UDim2.new(0.5, -210, 1.2, 0), "Out", "Back", 0.5)
 end)
@@ -592,7 +597,6 @@ createToggle(page4, "🌈 Chế độ RGB", "RGB", function(v)
     if not v then 
         titleLabel.TextColor3 = Theme.TextTitle; frameStroke.Color = Theme.Stroke; headerStroke.Color = Theme.Stroke; avatarStroke.Color = Theme.Brand
         openStroke.Color = opened and Theme.AccentOff or Theme.Brand
-        openStroke.Thickness = 0 -- Trở về không viền khi tắt RGB
         for _, obj in pairs(RGBElements) do
             if obj.Stroke and obj.Stroke.Parent then
                 if obj.Type == "Toggle" then obj.Stroke.Color = obj.State() and Theme.AccentOn or Theme.Stroke
@@ -600,8 +604,6 @@ createToggle(page4, "🌈 Chế độ RGB", "RGB", function(v)
                 elseif obj.Type == "Slider" or obj.Type == "Info" or obj.Type == "Container" then obj.Stroke.Color = Theme.Stroke end
             end
         end
-    else
-        openStroke.Thickness = 2 -- Hiện viền khi bật RGB
     end 
 end)
 createToggle(page4, "🖱️ Auto Click", "AutoClick")
@@ -648,8 +650,6 @@ createDualButtons(page4, "🌞 Trời SÁNG", Color3.fromRGB(243, 156, 18), func
 createDualButtons(page4, "🔄 VÀO LẠI SV", Theme.AccentOn, rejoinServer, "🎲 ĐỔI SV NGẪU NHIÊN", Theme.Brand, function() hopServer("Desc") end)
 createDualButtons(page4, "📉 ĐỔI SV ÍT NGƯỜI", Color3.fromRGB(52, 152, 219), function() hopServer("Asc") end, "📈 ĐỔI SV NHIỀU NGƯỜI", Color3.fromRGB(231, 76, 60), function() hopServer("Desc") end)
 createDualButtons(page4, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) end, "📂 TP SAVE V2 GUI", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
-
--- Yêu cầu 1: Đã thay thế đoạn Script Fly V1 bằng Script mới bạn cung cấp
 createDualButtons(page4, "🕊️ FLY V1", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end, "🕊️ FLY V3", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end) end)
 
 -- ==========================================
@@ -842,7 +842,6 @@ RunService.RenderStepped:Connect(function()
     if State.RGB then
         local hue = tick() % 5 / 5; local color = Color3.fromHSV(hue, 1, 1)
         titleLabel.TextColor3 = color; frameStroke.Color = color; headerStroke.Color = color; avatarStroke.Color = color
-        openStroke.Thickness = 2 -- Đảm bảo viền luôn hiển thị khi bật RGB
         openStroke.Color = color
         for _, obj in pairs(RGBElements) do if obj.Stroke and obj.Stroke.Parent then obj.Stroke.Color = color end end
     end
@@ -883,7 +882,6 @@ RunService.RenderStepped:Connect(function()
         if State.Noclip and char then for _, part in pairs(char:GetDescendants()) do if part:IsA("BasePart") and part.CanCollide then part.CanCollide = false end end end
         if State.Hitbox then for _, p in pairs(Players:GetPlayers()) do if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then p.Character.HumanoidRootPart.CanCollide = false end end end
         
-        -- Cập nhật logic hiển thị ESP xa vô hạn & định dạng km
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= player and p.Character and p.Character:FindFirstChild("Head") then
                 local tChar = p.Character; local head = tChar.Head
