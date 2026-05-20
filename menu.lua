@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V1.12.1 (Fix hiển thị, Fix ESP, Fix lưu TP)
+-- MENU VIP PRO V1.12.1 (Fix Kẹt Cầu Thang, Fix Tốc Độ Gốc)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -475,10 +475,31 @@ createToggle(page2, "🔴 ESP người chơi", "ESP")
 -- ==========================================
 -- [TAB 3: PLAYER]
 -- ==========================================
-createToggle(page3, "🏃 Chạy nhanh", "Speed", function(v) if not v and player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.WalkSpeed = 16 end end)
+local defaultWalkSpeed = 16
+createToggle(page3, "🏃 Chạy nhanh", "Speed", function(v) 
+    if player.Character and player.Character:FindFirstChild("Humanoid") then 
+        if v then
+            defaultWalkSpeed = player.Character.Humanoid.WalkSpeed
+        else
+            player.Character.Humanoid.WalkSpeed = defaultWalkSpeed 
+        end
+    end 
+end)
 createSlider(page3, "Tốc độ chạy", 16, 1000, "SpeedValue")
-createToggle(page3, "🦘 Nhảy cao", "Jump", function(v) if not v and player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.UseJumpPower = true; player.Character.Humanoid.JumpPower = 50 end end)
+
+local defaultJumpPower = 50
+createToggle(page3, "🦘 Nhảy cao", "Jump", function(v) 
+    if player.Character and player.Character:FindFirstChild("Humanoid") then 
+        if v then
+            defaultJumpPower = player.Character.Humanoid.JumpPower
+        else
+            player.Character.Humanoid.UseJumpPower = true
+            player.Character.Humanoid.JumpPower = defaultJumpPower 
+        end
+    end 
+end)
 createSlider(page3, "Lực nhảy", 50, 1000, "JumpValue")
+
 createToggle(page3, "⚡ Đánh nhanh", "FastAttack")
 createSlider(page3, "Mức độ Đánh nhanh", 1, 20, "FastAttackSpeed")
 createToggle(page3, "⚔️ Đánh xa", "Reach")
@@ -900,8 +921,9 @@ RunService.RenderStepped:Connect(function()
             hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
             if hum:GetState() == Enum.HumanoidStateType.FallingDown or hum:GetState() == Enum.HumanoidStateType.Ragdoll then
                 hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+                -- FIX LỖI KẸT BẬC THANG: Chỉ khóa xoay khi thực sự đang bị ngã
+                if root then root.RotVelocity = Vector3.new(0, 0, 0) end 
             end
-            if root then root.RotVelocity = Vector3.new(0, 0, 0) end 
         end
 
         if State.SpinBot and root then root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(State.SpinSpeed), 0) end
