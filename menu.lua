@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V1.12.1 (Fix Kẹt Cầu Thang, Fix Tốc Độ Gốc)
+-- MENU VIP PRO V1.12.1 (Fix Kẹt bậc thềm, AutoClick, Văng lên trời)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -513,15 +513,16 @@ createSlider(page3, "Phạm vi sáng", 50, 1000, "LightRange")
 createSlider(page3, "Độ sáng", 0, 5, "LightBrightness")
 
 -- ==========================================
--- [CACHE LOGIC (AutoCollect, Reach, Hitbox)]
+-- [CACHE LOGIC & LOOPS (AutoCollect)]
 -- ==========================================
-local cachedPrompts = {}; local originalPrompts = {}; local originalToolSizes = {}
+local cachedPrompts = {}; local originalToolSizes = {}
 task.spawn(function()
     local count = 0
     for _, obj in ipairs(workspace:GetDescendants()) do if obj:IsA("ProximityPrompt") then table.insert(cachedPrompts, obj) end; count = count + 1; if count % 1000 == 0 then task.wait() end end
 end)
 workspace.DescendantAdded:Connect(function(obj) if obj:IsA("ProximityPrompt") then table.insert(cachedPrompts, obj) end end)
 
+local originalPrompts = {}
 task.spawn(function()
     while task.wait(1) do
         if State.Instant then
@@ -541,6 +542,7 @@ task.spawn(function()
     end
 end)
 
+-- FIX: AutoCollect làm kẹt vật lý do đồ đạc có va chạm
 task.spawn(function()
     while task.wait(0.5) do
         pcall(function()
@@ -553,55 +555,15 @@ task.spawn(function()
                 local partsNearby = workspace:GetPartBoundsInRadius(rootPos, 50, overlapParams)
                 for _, part in ipairs(partsNearby) do
                     if part.Name == "Handle" and part.Parent and part.Parent:IsA("Tool") then
-                        if firetouchinterest then firetouchinterest(root, part, 0); task.wait(0.01); firetouchinterest(root, part, 1) else part.CFrame = root.CFrame end
-                    end
-                end
-            end
-        end)
-    end
-end)
-
-task.spawn(function()
-    while task.wait(0.1) do
-        pcall(function()
-            if State.Reach and player.Character then
-                local tool = player.Character:FindFirstChildOfClass("Tool")
-                if tool then
-                    for _, part in ipairs(tool:GetDescendants()) do
-                        if part:IsA("BasePart") then
-                            if not originalToolSizes[part] then originalToolSizes[part] = { Size = part.Size, Trans = part.Transparency, Massless = part.Massless, CanCollide = part.CanCollide } end
-                            part.Size = Vector3.new(State.ReachSize, State.ReachSize, State.ReachSize); part.Massless = true; part.CanCollide = false; part.Transparency = 0.8 
+                        -- FIX: Tắt va chạm trước khi dịch chuyển để không bị vướng chân
+                        part.CanCollide = false
+                        if firetouchinterest then 
+                            firetouchinterest(root, part, 0)
+                            task.wait(0.01)
+                            firetouchinterest(root, part, 1) 
+                        else 
+                            part.CFrame = root.CFrame 
                         end
-                    end
-                end
-            else
-                for part, origData in pairs(originalToolSizes) do
-                    if part and part.Parent then part.Size = origData.Size; part.Transparency = origData.Trans; part.Massless = origData.Massless; part.CanCollide = origData.CanCollide end
-                end; originalToolSizes = {}
-            end
-        end)
-    end
-end)
-
-task.spawn(function()
-    while task.wait(0.2) do
-        pcall(function()
-            if State.Hitbox then
-                for _, p in pairs(Players:GetPlayers()) do
-                    if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                        local hrp = p.Character.HumanoidRootPart; local hum = p.Character:FindFirstChildOfClass("Humanoid")
-                        if hum and hum.Health > 0 then
-                            if hrp.Size.X ~= State.HitboxSize then hrp.Size = Vector3.new(State.HitboxSize, State.HitboxSize, State.HitboxSize); hrp.Transparency = 0.7; hrp.Color = Color3.fromRGB(255, 50, 50); hrp.Material = Enum.Material.Neon end
-                        else
-                            if hrp.Size.X ~= 2 then hrp.Size = Vector3.new(2, 2, 1); hrp.Transparency = 1; hrp.Material = Enum.Material.Plastic end
-                        end
-                    end
-                end
-            else
-                for _, p in pairs(Players:GetPlayers()) do
-                    if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                        local hrp = p.Character.HumanoidRootPart
-                        if hrp.Size.X ~= 2 then hrp.Size = Vector3.new(2, 2, 1); hrp.Transparency = 1; hrp.Material = Enum.Material.Plastic end
                     end
                 end
             end
@@ -626,13 +588,27 @@ createToggle(page4, "🌈 Chế độ RGB", "RGB", function(v)
         end
     end 
 end)
+
+-- FIX: Nâng cấp sức mạnh AutoClick (Nhanh hơn, ổn định hơn)
 createToggle(page4, "🖱️ Auto Click", "AutoClick")
 task.spawn(function()
-    while task.wait(0.1) do
+    while task.wait(0.05) do
         if State.AutoClick then
             pcall(function()
-                if player.Character then local tool = player.Character:FindFirstChildOfClass("Tool"); if tool then tool:Activate() end end
-                local center = workspace.CurrentCamera.ViewportSize / 2; VirtualUser:ClickButton1(Vector2.new(center.X, center.Y), workspace.CurrentCamera.CFrame)
+                -- Cách 1: Ưu tiên chém vũ khí
+                if player.Character then 
+                    local tool = player.Character:FindFirstChildOfClass("Tool")
+                    if tool then tool:Activate() end 
+                end
+                
+                -- Cách 2: Kích hoạt chuột chuẩn
+                if mouse1click then mouse1click() end
+                
+                -- Cách 3: Dự phòng giả lập nhấn chuột (Roblox)
+                pcall(function() VirtualUser:CaptureController() end)
+                VirtualUser:Button1Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+                task.wait(0.01)
+                VirtualUser:Button1Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
             end)
         end
     end
@@ -862,10 +838,8 @@ local function updatePlayerList()
                 if myChar and myChar:FindFirstChild("HumanoidRootPart") then
                     local targetCFrame = nil
                     
-                    -- Kiểm tra nếu người chơi tồn tại và có HumanoidRootPart
                     if targetChar and targetChar:FindFirstChild("HumanoidRootPart") then
                         targetCFrame = targetChar.HumanoidRootPart.CFrame
-                    -- Nếu mất HumanoidRootPart nhưng Model vẫn còn (bypass StreamingEnabled một phần)
                     elseif targetChar and targetChar:GetPivot() then
                         targetCFrame = targetChar:GetPivot()
                     end
@@ -877,7 +851,6 @@ local function updatePlayerList()
                         task.wait(0.5)
                         if not State.RGB then TweenService:Create(stroke, TweenInfo.new(0.3), {Color = Theme.Stroke}):Play() end
                     else
-                        -- Báo lỗi rõ ràng nếu game không tải người chơi này
                         MakeToast("Lỗi TP", p.DisplayName .. " ở quá xa (bị ẩn)", Theme.AccentOff)
                     end
                 end
@@ -888,6 +861,42 @@ end
 updatePlayerList(); Players.PlayerAdded:Connect(updatePlayerList); Players.PlayerRemoving:Connect(updatePlayerList)
 
 player.Idled:Connect(function() if State.AntiAfk then VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame); task.wait(1); VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame) end end)
+
+-- ==========================================
+-- [FIX VĂNG LÊN TRỜI: XỬ LÝ REACH TRƯỚC KHI VẬT LÝ TÍNH TOÁN]
+-- ==========================================
+RunService.Stepped:Connect(function()
+    pcall(function()
+        if State.Reach and player.Character then
+            local tool = player.Character:FindFirstChildOfClass("Tool")
+            if tool then
+                for _, part in ipairs(tool:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        if not originalToolSizes[part] then 
+                            originalToolSizes[part] = { Size = part.Size, Trans = part.Transparency, Massless = part.Massless, CanCollide = part.CanCollide } 
+                        end
+                        part.Size = Vector3.new(State.ReachSize, State.ReachSize, State.ReachSize)
+                        part.Massless = true
+                        part.CanCollide = false -- Ép liên tục không cho game bật lại
+                        part.Transparency = 0.8 
+                    end
+                end
+            end
+        else
+            if next(originalToolSizes) then
+                for part, origData in pairs(originalToolSizes) do
+                    if part and part.Parent then 
+                        part.Size = origData.Size
+                        part.Transparency = origData.Trans
+                        part.Massless = origData.Massless
+                        part.CanCollide = origData.CanCollide 
+                    end
+                end
+                originalToolSizes = {}
+            end
+        end
+    end)
+end)
 
 -- ==========================================
 -- [BẢO TỒN HOẠT ĐỘNG LIÊN TỤC]
@@ -921,7 +930,6 @@ RunService.RenderStepped:Connect(function()
             hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
             if hum:GetState() == Enum.HumanoidStateType.FallingDown or hum:GetState() == Enum.HumanoidStateType.Ragdoll then
                 hum:ChangeState(Enum.HumanoidStateType.GettingUp)
-                -- FIX LỖI KẸT BẬC THANG: Chỉ khóa xoay khi thực sự đang bị ngã
                 if root then root.RotVelocity = Vector3.new(0, 0, 0) end 
             end
         end
@@ -940,7 +948,6 @@ RunService.RenderStepped:Connect(function()
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= player then
                 local tChar = p.Character
-                -- Cố gắng tìm Head, nếu không có thì lấy RootPart để gắn ESP
                 local espPart = tChar and (tChar:FindFirstChild("Head") or tChar:FindFirstChild("HumanoidRootPart"))
                 
                 if espPart then
@@ -967,7 +974,6 @@ RunService.RenderStepped:Connect(function()
                             tLabel.RichText = true 
                         end
                         
-                        -- LẤY TỌA ĐỘ MỤC TIÊU BẰNG GETPIVOT ĐỂ CHỐNG LỖI MẤT NHÂN VẬT KHI Ở XA
                         local targetPos = nil
                         if tChar:FindFirstChild("HumanoidRootPart") then
                             targetPos = tChar.HumanoidRootPart.Position
@@ -977,13 +983,11 @@ RunService.RenderStepped:Connect(function()
                         
                         if root and targetPos then
                             local dist = math.floor((root.Position - targetPos).Magnitude)
-                            -- CHỈ HIỂN THỊ M (MÉT), KHÔNG HIỂN THỊ KM
                             bgui.NameLabel.Text = p.DisplayName .. '\n<font color="#4CAF50">[' .. dist .. 'm]</font>'
                         else 
                             bgui.NameLabel.Text = p.DisplayName 
                         end
                     else
-                        -- Xóa ESP nếu tắt tính năng
                         local bgui = espPart:FindFirstChild("MobileESP_Name")
                         if bgui then bgui:Destroy() end
                     end
