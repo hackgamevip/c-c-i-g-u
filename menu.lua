@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V1.12.1 (Fix hiển thị viền nút mở Menu)
+-- MENU VIP PRO V1.12.1 (Fix hiển thị viền nút, Fix ESP, Fix lưu TP)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -122,7 +122,7 @@ local screenOverlay = Instance.new("Frame", gui)
 screenOverlay.Size = UDim2.new(2, 0, 2, 0); screenOverlay.Position = UDim2.new(-0.5, 0, -0.5, 0)
 screenOverlay.BackgroundColor3 = Color3.new(0,0,0); screenOverlay.ZIndex = 0; screenOverlay.Visible = false
 
--- NÚT MỞ MENU (ĐÃ FIX ÉP VIỀN RA NGOÀI VÀ LUÔN HIỂN THỊ)
+-- NÚT MỞ MENU 
 local openBtn = Instance.new("TextButton", gui)
 openBtn.Size = UDim2.new(0, 45, 0, 45); openBtn.Position = UDim2.new(0, 15, 0, 15)
 openBtn.Text = "🇻🇳"; openBtn.BackgroundColor3 = Theme.MainBg; openBtn.BackgroundTransparency = 0.3
@@ -132,7 +132,7 @@ Instance.new("UICorner", openBtn).CornerRadius = UDim.new(1, 0)
 local openStroke = Instance.new("UIStroke", openBtn)
 openStroke.Color = Theme.Brand
 openStroke.Thickness = 2 
-openStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border -- Thuộc tính quan trọng để viền bo ngoài
+openStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border 
 
 local function clickAnimate(obj)
     local scale = Instance.new("UIScale", obj)
@@ -228,7 +228,6 @@ local function createPage()
     return pg
 end
 
--- TẠO PAGE: Tab 5 & 6 là Khung Cố Định (Frame) để điều khiển nằm yên, chỉ danh sách cuộn
 local page1, page2, page3, page4 = createPage(), createPage(), createPage(), createPage()
 
 local page5 = Instance.new("Frame", pageContainer)
@@ -760,12 +759,27 @@ loadTpData()
 
 local tpControlFrame_New = createDualButtons(page6, "📍 LƯU VĨNH VIỄN", Theme.Brand, function()
     if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        local root = player.Character.HumanoidRootPart; local cf = {root.CFrame:GetComponents()}; local name = "Vị trí vĩnh viễn " .. (#savedTpList + 1)
-        table.insert(savedTpList, {name = name, cframe = cf, isTemp = false}); saveTpData()
+        local root = player.Character.HumanoidRootPart
+        local cf = {root.CFrame:GetComponents()}
+        
+        -- THUẬT TOÁN TÌM ID LỚN NHẤT ĐỂ KHÔNG BỊ TRÙNG KHI XÓA
+        local maxId = 0
+        for _, v in ipairs(savedTpList) do
+            local num = string.match(v.name, "Vị trí vĩnh viễn (%d+)")
+            if num then
+                maxId = math.max(maxId, tonumber(num))
+            end
+        end
+        local name = "Vị trí vĩnh viễn " .. (maxId + 1)
+        
+        table.insert(savedTpList, {name = name, cframe = cf, isTemp = false})
+        saveTpData()
         if renderSavedTps then renderSavedTps() end
     end
 end, "🗑️ XÓA TẤT CẢ", Theme.AccentOff, function() 
-    savedTpList = {}; saveTpData(); if renderSavedTps then renderSavedTps() end 
+    savedTpList = {}
+    saveTpData()
+    if renderSavedTps then renderSavedTps() end 
 end)
 tpControlFrame_New.LayoutOrder = 1 
 
@@ -821,11 +835,30 @@ local function updatePlayerList()
             
             btn.MouseButton1Click:Connect(function()
                 clickAnimate(btn)
-                if p.Character and p.Character:FindFirstChild("HumanoidRootPart") and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                    if not State.RGB then TweenService:Create(stroke, TweenInfo.new(0.3), {Color = Theme.AccentOn}):Play() end
-                    player.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame
-                    MakeToast("Dịch Chuyển", "Đã TP đến " .. p.DisplayName, Theme.Brand)
-                    task.wait(0.5); if not State.RGB then TweenService:Create(stroke, TweenInfo.new(0.3), {Color = Theme.Stroke}):Play() end
+                local targetChar = p.Character
+                local myChar = player.Character
+                
+                if myChar and myChar:FindFirstChild("HumanoidRootPart") then
+                    local targetCFrame = nil
+                    
+                    -- Kiểm tra nếu người chơi tồn tại và có HumanoidRootPart
+                    if targetChar and targetChar:FindFirstChild("HumanoidRootPart") then
+                        targetCFrame = targetChar.HumanoidRootPart.CFrame
+                    -- Nếu mất HumanoidRootPart nhưng Model vẫn còn (bypass StreamingEnabled một phần)
+                    elseif targetChar and targetChar:GetPivot() then
+                        targetCFrame = targetChar:GetPivot()
+                    end
+                    
+                    if targetCFrame then
+                        if not State.RGB then TweenService:Create(stroke, TweenInfo.new(0.3), {Color = Theme.AccentOn}):Play() end
+                        myChar.HumanoidRootPart.CFrame = targetCFrame
+                        MakeToast("Dịch Chuyển", "Đã TP đến " .. p.DisplayName, Theme.Brand)
+                        task.wait(0.5)
+                        if not State.RGB then TweenService:Create(stroke, TweenInfo.new(0.3), {Color = Theme.Stroke}):Play() end
+                    else
+                        -- Báo lỗi rõ ràng nếu game không tải người chơi này
+                        MakeToast("Lỗi TP", p.DisplayName .. " ở quá xa (bị ẩn)", Theme.AccentOff)
+                    end
                 end
             end)
         end
@@ -883,27 +916,50 @@ RunService.RenderStepped:Connect(function()
         if State.Hitbox then for _, p in pairs(Players:GetPlayers()) do if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then p.Character.HumanoidRootPart.CanCollide = false end end end
         
         for _, p in pairs(Players:GetPlayers()) do
-            if p ~= player and p.Character and p.Character:FindFirstChild("Head") then
-                local tChar = p.Character; local head = tChar.Head
-                if State.ESP then
-                    local bgui = head:FindFirstChild("MobileESP_Name")
-                    if not bgui then
-                        bgui = Instance.new("BillboardGui", head); bgui.Name = "MobileESP_Name"; bgui.Size = UDim2.new(0, 200, 0, 50); bgui.StudsOffset = Vector3.new(0, 2, 0); 
-                        bgui.AlwaysOnTop = true; bgui.MaxDistance = math.huge; bgui.Adornee = head
-                        local tLabel = Instance.new("TextLabel", bgui); tLabel.Name = "NameLabel"; tLabel.Size = UDim2.new(1, 0, 1, 0); tLabel.BackgroundTransparency = 1; tLabel.TextColor3 = Color3.fromRGB(255, 60, 60); tLabel.TextStrokeTransparency = 0.2; tLabel.TextStrokeColor3 = Color3.new(0, 0, 0); tLabel.Font = Enum.Font.GothamBold; tLabel.TextSize = 11; tLabel.RichText = true 
-                    end
-                    if root and tChar:FindFirstChild("HumanoidRootPart") then
-                        local dist = math.floor((root.Position - tChar.HumanoidRootPart.Position).Magnitude)
-                        local distText = dist .. "m"
-                        if dist >= 1000 then
-                            distText = string.format("%.1f km", dist / 1000)
+            if p ~= player then
+                local tChar = p.Character
+                -- Cố gắng tìm Head, nếu không có thì lấy RootPart để gắn ESP
+                local espPart = tChar and (tChar:FindFirstChild("Head") or tChar:FindFirstChild("HumanoidRootPart"))
+                
+                if espPart then
+                    if State.ESP then
+                        local bgui = espPart:FindFirstChild("MobileESP_Name")
+                        if not bgui then
+                            bgui = Instance.new("BillboardGui", espPart)
+                            bgui.Name = "MobileESP_Name"
+                            bgui.Size = UDim2.new(0, 200, 0, 50)
+                            bgui.StudsOffset = Vector3.new(0, 2, 0)
+                            bgui.AlwaysOnTop = true
+                            bgui.MaxDistance = math.huge
+                            bgui.Adornee = espPart
+                            
+                            local tLabel = Instance.new("TextLabel", bgui)
+                            tLabel.Name = "NameLabel"
+                            tLabel.Size = UDim2.new(1, 0, 1, 0)
+                            tLabel.BackgroundTransparency = 1
+                            tLabel.TextColor3 = Color3.fromRGB(255, 60, 60)
+                            tLabel.TextStrokeTransparency = 0.2
+                            tLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+                            tLabel.Font = Enum.Font.GothamBold
+                            tLabel.TextSize = 11
+                            tLabel.RichText = true 
                         end
-                        bgui.NameLabel.Text = p.DisplayName .. '\n<font color="#4CAF50">[' .. distText .. ']</font>'
-                    else 
-                        bgui.NameLabel.Text = p.DisplayName 
+                        
+                        if root and tChar:FindFirstChild("HumanoidRootPart") then
+                            local dist = math.floor((root.Position - tChar.HumanoidRootPart.Position).Magnitude)
+                            local distText = dist .. "m"
+                            if dist >= 1000 then
+                                distText = string.format("%.1f km", dist / 1000)
+                            end
+                            bgui.NameLabel.Text = p.DisplayName .. '\n<font color="#4CAF50">[' .. distText .. ']</font>'
+                        else 
+                            bgui.NameLabel.Text = p.DisplayName 
+                        end
+                    else
+                        -- Xóa ESP nếu tắt tính năng
+                        local bgui = espPart:FindFirstChild("MobileESP_Name")
+                        if bgui then bgui:Destroy() end
                     end
-                else
-                    local bgui = head:FindFirstChild("MobileESP_Name"); if bgui then bgui:Destroy() end
                 end
             end
         end
