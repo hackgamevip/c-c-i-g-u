@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V1.12.1 (Fix hiển thị viền nút, Fix ESP, Fix lưu TP)
+-- MENU VIP PRO V1.12.1 (Fix hiển thị, Fix ESP, Fix lưu TP)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -945,13 +945,18 @@ RunService.RenderStepped:Connect(function()
                             tLabel.RichText = true 
                         end
                         
-                        if root and tChar:FindFirstChild("HumanoidRootPart") then
-                            local dist = math.floor((root.Position - tChar.HumanoidRootPart.Position).Magnitude)
-                            local distText = dist .. "m"
-                            if dist >= 1000 then
-                                distText = string.format("%.1f km", dist / 1000)
-                            end
-                            bgui.NameLabel.Text = p.DisplayName .. '\n<font color="#4CAF50">[' .. distText .. ']</font>'
+                        -- LẤY TỌA ĐỘ MỤC TIÊU BẰNG GETPIVOT ĐỂ CHỐNG LỖI MẤT NHÂN VẬT KHI Ở XA
+                        local targetPos = nil
+                        if tChar:FindFirstChild("HumanoidRootPart") then
+                            targetPos = tChar.HumanoidRootPart.Position
+                        elseif tChar:GetPivot() then
+                            targetPos = tChar:GetPivot().Position
+                        end
+                        
+                        if root and targetPos then
+                            local dist = math.floor((root.Position - targetPos).Magnitude)
+                            -- CHỈ HIỂN THỊ M (MÉT), KHÔNG HIỂN THỊ KM
+                            bgui.NameLabel.Text = p.DisplayName .. '\n<font color="#4CAF50">[' .. dist .. 'm]</font>'
                         else 
                             bgui.NameLabel.Text = p.DisplayName 
                         end
