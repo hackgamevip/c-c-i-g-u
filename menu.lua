@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V1.12.1 (Fix Kẹt bậc thềm, AutoClick, Văng lên trời)
+-- MENU VIP PRO V1.12.1 (Fix ESP đè tên, FastAttack Ổn định, Cảnh báo Xóa TP)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -306,25 +306,6 @@ local function createToggle(parent, text, varName, callback)
     return btnFrame
 end
 
-local function createButton(parent, text, color, callback)
-    local btnFrame = Instance.new("Frame", parent)
-    btnFrame.Size = UDim2.new(0.9, 0, 0, 42); btnFrame.BackgroundTransparency = 1
-    local btn = Instance.new("TextButton", btnFrame)
-    btn.Size = UDim2.new(1, 0, 1, 0); btn.BackgroundColor3 = Theme.ItemBg; btn.Text = ""; btn.AutoButtonColor = false; btn.ZIndex = 10
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
-    local stroke = Instance.new("UIStroke", btn); stroke.Color = color; stroke.Thickness = 1.5; stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    table.insert(RGBElements, {Type = "Button", Stroke = stroke, DefaultColor = color})
-    local title = Instance.new("TextLabel", btn)
-    title.Size = UDim2.new(1, 0, 1, 0); title.BackgroundTransparency = 1; title.Text = text; title.TextColor3 = color; title.Font = Enum.Font.GothamBold; title.TextSize = 13; title.ZIndex = 10
-    btn.MouseButton1Click:Connect(function()
-        clickAnimate(btn); if not State.RGB then TweenService:Create(stroke, TweenInfo.new(0.15), {Color = Theme.TextTitle}):Play() end
-        task.wait(0.15); if not State.RGB then TweenService:Create(stroke, TweenInfo.new(0.3), {Color = color}):Play() end
-        MakeToast("Đã thực thi", text, color)
-        callback()
-    end)
-    return btnFrame
-end
-
 local function createDualButtons(parent, text1, color1, cb1, text2, color2, cb2)
     local dFrame = Instance.new("Frame", parent)
     dFrame.Size = UDim2.new(0.9, 0, 0, 42); dFrame.BackgroundTransparency = 1
@@ -339,7 +320,10 @@ local function createDualButtons(parent, text1, color1, cb1, text2, color2, cb2)
         btn.MouseButton1Click:Connect(function()
             clickAnimate(btn); if not State.RGB then TweenService:Create(stroke, TweenInfo.new(0.15), {Color = Theme.TextTitle}):Play() end
             task.wait(0.15); if not State.RGB then TweenService:Create(stroke, TweenInfo.new(0.3), {Color = col}):Play() end
-            MakeToast("Đã thực thi", txt, col)
+            -- Nếu là nút xóa tất cả thì không báo "đã thực thi" vì nó có thông báo riêng
+            if txt ~= "🗑️ XÓA TẤT CẢ" then
+                MakeToast("Đã thực thi", txt, col)
+            end
             cb()
         end)
     end
@@ -542,7 +526,6 @@ task.spawn(function()
     end
 end)
 
--- FIX: AutoCollect làm kẹt vật lý do đồ đạc có va chạm
 task.spawn(function()
     while task.wait(0.5) do
         pcall(function()
@@ -555,7 +538,6 @@ task.spawn(function()
                 local partsNearby = workspace:GetPartBoundsInRadius(rootPos, 50, overlapParams)
                 for _, part in ipairs(partsNearby) do
                     if part.Name == "Handle" and part.Parent and part.Parent:IsA("Tool") then
-                        -- FIX: Tắt va chạm trước khi dịch chuyển để không bị vướng chân
                         part.CanCollide = false
                         if firetouchinterest then 
                             firetouchinterest(root, part, 0)
@@ -589,22 +571,16 @@ createToggle(page4, "🌈 Chế độ RGB", "RGB", function(v)
     end 
 end)
 
--- FIX: Nâng cấp sức mạnh AutoClick (Nhanh hơn, ổn định hơn)
 createToggle(page4, "🖱️ Auto Click", "AutoClick")
 task.spawn(function()
     while task.wait(0.05) do
         if State.AutoClick then
             pcall(function()
-                -- Cách 1: Ưu tiên chém vũ khí
                 if player.Character then 
                     local tool = player.Character:FindFirstChildOfClass("Tool")
                     if tool then tool:Activate() end 
                 end
-                
-                -- Cách 2: Kích hoạt chuột chuẩn
                 if mouse1click then mouse1click() end
-                
-                -- Cách 3: Dự phòng giả lập nhấn chuột (Roblox)
                 pcall(function() VirtualUser:CaptureController() end)
                 VirtualUser:Button1Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
                 task.wait(0.01)
@@ -754,18 +730,17 @@ local function loadTpData() pcall(function() if isfile and isfile(tpFileName) th
 local function saveTpData() pcall(function() if writefile then local dataToSave = {}; for _, v in ipairs(savedTpList) do if not v.isTemp then table.insert(dataToSave, v) end end; writefile(tpFileName, HttpService:JSONEncode(dataToSave)) end end) end
 loadTpData()
 
+-- FIX: Cảnh báo khi bấm nút XÓA TẤT CẢ (Confirm Dialog)
+local pendingDeleteAll = false
+
 local tpControlFrame_New = createDualButtons(page6, "📍 LƯU VĨNH VIỄN", Theme.Brand, function()
     if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
         local root = player.Character.HumanoidRootPart
         local cf = {root.CFrame:GetComponents()}
-        
-        -- THUẬT TOÁN TÌM ID LỚN NHẤT ĐỂ KHÔNG BỊ TRÙNG KHI XÓA
         local maxId = 0
         for _, v in ipairs(savedTpList) do
             local num = string.match(v.name, "Vị trí vĩnh viễn (%d+)")
-            if num then
-                maxId = math.max(maxId, tonumber(num))
-            end
+            if num then maxId = math.max(maxId, tonumber(num)) end
         end
         local name = "Vị trí vĩnh viễn " .. (maxId + 1)
         
@@ -774,9 +749,17 @@ local tpControlFrame_New = createDualButtons(page6, "📍 LƯU VĨNH VIỄN", Th
         if renderSavedTps then renderSavedTps() end
     end
 end, "🗑️ XÓA TẤT CẢ", Theme.AccentOff, function() 
-    savedTpList = {}
-    saveTpData()
-    if renderSavedTps then renderSavedTps() end 
+    if not pendingDeleteAll then
+        pendingDeleteAll = true
+        MakeToast("⚠️ CẢNH BÁO", "Bấm 'XÓA TẤT CẢ' lần nữa để xác nhận xóa toàn bộ!", Theme.AccentOff)
+        task.delay(3, function() pendingDeleteAll = false end)
+    else
+        savedTpList = {}
+        saveTpData()
+        if renderSavedTps then renderSavedTps() end 
+        MakeToast("Thành công", "Đã dọn dẹp sạch toàn bộ danh sách!", Theme.Brand)
+        pendingDeleteAll = false
+    end
 end)
 tpControlFrame_New.LayoutOrder = 1 
 
@@ -863,7 +846,7 @@ updatePlayerList(); Players.PlayerAdded:Connect(updatePlayerList); Players.Playe
 player.Idled:Connect(function() if State.AntiAfk then VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame); task.wait(1); VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame) end end)
 
 -- ==========================================
--- [FIX VĂNG LÊN TRỜI: XỬ LÝ REACH TRƯỚC KHI VẬT LÝ TÍNH TOÁN]
+-- [XỬ LÝ REACH TRƯỚC KHI VẬT LÝ TÍNH TOÁN]
 -- ==========================================
 RunService.Stepped:Connect(function()
     pcall(function()
@@ -877,7 +860,7 @@ RunService.Stepped:Connect(function()
                         end
                         part.Size = Vector3.new(State.ReachSize, State.ReachSize, State.ReachSize)
                         part.Massless = true
-                        part.CanCollide = false -- Ép liên tục không cho game bật lại
+                        part.CanCollide = false 
                         part.Transparency = 0.8 
                     end
                 end
@@ -917,10 +900,15 @@ RunService.RenderStepped:Connect(function()
         if State.Speed then hum.WalkSpeed = State.SpeedValue end
         if State.Jump then hum.UseJumpPower = true; hum.JumpPower = State.JumpValue end
         
+        -- FIX: Cải thiện Đánh nhanh chỉ tăng tốc các đòn chém (Tránh làm lỗi chạy/nhảy)
         if State.FastAttack then
             pcall(function()
-                local tool = char:FindFirstChildOfClass("Tool"); if tool then tool:Activate() end
-                for _, anim in pairs(hum:GetPlayingAnimationTracks()) do anim:AdjustSpeed(State.FastAttackSpeed) end
+                for _, anim in pairs(hum:GetPlayingAnimationTracks()) do 
+                    local p = anim.Priority
+                    if p == Enum.AnimationPriority.Action or p == Enum.AnimationPriority.Action2 or p == Enum.AnimationPriority.Action3 or p == Enum.AnimationPriority.Action4 or p == Enum.AnimationPriority.Weapon then
+                        anim:AdjustSpeed(State.FastAttackSpeed)
+                    end
+                end
             end)
         end
         
@@ -949,9 +937,13 @@ RunService.RenderStepped:Connect(function()
             if p ~= player then
                 local tChar = p.Character
                 local espPart = tChar and (tChar:FindFirstChild("Head") or tChar:FindFirstChild("HumanoidRootPart"))
-                
-                if espPart then
-                    if State.ESP then
+                local tHum = tChar and tChar:FindFirstChildOfClass("Humanoid")
+
+                if State.ESP then
+                    -- FIX: Tắt tên gốc của Roblox khi bật ESP để chống đè chữ
+                    if tHum then tHum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None end
+                    
+                    if espPart then
                         local bgui = espPart:FindFirstChild("MobileESP_Name")
                         if not bgui then
                             bgui = Instance.new("BillboardGui", espPart)
@@ -987,7 +979,11 @@ RunService.RenderStepped:Connect(function()
                         else 
                             bgui.NameLabel.Text = p.DisplayName 
                         end
-                    else
+                    end
+                else
+                    -- TRẢ LẠI tên gốc khi tắt ESP
+                    if tHum then tHum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.Viewer end
+                    if espPart then
                         local bgui = espPart:FindFirstChild("MobileESP_Name")
                         if bgui then bgui:Destroy() end
                     end
