@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V1.12.1 (Fix ESP đè tên, FastAttack Ổn định, Cảnh báo Xóa TP)
+-- MENU VIP PRO V1.12.1 (Fix AutoClick Nhảy, Thêm Tọa Độ, Sửa Lưu Cấu Hình)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -306,6 +306,25 @@ local function createToggle(parent, text, varName, callback)
     return btnFrame
 end
 
+local function createButton(parent, text, color, callback)
+    local btnFrame = Instance.new("Frame", parent)
+    btnFrame.Size = UDim2.new(0.9, 0, 0, 42); btnFrame.BackgroundTransparency = 1
+    local btn = Instance.new("TextButton", btnFrame)
+    btn.Size = UDim2.new(1, 0, 1, 0); btn.BackgroundColor3 = Theme.ItemBg; btn.Text = ""; btn.AutoButtonColor = false; btn.ZIndex = 10
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
+    local stroke = Instance.new("UIStroke", btn); stroke.Color = color; stroke.Thickness = 1.5; stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    table.insert(RGBElements, {Type = "Button", Stroke = stroke, DefaultColor = color})
+    local title = Instance.new("TextLabel", btn)
+    title.Size = UDim2.new(1, 0, 1, 0); title.BackgroundTransparency = 1; title.Text = text; title.TextColor3 = color; title.Font = Enum.Font.GothamBold; title.TextSize = 13; title.ZIndex = 10
+    btn.MouseButton1Click:Connect(function()
+        clickAnimate(btn); if not State.RGB then TweenService:Create(stroke, TweenInfo.new(0.15), {Color = Theme.TextTitle}):Play() end
+        task.wait(0.15); if not State.RGB then TweenService:Create(stroke, TweenInfo.new(0.3), {Color = color}):Play() end
+        MakeToast("Đã thực thi", text, color)
+        callback()
+    end)
+    return btnFrame
+end
+
 local function createDualButtons(parent, text1, color1, cb1, text2, color2, cb2)
     local dFrame = Instance.new("Frame", parent)
     dFrame.Size = UDim2.new(0.9, 0, 0, 42); dFrame.BackgroundTransparency = 1
@@ -320,8 +339,7 @@ local function createDualButtons(parent, text1, color1, cb1, text2, color2, cb2)
         btn.MouseButton1Click:Connect(function()
             clickAnimate(btn); if not State.RGB then TweenService:Create(stroke, TweenInfo.new(0.15), {Color = Theme.TextTitle}):Play() end
             task.wait(0.15); if not State.RGB then TweenService:Create(stroke, TweenInfo.new(0.3), {Color = col}):Play() end
-            -- Nếu là nút xóa tất cả thì không báo "đã thực thi" vì nó có thông báo riêng
-            if txt ~= "🗑️ XÓA TẤT CẢ" then
+            if txt ~= "🗑️ XÓA TẤT CẢ" and txt ~= "🗑️ XÓA CẤU HÌNH" and txt ~= "💾 LƯU CẤU HÌNH" then
                 MakeToast("Đã thực thi", txt, col)
             end
             cb()
@@ -380,7 +398,8 @@ local function createInfoBox(parent, icon, titleText, heightOffset)
     return content, item
 end
 
-local playerInfoLabel = createInfoBox(page1, "👤", "THÔNG TIN NHÂN VẬT", 85)
+-- Tăng kích thước khung THÔNG TIN NHÂN VẬT để hiển thị thêm Tọa độ
+local playerInfoLabel = createInfoBox(page1, "👤", "THÔNG TIN NHÂN VẬT", 100)
 local serverInfoLabel, serverInfoFrame = createInfoBox(page1, "🌐", "THÔNG TIN MÁY CHỦ", 85)
 
 local copyIdBtn = Instance.new("TextButton", serverInfoFrame)
@@ -407,10 +426,24 @@ local fps = 0; RunService.RenderStepped:Connect(function(dt) fps = math.floor(1/
 task.spawn(function()
     while task.wait(0.5) do
         local hp, maxHp, ws, jp = 0, 0, 0, 0
+        local coords = "0, 0, 0"
+        
         if player.Character and player.Character:FindFirstChild("Humanoid") then
-            local hum = player.Character.Humanoid; hp = math.floor(hum.Health); maxHp = math.floor(hum.MaxHealth); ws = math.floor(hum.WalkSpeed); jp = math.floor(hum.JumpPower)
+            local hum = player.Character.Humanoid
+            hp = math.floor(hum.Health)
+            maxHp = math.floor(hum.MaxHealth)
+            ws = math.floor(hum.WalkSpeed)
+            jp = math.floor(hum.JumpPower)
         end
-        playerInfoLabel.Text = string.format("<font color='#FF3300'>Tên:</font> %s (@%s)\n<font color='#FF3300'>Máu:</font> %d / %d\n<font color='#FF3300'>Tốc độ:</font> %d\n<font color='#FF3300'>Lực nhảy:</font> %d", player.DisplayName, player.Name, hp, maxHp, ws, jp)
+        
+        -- LẤY TỌA ĐỘ NGƯỜI CHƠI
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local pos = player.Character.HumanoidRootPart.Position
+            coords = string.format("%.1f, %.1f, %.1f", pos.X, pos.Y, pos.Z)
+        end
+
+        playerInfoLabel.Text = string.format("<font color='#FF3300'>Tên:</font> %s (@%s)\n<font color='#FF3300'>Máu:</font> %d / %d\n<font color='#FF3300'>Tốc độ:</font> %d\n<font color='#FF3300'>Lực nhảy:</font> %d\n<font color='#FF3300'>Tọa độ:</font> %s", player.DisplayName, player.Name, hp, maxHp, ws, jp, coords)
+        
         local ping = "0"
         pcall(function() local stats = game:GetService("Stats"); if stats and stats:FindFirstChild("Network") and stats.Network:FindFirstChild("ServerStatsItem") then ping = stats.Network.ServerStatsItem["Data Ping"]:GetValueString() else ping = tostring(math.floor(player:GetNetworkPing() * 1000)) .. " ms" end end)
         local pCount = #Players:GetPlayers(); local maxP = Players.MaxPlayers; local jobText = game.JobId ~= "" and string.sub(game.JobId, 1, 15).."..." or "N/A"
@@ -557,6 +590,16 @@ end)
 -- [TAB 4: TIỆN ÍCH]
 -- ==========================================
 createToggle(page4, "💾 Tự động Lưu Cài Đặt", "AutoSave", function(v) if v then saveConfig() end end)
+
+-- NÚT LƯU THỦ CÔNG ĐỂ NGĂN VIỆC LƯU NHẦM TRẠNG THÁI
+createDualButtons(page4, "💾 LƯU CẤU HÌNH", Theme.AccentOn, function() 
+    saveConfig()
+    MakeToast("Lưu Thành Công", "Đã lưu lại trạng thái toàn bộ tính năng!", Theme.Brand)
+end, "🗑️ XÓA CẤU HÌNH", Theme.AccentOff, function()
+    pcall(function() if isfile and isfile(configFileName) then delfile(configFileName) end end)
+    MakeToast("Đã Xóa", "File cấu hình đã bị xóa. (Nên thoát game vào lại)", Theme.AccentOff)
+end)
+
 createToggle(page4, "🌈 Chế độ RGB", "RGB", function(v) 
     if not v then 
         titleLabel.TextColor3 = Theme.TextTitle; frameStroke.Color = Theme.Stroke; headerStroke.Color = Theme.Stroke; avatarStroke.Color = Theme.Brand
@@ -571,20 +614,20 @@ createToggle(page4, "🌈 Chế độ RGB", "RGB", function(v)
     end 
 end)
 
+-- FIX: Gỡ bỏ hoàn toàn VirtualUser, chỉ dùng cách bấm tĩnh để không bị nhảy lung tung
 createToggle(page4, "🖱️ Auto Click", "AutoClick")
 task.spawn(function()
     while task.wait(0.05) do
         if State.AutoClick then
             pcall(function()
+                -- Kích hoạt đòn chém chuẩn của Tool (Vũ khí)
                 if player.Character then 
                     local tool = player.Character:FindFirstChildOfClass("Tool")
                     if tool then tool:Activate() end 
                 end
+                
+                -- Hỗ trợ kích chuột ở chính giữa màn hình tĩnh, không giật camera
                 if mouse1click then mouse1click() end
-                pcall(function() VirtualUser:CaptureController() end)
-                VirtualUser:Button1Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-                task.wait(0.01)
-                VirtualUser:Button1Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
             end)
         end
     end
@@ -730,7 +773,6 @@ local function loadTpData() pcall(function() if isfile and isfile(tpFileName) th
 local function saveTpData() pcall(function() if writefile then local dataToSave = {}; for _, v in ipairs(savedTpList) do if not v.isTemp then table.insert(dataToSave, v) end end; writefile(tpFileName, HttpService:JSONEncode(dataToSave)) end end) end
 loadTpData()
 
--- FIX: Cảnh báo khi bấm nút XÓA TẤT CẢ (Confirm Dialog)
 local pendingDeleteAll = false
 
 local tpControlFrame_New = createDualButtons(page6, "📍 LƯU VĨNH VIỄN", Theme.Brand, function()
@@ -900,7 +942,6 @@ RunService.RenderStepped:Connect(function()
         if State.Speed then hum.WalkSpeed = State.SpeedValue end
         if State.Jump then hum.UseJumpPower = true; hum.JumpPower = State.JumpValue end
         
-        -- FIX: Cải thiện Đánh nhanh chỉ tăng tốc các đòn chém (Tránh làm lỗi chạy/nhảy)
         if State.FastAttack then
             pcall(function()
                 for _, anim in pairs(hum:GetPlayingAnimationTracks()) do 
@@ -940,7 +981,6 @@ RunService.RenderStepped:Connect(function()
                 local tHum = tChar and tChar:FindFirstChildOfClass("Humanoid")
 
                 if State.ESP then
-                    -- FIX: Tắt tên gốc của Roblox khi bật ESP để chống đè chữ
                     if tHum then tHum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None end
                     
                     if espPart then
@@ -981,7 +1021,6 @@ RunService.RenderStepped:Connect(function()
                         end
                     end
                 else
-                    -- TRẢ LẠI tên gốc khi tắt ESP
                     if tHum then tHum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.Viewer end
                     if espPart then
                         local bgui = espPart:FindFirstChild("MobileESP_Name")
