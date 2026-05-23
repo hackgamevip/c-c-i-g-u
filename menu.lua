@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V1.12.1 (Fix AutoClick Nhảy, Thêm Tọa Độ, Sửa Lưu Cấu Hình)
+-- MENU VIP PRO V1.12.1 (Fix Triệt Để AutoClick Nhảy Màn Hình)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -298,9 +298,13 @@ local function createToggle(parent, text, varName, callback)
         TweenService:Create(status, TweenInfo.new(0.2), {TextColor3 = active and Theme.AccentOn or Theme.AccentOff}):Play()
         if not State.RGB then TweenService:Create(stroke, TweenInfo.new(0.2), {Color = active and Theme.AccentOn or Theme.Stroke}):Play() end
         TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = active and Color3.fromRGB(35, 45, 40) or Theme.ItemBg}):Play()
-        if active then MakeToast("Đã Bật", text, Theme.AccentOn) else MakeToast("Đã Tắt", text, Theme.AccentOff) end
+        
+        if varName ~= "AutoSave" then
+            if active then MakeToast("Đã Bật", text, Theme.AccentOn) else MakeToast("Đã Tắt", text, Theme.AccentOff) end
+            if State.AutoSave then saveConfig() end
+        end
+        
         if callback then callback(active) end
-        if State.AutoSave and varName ~= "AutoSave" then saveConfig() end
     end)
     if active and callback then task.spawn(callback, active) end
     return btnFrame
@@ -339,7 +343,7 @@ local function createDualButtons(parent, text1, color1, cb1, text2, color2, cb2)
         btn.MouseButton1Click:Connect(function()
             clickAnimate(btn); if not State.RGB then TweenService:Create(stroke, TweenInfo.new(0.15), {Color = Theme.TextTitle}):Play() end
             task.wait(0.15); if not State.RGB then TweenService:Create(stroke, TweenInfo.new(0.3), {Color = col}):Play() end
-            if txt ~= "🗑️ XÓA TẤT CẢ" and txt ~= "🗑️ XÓA CẤU HÌNH" and txt ~= "💾 LƯU CẤU HÌNH" then
+            if txt ~= "🗑️ XÓA TẤT CẢ" then
                 MakeToast("Đã thực thi", txt, col)
             end
             cb()
@@ -398,7 +402,6 @@ local function createInfoBox(parent, icon, titleText, heightOffset)
     return content, item
 end
 
--- Tăng kích thước khung THÔNG TIN NHÂN VẬT để hiển thị thêm Tọa độ
 local playerInfoLabel = createInfoBox(page1, "👤", "THÔNG TIN NHÂN VẬT", 100)
 local serverInfoLabel, serverInfoFrame = createInfoBox(page1, "🌐", "THÔNG TIN MÁY CHỦ", 85)
 
@@ -436,7 +439,6 @@ task.spawn(function()
             jp = math.floor(hum.JumpPower)
         end
         
-        -- LẤY TỌA ĐỘ NGƯỜI CHƠI
         if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             local pos = player.Character.HumanoidRootPart.Position
             coords = string.format("%.1f, %.1f, %.1f", pos.X, pos.Y, pos.Z)
@@ -589,15 +591,14 @@ end)
 -- ==========================================
 -- [TAB 4: TIỆN ÍCH]
 -- ==========================================
-createToggle(page4, "💾 Tự động Lưu Cài Đặt", "AutoSave", function(v) if v then saveConfig() end end)
-
--- NÚT LƯU THỦ CÔNG ĐỂ NGĂN VIỆC LƯU NHẦM TRẠNG THÁI
-createDualButtons(page4, "💾 LƯU CẤU HÌNH", Theme.AccentOn, function() 
-    saveConfig()
-    MakeToast("Lưu Thành Công", "Đã lưu lại trạng thái toàn bộ tính năng!", Theme.Brand)
-end, "🗑️ XÓA CẤU HÌNH", Theme.AccentOff, function()
-    pcall(function() if isfile and isfile(configFileName) then delfile(configFileName) end end)
-    MakeToast("Đã Xóa", "File cấu hình đã bị xóa. (Nên thoát game vào lại)", Theme.AccentOff)
+createToggle(page4, "💾 Tự động Lưu Cài Đặt", "AutoSave", function(v) 
+    if v then 
+        saveConfig()
+        MakeToast("Đã Bật", "Đã lưu lại cấu hình hiện tại và sẽ tự động lưu!", Theme.AccentOn)
+    else
+        pcall(function() if isfile and isfile(configFileName) then delfile(configFileName) end end)
+        MakeToast("Đã Tắt", "Đã xóa file cấu hình. Menu sẽ reset vào lần sau!", Theme.AccentOff)
+    end 
 end)
 
 createToggle(page4, "🌈 Chế độ RGB", "RGB", function(v) 
@@ -614,20 +615,17 @@ createToggle(page4, "🌈 Chế độ RGB", "RGB", function(v)
     end 
 end)
 
--- FIX: Gỡ bỏ hoàn toàn VirtualUser, chỉ dùng cách bấm tĩnh để không bị nhảy lung tung
+-- FIX: Đã xóa hoàn toàn mouse1click() và VirtualUser để chống lỗi camera nhảy lung tung.
 createToggle(page4, "🖱️ Auto Click", "AutoClick")
 task.spawn(function()
     while task.wait(0.05) do
         if State.AutoClick then
             pcall(function()
-                -- Kích hoạt đòn chém chuẩn của Tool (Vũ khí)
                 if player.Character then 
                     local tool = player.Character:FindFirstChildOfClass("Tool")
+                    -- Chỉ dùng lệnh Activate của vũ khí, tuyệt đối không dùng thao tác chuột giả
                     if tool then tool:Activate() end 
                 end
-                
-                -- Hỗ trợ kích chuột ở chính giữa màn hình tĩnh, không giật camera
-                if mouse1click then mouse1click() end
             end)
         end
     end
