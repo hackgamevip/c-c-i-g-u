@@ -56,7 +56,7 @@ for _, v in pairs(guiParent:GetChildren()) do
     if v.Name == "MobileProMax" then v:Destroy() end
 end
 
-local configFileName = "MenuVipProMax_Config.json""
+local configFileName = "MenuVipProMax_Config.json"
 pcall(function()
     if isfile and isfile(configFileName) then
         local data = HttpService:JSONDecode(readfile(configFileName))
