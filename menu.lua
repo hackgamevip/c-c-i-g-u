@@ -779,16 +779,16 @@ loadTpData()
 
 local pendingDeleteAll = false
 
-local tpControlFrame_New = createDualButtons(page6, "📍 LƯU Vị Trí", Theme.Brand, function()
+local tpControlFrame_New = createDualButtons(page6, "📍 LƯU VỊ TRÍ", Theme.Brand, function()
     if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
         local root = player.Character.HumanoidRootPart
         local cf = {root.CFrame:GetComponents()}
         local maxId = 0
         for _, v in ipairs(savedTpList) do
-            local num = string.match(v.name, "Lưu Vị Trí(%d+)")
+            local num = string.match(v.name, "Lưu Vị Trí (%d+)")
             if num then maxId = math.max(maxId, tonumber(num)) end
         end
-        local name = "Lưu Vị Trí" .. (maxId + 1)
+        local name = "Lưu Vị Trí " .. (maxId + 1)
         
         table.insert(savedTpList, {name = name, cframe = cf, isTemp = false})
         saveTpData()
