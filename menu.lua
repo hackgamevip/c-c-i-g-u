@@ -56,7 +56,7 @@ for _, v in pairs(guiParent:GetChildren()) do
     if v.Name == "MobileProMax" then v:Destroy() end
 end
 
-local configFileName = "MENU VIP PRO MAX.json"
+local configFileName = "MenuVipProMax_Config.json""
 pcall(function()
     if isfile and isfile(configFileName) then
         local data = HttpService:JSONDecode(readfile(configFileName))
@@ -170,7 +170,7 @@ table.insert(RGBElements, {Type = "Header", Stroke = headerStroke})
 
 local titleLabel = Instance.new("TextLabel", header)
 titleLabel.Size = UDim2.new(1, 0, 1, 0); titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "MENU PRO MAX V1.12.1"
+titleLabel.Text = "MENU VIP PRO MAX"
 titleLabel.TextColor3 = Theme.TextTitle; titleLabel.Font = Enum.Font.GothamBlack; titleLabel.TextSize = 16; titleLabel.ZIndex = 10
 
 local avatarImg = Instance.new("ImageLabel", header)
