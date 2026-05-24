@@ -56,7 +56,7 @@ for _, v in pairs(guiParent:GetChildren()) do
     if v.Name == "MobileProMax" then v:Destroy() end
 end
 
-local configFileName = "MenuProMax_Config_V1_12_1.json"
+local configFileName = "MENU VIP PRO MAX.json"
 pcall(function()
     if isfile and isfile(configFileName) then
         local data = HttpService:JSONDecode(readfile(configFileName))
@@ -444,15 +444,15 @@ task.spawn(function()
             coords = string.format("%.1f, %.1f, %.1f", pos.X, pos.Y, pos.Z)
         end
 
-        playerInfoLabel.Text = string.format("<font color='#FF3300'>Tên:</font> %s (@%s)\n<font color='#FF3300'>Máu:</font> %d / %d\n<font color='#FF3300'>Tốc độ:</font> %d\n<font color='#FF3300'>Lực nhảy:</font> %d\n<font color='#FF3300'>Tọa độ:</font> %s", player.DisplayName, player.Name, hp, maxHp, ws, jp, coords)
+        playerInfoLabel.Text = string.format("<font color='#FF00FF'>Tên:</font> %s (@%s)\n<font color='#FF00FF'>Máu:</font> %d / %d\n<font color='#FF00FF'>Tốc độ:</font> %d\n<font color='#FF00FF'>Lực nhảy:</font> %d\n<font color='#FF00FF'>Tọa độ:</font> %s", player.DisplayName, player.Name, hp, maxHp, ws, jp, coords)
         
         local ping = "0"
         pcall(function() local stats = game:GetService("Stats"); if stats and stats:FindFirstChild("Network") and stats.Network:FindFirstChild("ServerStatsItem") then ping = stats.Network.ServerStatsItem["Data Ping"]:GetValueString() else ping = tostring(math.floor(player:GetNetworkPing() * 1000)) .. " ms" end end)
         local pCount = #Players:GetPlayers(); local maxP = Players.MaxPlayers; local jobText = game.JobId ~= "" and string.sub(game.JobId, 1, 15).."..." or "N/A"
-        serverInfoLabel.Text = string.format("<font color='#FF3300'>FPS:</font> %d\n<font color='#FF3300'>Ping:</font> %s\n<font color='#FF3300'>Người chơi:</font> %d / %d\n<font color='#FF3300'>ID SV:</font> %s", fps, ping, pCount, maxP, jobText)
+        serverInfoLabel.Text = string.format("<font color='#FF00FF'>FPS:</font> %d\n<font color='#FF00FF'>Ping:</font> %s\n<font color='#FF00FF'>Người chơi:</font> %d / %d\n<font color='#FF00FF'>ID SV:</font> %s", fps, ping, pCount, maxP, jobText)
         local execTime = math.floor(workspace.DistributedGameTime); local hours = math.floor(execTime / 3600); local mins = math.floor((execTime % 3600) / 60); local secs = execTime % 60
         local timeString = string.format("%02d:%02d:%02d", hours, mins, secs)
-        extraInfoLabel.Text = string.format("<font color='#FF3300'>Thời gian chơi:</font> %s\n<font color='#FF3300'>Giờ hệ thống:</font> %s\n<font color='#FF3300'>Phiên bản:</font> MENU VIP PRO V1.12.1", timeString, os.date("%H:%M:%S"))
+        extraInfoLabel.Text = string.format("<font color='#FF00FF'>Thời gian chơi:</font> %s\n<font color='#FF00FF'>Giờ hệ thống:</font> %s\n<font color='#FF00FF'>Phiên bản:</font> MENU VIP PRO MAX", timeString, os.date("%H:%M:%S"))
     end
 end)
 
@@ -512,7 +512,7 @@ createToggle(page3, "🏃 Chạy nhanh", "Speed", function(v)
         end
     end 
 end)
-createSlider(page3, "Tốc độ chạy", 16, 1000, "SpeedValue")
+createSlider(page3, "Tốc độ chạy", 0, 1000, "SpeedValue")
 
 local defaultJumpPower = 50
 createToggle(page3, "🦘 Nhảy cao", "Jump", function(v) 
@@ -525,18 +525,18 @@ createToggle(page3, "🦘 Nhảy cao", "Jump", function(v)
         end
     end 
 end)
-createSlider(page3, "Lực nhảy", 50, 1000, "JumpValue")
+createSlider(page3, "Lực nhảy", 0, 1000, "JumpValue")
 
 createToggle(page3, "⚡ Đánh nhanh", "FastAttack")
-createSlider(page3, "Mức độ Đánh nhanh", 1, 20, "FastAttackSpeed")
+createSlider(page3, "Mức độ Đánh nhanh", 0, 20, "FastAttackSpeed")
 createToggle(page3, "⚔️ Đánh xa", "Reach")
-createSlider(page3, "Kích thước vũ khí", 2, 300, "ReachSize")
+createSlider(page3, "Kích thước vũ khí", 0, 300, "ReachSize")
 createToggle(page3, "🌪️ Xoay vòng tròn", "SpinBot")
-createSlider(page3, "Tốc độ xoay", 10, 100, "SpinSpeed")
+createSlider(page3, "Tốc độ xoay", 0, 100, "SpinSpeed")
 createToggle(page3, "🎯 Hitbox", "Hitbox")
-createSlider(page3, "Kích thước đối thủ", 2, 100, "HitboxSize")
+createSlider(page3, "Kích thước Hitbox", 0, 100, "HitboxSize")
 createToggle(page3, "💡 Ánh sáng quanh người", "PlayerLight", function(v) if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then local light = player.Character.HumanoidRootPart:FindFirstChild("PlayerPointLight"); if light then light:Destroy() end end end)
-createSlider(page3, "Phạm vi sáng", 50, 1000, "LightRange")
+createSlider(page3, "Phạm vi sáng", 0, 1000, "LightRange")
 createSlider(page3, "Độ sáng", 0, 5, "LightBrightness")
 
 -- ==========================================
@@ -599,7 +599,7 @@ end)
 -- ==========================================
 -- [TAB 4: TIỆN ÍCH]
 -- ==========================================
-createToggle(page4, "💾 Tự động Lưu Cài Đặt", "AutoSave", function(v) 
+createToggle(page4, "💾 Lưu Cài Đặt", "AutoSave", function(v) 
     if v then 
         saveConfig()
         MakeToast("Đã Bật", "Đã lưu lại cấu hình hiện tại và sẽ tự động lưu!", Theme.AccentOn)
@@ -644,7 +644,7 @@ createToggle(page4, "☀️ Xóa sương mù", "NoFog", function(v)
 end)
 createToggle(page4, "⬛ Màn hình đen", "BlackScreen", function(v) screenOverlay.BackgroundColor3 = Color3.new(0, 0, 0); screenOverlay.Visible = v end)
 createToggle(page4, "⬜ Màn hình trắng", "WhiteScreen", function(v) screenOverlay.BackgroundColor3 = Color3.new(1, 1, 1); screenOverlay.Visible = v end)
-createToggle(page4, "🛡️ Chống AFK", "AntiAfk")
+createToggle(page4, "🛡️ Chống AFK (Antiafk)", "AntiAfk")
 
 local function hopServer(sortOrder)
     local api = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=" .. sortOrder .. "&limit=100"
@@ -665,7 +665,7 @@ local function rejoinServer()
     if #Players:GetPlayers() <= 1 then player:Kick("\nĐang vào lại server..."); task.wait(); TeleportService:Teleport(game.PlaceId, player) else TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, player) end
 end
 
-createDualButtons(page4, "🌞 Trời SÁNG", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12 end, "🌚 Trời TỐI", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0 end)
+createDualButtons(page4, "🌞 Trời SÁNG (Fake)", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12 end, "🌚 Trời TỐI (Fake)", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0 end)
 createDualButtons(page4, "🔄 VÀO LẠI SV", Theme.AccentOn, rejoinServer, "🎲 ĐỔI SV NGẪU NHIÊN", Theme.Brand, function() hopServer("Desc") end)
 createDualButtons(page4, "📉 ĐỔI SV ÍT NGƯỜI", Color3.fromRGB(52, 152, 219), function() hopServer("Asc") end, "📈 ĐỔI SV NHIỀU NGƯỜI", Color3.fromRGB(231, 76, 60), function() hopServer("Desc") end)
 createDualButtons(page4, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) end, "📂 TP SAVE V2 GUI", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
@@ -724,7 +724,7 @@ end
 
 local playControlFrame = createDualButtons(page5, "▶️ PHÁT NHẠC", Theme.AccentOn, function() playMusic(musicIdBox.Text) end, "⏸️ TẮT NHẠC", Theme.AccentOff, function() stopMusic() end)
 playControlFrame.LayoutOrder = 2
-local volumeFrame = createSlider(page5, "ÂM LƯỢNG 🎛️", 0, 10, "MusicVolume", function(val) if currentSound then currentSound.Volume = val end end)
+local volumeFrame = createSlider(page5, "ÂM LƯỢNG 🔊", 0, 10, "MusicVolume", function(val) if currentSound then currentSound.Volume = val end end)
 volumeFrame.LayoutOrder = 3
 
 local savedMusicContent = Instance.new("ScrollingFrame", page5)
@@ -737,7 +737,7 @@ sLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     savedMusicContent.CanvasSize = UDim2.new(0, 0, 0, sLayout.AbsoluteContentSize.Y + 20)
 end)
 
-local fileName = "MenuProMax_SavedMusic.json"
+local fileName = "MenuVipProMax_SavedMusic.json"
 local function loadMusicData() pcall(function() if isfile and isfile(fileName) then local data = readfile(fileName); local decoded = HttpService:JSONDecode(data); if type(decoded) == "table" then savedMusicList = decoded end end end) end
 local function saveMusicData() pcall(function() if writefile then writefile(fileName, HttpService:JSONEncode(savedMusicList)) end end) end
 loadMusicData()
@@ -771,7 +771,7 @@ renderSavedMusic()
 -- ==========================================
 -- [TAB 6: VỊ TRÍ TP SAVE]
 -- ==========================================
-local tpFileName = "MenuProMax_SavedTPs.json"
+local tpFileName = "MenuVipProMax_SavedTPs.json"
 local savedTpList = {}
 local function loadTpData() pcall(function() if isfile and isfile(tpFileName) then local data = readfile(tpFileName); local decoded = HttpService:JSONDecode(data); if type(decoded) == "table" then savedTpList = decoded end end end) end
 local function saveTpData() pcall(function() if writefile then local dataToSave = {}; for _, v in ipairs(savedTpList) do if not v.isTemp then table.insert(dataToSave, v) end end; writefile(tpFileName, HttpService:JSONEncode(dataToSave)) end end) end
@@ -779,16 +779,16 @@ loadTpData()
 
 local pendingDeleteAll = false
 
-local tpControlFrame_New = createDualButtons(page6, "📍 LƯU VĨNH VIỄN", Theme.Brand, function()
+local tpControlFrame_New = createDualButtons(page6, "📍 LƯU Vị Trí", Theme.Brand, function()
     if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
         local root = player.Character.HumanoidRootPart
         local cf = {root.CFrame:GetComponents()}
         local maxId = 0
         for _, v in ipairs(savedTpList) do
-            local num = string.match(v.name, "Vị trí vĩnh viễn (%d+)")
+            local num = string.match(v.name, "Lưu Vị Trí(%d+)")
             if num then maxId = math.max(maxId, tonumber(num)) end
         end
-        local name = "Vị trí vĩnh viễn " .. (maxId + 1)
+        local name = "Lưu Vị Trí" .. (maxId + 1)
         
         table.insert(savedTpList, {name = name, cframe = cf, isTemp = false})
         saveTpData()
@@ -797,7 +797,7 @@ local tpControlFrame_New = createDualButtons(page6, "📍 LƯU VĨNH VIỄN", Th
 end, "🗑️ XÓA TẤT CẢ", Theme.AccentOff, function() 
     if not pendingDeleteAll then
         pendingDeleteAll = true
-        MakeToast("⚠️ CẢNH BÁO", "Bấm 'XÓA TẤT CẢ' lần nữa để xác nhận xóa toàn bộ!", Theme.AccentOff)
+        MakeToast("⚠️ CẢNH BÁO", "Bấm 'XÓA TẤT CẢ' ấn lần nữa để xác nhận xóa toàn bộ!", Theme.AccentOff)
         task.delay(3, function() pendingDeleteAll = false end)
     else
         savedTpList = {}
