@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V1.12.1 (Fix Triệt Để AutoClick Nhảy Màn Hình)
+-- MENU VIP PRO V1.12.1 (Fix Triệt Để Lỗi Kẹt Bậc Thềm Khi Noclip)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -465,7 +465,15 @@ createToggle(page2, "🚀 Nhảy trên không", "InfJump")
 UIS.JumpRequest:Connect(function() if State.InfJump and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then player.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping) end end)
 createToggle(page2, "🐿️ Lấy đồ nhanh", "Instant")
 createToggle(page2, "🧲 Auto nhặt đồ xung quanh", "AutoCollect")
-createToggle(page2, "🚷 Đi xuyên tường", "Noclip", function(v) if not v and player.Character then for _, part in pairs(player.Character:GetDescendants()) do if part:IsA("BasePart") then part.CanCollide = true end end end end)
+
+-- FIX: Xóa lệnh tự động bật va chạm bừa bãi khi tắt Noclip để tránh lỗi kẹt bậc thềm
+createToggle(page2, "🚷 Đi xuyên tường", "Noclip", function(v) 
+    if not v and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then 
+        -- Đổi State để tự động game khôi phục chuẩn vật lý cho nhân vật
+        player.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.GettingUp)
+    end 
+end)
+
 local xrayMats = {}; local xrayTick = 0
 createToggle(page2, "👀 Nhìn xuyên map", "XRay", function(v) 
     xrayTick = xrayTick + 1; local currentTick = xrayTick
@@ -615,7 +623,6 @@ createToggle(page4, "🌈 Chế độ RGB", "RGB", function(v)
     end 
 end)
 
--- FIX: Đã xóa hoàn toàn mouse1click() và VirtualUser để chống lỗi camera nhảy lung tung.
 createToggle(page4, "🖱️ Auto Click", "AutoClick")
 task.spawn(function()
     while task.wait(0.05) do
@@ -623,7 +630,6 @@ task.spawn(function()
             pcall(function()
                 if player.Character then 
                     local tool = player.Character:FindFirstChildOfClass("Tool")
-                    -- Chỉ dùng lệnh Activate của vũ khí, tuyệt đối không dùng thao tác chuột giả
                     if tool then tool:Activate() end 
                 end
             end)
@@ -886,10 +892,20 @@ updatePlayerList(); Players.PlayerAdded:Connect(updatePlayerList); Players.Playe
 player.Idled:Connect(function() if State.AntiAfk then VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame); task.wait(1); VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame) end end)
 
 -- ==========================================
--- [XỬ LÝ REACH TRƯỚC KHI VẬT LÝ TÍNH TOÁN]
+-- [XỬ LÝ REACH VÀ NOCLIP TRƯỚC KHI VẬT LÝ TÍNH TOÁN]
 -- ==========================================
 RunService.Stepped:Connect(function()
     pcall(function()
+        -- FIX: Xử lý Noclip ở Stepped giúp qua tường siêu mượt
+        if State.Noclip and player.Character then
+            for _, part in ipairs(player.Character:GetDescendants()) do
+                if part:IsA("BasePart") and part.CanCollide then
+                    part.CanCollide = false
+                end
+            end
+        end
+
+        -- Xử lý Reach
         if State.Reach and player.Character then
             local tool = player.Character:FindFirstChildOfClass("Tool")
             if tool then
@@ -969,7 +985,6 @@ RunService.RenderStepped:Connect(function()
                 light.Brightness = State.LightBrightness; light.Range = State.LightRange
             else if light then light:Destroy() end end
         end
-        if State.Noclip and char then for _, part in pairs(char:GetDescendants()) do if part:IsA("BasePart") and part.CanCollide then part.CanCollide = false end end end
         if State.Hitbox then for _, p in pairs(Players:GetPlayers()) do if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then p.Character.HumanoidRootPart.CanCollide = false end end end
         
         for _, p in pairs(Players:GetPlayers()) do
