@@ -42,6 +42,7 @@ local Theme = {
 }
 
 local RGBElements = {}
+local ActiveESPs = {} -- Bảng theo dõi ESP chống trùng lặp dữ liệu
 local guiParent = player:WaitForChild("PlayerGui")
 pcall(function()
     if gethui and type(gethui) == "function" then
@@ -466,11 +467,19 @@ UIS.JumpRequest:Connect(function() if State.InfJump and player.Character and pla
 createToggle(page2, "🐿️ Lấy đồ nhanh", "Instant")
 createToggle(page2, "🧲 Auto nhặt đồ xung quanh", "AutoCollect")
 
--- FIX: Xóa lệnh tự động bật va chạm bừa bãi khi tắt Noclip để tránh lỗi kẹt bậc thềm
+-- FIX: Khôi phục thuộc tính vật lý lập tức khi tắt Noclip để triệt tiêu hoàn toàn kẹt bậc thềm
 createToggle(page2, "🚷 Đi xuyên tường", "Noclip", function(v) 
-    if not v and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then 
-        -- Đổi State để tự động game khôi phục chuẩn vật lý cho nhân vật
-        player.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.GettingUp)
+    if not v and player.Character then 
+        pcall(function()
+            for _, part in ipairs(player.Character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = true
+                end
+            end
+            if player.Character:FindFirstChildOfClass("Humanoid") then 
+                player.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.GettingUp)
+            end
+        end)
     end 
 end)
 
@@ -889,18 +898,30 @@ local function updatePlayerList()
 end
 updatePlayerList(); Players.PlayerAdded:Connect(updatePlayerList); Players.PlayerRemoving:Connect(updatePlayerList)
 
-player.Idled:Connect(function() if State.AntiAfk then VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame); task.wait(1); VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame) end end)
+player.Idled:Connect(function() 
+    if State.AntiAfk then 
+        pcall(function()
+            local cam = workspace.CurrentCamera or camera
+            local cf = cam and cam.CFrame or CFrame.new()
+            VirtualUser:Button2Down(Vector2.new(0,0), cf)
+            task.wait(1)
+            VirtualUser:Button2Up(Vector2.new(0,0), cf) 
+        end)
+    end 
+end)
 
 -- ==========================================
 -- [XỬ LÝ REACH VÀ NOCLIP TRƯỚC KHI VẬT LÝ TÍNH TOÁN]
 -- ==========================================
 RunService.Stepped:Connect(function()
     pcall(function()
-        -- FIX: Xử lý Noclip ở Stepped giúp qua tường siêu mượt
+        -- FIX TỐI ƯU HOÁ: Thay GetDescendants thành GetChildren để giảm tải CPU, chống lag văng game tuyệt đối
         if State.Noclip and player.Character then
-            for _, part in ipairs(player.Character:GetDescendants()) do
-                if part:IsA("BasePart") and part.CanCollide then
+            for _, part in ipairs(player.Character:GetChildren()) do
+                if part:IsA("BasePart") then
                     part.CanCollide = false
+                elseif part:IsA("Accessory") and part:FindFirstChild("Handle") then
+                    part.Handle.CanCollide = false
                 end
             end
         end
@@ -949,8 +970,9 @@ RunService.RenderStepped:Connect(function()
     end
 
     local char = player.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
     if char and char:FindFirstChildOfClass("Humanoid") then
-        local hum = char:FindFirstChildOfClass("Humanoid"); local root = char:FindFirstChild("HumanoidRootPart")
+        local hum = char:FindFirstChildOfClass("Humanoid")
         
         if State.LockPosition and root then root.Anchored = true end
         if State.Speed then hum.WalkSpeed = State.SpeedValue end
@@ -987,25 +1009,30 @@ RunService.RenderStepped:Connect(function()
         end
         if State.Hitbox then for _, p in pairs(Players:GetPlayers()) do if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then p.Character.HumanoidRootPart.CanCollide = false end end end
         
-        for _, p in pairs(Players:GetPlayers()) do
-            if p ~= player then
-                local tChar = p.Character
-                local espPart = tChar and (tChar:FindFirstChild("Head") or tChar:FindFirstChild("HumanoidRootPart"))
-                local tHum = tChar and tChar:FindFirstChildOfClass("Humanoid")
+        -- FIX CHỐNG TRÙNG LẶP (Ảnh 1000078543.jpg): Hệ thống quản lý ESP bằng dữ liệu từ điển đồng bộ
+        if State.ESP then
+            for _, p in pairs(Players:GetPlayers()) do
+                if p ~= player then
+                    local tChar = p.Character
+                    local espPart = tChar and (tChar:FindFirstChild("HumanoidRootPart") or tChar:FindFirstChild("Head"))
+                    local tHum = tChar and tChar:FindFirstChildOfClass("Humanoid")
 
-                if State.ESP then
                     if tHum then tHum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None end
                     
                     if espPart then
-                        local bgui = espPart:FindFirstChild("MobileESP_Name")
-                        if not bgui then
-                            bgui = Instance.new("BillboardGui", espPart)
+                        local bgui = ActiveESPs[p]
+                        -- Kiểm tra nếu thẻ chưa được tạo hoặc đang bị kẹt ở bộ phận cũ (khi nhân vật reset)
+                        if not bgui or bgui.Parent ~= espPart then
+                            if bgui then bgui:Destroy() end -- Hủy thẻ lỗi cũ ngay lập tức
+                            
+                            bgui = Instance.new("BillboardGui")
                             bgui.Name = "MobileESP_Name"
                             bgui.Size = UDim2.new(0, 200, 0, 50)
-                            bgui.StudsOffset = Vector3.new(0, 2, 0)
+                            bgui.StudsOffset = Vector3.new(0, 3, 0)
                             bgui.AlwaysOnTop = true
-                            bgui.MaxDistance = math.huge
+                            bgui.MaxDistance = math.huge -- Nhìn thấy ở mọi khoảng cách vô hạn
                             bgui.Adornee = espPart
+                            bgui.Parent = espPart
                             
                             local tLabel = Instance.new("TextLabel", bgui)
                             tLabel.Name = "NameLabel"
@@ -1016,29 +1043,42 @@ RunService.RenderStepped:Connect(function()
                             tLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
                             tLabel.Font = Enum.Font.GothamBold
                             tLabel.TextSize = 11
-                            tLabel.RichText = true 
+                            tLabel.RichText = true
+                            
+                            ActiveESPs[p] = bgui
                         end
                         
-                        local targetPos = nil
-                        if tChar:FindFirstChild("HumanoidRootPart") then
-                            targetPos = tChar.HumanoidRootPart.Position
-                        elseif tChar:GetPivot() then
-                            targetPos = tChar:GetPivot().Position
-                        end
-                        
-                        if root and targetPos then
-                            local dist = math.floor((root.Position - targetPos).Magnitude)
+                        if root and espPart then
+                            local dist = math.floor((root.Position - espPart.Position).Magnitude)
                             bgui.NameLabel.Text = p.DisplayName .. '\n<font color="#4CAF50">[' .. dist .. 'm]</font>'
                         else 
                             bgui.NameLabel.Text = p.DisplayName 
                         end
+                    else
+                        if ActiveESPs[p] then
+                            ActiveESPs[p]:Destroy()
+                            ActiveESPs[p] = nil
+                        end
                     end
-                else
-                    if tHum then tHum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.Viewer end
-                    if espPart then
-                        local bgui = espPart:FindFirstChild("MobileESP_Name")
-                        if bgui then bgui:Destroy() end
-                    end
+                end
+            end
+            
+            -- Dọn dẹp ESP của những người chơi đã rời phòng
+            for p, bgui in pairs(ActiveESPs) do
+                if not Players:FindFirstChild(p.Name) then
+                    if bgui then bgui:Destroy() end
+                    ActiveESPs[p] = nil
+                end
+            end
+        else
+            -- Giải phóng bộ nhớ hoàn toàn và trả lại tên gốc khi tắt ESP
+            for p, bgui in pairs(ActiveESPs) do
+                if bgui then bgui:Destroy() end
+                ActiveESPs[p] = nil
+            end
+            for _, p in pairs(Players:GetPlayers()) do
+                if p ~= player and p.Character and p.Character:FindFirstChildOfClass("Humanoid") then
+                    p.Character:FindFirstChildOfClass("Humanoid").DisplayDistanceType = Enum.HumanoidDisplayDistanceType.Viewer
                 end
             end
         end
