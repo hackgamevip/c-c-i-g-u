@@ -509,7 +509,7 @@ createToggle(page2, "🔴 ESP người chơi", "ESP")
 -- [TAB 3: PLAYER]
 -- ==========================================
 -- FIX FLY: Thêm Toggle và Slider quản lý Bay nguyên bản (Native Fly) không dùng link ngoài
-createToggle(page3, "🕊️ BẬT CHẾ ĐỘ BAY (FLY)", "Fly")
+createToggle(page3, "🕊️ Bay Trên không (FLY)", "Fly")
 createSlider(page3, "Tốc độ bay", 10, 300, "FlySpeed")
 
 local defaultWalkSpeed = 16
@@ -532,10 +532,10 @@ createToggle(page3, "⚡ Đánh nhanh", "FastAttack")
 createSlider(page3, "Mức độ Đánh nhanh", 0, 20, "FastAttackSpeed")
 createToggle(page3, "⚔️ Đánh xa", "Reach")
 createSlider(page3, "Kích thước vũ khí", 0, 300, "ReachSize")
-createToggle(page3, "🌪️ Xoay vòng tròn", "SpinBot")
-createSlider(page3, "Tốc độ xoay", 0, 100, "SpinSpeed")
 createToggle(page3, "🎯 Hitbox", "Hitbox")
 createSlider(page3, "Kích thước Hitbox", 0, 100, "HitboxSize")
+createToggle(page3, "🌪️ Xoay vòng tròn", "SpinBot")
+createSlider(page3, "Tốc độ xoay", 0, 100, "SpinSpeed")
 createToggle(page3, "💡 Ánh sáng quanh người", "PlayerLight", function(v) if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then local light = player.Character.HumanoidRootPart:FindFirstChild("PlayerPointLight"); if light then light:Destroy() end end end)
 createSlider(page3, "Phạm vi sáng", 0, 1000, "LightRange")
 createSlider(page3, "Độ sáng", 0, 5, "LightBrightness")
@@ -630,7 +630,7 @@ createToggle(page4, "☀️ Xóa sương mù", "NoFog", function(v)
     if v then origFog = Lighting.FogEnd; origBright = Lighting.Brightness; origShadow = Lighting.GlobalShadows; Lighting.FogEnd = 100000; Lighting.Brightness = 2; Lighting.GlobalShadows = false
     else Lighting.FogEnd = origFog or 100000; Lighting.Brightness = origBright or 1; Lighting.GlobalShadows = origShadow end
 end)
-createToggle(page4, "⬛ Màn hình đen", "BlackScreen", function(v) screenOverlay.BackgroundColor3 = Color3.new(0, 0, 0); screenOverlay.Visible = v end)
+createToggle(page4, "⬛ Màn hình đen (treo máy)", "BlackScreen", function(v) screenOverlay.BackgroundColor3 = Color3.new(0, 0, 0); screenOverlay.Visible = v end)
 createToggle(page4, "⬜ Màn hình trắng", "WhiteScreen", function(v) screenOverlay.BackgroundColor3 = Color3.new(1, 1, 1); screenOverlay.Visible = v end)
 createToggle(page4, "🛡️ Chống AFK (Antiafk)", "AntiAfk")
 
@@ -656,7 +656,8 @@ end
 createDualButtons(page4, "🌞 Trời SÁNG (Fake)", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12 end, "🌚 Trời TỐI (Fake)", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0 end)
 createDualButtons(page4, "🔄 VÀO LẠI SV", Theme.AccentOn, rejoinServer, "🎲 ĐỔI SV NGẪU NHIÊN", Theme.Brand, function() hopServer("Desc") end)
 createDualButtons(page4, "📉 ĐỔI SV ÍT NGƯỜI", Color3.fromRGB(52, 152, 219), function() hopServer("Asc") end, "📈 ĐỔI SV NHIỀU NGƯỜI", Color3.fromRGB(231, 76, 60), function() hopServer("Desc") end)
-createDualButtons(page4, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) end, "📂 FE TP GUI", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
+createDualButtons(page4, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) end, "📂 SCRIPT TP SAVE", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
+createDualButtons(page4, "🕊️ FLY V1", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end, "🕊️ FLY V3", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end) end)
 
 -- ==========================================
 -- [TAB 5: NHẠC ID]
