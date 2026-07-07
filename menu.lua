@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V1.12.2 (Fix Triệt Để Lỗi Kẹt Bậc Thềm & ESP Vô Hạn Khoảng Cách)
+-- MENU VIP PRO V1.12.3 (BẢN VÁ LỖI TRONG NATIVE FLY & TÁCH LẬP LUỒNG ESP ĐỘC LẬP)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -20,7 +20,7 @@ local camera = workspace.CurrentCamera
 local State = {
     Instant = false, Noclip = false, LowGfx = false, Speed = false, Jump = false,
     InfJump = false, PlayerLight = false, ESP = false, AntiAfk = true, AntiStun = false, 
-    XRay = false, LockPosition = false, AutoCollect = false,
+    XRay = false, LockPosition = false, AutoCollect = false, Fly = false, FlySpeed = 50,
     SpinBot = false, SpinSpeed = 50, Hitbox = false, HitboxSize = 15, AutoClick = false, RGB = false,
     Reach = false, ReachSize = 15, FastAttack = false, FastAttackSpeed = 5, AutoSave = false, Astral = false,
     SpeedValue = 60, JumpValue = 120, LightRange = 60, LightBrightness = 3,
@@ -42,7 +42,7 @@ local Theme = {
 }
 
 local RGBElements = {}
-local ActiveESPs = {} -- Bảng theo dõi ESP chống trùng lặp dữ liệu
+local ActiveESPs = {} 
 local guiParent = player:WaitForChild("PlayerGui")
 pcall(function()
     if gethui and type(gethui) == "function" then
@@ -453,12 +453,12 @@ task.spawn(function()
         serverInfoLabel.Text = string.format("<font color='#FF00FF'>FPS:</font> %d\n<font color='#FF00FF'>Ping:</font> %s\n<font color='#FF00FF'>Người chơi:</font> %d / %d\n<font color='#FF00FF'>ID SV:</font> %s", fps, ping, pCount, maxP, jobText)
         local execTime = math.floor(workspace.DistributedGameTime); local hours = math.floor(execTime / 3600); local mins = math.floor((execTime % 3600) / 60); local secs = execTime % 60
         local timeString = string.format("%02d:%02d:%02d", hours, mins, secs)
-        extraInfoLabel.Text = string.format("<font color='#FF00FF'>Thời gian chơi:</font> %s\n<font color='#FF00FF'>Giờ hệ thống:</font> %s\n<font color='#FF00FF'>Phiên bản:</font> MENU VIP PRO MAX", timeString, os.date("%H:%M:%S"))
+        extraInfoLabel.Text = string.format("<font color='#FF00FF'>Thời gian chơi:</font> %s\n<font color='#FF00FF'>Giờ hệ thống:</font> %s\n<font color='#FF00FF'>Phiên bản:</font> MENU VIP PRO MAX V1.12.3", timeString, os.date("%H:%M:%S"))
     end
 end)
 
 -- ==========================================
--- [TAB 2: NHÂN VẬT]
+-- [TAB 2: TÍNH NĂNG]
 -- ==========================================
 createToggle(page2, "🛡️ Chống ngã", "AntiStun")
 createToggle(page2, "🔒 Khóa vị trí", "LockPosition", function(v) if not v and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then player.Character.HumanoidRootPart.Anchored = false end end)
@@ -467,14 +467,11 @@ UIS.JumpRequest:Connect(function() if State.InfJump and player.Character and pla
 createToggle(page2, "🐿️ Lấy đồ nhanh", "Instant")
 createToggle(page2, "🧲 Auto nhặt đồ xung quanh", "AutoCollect")
 
--- FIX: Khôi phục thuộc tính vật lý lập tức khi tắt Noclip để triệt tiêu hoàn toàn kẹt bậc thềm
-createToggle(page2, "🚷 Đi xuyên tường", "Noclip", function(v) 
+createToggle(page2, "𚗷 Đi xuyên tường", "Noclip", function(v) 
     if not v and player.Character then 
         pcall(function()
             for _, part in ipairs(player.Character:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.CanCollide = true
-                end
+                if part:IsA("BasePart") then part.CanCollide = true end
             end
             if player.Character:FindFirstChildOfClass("Humanoid") then 
                 player.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.GettingUp)
@@ -511,14 +508,14 @@ createToggle(page2, "🔴 ESP người chơi", "ESP")
 -- ==========================================
 -- [TAB 3: PLAYER]
 -- ==========================================
+-- FIX FLY: Thêm Toggle và Slider quản lý Bay nguyên bản (Native Fly) không dùng link ngoài
+createToggle(page3, "🕊️ BẬT CHẾ ĐỘ BAY (FLY)", "Fly")
+createSlider(page3, "Tốc độ bay", 10, 300, "FlySpeed")
+
 local defaultWalkSpeed = 16
 createToggle(page3, "🏃 Chạy nhanh", "Speed", function(v) 
     if player.Character and player.Character:FindFirstChild("Humanoid") then 
-        if v then
-            defaultWalkSpeed = player.Character.Humanoid.WalkSpeed
-        else
-            player.Character.Humanoid.WalkSpeed = defaultWalkSpeed 
-        end
+        if v then defaultWalkSpeed = player.Character.Humanoid.WalkSpeed else player.Character.Humanoid.WalkSpeed = defaultWalkSpeed end
     end 
 end)
 createSlider(page3, "Tốc độ chạy", 0, 1000, "SpeedValue")
@@ -526,12 +523,7 @@ createSlider(page3, "Tốc độ chạy", 0, 1000, "SpeedValue")
 local defaultJumpPower = 50
 createToggle(page3, "🦘 Nhảy cao", "Jump", function(v) 
     if player.Character and player.Character:FindFirstChild("Humanoid") then 
-        if v then
-            defaultJumpPower = player.Character.Humanoid.JumpPower
-        else
-            player.Character.Humanoid.UseJumpPower = true
-            player.Character.Humanoid.JumpPower = defaultJumpPower 
-        end
+        if v then defaultJumpPower = player.Character.Humanoid.JumpPower else player.Character.Humanoid.UseJumpPower = true; player.Character.Humanoid.JumpPower = defaultJumpPower end
     end 
 end)
 createSlider(page3, "Lực nhảy", 0, 1000, "JumpValue")
@@ -595,9 +587,7 @@ task.spawn(function()
                             firetouchinterest(root, part, 0)
                             task.wait(0.01)
                             firetouchinterest(root, part, 1) 
-                        else 
-                            part.CFrame = root.CFrame 
-                        end
+                        else part.CFrame = root.CFrame end
                     end
                 end
             end
@@ -609,19 +599,13 @@ end)
 -- [TAB 4: TIỆN ÍCH]
 -- ==========================================
 createToggle(page4, "💾 Lưu Cài Đặt", "AutoSave", function(v) 
-    if v then 
-        saveConfig()
-        MakeToast("Đã Bật", "Đã lưu lại cấu hình hiện tại và sẽ tự động lưu!", Theme.AccentOn)
-    else
-        pcall(function() if isfile and isfile(configFileName) then delfile(configFileName) end end)
-        MakeToast("Đã Tắt", "Đã xóa file cấu hình. Menu sẽ reset vào lần sau!", Theme.AccentOff)
-    end 
+    if v then saveConfig(); MakeToast("Đã Bật", "Đã lưu cấu hình hiện tại!", Theme.AccentOn)
+    else pcall(function() if isfile and isfile(configFileName) then delfile(configFileName) end end); MakeToast("Đã Tắt", "Đã xóa cấu hình cũ!", Theme.AccentOff) end 
 end)
 
 createToggle(page4, "🌈 Chế độ RGB", "RGB", function(v) 
     if not v then 
-        titleLabel.TextColor3 = Theme.TextTitle; frameStroke.Color = Theme.Stroke; headerStroke.Color = Theme.Stroke; avatarStroke.Color = Theme.Brand
-        openStroke.Color = opened and Theme.AccentOff or Theme.Brand
+        titleLabel.TextColor3 = Theme.TextTitle; frameStroke.Color = Theme.Stroke; headerStroke.Color = Theme.Stroke; avatarStroke.Color = Theme.Brand; openStroke.Color = opened and Theme.AccentOff or Theme.Brand
         for _, obj in pairs(RGBElements) do
             if obj.Stroke and obj.Stroke.Parent then
                 if obj.Type == "Toggle" then obj.Stroke.Color = obj.State() and Theme.AccentOn or Theme.Stroke
@@ -635,13 +619,8 @@ end)
 createToggle(page4, "🖱️ Auto Click", "AutoClick")
 task.spawn(function()
     while task.wait(0.05) do
-        if State.AutoClick then
-            pcall(function()
-                if player.Character then 
-                    local tool = player.Character:FindFirstChildOfClass("Tool")
-                    if tool then tool:Activate() end 
-                end
-            end)
+        if State.AutoClick and player.Character then
+            pcall(function() local tool = player.Character:FindFirstChildOfClass("Tool"); if tool then tool:Activate() end end)
         end
     end
 end)
@@ -677,172 +656,94 @@ end
 createDualButtons(page4, "🌞 Trời SÁNG (Fake)", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12 end, "🌚 Trời TỐI (Fake)", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0 end)
 createDualButtons(page4, "🔄 VÀO LẠI SV", Theme.AccentOn, rejoinServer, "🎲 ĐỔI SV NGẪU NHIÊN", Theme.Brand, function() hopServer("Desc") end)
 createDualButtons(page4, "📉 ĐỔI SV ÍT NGƯỜI", Color3.fromRGB(52, 152, 219), function() hopServer("Asc") end, "📈 ĐỔI SV NHIỀU NGƯỜI", Color3.fromRGB(231, 76, 60), function() hopServer("Desc") end)
-createDualButtons(page4, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) end, "📂 TP SAVE V2 GUI", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
-createDualButtons(page4, "🕊️ FLY V1", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end, "🕊️ FLY V3", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end) end)
+createDualButtons(page4, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) end, "📂 FE TP GUI", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
 
 -- ==========================================
--- [TAB 5: PHÁT NHẠC VÀ LƯU TRỮ VĨNH VIỄN]
+-- [TAB 5: NHẠC ID]
 -- ==========================================
 local currentSound = nil; local currentMusicId = ""; local savedMusicList = {}
-
-local musicControlFrame = Instance.new("Frame", page5)
-musicControlFrame.Size = UDim2.new(0.9, 0, 0, 85); musicControlFrame.BackgroundColor3 = Theme.ItemBg; musicControlFrame.ZIndex = 10; musicControlFrame.LayoutOrder = 1
-Instance.new("UICorner", musicControlFrame).CornerRadius = UDim.new(0, 8)
+local musicControlFrame = Instance.new("Frame", page5); musicControlFrame.Size = UDim2.new(0.9, 0, 0, 85); musicControlFrame.BackgroundColor3 = Theme.ItemBg; musicControlFrame.ZIndex = 10; musicControlFrame.LayoutOrder = 1; Instance.new("UICorner", musicControlFrame).CornerRadius = UDim.new(0, 8)
 local mStroke = Instance.new("UIStroke", musicControlFrame); mStroke.Color = Theme.Stroke; mStroke.Thickness = 1.5; table.insert(RGBElements, {Type = "Info", Stroke = mStroke})
+local musicIcon = Instance.new("TextLabel", musicControlFrame); musicIcon.Size = UDim2.new(0.15, 0, 0, 40); musicIcon.BackgroundTransparency = 1; musicIcon.Text = "🎼"; musicIcon.TextSize = 18; musicIcon.ZIndex = 10
+local musicIdBox = Instance.new("TextBox", musicControlFrame); musicIdBox.Size = UDim2.new(0.65, 0, 0, 40); musicIdBox.Position = UDim2.new(0.15, 0, 0, 0); musicIdBox.BackgroundTransparency = 1; musicIdBox.PlaceholderText = "Nhập ID Nhạc..."; musicIdBox.Text = ""; musicIdBox.TextColor3 = Theme.TextTitle; musicIdBox.Font = Enum.Font.GothamSemibold; musicIdBox.TextSize = 12; musicIdBox.TextXAlignment = Enum.TextXAlignment.Left; musicIdBox.ClearTextOnFocus = false; musicIdBox.ZIndex = 10
+local saveIdBtn = Instance.new("TextButton", musicControlFrame); saveIdBtn.Size = UDim2.new(0.2, 0, 0, 40); saveIdBtn.Position = UDim2.new(0.8, 0, 0, 0); saveIdBtn.BackgroundTransparency = 1; saveIdBtn.Text = "💾 Lưu"; saveIdBtn.TextColor3 = Theme.AccentOn; saveIdBtn.Font = Enum.Font.GothamBold; saveIdBtn.TextSize = 11; saveIdBtn.ZIndex = 10
+local divLine = Instance.new("Frame", musicControlFrame); divLine.Size = UDim2.new(0.9, 0, 0, 1); divLine.Position = UDim2.new(0.05, 0, 0, 40); divLine.BackgroundColor3 = Theme.Stroke; divLine.BorderSizePixel = 0; divLine.ZIndex = 10
+local nowPlayingLabel = Instance.new("TextLabel", musicControlFrame); nowPlayingLabel.Size = UDim2.new(0.9, 0, 0, 45); nowPlayingLabel.Position = UDim2.new(0.05, 0, 0, 40); nowPlayingLabel.BackgroundTransparency = 1; nowPlayingLabel.RichText = true; nowPlayingLabel.Text = "<font color='#FFFFFF'>🎵 Chưa có nhạc phát</font>"; nowPlayingLabel.Font = Enum.Font.GothamSemibold; nowPlayingLabel.TextSize = 13; nowPlayingLabel.TextWrapped = true; nowPlayingLabel.ZIndex = 10
 
-local musicIcon = Instance.new("TextLabel", musicControlFrame)
-musicIcon.Size = UDim2.new(0.15, 0, 0, 40); musicIcon.BackgroundTransparency = 1; musicIcon.Text = "🎼"; musicIcon.TextSize = 18; musicIcon.ZIndex = 10
-local musicIdBox = Instance.new("TextBox", musicControlFrame)
-musicIdBox.Size = UDim2.new(0.65, 0, 0, 40); musicIdBox.Position = UDim2.new(0.15, 0, 0, 0); musicIdBox.BackgroundTransparency = 1; musicIdBox.PlaceholderText = "Nhập ID Nhạc..."; musicIdBox.Text = ""; musicIdBox.TextColor3 = Theme.TextTitle; musicIdBox.Font = Enum.Font.GothamSemibold; musicIdBox.TextSize = 12; musicIdBox.TextXAlignment = Enum.TextXAlignment.Left; musicIdBox.ClearTextOnFocus = false; musicIdBox.ZIndex = 10
-local saveIdBtn = Instance.new("TextButton", musicControlFrame)
-saveIdBtn.Size = UDim2.new(0.2, 0, 0, 40); saveIdBtn.Position = UDim2.new(0.8, 0, 0, 0); saveIdBtn.BackgroundTransparency = 1; saveIdBtn.Text = "💾 Lưu"; saveIdBtn.TextColor3 = Theme.AccentOn; saveIdBtn.Font = Enum.Font.GothamBold; saveIdBtn.TextSize = 11; saveIdBtn.ZIndex = 10
-local divLine = Instance.new("Frame", musicControlFrame)
-divLine.Size = UDim2.new(0.9, 0, 0, 1); divLine.Position = UDim2.new(0.05, 0, 0, 40); divLine.BackgroundColor3 = Theme.Stroke; divLine.BorderSizePixel = 0; divLine.ZIndex = 10
-local nowPlayingLabel = Instance.new("TextLabel", musicControlFrame)
-nowPlayingLabel.Size = UDim2.new(0.9, 0, 0, 45); nowPlayingLabel.Position = UDim2.new(0.05, 0, 0, 40); nowPlayingLabel.BackgroundTransparency = 1; nowPlayingLabel.RichText = true; nowPlayingLabel.Text = "<font color='#FFFFFF'>🎵 Chưa có bài hát nào đang phát</font>"; nowPlayingLabel.Font = Enum.Font.GothamSemibold; nowPlayingLabel.TextSize = 13; nowPlayingLabel.TextWrapped = true; nowPlayingLabel.ZIndex = 10
-
-local function getSongName(id)
-    local numId = tonumber(id); if not numId then return "ID không hợp lệ!" end
-    local s, info = pcall(function() return MarketplaceService:GetProductInfo(numId) end)
-    if s and info then return info.Name else return "Tên bị ẩn hoặc ID sai" end
-end
-
+local function getSongName(id) local numId = tonumber(id); if not numId then return "ID sai!" end; local s, info = pcall(function() return MarketplaceService:GetProductInfo(numId) end); if s and info then return info.Name else return "Ẩn danh" end end
 local function playMusic(id)
-    if currentSound then currentSound:Destroy() end
-    local soundId = tostring(id):match("%d+"); if not soundId or soundId == "" then return end
-    currentMusicId = soundId
-    nowPlayingLabel.Text = "<font color='#FFFFFF'>⏳ Đang tải:</font> <font color='#FFFF00'>" .. soundId .. "...</font>"
-    task.spawn(function()
-        local name = getSongName(soundId)
-        if currentMusicId == soundId then nowPlayingLabel.Text = "<font color='#FFFFFF'>🎵 Đang phát:</font> <font color='#FFFF00'>" .. name .. "</font>" end
-    end)
+    if currentSound then currentSound:Destroy() end; local soundId = tostring(id):match("%d+"); if not soundId or soundId == "" then return end
+    currentMusicId = soundId; nowPlayingLabel.Text = "<font color='#FFFFFF'>⏳ Tải...</font>"
+    task.spawn(function() local name = getSongName(soundId); if currentMusicId == soundId then nowPlayingLabel.Text = "<font color='#FFFFFF'>🎵 Phát:</font> <font color='#FFFF00'>" .. name .. "</font>" end end)
     currentSound = Instance.new("Sound"); currentSound.SoundId = "rbxassetid://" .. soundId; currentSound.Volume = State.MusicVolume; currentSound.Parent = workspace
     currentSound.Ended:Connect(function()
         if #savedMusicList > 0 then
-            local currentIndex = 0; for i, v in ipairs(savedMusicList) do if v.id == currentMusicId then currentIndex = i; break end end
-            local nextIndex = currentIndex + 1; if nextIndex > #savedMusicList then nextIndex = 1 end
-            playMusic(savedMusicList[nextIndex].id)
+            local cx = 0; for i, v in ipairs(savedMusicList) do if v.id == currentMusicId then cx = i; break end end
+            local nx = cx + 1; if nx > #savedMusicList then nx = 1 end; playMusic(savedMusicList[nx].id)
         end
     end)
     currentSound:Play()
 end
+local function stopMusic() if currentSound then currentSound:Stop(); currentSound:Destroy(); currentSound = nil; currentMusicId = ""; nowPlayingLabel.Text = "<font color='#FFFFFF'>⏹ Đã dừng nhạc</font>" end end
 
-local function stopMusic()
-    if currentSound then currentSound:Stop(); currentSound:Destroy(); currentSound = nil; currentMusicId = ""; nowPlayingLabel.Text = "<font color='#FFFFFF'>⏹ Đã dừng phát nhạc</font>" end
-end
-
-local playControlFrame = createDualButtons(page5, "▶️ PHÁT NHẠC", Theme.AccentOn, function() playMusic(musicIdBox.Text) end, "⏸️ TẮT NHẠC", Theme.AccentOff, function() stopMusic() end)
-playControlFrame.LayoutOrder = 2
-local volumeFrame = createSlider(page5, "ÂM LƯỢNG 🔊", 0, 10, "MusicVolume", function(val) if currentSound then currentSound.Volume = val end end)
-volumeFrame.LayoutOrder = 3
-
-local savedMusicContent = Instance.new("ScrollingFrame", page5)
-savedMusicContent.Size = UDim2.new(0.9, 0, 1, -265); savedMusicContent.BackgroundTransparency = 1
-savedMusicContent.ScrollBarThickness = 3; savedMusicContent.ScrollBarImageColor3 = Theme.Brand
-savedMusicContent.BorderSizePixel = 0; savedMusicContent.ZIndex = 10; savedMusicContent.LayoutOrder = 4
-local sLayout = Instance.new("UIListLayout", savedMusicContent)
-sLayout.SortOrder = Enum.SortOrder.LayoutOrder; sLayout.Padding = UDim.new(0, 8)
-sLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    savedMusicContent.CanvasSize = UDim2.new(0, 0, 0, sLayout.AbsoluteContentSize.Y + 20)
-end)
+local playControlFrame = createDualButtons(page5, "▶️ PHÁT NHẠC", Theme.AccentOn, function() playMusic(musicIdBox.Text) end, "⏸️ TẮT NHẠC", Theme.AccentOff, function() stopMusic() end); playControlFrame.LayoutOrder = 2
+local volumeFrame = createSlider(page5, "ÂM LƯỢNG 🔊", 0, 10, "MusicVolume", function(val) if currentSound then currentSound.Volume = val end end); volumeFrame.LayoutOrder = 3
+local savedMusicContent = Instance.new("ScrollingFrame", page5); savedMusicContent.Size = UDim2.new(0.9, 0, 1, -265); savedMusicContent.BackgroundTransparency = 1; savedMusicContent.ScrollBarThickness = 3; savedMusicContent.ScrollBarImageColor3 = Theme.Brand; savedMusicContent.BorderSizePixel = 0; savedMusicContent.ZIndex = 10; savedMusicContent.LayoutOrder = 4
+local sLayout = Instance.new("UIListLayout", savedMusicContent); sLayout.SortOrder = Enum.SortOrder.LayoutOrder; sLayout.Padding = UDim.new(0, 8)
+sLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() savedMusicContent.CanvasSize = UDim2.new(0, 0, 0, sLayout.AbsoluteContentSize.Y + 20) end)
 
 local fileName = "MenuVipProMax_SavedMusic.json"
-local function loadMusicData() pcall(function() if isfile and isfile(fileName) then local data = readfile(fileName); local decoded = HttpService:JSONDecode(data); if type(decoded) == "table" then savedMusicList = decoded end end end) end
+pcall(function() if isfile and isfile(fileName) then local decoded = HttpService:JSONDecode(readfile(fileName)); if type(decoded) == "table" then savedMusicList = decoded end end end)
 local function saveMusicData() pcall(function() if writefile then writefile(fileName, HttpService:JSONEncode(savedMusicList)) end end) end
-loadMusicData()
 
 local function renderSavedMusic()
     for _, child in pairs(savedMusicContent:GetChildren()) do if child:IsA("Frame") then child:Destroy() end end
     for i, data in ipairs(savedMusicList) do
-        local item = Instance.new("Frame", savedMusicContent)
-        item.Size = UDim2.new(1, 0, 0, 48); item.BackgroundColor3 = Theme.ItemBg; item.ZIndex = 10; Instance.new("UICorner", item).CornerRadius = UDim.new(0, 8)
-        local stroke = Instance.new("UIStroke", item); stroke.Color = State.RGB and Color3.fromHSV(tick() % 5 / 5, 1, 1) or Theme.Stroke; stroke.Thickness = 1.5; table.insert(RGBElements, {Type = "Info", Stroke = stroke})
-        
-        local iconLabel = Instance.new("TextLabel", item); iconLabel.Size = UDim2.new(0.08, 0, 1, 0); iconLabel.BackgroundTransparency = 1; iconLabel.Text = "🎶"; iconLabel.TextColor3 = Theme.Brand; iconLabel.TextSize = 11; iconLabel.ZIndex = 10
-        local nameBox = Instance.new("TextBox", item); nameBox.Size = UDim2.new(0.52, 0, 1, 0); nameBox.Position = UDim2.new(0.08, 0, 0, 0); nameBox.Text = data.name; nameBox.TextColor3 = Theme.TextTitle; nameBox.Font = Enum.Font.GothamSemibold; nameBox.TextSize = 11; nameBox.BackgroundTransparency = 1; nameBox.TextXAlignment = Enum.TextXAlignment.Left; nameBox.TextWrapped = true; nameBox.ClearTextOnFocus = false; nameBox.ZIndex = 10
+        local item = Instance.new("Frame", savedMusicContent); item.Size = UDim2.new(1, 0, 0, 48); item.BackgroundColor3 = Theme.ItemBg; item.ZIndex = 10; Instance.new("UICorner", item).CornerRadius = UDim.new(0, 8)
+        local stroke = Instance.new("UIStroke", item); stroke.Color = Theme.Stroke; stroke.Thickness = 1.5; table.insert(RGBElements, {Type = "Info", Stroke = stroke})
+        local nameBox = Instance.new("TextBox", item); nameBox.Size = UDim2.new(0.52, 0, 1, 0); nameBox.Position = UDim2.new(0.08, 0, 0, 0); nameBox.Text = data.name; nameBox.TextColor3 = Theme.TextTitle; nameBox.Font = Enum.Font.GothamSemibold; nameBox.TextSize = 11; nameBox.BackgroundTransparency = 1; nameBox.TextXAlignment = Enum.TextXAlignment.Left; nameBox.ClearTextOnFocus = false; nameBox.ZIndex = 10
         nameBox.FocusLost:Connect(function() if nameBox.Text ~= "" then data.name = nameBox.Text; saveMusicData() else nameBox.Text = data.name end end)
-        
         local playBtn = Instance.new("TextButton", item); playBtn.Size = UDim2.new(0.18, 0, 0.6, 0); playBtn.Position = UDim2.new(0.62, 0, 0.2, 0); playBtn.Text = "▶️"; playBtn.BackgroundColor3 = Theme.Brand; playBtn.TextColor3 = Color3.new(1,1,1); playBtn.Font = Enum.Font.GothamBold; playBtn.TextSize = 11; playBtn.ZIndex = 10; Instance.new("UICorner", playBtn).CornerRadius = UDim.new(0, 6)
         local delBtn = Instance.new("TextButton", item); delBtn.Size = UDim2.new(0.15, 0, 0.6, 0); delBtn.Position = UDim2.new(0.82, 0, 0.2, 0); delBtn.Text = "❌"; delBtn.BackgroundColor3 = Theme.AccentOff; delBtn.TextColor3 = Color3.new(1,1,1); delBtn.Font = Enum.Font.GothamBold; delBtn.TextSize = 12; delBtn.ZIndex = 10; Instance.new("UICorner", delBtn).CornerRadius = UDim.new(0, 6)
-        
         playBtn.MouseButton1Click:Connect(function() clickAnimate(playBtn); musicIdBox.Text = data.id; playMusic(data.id) end)
         delBtn.MouseButton1Click:Connect(function() clickAnimate(delBtn); table.remove(savedMusicList, i); saveMusicData(); renderSavedMusic() end)
     end
 end
-saveIdBtn.MouseButton1Click:Connect(function()
-    clickAnimate(saveIdBtn); local rawId = musicIdBox.Text:match("%d+"); if rawId and rawId ~= "" then
-        saveIdBtn.Text = "⏳..."
-        task.spawn(function() local name = getSongName(rawId); table.insert(savedMusicList, {id = rawId, name = name}); saveMusicData(); renderSavedMusic(); saveIdBtn.Text = "💾 Lưu" end)
-    end
-end)
+saveIdBtn.MouseButton1Click:Connect(function() clickAnimate(saveIdBtn); local rawId = musicIdBox.Text:match("%d+"); if rawId and rawId ~= "" then saveIdBtn.Text = "⏳..."; task.spawn(function() local name = getSongName(rawId); table.insert(savedMusicList, {id = rawId, name = name}); saveMusicData(); renderSavedMusic(); saveIdBtn.Text = "💾 Lưu" end) end end)
 renderSavedMusic()
 
 -- ==========================================
--- [TAB 6: VỊ TRÍ TP SAVE]
+-- [TAB 6: TP SAVE]
 -- ==========================================
-local tpFileName = "MenuVipProMax_SavedTPs.json"
-local savedTpList = {}
-local function loadTpData() pcall(function() if isfile and isfile(tpFileName) then local data = readfile(tpFileName); local decoded = HttpService:JSONDecode(data); if type(decoded) == "table" then savedTpList = decoded end end end) end
-local function saveTpData() pcall(function() if writefile then local dataToSave = {}; for _, v in ipairs(savedTpList) do if not v.isTemp then table.insert(dataToSave, v) end end; writefile(tpFileName, HttpService:JSONEncode(dataToSave)) end end) end
-loadTpData()
-
+local tpFileName = "MenuVipProMax_SavedTPs.json"; local savedTpList = {}; pcall(function() if isfile and isfile(tpFileName) then local decoded = HttpService:JSONDecode(readfile(tpFileName)); if type(decoded) == "table" then savedTpList = decoded end end end)
+local function saveTpData() pcall(function() if writefile then local d = {}; for _, v in ipairs(savedTpList) do if not v.isTemp then table.insert(d, v) end end; writefile(tpFileName, HttpService:JSONEncode(d)) end end) end
 local pendingDeleteAll = false
 
 local tpControlFrame_New = createDualButtons(page6, "📍 LƯU VỊ TRÍ", Theme.Brand, function()
     if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        local root = player.Character.HumanoidRootPart
-        local cf = {root.CFrame:GetComponents()}
-        local maxId = 0
-        for _, v in ipairs(savedTpList) do
-            local num = string.match(v.name, "Lưu Vị Trí (%d+)")
-            if num then maxId = math.max(maxId, tonumber(num)) end
-        end
-        local name = "Lưu Vị Trí " .. (maxId + 1)
-        
-        table.insert(savedTpList, {name = name, cframe = cf, isTemp = false})
-        saveTpData()
-        if renderSavedTps then renderSavedTps() end
+        local root = player.Character.HumanoidRootPart; local cf = {root.CFrame:GetComponents()}; local mx = 0
+        for _, v in ipairs(savedTpList) do local num = string.match(v.name, "Lưu Vị Trí (%d+)"); if num then mx = math.max(mx, tonumber(num)) end end
+        table.insert(savedTpList, {name = "Lưu Vị Trí " .. (mx + 1), cframe = cf, isTemp = false}); saveTpData(); renderSavedTps()
     end
 end, "🗑️ XÓA TẤT CẢ", Theme.AccentOff, function() 
-    if not pendingDeleteAll then
-        pendingDeleteAll = true
-        MakeToast("⚠️ CẢNH BÁO", "Bấm 'XÓA TẤT CẢ' ấn lần nữa để xác nhận xóa toàn bộ!", Theme.AccentOff)
-        task.delay(3, function() pendingDeleteAll = false end)
-    else
-        savedTpList = {}
-        saveTpData()
-        if renderSavedTps then renderSavedTps() end 
-        MakeToast("Thành công", "Đã dọn dẹp sạch toàn bộ danh sách!", Theme.Brand)
-        pendingDeleteAll = false
-    end
-end)
-tpControlFrame_New.LayoutOrder = 1 
+    if not pendingDeleteAll then pendingDeleteAll = true; MakeToast("⚠️ CẢNH BÁO", "Ấn lần nữa để xác nhận xóa sạch!", Theme.AccentOff); task.delay(3, function() pendingDeleteAll = false end)
+    else savedTpList = {}; saveTpData(); renderSavedTps(); MakeToast("Thành công", "Đã xóa toàn bộ!", Theme.Brand); pendingDeleteAll = false end
+end); tpControlFrame_New.LayoutOrder = 1 
 
-local savedTpContent = Instance.new("ScrollingFrame", page6)
-savedTpContent.Size = UDim2.new(0.9, 0, 1, -114); savedTpContent.BackgroundTransparency = 1
-savedTpContent.ScrollBarThickness = 3; savedTpContent.ScrollBarImageColor3 = Theme.Brand
-savedTpContent.BorderSizePixel = 0; savedTpContent.ZIndex = 10; savedTpContent.LayoutOrder = 2
-local tpLayout = Instance.new("UIListLayout", savedTpContent)
-tpLayout.SortOrder = Enum.SortOrder.LayoutOrder; tpLayout.Padding = UDim.new(0, 8)
-tpLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    savedTpContent.CanvasSize = UDim2.new(0, 0, 0, tpLayout.AbsoluteContentSize.Y + 20)
-end)
+local savedTpContent = Instance.new("ScrollingFrame", page6); savedTpContent.Size = UDim2.new(0.9, 0, 1, -114); savedTpContent.BackgroundTransparency = 1; savedTpContent.ScrollBarThickness = 3; savedTpContent.ScrollBarImageColor3 = Theme.Brand; savedTpContent.BorderSizePixel = 0; savedTpContent.ZIndex = 10; savedTpContent.LayoutOrder = 2
+local tpLayout = Instance.new("UIListLayout", savedTpContent); tpLayout.SortOrder = Enum.SortOrder.LayoutOrder; tpLayout.Padding = UDim.new(0, 8)
+tpLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() savedTpContent.CanvasSize = UDim2.new(0, 0, 0, tpLayout.AbsoluteContentSize.Y + 20) end)
 
 function renderSavedTps()
     for _, child in pairs(savedTpContent:GetChildren()) do if child:IsA("Frame") then child:Destroy() end end
     for i, data in ipairs(savedTpList) do
-        local item = Instance.new("Frame", savedTpContent)
-        item.Size = UDim2.new(1, 0, 0, 48); item.BackgroundColor3 = Theme.ItemBg; item.ZIndex = 10; Instance.new("UICorner", item).CornerRadius = UDim.new(0, 8)
-        local stroke = Instance.new("UIStroke", item); stroke.Color = State.RGB and Color3.fromHSV(tick() % 5 / 5, 1, 1) or Theme.Stroke; stroke.Thickness = 1.5; table.insert(RGBElements, {Type = "Info", Stroke = stroke})
-        
-        local nameBox = Instance.new("TextBox", item)
-        nameBox.Size = UDim2.new(0.45, 0, 1, 0); nameBox.Position = UDim2.new(0.05, 0, 0, 0); nameBox.Text = data.name; nameBox.TextColor3 = Theme.TextTitle; nameBox.Font = Enum.Font.GothamSemibold; nameBox.TextSize = 12; nameBox.BackgroundTransparency = 1; nameBox.TextXAlignment = Enum.TextXAlignment.Left; nameBox.ClearTextOnFocus = false; nameBox.ZIndex = 10
+        local item = Instance.new("Frame", savedTpContent); item.Size = UDim2.new(1, 0, 0, 48); item.BackgroundColor3 = Theme.ItemBg; item.ZIndex = 10; Instance.new("UICorner", item).CornerRadius = UDim.new(0, 8)
+        local stroke = Instance.new("UIStroke", item); stroke.Color = Theme.Stroke; stroke.Thickness = 1.5; table.insert(RGBElements, {Type = "Info", Stroke = stroke})
+        local nameBox = Instance.new("TextBox", item); nameBox.Size = UDim2.new(0.45, 0, 1, 0); nameBox.Position = UDim2.new(0.05, 0, 0, 0); nameBox.Text = data.name; nameBox.TextColor3 = Theme.TextTitle; nameBox.Font = Enum.Font.GothamSemibold; nameBox.TextSize = 12; nameBox.BackgroundTransparency = 1; nameBox.TextXAlignment = Enum.TextXAlignment.Left; nameBox.ClearTextOnFocus = false; nameBox.ZIndex = 10
         nameBox.FocusLost:Connect(function() if nameBox.Text ~= "" then data.name = nameBox.Text; saveTpData() else nameBox.Text = data.name end end)
-
         local tpBtn = Instance.new("TextButton", item); tpBtn.Size = UDim2.new(0.25, 0, 0.6, 0); tpBtn.Position = UDim2.new(0.53, 0, 0.2, 0); tpBtn.Text = "TP"; tpBtn.BackgroundColor3 = Theme.Brand; tpBtn.TextColor3 = Color3.new(1,1,1); tpBtn.Font = Enum.Font.GothamBold; tpBtn.TextSize = 11; tpBtn.ZIndex = 10; Instance.new("UICorner", tpBtn).CornerRadius = UDim.new(0, 6)
         local delBtn = Instance.new("TextButton", item); delBtn.Size = UDim2.new(0.15, 0, 0.6, 0); delBtn.Position = UDim2.new(0.81, 0, 0.2, 0); delBtn.Text = "X"; delBtn.BackgroundColor3 = Theme.AccentOff; delBtn.TextColor3 = Color3.new(1,1,1); delBtn.Font = Enum.Font.GothamBold; delBtn.TextSize = 12; delBtn.ZIndex = 10; Instance.new("UICorner", delBtn).CornerRadius = UDim.new(0, 6)
-        
-        tpBtn.MouseButton1Click:Connect(function() clickAnimate(tpBtn); if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then local cf = CFrame.new(unpack(data.cframe)); player.Character.HumanoidRootPart.CFrame = cf; MakeToast("Dịch chuyển", "Đã TP đến " .. data.name, Theme.Brand) end end)
+        tpBtn.MouseButton1Click:Connect(function() clickAnimate(tpBtn); if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then player.Character.HumanoidRootPart.CFrame = CFrame.new(unpack(data.cframe)); MakeToast("Dịch chuyển", "Đến " .. data.name, Theme.Brand) end end)
         delBtn.MouseButton1Click:Connect(function() clickAnimate(delBtn); table.remove(savedTpList, i); saveTpData(); renderSavedTps() end)
     end
 end
@@ -852,45 +753,25 @@ renderSavedTps()
 -- [TAB 7: TP NGƯỜI CHƠI]
 -- ==========================================
 local function updatePlayerList()
-    local cleanRGB = {}
-    for _, obj in ipairs(RGBElements) do if obj.Stroke and obj.Stroke.Parent then table.insert(cleanRGB, obj) end end
-    RGBElements = cleanRGB
+    local cleanRGB = {}; for _, obj in ipairs(RGBElements) do if obj.Stroke and obj.Stroke.Parent then table.insert(cleanRGB, obj) end end; RGBElements = cleanRGB
     for _, child in pairs(page7:GetChildren()) do if child.Name == "PaddingFrame" then child:Destroy() end end
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= player then
             local pFrame = Instance.new("Frame", page7); pFrame.Name = "PaddingFrame"; pFrame.Size = UDim2.new(0.9, 0, 0, 48); pFrame.BackgroundTransparency = 1; pFrame.ZIndex = 10
-            local btn = Instance.new("TextButton", pFrame); btn.Name = "PlayerBtn_TP"; btn.Size = UDim2.new(1, 0, 1, 0); btn.BackgroundColor3 = Theme.ItemBg; btn.Text = ""; btn.AutoButtonColor = false; btn.ZIndex = 10; Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
-            local currentColor = State.RGB and Color3.fromHSV(tick() % 5 / 5, 1, 1) or Theme.Stroke
-            local stroke = Instance.new("UIStroke", btn); stroke.Color = currentColor; stroke.Thickness = 1.5; table.insert(RGBElements, {Type = "Info", Stroke = stroke})
-            local nLabel = Instance.new("TextLabel", btn); nLabel.Size = UDim2.new(0.7, 0, 0.5, 0); nLabel.Position = UDim2.new(0.05, 0, 0.05, 0); nLabel.BackgroundTransparency = 1; nLabel.Text = "👤  " .. p.DisplayName; nLabel.TextColor3 = Theme.TextTitle; nLabel.Font = Enum.Font.GothamSemibold; nLabel.TextSize = 13; nLabel.TextXAlignment = Enum.TextXAlignment.Left; nLabel.ZIndex = 10
+            local btn = Instance.new("TextButton", pFrame); btn.Size = UDim2.new(1, 0, 1, 0); btn.BackgroundColor3 = Theme.ItemBg; btn.Text = ""; btn.AutoButtonColor = false; btn.ZIndex = 10; Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+            local stroke = Instance.new("UIStroke", btn); stroke.Color = Theme.Stroke; stroke.Thickness = 1.5; table.insert(RGBElements, {Type = "Info", Stroke = stroke})
+            local nLabel = Instance.new("TextLabel", btn); nLabel.Size = UDim2.new(0.7, 0, 0.5, 0); nLabel.Position = UDim2.new(0.05, 0, 0.05, 0); nLabel.BackgroundTransparency = 1; nLabel.Text = "👤 " .. p.DisplayName; nLabel.TextColor3 = Theme.TextTitle; nLabel.Font = Enum.Font.GothamSemibold; nLabel.TextSize = 13; nLabel.TextXAlignment = Enum.TextXAlignment.Left; nLabel.ZIndex = 10
             local subLabel = Instance.new("TextLabel", btn); subLabel.Size = UDim2.new(0.7, 0, 0.45, 0); subLabel.Position = UDim2.new(0.05, 0, 0.5, 0); subLabel.BackgroundTransparency = 1; subLabel.Text = "@" .. p.Name; subLabel.TextColor3 = Color3.fromRGB(100, 255, 100); subLabel.Font = Enum.Font.Gotham; subLabel.TextSize = 10; subLabel.TextXAlignment = Enum.TextXAlignment.Left; subLabel.ZIndex = 10
             local targetAvatar = Instance.new("ImageLabel", btn); targetAvatar.Size = UDim2.new(0, 32, 0, 32); targetAvatar.Position = UDim2.new(1, -42, 0.5, -16); targetAvatar.BackgroundTransparency = 1; targetAvatar.ZIndex = 10; Instance.new("UICorner", targetAvatar).CornerRadius = UDim.new(1, 0)
-            local targetStroke = Instance.new("UIStroke", targetAvatar); targetStroke.Color = currentColor; targetStroke.Thickness = 1.5; targetStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border; table.insert(RGBElements, {Type = "Info", Stroke = targetStroke})
+            local targetStroke = Instance.new("UIStroke", targetAvatar); targetStroke.Color = Theme.Stroke; targetStroke.Thickness = 1.5; targetStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border; table.insert(RGBElements, {Type = "Info", Stroke = targetStroke})
             task.spawn(function() pcall(function() targetAvatar.Image = Players:GetUserThumbnailAsync(p.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420) end) end)
             
             btn.MouseButton1Click:Connect(function()
-                clickAnimate(btn)
-                local targetChar = p.Character
-                local myChar = player.Character
-                
+                clickAnimate(btn); local myChar = player.Character
                 if myChar and myChar:FindFirstChild("HumanoidRootPart") then
-                    local targetCFrame = nil
-                    
-                    if targetChar and targetChar:FindFirstChild("HumanoidRootPart") then
-                        targetCFrame = targetChar.HumanoidRootPart.CFrame
-                    elseif targetChar and targetChar:GetPivot() then
-                        targetCFrame = targetChar:GetPivot()
-                    end
-                    
-                    if targetCFrame then
-                        if not State.RGB then TweenService:Create(stroke, TweenInfo.new(0.3), {Color = Theme.AccentOn}):Play() end
-                        myChar.HumanoidRootPart.CFrame = targetCFrame
-                        MakeToast("Dịch Chuyển", "Đã TP đến " .. p.DisplayName, Theme.Brand)
-                        task.wait(0.5)
-                        if not State.RGB then TweenService:Create(stroke, TweenInfo.new(0.3), {Color = Theme.Stroke}):Play() end
-                    else
-                        MakeToast("Lỗi TP", p.DisplayName .. " ở quá xa (bị ẩn)", Theme.AccentOff)
-                    end
+                    local targetCFrame = p.Character and (p.Character:FindFirstChild("HumanoidRootPart") or p.Character:GetPivot())
+                    if targetCFrame then myChar.HumanoidRootPart.CFrame = targetCFrame; MakeToast("Dịch Chuyển", "Đến " .. p.DisplayName, Theme.Brand)
+                    else MakeToast("Lỗi", "Người chơi bị ẩn map", Theme.AccentOff) end
                 end
             end)
         end
@@ -898,60 +779,32 @@ local function updatePlayerList()
 end
 updatePlayerList(); Players.PlayerAdded:Connect(updatePlayerList); Players.PlayerRemoving:Connect(updatePlayerList)
 
-player.Idled:Connect(function() 
-    if State.AntiAfk then 
-        pcall(function()
-            local cam = workspace.CurrentCamera or camera
-            local cf = cam and cam.CFrame or CFrame.new()
-            VirtualUser:Button2Down(Vector2.new(0,0), cf)
-            task.wait(1)
-            VirtualUser:Button2Up(Vector2.new(0,0), cf) 
-        end)
-    end 
-end)
+player.Idled:Connect(function() if State.AntiAfk then pcall(function() local cam = workspace.CurrentCamera or camera; VirtualUser:Button2Down(Vector2.new(0,0), cam and cam.CFrame or CFrame.new()); task.wait(1); VirtualUser:Button2Up(Vector2.new(0,0), cam and cam.CFrame or CFrame.new()) end) end end)
 
 -- ==========================================
 -- [XỬ LÝ REACH VÀ NOCLIP TRƯỚC KHI VẬT LÝ TÍNH TOÁN]
 -- ==========================================
 RunService.Stepped:Connect(function()
     pcall(function()
-        -- FIX TỐI ƯU HOÁ: Thay GetDescendants thành GetChildren để giảm tải CPU, chống lag văng game tuyệt đối
         if State.Noclip and player.Character then
             for _, part in ipairs(player.Character:GetChildren()) do
-                if part:IsA("BasePart") then
-                    part.CanCollide = false
-                elseif part:IsA("Accessory") and part:FindFirstChild("Handle") then
-                    part.Handle.CanCollide = false
-                end
+                if part:IsA("BasePart") then part.CanCollide = false
+                elseif part:IsA("Accessory") and part:FindFirstChild("Handle") then part.Handle.CanCollide = false end
             end
         end
-
-        -- Xử lý Reach
         if State.Reach and player.Character then
             local tool = player.Character:FindFirstChildOfClass("Tool")
             if tool then
                 for _, part in ipairs(tool:GetDescendants()) do
                     if part:IsA("BasePart") then
-                        if not originalToolSizes[part] then 
-                            originalToolSizes[part] = { Size = part.Size, Trans = part.Transparency, Massless = part.Massless, CanCollide = part.CanCollide } 
-                        end
-                        part.Size = Vector3.new(State.ReachSize, State.ReachSize, State.ReachSize)
-                        part.Massless = true
-                        part.CanCollide = false 
-                        part.Transparency = 0.8 
+                        if not originalToolSizes[part] then originalToolSizes[part] = { Size = part.Size, Trans = part.Transparency, Massless = part.Massless, CanCollide = part.CanCollide } end
+                        part.Size = Vector3.new(State.ReachSize, State.ReachSize, State.ReachSize); part.Massless = true; part.CanCollide = false; part.Transparency = 0.8 
                     end
                 end
             end
         else
             if next(originalToolSizes) then
-                for part, origData in pairs(originalToolSizes) do
-                    if part and part.Parent then 
-                        part.Size = origData.Size
-                        part.Transparency = origData.Trans
-                        part.Massless = origData.Massless
-                        part.CanCollide = origData.CanCollide 
-                    end
-                end
+                for part, origData in pairs(originalToolSizes) do if part and part.Parent then part.Size = origData.Size; part.Transparency = origData.Trans; part.Massless = origData.Massless; part.CanCollide = origData.CanCollide end end
                 originalToolSizes = {}
             end
         end
@@ -959,13 +812,122 @@ RunService.Stepped:Connect(function()
 end)
 
 -- ==========================================
--- [BẢO TỒN HOẠT ĐỘNG LIÊN TỤC]
+-- [HỆ THỐNG ĐIỀU KHIỂN FLY NATIVE]
+-- ==========================================
+local flyBV, flyBG = nil, nil
+local function updateFly()
+    if not State.Fly then
+        if flyBV then flyBV:Destroy(); flyBV = nil end
+        if flyBG then flyBG:Destroy(); flyBG = nil end
+        pcall(function() if player.Character and player.Character:FindFirstChildOfClass("Humanoid") then player.Character:FindFirstChildOfClass("Humanoid").PlatformStand = false end end)
+        return
+    end
+
+    pcall(function()
+        local char = player.Character
+        local root = char and char:FindFirstChild("HumanoidRootPart")
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+        
+        if root and hum then
+            if not flyBG or flyBG.Parent ~= root then
+                if flyBG then flyBG:Destroy() end
+                flyBG = Instance.new("BodyGyro", root)
+                flyBG.P = 9e4; flyBG.maxTorque = Vector3.new(9e9, 9e9, 9e9); flyBG.cframe = root.CFrame
+            end
+            if not flyBV or flyBV.Parent ~= root then
+                if flyBV then flyBV:Destroy() end
+                flyBV = Instance.new("BodyVelocity", root)
+                flyBV.maxForce = Vector3.new(9e9, 9e9, 9e9); flyBV.velocity = Vector3.new(0, 0.1, 0)
+            end
+            
+            hum.PlatformStand = true
+            flyBG.cframe = camera.CFrame
+            
+            local moveDir = hum.MoveDirection
+            if moveDir.Magnitude > 0 then
+                local look = camera.CFrame.LookVector
+                -- Bay linh hoạt 3D theo hướng nút di chuyển (Joystick/WASD) và góc nhìn camera
+                flyBV.velocity = Vector3.new(moveDir.X * State.FlySpeed, look.Y * State.FlySpeed, moveDir.Z * State.FlySpeed)
+            else
+                flyBV.velocity = Vector3.new(0, 0.1, 0)
+            end
+        end
+    end)
+end
+
+-- ==========================================
+-- [VÀ VÁ LỖI CÔ LẬP LUỒNG ESP KHÔNG GÂY SẬP VÒNG LẶP]
+-- ==========================================
+local function updateESP()
+    if not State.ESP then
+        for p, bgui in pairs(ActiveESPs) do if bgui then bgui:Destroy() end; ActiveESPs[p] = nil end
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= player and p.Character and p.Character:FindFirstChildOfClass("Humanoid") then p.Character:FindFirstChildOfClass("Humanoid").DisplayDistanceType = Enum.HumanoidDisplayDistanceType.Viewer end
+        end
+        return
+    end
+
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= player then
+            -- Wrap pcall cho từng người chơi để chống lỗi đồng bộ bản đồ văng game (StreamingEnabled)
+            pcall(function()
+                local tChar = p.Character
+                local espPart = tChar and (tChar:FindFirstChild("HumanoidRootPart") or tChar:FindFirstChild("Head") or tChar.PrimaryPart)
+                local tHum = tChar and tChar:FindFirstChildOfClass("Humanoid")
+
+                if tHum then tHum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None end
+                
+                if espPart then
+                    local bgui = ActiveESPs[p]
+                    if not bgui or bgui.Adornee ~= espPart or not bgui.Parent then
+                        if bgui then bgui:Destroy() end
+                        
+                        bgui = Instance.new("BillboardGui")
+                        bgui.Name = "MobileESP_" .. p.Name
+                        bgui.Size = UDim2.new(0, 200, 0, 50)
+                        bgui.StudsOffset = Vector3.new(0, 3.5, 0)
+                        bgui.AlwaysOnTop = true
+                        bgui.MaxDistance = 9e9
+                        bgui.LightInfluence = 0
+                        bgui.Adornee = espPart
+                        bgui.Parent = guiParent
+                        
+                        local tLabel = Instance.new("TextLabel", bgui)
+                        tLabel.Name = "NameLabel"
+                        tLabel.Size = UDim2.new(1, 0, 1, 0); tLabel.BackgroundTransparency = 1
+                        tLabel.TextColor3 = Color3.fromRGB(255, 60, 60); tLabel.TextStrokeTransparency = 0.2; tLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+                        tLabel.Font = Enum.Font.GothamBold; tLabel.TextSize = 12; tLabel.RichText = true
+                        
+                        ActiveESPs[p] = bgui
+                    end
+                    
+                    local myChar = player.Character
+                    local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+                    if myRoot then
+                        local dist = math.floor((myRoot.Position - espPart.Position).Magnitude)
+                        bgui.NameLabel.Text = p.DisplayName .. '\n<font color="#00FFFF">[' .. dist .. 'm]</font>'
+                    else
+                        bgui.NameLabel.Text = p.DisplayName
+                    end
+                else
+                    if ActiveESPs[p] then ActiveESPs[p]:Destroy(); ActiveESPs[p] = nil end
+                end
+            end)
+        end
+    end
+    
+    for p, bgui in pairs(ActiveESPs) do
+        if not Players:FindFirstChild(p.Name) then if bgui then bgui:Destroy() end; ActiveESPs[p] = nil end
+    end
+end
+
+-- ==========================================
+-- BẢO TỒN HOẠT ĐỘNG LIÊN TỤC VÀ LUỒNG ĐỘC LẬP
 -- ==========================================
 RunService.RenderStepped:Connect(function()
     if State.RGB then
         local hue = tick() % 5 / 5; local color = Color3.fromHSV(hue, 1, 1)
-        titleLabel.TextColor3 = color; frameStroke.Color = color; headerStroke.Color = color; avatarStroke.Color = color
-        openStroke.Color = color
+        titleLabel.TextColor3 = color; frameStroke.Color = color; headerStroke.Color = color; avatarStroke.Color = color; openStroke.Color = color
         for _, obj in pairs(RGBElements) do if obj.Stroke and obj.Stroke.Parent then obj.Stroke.Color = color end end
     end
 
@@ -973,7 +935,6 @@ RunService.RenderStepped:Connect(function()
     local root = char and char:FindFirstChild("HumanoidRootPart")
     if char and char:FindFirstChildOfClass("Humanoid") then
         local hum = char:FindFirstChildOfClass("Humanoid")
-        
         if State.LockPosition and root then root.Anchored = true end
         if State.Speed then hum.WalkSpeed = State.SpeedValue end
         if State.Jump then hum.UseJumpPower = true; hum.JumpPower = State.JumpValue end
@@ -982,21 +943,14 @@ RunService.RenderStepped:Connect(function()
             pcall(function()
                 for _, anim in pairs(hum:GetPlayingAnimationTracks()) do 
                     local p = anim.Priority
-                    if p == Enum.AnimationPriority.Action or p == Enum.AnimationPriority.Action2 or p == Enum.AnimationPriority.Action3 or p == Enum.AnimationPriority.Action4 or p == Enum.AnimationPriority.Weapon then
-                        anim:AdjustSpeed(State.FastAttackSpeed)
-                    end
+                    if p == Enum.AnimationPriority.Action or p == Enum.AnimationPriority.Action2 or p == Enum.AnimationPriority.Action3 or p == Enum.AnimationPriority.Action4 or p == Enum.AnimationPriority.Weapon then anim:AdjustSpeed(State.FastAttackSpeed) end
                 end
             end)
         end
         
         if State.AntiStun then 
-            hum.PlatformStand = false
-            hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
-            hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
-            if hum:GetState() == Enum.HumanoidStateType.FallingDown or hum:GetState() == Enum.HumanoidStateType.Ragdoll then
-                hum:ChangeState(Enum.HumanoidStateType.GettingUp)
-                if root then root.RotVelocity = Vector3.new(0, 0, 0) end 
-            end
+            hum.PlatformStand = false; hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false); hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+            if hum:GetState() == Enum.HumanoidStateType.FallingDown or hum:GetState() == Enum.HumanoidStateType.Ragdoll then hum:ChangeState(Enum.HumanoidStateType.GettingUp); if root then root.RotVelocity = Vector3.new(0, 0, 0) end end
         end
 
         if State.SpinBot and root then root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(State.SpinSpeed), 0) end
@@ -1008,92 +962,11 @@ RunService.RenderStepped:Connect(function()
             else if light then light:Destroy() end end
         end
         if State.Hitbox then for _, p in pairs(Players:GetPlayers()) do if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then p.Character.HumanoidRootPart.CanCollide = false end end end
-        
-        -- FIX CHỐNG TRÙNG LẶP & HIỆN KHÔNG GIỚI HẠN KHOẢNG CÁCH (UNLIMITED ESP):
-        if State.ESP then
-            for _, p in pairs(Players:GetPlayers()) do
-                if p ~= player then
-                    local tChar = p.Character
-                    -- Tối ưu tìm bộ phận: Thêm PrimaryPart để chống lỗi mất RootPart ở xa
-                    local espPart = tChar and (tChar:FindFirstChild("HumanoidRootPart") or tChar:FindFirstChild("Head") or tChar.PrimaryPart)
-                    local tHum = tChar and tChar:FindFirstChildOfClass("Humanoid")
-
-                    if tHum then tHum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None end
-                    
-                    if espPart then
-                        local bgui = ActiveESPs[p]
-                        -- Kiểm tra nếu chưa có, hoặc Adornee/Parent bị sai lệch do nhân vật respawn
-                        if not bgui or bgui.Adornee ~= espPart or bgui.Parent ~= guiParent then
-                            if bgui then bgui:Destroy() end
-                            
-                            bgui = Instance.new("BillboardGui")
-                            bgui.Name = "MobileESP_" .. p.Name
-                            bgui.Size = UDim2.new(0, 250, 0, 50) -- Tăng khung chứa để không bị cắt chữ ở xa
-                            bgui.StudsOffset = Vector3.new(0, 3.5, 0)
-                            bgui.AlwaysOnTop = true
-                            
-                            -- [FIX 1]: Dùng 9e9 (9 tỉ mét) thay cho math.huge để chống lỗi tự ẩn GUI của Roblox
-                            bgui.MaxDistance = 9e9 
-                            
-                            -- [FIX 2]: Khóa ánh sáng = 0 để ESP luôn sáng rực rỡ dù trong bóng tối hay sương mù xa
-                            bgui.LightInfluence = 0 
-                            bgui.ResetOnSpawn = false
-                            bgui.Adornee = espPart
-                            
-                            -- [FIX 3 QUAN TRỌNG]: Đưa Parent vào CoreGui (guiParent) thay vì gắn vào người khác
-                            -- Giúp ESP không bị văng lỗi khi game Unload map ở xa (StreamingEnabled)
-                            bgui.Parent = guiParent 
-                            
-                            local tLabel = Instance.new("TextLabel", bgui)
-                            tLabel.Name = "NameLabel"
-                            tLabel.Size = UDim2.new(1, 0, 1, 0)
-                            tLabel.BackgroundTransparency = 1
-                            tLabel.TextColor3 = Color3.fromRGB(255, 60, 60)
-                            tLabel.TextStrokeTransparency = 0.2
-                            tLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
-                            tLabel.Font = Enum.Font.GothamBold
-                            tLabel.TextSize = 12
-                            tLabel.RichText = true
-                            
-                            ActiveESPs[p] = bgui
-                        end
-                        
-                        if root and espPart then
-                            local dist = math.floor((root.Position - espPart.Position).Magnitude)
-                            -- Đổi màu số mét sang màu Xanh Ngọc (#00FFFF) để cực kỳ nổi bật khi nhìn xa
-                            bgui.NameLabel.Text = p.DisplayName .. '\n<font color="#00FFFF">[' .. dist .. 'm]</font>'
-                        else 
-                            bgui.NameLabel.Text = p.DisplayName 
-                        end
-                    else
-                        -- Nếu người chơi đi xa tới mức server hoàn toàn xóa nhân vật để giảm lag
-                        -- Hủy tạm thời GUI cũ và sẽ tự động bật lại ngay lập tức khi họ lấp ló xuất hiện
-                        if ActiveESPs[p] then
-                            ActiveESPs[p]:Destroy()
-                            ActiveESPs[p] = nil
-                        end
-                    end
-                end
-            end
-            
-            -- Dọn dẹp ESP của những người chơi đã rời phòng
-            for p, bgui in pairs(ActiveESPs) do
-                if not Players:FindFirstChild(p.Name) then
-                    if bgui then bgui:Destroy() end
-                    ActiveESPs[p] = nil
-                end
-            end
-        else
-            -- Giải phóng bộ nhớ hoàn toàn và trả lại tên gốc khi tắt ESP
-            for p, bgui in pairs(ActiveESPs) do
-                if bgui then bgui:Destroy() end
-                ActiveESPs[p] = nil
-            end
-            for _, p in pairs(Players:GetPlayers()) do
-                if p ~= player and p.Character and p.Character:FindFirstChildOfClass("Humanoid") then
-                    p.Character:FindFirstChildOfClass("Humanoid").DisplayDistanceType = Enum.HumanoidDisplayDistanceType.Viewer
-                end
-            end
-        end
     end
+end)
+
+-- Luồng độc lập bảo vệ ESP và Fly hoạt động mượt mà không bị Crash chéo
+RunService.Heartbeat:Connect(function()
+    updateESP()
+    updateFly()
 end)
