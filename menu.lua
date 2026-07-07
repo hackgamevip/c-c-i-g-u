@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V1.12.1 (Fix Triệt Để Lỗi Kẹt Bậc Thềm Khi Noclip)
+-- MENU VIP PRO V1.12.2 (Fix Triệt Để Lỗi Kẹt Bậc Thềm & ESP Vô Hạn Khoảng Cách)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -678,7 +678,7 @@ createDualButtons(page4, "🌞 Trời SÁNG (Fake)", Color3.fromRGB(243, 156, 18
 createDualButtons(page4, "🔄 VÀO LẠI SV", Theme.AccentOn, rejoinServer, "🎲 ĐỔI SV NGẪU NHIÊN", Theme.Brand, function() hopServer("Desc") end)
 createDualButtons(page4, "📉 ĐỔI SV ÍT NGƯỜI", Color3.fromRGB(52, 152, 219), function() hopServer("Asc") end, "📈 ĐỔI SV NHIỀU NGƯỜI", Color3.fromRGB(231, 76, 60), function() hopServer("Desc") end)
 createDualButtons(page4, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) end, "📂 TP SAVE V2 GUI", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
-createDualButtons(page4, "🕊️ FLY V1", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end, "🕊️ FLY V3", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end) end)
+createDualButtons(page4, "🕊️ FLY V1", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end, "🕊️ FLY V3", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end) end)
 
 -- ==========================================
 -- [TAB 5: PHÁT NHẠC VÀ LƯU TRỮ VĨNH VIỄN]
@@ -1009,30 +1009,40 @@ RunService.RenderStepped:Connect(function()
         end
         if State.Hitbox then for _, p in pairs(Players:GetPlayers()) do if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then p.Character.HumanoidRootPart.CanCollide = false end end end
         
-        -- FIX CHỐNG TRÙNG LẶP (Ảnh 1000078543.jpg): Hệ thống quản lý ESP bằng dữ liệu từ điển đồng bộ
+        -- FIX CHỐNG TRÙNG LẶP & HIỆN KHÔNG GIỚI HẠN KHOẢNG CÁCH (UNLIMITED ESP):
         if State.ESP then
             for _, p in pairs(Players:GetPlayers()) do
                 if p ~= player then
                     local tChar = p.Character
-                    local espPart = tChar and (tChar:FindFirstChild("HumanoidRootPart") or tChar:FindFirstChild("Head"))
+                    -- Tối ưu tìm bộ phận: Thêm PrimaryPart để chống lỗi mất RootPart ở xa
+                    local espPart = tChar and (tChar:FindFirstChild("HumanoidRootPart") or tChar:FindFirstChild("Head") or tChar.PrimaryPart)
                     local tHum = tChar and tChar:FindFirstChildOfClass("Humanoid")
 
                     if tHum then tHum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None end
                     
                     if espPart then
                         local bgui = ActiveESPs[p]
-                        -- Kiểm tra nếu thẻ chưa được tạo hoặc đang bị kẹt ở bộ phận cũ (khi nhân vật reset)
-                        if not bgui or bgui.Parent ~= espPart then
-                            if bgui then bgui:Destroy() end -- Hủy thẻ lỗi cũ ngay lập tức
+                        -- Kiểm tra nếu chưa có, hoặc Adornee/Parent bị sai lệch do nhân vật respawn
+                        if not bgui or bgui.Adornee ~= espPart or bgui.Parent ~= guiParent then
+                            if bgui then bgui:Destroy() end
                             
                             bgui = Instance.new("BillboardGui")
-                            bgui.Name = "MobileESP_Name"
-                            bgui.Size = UDim2.new(0, 200, 0, 50)
-                            bgui.StudsOffset = Vector3.new(0, 3, 0)
+                            bgui.Name = "MobileESP_" .. p.Name
+                            bgui.Size = UDim2.new(0, 250, 0, 50) -- Tăng khung chứa để không bị cắt chữ ở xa
+                            bgui.StudsOffset = Vector3.new(0, 3.5, 0)
                             bgui.AlwaysOnTop = true
-                            bgui.MaxDistance = math.huge -- Nhìn thấy ở mọi khoảng cách vô hạn
+                            
+                            -- [FIX 1]: Dùng 9e9 (9 tỉ mét) thay cho math.huge để chống lỗi tự ẩn GUI của Roblox
+                            bgui.MaxDistance = 9e9 
+                            
+                            -- [FIX 2]: Khóa ánh sáng = 0 để ESP luôn sáng rực rỡ dù trong bóng tối hay sương mù xa
+                            bgui.LightInfluence = 0 
+                            bgui.ResetOnSpawn = false
                             bgui.Adornee = espPart
-                            bgui.Parent = espPart
+                            
+                            -- [FIX 3 QUAN TRỌNG]: Đưa Parent vào CoreGui (guiParent) thay vì gắn vào người khác
+                            -- Giúp ESP không bị văng lỗi khi game Unload map ở xa (StreamingEnabled)
+                            bgui.Parent = guiParent 
                             
                             local tLabel = Instance.new("TextLabel", bgui)
                             tLabel.Name = "NameLabel"
@@ -1042,7 +1052,7 @@ RunService.RenderStepped:Connect(function()
                             tLabel.TextStrokeTransparency = 0.2
                             tLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
                             tLabel.Font = Enum.Font.GothamBold
-                            tLabel.TextSize = 11
+                            tLabel.TextSize = 12
                             tLabel.RichText = true
                             
                             ActiveESPs[p] = bgui
@@ -1050,11 +1060,14 @@ RunService.RenderStepped:Connect(function()
                         
                         if root and espPart then
                             local dist = math.floor((root.Position - espPart.Position).Magnitude)
-                            bgui.NameLabel.Text = p.DisplayName .. '\n<font color="#4CAF50">[' .. dist .. 'm]</font>'
+                            -- Đổi màu số mét sang màu Xanh Ngọc (#00FFFF) để cực kỳ nổi bật khi nhìn xa
+                            bgui.NameLabel.Text = p.DisplayName .. '\n<font color="#00FFFF">[' .. dist .. 'm]</font>'
                         else 
                             bgui.NameLabel.Text = p.DisplayName 
                         end
                     else
+                        -- Nếu người chơi đi xa tới mức server hoàn toàn xóa nhân vật để giảm lag
+                        -- Hủy tạm thời GUI cũ và sẽ tự động bật lại ngay lập tức khi họ lấp ló xuất hiện
                         if ActiveESPs[p] then
                             ActiveESPs[p]:Destroy()
                             ActiveESPs[p] = nil
