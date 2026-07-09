@@ -482,7 +482,7 @@ createToggle(page2, "🐿️ Lấy đồ nhanh", "Instant")
 createToggle(page2, "🧲 Auto nhặt đồ xung quanh", "AutoCollect")
 
 -- NOCLIP AN TOÀN CHỐNG TRÔI
-createToggle(page2, "𚗷 Đi xuyên tường", "Noclip", function(v) 
+createToggle(page2, "🚷 Đi xuyên tường", "Noclip", function(v) 
     if not v and player.Character then 
         pcall(function()
             for _, part in ipairs(player.Character:GetDescendants()) do
@@ -532,7 +532,7 @@ createToggle(page3, "🏃 Chạy nhanh", "Speed", function(v)
         if v then defaultWalkSpeed = player.Character.Humanoid.WalkSpeed else player.Character.Humanoid.WalkSpeed = defaultWalkSpeed end
     end 
 end)
-createSlider(page3, "Tốc độ chạy", 0, 1000, "SpeedValue")
+createSlider(page3, "Tốc độ chạy", 1, 1000, "SpeedValue")
 
 local defaultJumpPower = 50
 createToggle(page3, "🦘 Nhảy cao", "Jump", function(v) 
@@ -540,7 +540,7 @@ createToggle(page3, "🦘 Nhảy cao", "Jump", function(v)
         if v then defaultJumpPower = player.Character.Humanoid.JumpPower else player.Character.Humanoid.UseJumpPower = true; player.Character.Humanoid.JumpPower = defaultJumpPower end
     end 
 end)
-createSlider(page3, "Lực nhảy", 0, 1000, "JumpValue")
+createSlider(page3, "Lực nhảy", 1, 1000, "JumpValue")
 
 createToggle(page3, "💨 Lướt liên tục", "AutoDash")
 createSlider(page3, "Tốc độ lướt", 1, 50, "DashSpeed")
@@ -653,7 +653,7 @@ createToggle(page4, "💫 Mở khóa ShiftLock Mobile", "ShiftLock", function(v)
     pcall(function() player.DevEnableMouseLock = v end)
 end)
 
-createToggle(page4, "鼠标 Auto Click", "AutoClick")
+createToggle(page4, "🖱️ Auto Click", "AutoClick")
 task.spawn(function()
     while task.wait(0.05) do
         if State.AutoClick and player.Character then
@@ -693,6 +693,25 @@ end
 createDualButtons(page4, "🌞 Trời SÁNG (Fake)", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12 end, "🌚 Trời TỐI (Fake)", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0 end)
 createDualButtons(page4, "🔄 VÀO LẠI SV", Theme.AccentOn, rejoinServer, "🎲 ĐỔI SV NGẪU NHIÊN", Theme.Brand, function() hopServer("Desc") end)
 createDualButtons(page4, "📉 ĐỔI SV ÍT NGƯỜI", Color3.fromRGB(52, 152, 219), function() hopServer("Asc") end, "📈 ĐỔI SV NHIỀU NGƯỜI", Color3.fromRGB(231, 76, 60), function() hopServer("Desc") end)
+createDualButtons(page4, "💻 LỆNH ADMIN", Theme.AccentOn, function() 
+    pcall(function() 
+        loadstring(game: HttpGet('https://raw.githubusercontent.com/EdgelY/infiniteyield/master/source'))() 
+    end) 
+end, "📁 TP SAVE V3", Theme.Brand, function() 
+    pcall(function() 
+        loadstring(game: HttpGet('https://raw.githubusercontent.com/OBen1/fe/main/Tp%20Place%20GUI', true))() 
+    end) 
+end)
+
+createDualButtons(page4, "🕊️ FLY V1", Theme.Brand, function() 
+    pcall(function() 
+        loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\109\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() 
+    end) 
+end, "🕊️ FLY V3", Theme.Brand, function() 
+    pcall(function() 
+        loadstring(game: HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() 
+    end) 
+end)
 
 -- ==========================================
 -- [TAB 5: NHẠC ID] & [TAB 6: TP SAVE] 
