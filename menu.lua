@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V1.12.4 (FIX BUGS & TỐI ƯU HÓA LUỒNG)
+-- MENU VIP PRO V1.12.5 (MAX SPEED 1000 & FULL UTILITIES)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -23,7 +23,7 @@ local State = {
     XRay = false, LockPosition = false, AutoCollect = false, Fly = false, FlySpeed = 50,
     SpinBot = false, SpinSpeed = 50, Hitbox = false, HitboxSize = 15, AutoClick = false, RGB = false,
     Reach = false, ReachSize = 15, AutoDash = false, DashSpeed = 10, AutoSave = false, Astral = false,
-    SpeedValue = 60, JumpValue = 120, LightRange = 60, LightBrightness = 3,
+    ShiftLock = false, SpeedValue = 60, JumpValue = 120, LightRange = 60, LightBrightness = 3,
     MusicVolume = 5
 }
 
@@ -467,7 +467,7 @@ task.spawn(function()
         serverInfoLabel.Text = string.format("<font color='#FF00FF'>FPS:</font> %d\n<font color='#FF00FF'>Ping:</font> %s\n<font color='#FF00FF'>Người chơi:</font> %d / %d\n<font color='#FF00FF'>ID SV:</font> %s", fps, ping, pCount, maxP, jobText)
         local execTime = math.floor(workspace.DistributedGameTime); local hours = math.floor(execTime / 3600); local mins = math.floor((execTime % 3600) / 60); local secs = execTime % 60
         local timeString = string.format("%02d:%02d:%02d", hours, mins, secs)
-        extraInfoLabel.Text = string.format("<font color='#FF00FF'>Thời gian chơi:</font> %s\n<font color='#FF00FF'>Giờ hệ thống:</font> %s\n<font color='#FF00FF'>Phiên bản:</font> MENU VIP PRO MAX V1.12.4", timeString, os.date("%H:%M:%S"))
+        extraInfoLabel.Text = string.format("<font color='#FF00FF'>Thời gian chơi:</font> %s\n<font color='#FF00FF'>Giờ hệ thống:</font> %s\n<font color='#FF00FF'>Phiên bản:</font> MENU VIP PRO MAX V1.12.5", timeString, os.date("%H:%M:%S"))
     end
 end)
 
@@ -481,7 +481,7 @@ UIS.JumpRequest:Connect(function() if State.InfJump and player.Character and pla
 createToggle(page2, "🐿️ Lấy đồ nhanh", "Instant")
 createToggle(page2, "🧲 Auto nhặt đồ xung quanh", "AutoCollect")
 
--- [FIX NOCLIP LÚN SÀN]
+-- NOCLIP AN TOÀN CHỐNG TRÔI
 createToggle(page2, "𚗷 Đi xuyên tường", "Noclip", function(v) 
     if not v and player.Character then 
         pcall(function()
@@ -524,7 +524,7 @@ createToggle(page2, "🔴 ESP người chơi", "ESP")
 -- [TAB 3: PLAYER]
 -- ==========================================
 createToggle(page3, "🕊️ Bay Trên không (FLY)", "Fly")
-createSlider(page3, "Tốc độ bay", 10, 300, "FlySpeed")
+createSlider(page3, "Tốc độ bay", 10, 1000, "FlySpeed") -- ĐÃ NÂNG LÊN 1000
 
 local defaultWalkSpeed = 16
 createToggle(page3, "🏃 Chạy nhanh", "Speed", function(v) 
@@ -542,7 +542,6 @@ createToggle(page3, "🦘 Nhảy cao", "Jump", function(v)
 end)
 createSlider(page3, "Lực nhảy", 0, 1000, "JumpValue")
 
--- TÍNH NĂNG MỚI: LƯỚT LIÊN TỤC
 createToggle(page3, "💨 Lướt liên tục", "AutoDash")
 createSlider(page3, "Tốc độ lướt", 1, 50, "DashSpeed")
 
@@ -612,7 +611,7 @@ task.spawn(function()
 end)
 
 -- ==========================================
--- [TAB 4: TIỆN ÍCH]
+-- [TAB 4: TIỆN ÍCH] - ĐÃ BỔ SUNG ĐỦ TÍNH NĂNG CHÌM
 -- ==========================================
 createToggle(page4, "💾 Lưu Cài Đặt", "AutoSave", function(v) 
     if v then saveConfig(); MakeToast("Đã Bật", "Đã lưu cấu hình hiện tại!", Theme.AccentOn)
@@ -632,7 +631,29 @@ createToggle(page4, "🌈 Chế độ RGB", "RGB", function(v)
     end 
 end)
 
-createToggle(page4, "🖱️ Auto Click", "AutoClick")
+createToggle(page4, "📉 Giảm Lag (Low GFX)", "LowGfx", function(v)
+    pcall(function()
+        for _, obj in ipairs(workspace:GetDescendants()) do
+            if obj:IsA("BasePart") then
+                if v then
+                    if not obj:GetAttribute("OldMat") then obj:SetAttribute("OldMat", obj.Material.Name) end
+                    obj.Material = Enum.Material.SmoothPlastic
+                else
+                    local old = obj:GetAttribute("OldMat")
+                    if old then obj.Material = Enum.Material[old] end
+                end
+            elseif obj:IsA("Decal") or obj:IsA("Texture") then
+                obj.Transparency = v and 1 or 0
+            end
+        end
+    end)
+end)
+
+createToggle(page4, "💫 Mở khóa ShiftLock Mobile", "ShiftLock", function(v)
+    pcall(function() player.DevEnableMouseLock = v end)
+end)
+
+createToggle(page4, "鼠标 Auto Click", "AutoClick")
 task.spawn(function()
     while task.wait(0.05) do
         if State.AutoClick and player.Character then
@@ -675,7 +696,6 @@ createDualButtons(page4, "📉 ĐỔI SV ÍT NGƯỜI", Color3.fromRGB(52, 152, 
 
 -- ==========================================
 -- [TAB 5: NHẠC ID] & [TAB 6: TP SAVE] 
--- (Được giữ nguyên hoàn toàn như phiên bản cũ của bạn)
 -- ==========================================
 local currentSound = nil; local currentMusicId = ""; local savedMusicList = {}
 local musicControlFrame = Instance.new("Frame", page5); musicControlFrame.Size = UDim2.new(0.9, 0, 0, 85); musicControlFrame.BackgroundColor3 = Theme.ItemBg; musicControlFrame.ZIndex = 10; musicControlFrame.LayoutOrder = 1; Instance.new("UICorner", musicControlFrame).CornerRadius = UDim.new(0, 8)
@@ -762,7 +782,7 @@ end
 renderSavedTps()
 
 -- ==========================================
--- [TAB 7: TP NGƯỜI CHƠI] - ĐÃ SỬA LỖI INSTANCE
+-- [TAB 7: TP NGƯỜI CHƠI] 
 -- ==========================================
 local function updatePlayerList()
     local cleanRGB = {}; for _, obj in ipairs(RGBElements) do if obj.Stroke and obj.Stroke.Parent then table.insert(cleanRGB, obj) end end; RGBElements = cleanRGB
@@ -810,7 +830,6 @@ RunService.Stepped:Connect(function()
             for _, part in ipairs(player.Character:GetDescendants()) do
                 if part:IsA("BasePart") then
                     local n = part.Name
-                    -- Giữ lại chân để không lún đất, tắt va chạm các bộ phận khác
                     if not (n == "LeftFoot" or n == "RightFoot" or n == "LeftLowerLeg" or n == "RightLowerLeg" or n == "Left Leg" or n == "Right Leg") then
                         part.CanCollide = false
                     end
@@ -893,7 +912,6 @@ end
 -- [CÔ LẬP LUỒNG ESP VÀ HITBOX]
 -- ==========================================
 local function updateESP_Hitbox()
-    -- Xử lý Hitbox
     if State.Hitbox then
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
@@ -916,7 +934,6 @@ local function updateESP_Hitbox()
         end
     end
 
-    -- Xử lý ESP
     if not State.ESP then
         for p, bgui in pairs(ActiveESPs) do if bgui then bgui:Destroy() end; ActiveESPs[p] = nil end
         for _, p in pairs(Players:GetPlayers()) do
@@ -987,7 +1004,6 @@ RunService.RenderStepped:Connect(function()
         if State.Speed then hum.WalkSpeed = State.SpeedValue end
         if State.Jump then hum.UseJumpPower = true; hum.JumpPower = State.JumpValue end
         
-        -- Logic Lướt liên tục (Dash)
         if State.AutoDash and root and hum.MoveDirection.Magnitude > 0 then
             root.CFrame = root.CFrame + (hum.MoveDirection * (State.DashSpeed / 10))
         end
