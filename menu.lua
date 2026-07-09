@@ -1,5 +1,5 @@
 -- ==========================================
--- MENU VIP PRO V1.12.3 (BẢN VÁ LỖI TRONG NATIVE FLY & TÁCH LẬP LUỒNG ESP ĐỘC LẬP)
+-- MENU VIP PRO V1.12.4 (FIX BUGS & TỐI ƯU HÓA LUỒNG)
 -- ==========================================
 repeat task.wait() until game:IsLoaded()
 
@@ -22,7 +22,7 @@ local State = {
     InfJump = false, PlayerLight = false, ESP = false, AntiAfk = true, AntiStun = false, 
     XRay = false, LockPosition = false, AutoCollect = false, Fly = false, FlySpeed = 50,
     SpinBot = false, SpinSpeed = 50, Hitbox = false, HitboxSize = 15, AutoClick = false, RGB = false,
-    Reach = false, ReachSize = 15, FastAttack = false, FastAttackSpeed = 5, AutoSave = false, Astral = false,
+    Reach = false, ReachSize = 15, AutoDash = false, DashSpeed = 10, AutoSave = false, Astral = false,
     SpeedValue = 60, JumpValue = 120, LightRange = 60, LightBrightness = 3,
     MusicVolume = 5
 }
@@ -43,6 +43,7 @@ local Theme = {
 
 local RGBElements = {}
 local ActiveESPs = {} 
+local originalHitboxSizes = {}
 local guiParent = player:WaitForChild("PlayerGui")
 pcall(function()
     if gethui and type(gethui) == "function" then
@@ -288,7 +289,7 @@ local function createToggle(parent, text, varName, callback)
     
     local active = State[varName] or false
     status.Text = active and "ON" or "OFF"; status.TextColor3 = active and Theme.AccentOn or Theme.AccentOff
-    stroke.Color = State.RGB and Color3.fromHSV(tick() % 5 / 5, 1, 1) or (active and Theme.AccentOn or Theme.Stroke)
+    stroke.Color = active and Theme.AccentOn or Theme.Stroke
     btn.BackgroundColor3 = active and Color3.fromRGB(35, 45, 40) or Theme.ItemBg
     
     table.insert(RGBElements, {Type = "Toggle", Stroke = stroke, State = function() return State[varName] end})
@@ -359,7 +360,7 @@ local function createSlider(parent, text, min, max, varName, callback)
     frame.Size = UDim2.new(0.9, 0, 0, 48); frame.BackgroundTransparency = 1
     local bg = Instance.new("Frame", frame); bg.Size = UDim2.new(1, 0, 1, 0); bg.BackgroundColor3 = Theme.ItemBg; bg.ZIndex = 10
     Instance.new("UICorner", bg).CornerRadius = UDim.new(0, 10)
-    local stroke = Instance.new("UIStroke", bg); stroke.Color = State.RGB and Color3.fromHSV(tick() % 5 / 5, 1, 1) or Theme.Stroke; stroke.Thickness = 1.5
+    local stroke = Instance.new("UIStroke", bg); stroke.Color = Theme.Stroke; stroke.Thickness = 1.5
     table.insert(RGBElements, {Type = "Slider", Stroke = stroke})
     local titleLabel = Instance.new("TextLabel", bg)
     titleLabel.Size = UDim2.new(0.7, 0, 0.4, 0); titleLabel.Position = UDim2.new(0.05, 0, 0.1, 0); titleLabel.BackgroundTransparency = 1; titleLabel.Text = text; titleLabel.TextColor3 = Theme.TextDim; titleLabel.Font = Enum.Font.GothamSemibold; titleLabel.TextSize = 12; titleLabel.TextXAlignment = Enum.TextXAlignment.Left; titleLabel.ZIndex = 10
@@ -389,13 +390,26 @@ local function createSlider(parent, text, min, max, varName, callback)
 end
 
 -- ==========================================
+-- [LUỒNG TỐI ƯU RGB RIÊNG BIỆT - GIẢM LAG]
+-- ==========================================
+task.spawn(function()
+    while task.wait(0.05) do
+        if State.RGB then
+            local hue = tick() % 5 / 5; local color = Color3.fromHSV(hue, 1, 1)
+            titleLabel.TextColor3 = color; frameStroke.Color = color; headerStroke.Color = color; avatarStroke.Color = color; openStroke.Color = color
+            for _, obj in pairs(RGBElements) do if obj.Stroke and obj.Stroke.Parent then obj.Stroke.Color = color end end
+        end
+    end
+end)
+
+-- ==========================================
 -- [TAB 1: THÔNG TIN - DASHBOARD]
 -- ==========================================
 local function createInfoBox(parent, icon, titleText, heightOffset)
     local item = Instance.new("Frame", parent)
     item.Size = UDim2.new(0.9, 0, 0, heightOffset or 85); item.BackgroundColor3 = Theme.ItemBg; item.ZIndex = 10
     Instance.new("UICorner", item).CornerRadius = UDim.new(0, 8)
-    local stroke = Instance.new("UIStroke", item); stroke.Color = State.RGB and Color3.fromHSV(tick() % 5 / 5, 1, 1) or Theme.Stroke; stroke.Thickness = 1.5; table.insert(RGBElements, {Type = "Info", Stroke = stroke})
+    local stroke = Instance.new("UIStroke", item); stroke.Color = Theme.Stroke; stroke.Thickness = 1.5; table.insert(RGBElements, {Type = "Info", Stroke = stroke})
     local title = Instance.new("TextLabel", item)
     title.Size = UDim2.new(1, -20, 0, 25); title.Position = UDim2.new(0, 10, 0, 5); title.BackgroundTransparency = 1; title.Text = icon .. " " .. titleText; title.TextColor3 = Theme.Brand; title.Font = Enum.Font.GothamBold; title.TextSize = 12; title.TextXAlignment = Enum.TextXAlignment.Left; title.ZIndex = 10
     local content = Instance.new("TextLabel", item)
@@ -416,7 +430,7 @@ end)
 local joinIdFrame = Instance.new("Frame", page1)
 joinIdFrame.Size = UDim2.new(0.9, 0, 0, 44); joinIdFrame.BackgroundColor3 = Theme.ItemBg; joinIdFrame.ZIndex = 10
 Instance.new("UICorner", joinIdFrame).CornerRadius = UDim.new(0, 8)
-local jStroke = Instance.new("UIStroke", joinIdFrame); jStroke.Color = State.RGB and Color3.fromHSV(tick() % 5 / 5, 1, 1) or Theme.Stroke; jStroke.Thickness = 1.5; table.insert(RGBElements, {Type = "Info", Stroke = jStroke})
+local jStroke = Instance.new("UIStroke", joinIdFrame); jStroke.Color = Theme.Stroke; jStroke.Thickness = 1.5; table.insert(RGBElements, {Type = "Info", Stroke = jStroke})
 local idBox = Instance.new("TextBox", joinIdFrame)
 idBox.Size = UDim2.new(0.65, 0, 1, 0); idBox.Position = UDim2.new(0.05, 0, 0, 0); idBox.BackgroundTransparency = 1; idBox.PlaceholderText = "Dán ID Server vào đây..."; idBox.Text = ""; idBox.TextColor3 = Theme.Brand; idBox.Font = Enum.Font.Gotham; idBox.TextSize = 11; idBox.TextXAlignment = Enum.TextXAlignment.Left; idBox.ClearTextOnFocus = false; idBox.ZIndex = 10
 local joinBtn = Instance.new("TextButton", joinIdFrame)
@@ -453,7 +467,7 @@ task.spawn(function()
         serverInfoLabel.Text = string.format("<font color='#FF00FF'>FPS:</font> %d\n<font color='#FF00FF'>Ping:</font> %s\n<font color='#FF00FF'>Người chơi:</font> %d / %d\n<font color='#FF00FF'>ID SV:</font> %s", fps, ping, pCount, maxP, jobText)
         local execTime = math.floor(workspace.DistributedGameTime); local hours = math.floor(execTime / 3600); local mins = math.floor((execTime % 3600) / 60); local secs = execTime % 60
         local timeString = string.format("%02d:%02d:%02d", hours, mins, secs)
-        extraInfoLabel.Text = string.format("<font color='#FF00FF'>Thời gian chơi:</font> %s\n<font color='#FF00FF'>Giờ hệ thống:</font> %s\n<font color='#FF00FF'>Phiên bản:</font> MENU VIP PRO MAX V1.12.3", timeString, os.date("%H:%M:%S"))
+        extraInfoLabel.Text = string.format("<font color='#FF00FF'>Thời gian chơi:</font> %s\n<font color='#FF00FF'>Giờ hệ thống:</font> %s\n<font color='#FF00FF'>Phiên bản:</font> MENU VIP PRO MAX V1.12.4", timeString, os.date("%H:%M:%S"))
     end
 end)
 
@@ -467,6 +481,7 @@ UIS.JumpRequest:Connect(function() if State.InfJump and player.Character and pla
 createToggle(page2, "🐿️ Lấy đồ nhanh", "Instant")
 createToggle(page2, "🧲 Auto nhặt đồ xung quanh", "AutoCollect")
 
+-- [FIX NOCLIP LÚN SÀN]
 createToggle(page2, "𚗷 Đi xuyên tường", "Noclip", function(v) 
     if not v and player.Character then 
         pcall(function()
@@ -508,7 +523,6 @@ createToggle(page2, "🔴 ESP người chơi", "ESP")
 -- ==========================================
 -- [TAB 3: PLAYER]
 -- ==========================================
--- FIX FLY: Thêm Toggle và Slider quản lý Bay nguyên bản (Native Fly) không dùng link ngoài
 createToggle(page3, "🕊️ Bay Trên không (FLY)", "Fly")
 createSlider(page3, "Tốc độ bay", 10, 300, "FlySpeed")
 
@@ -528,8 +542,10 @@ createToggle(page3, "🦘 Nhảy cao", "Jump", function(v)
 end)
 createSlider(page3, "Lực nhảy", 0, 1000, "JumpValue")
 
-createToggle(page3, "⚡ Đánh nhanh", "FastAttack")
-createSlider(page3, "Mức độ Đánh nhanh", 0, 20, "FastAttackSpeed")
+-- TÍNH NĂNG MỚI: LƯỚT LIÊN TỤC
+createToggle(page3, "💨 Lướt liên tục", "AutoDash")
+createSlider(page3, "Tốc độ lướt", 1, 50, "DashSpeed")
+
 createToggle(page3, "⚔️ Đánh xa", "Reach")
 createSlider(page3, "Kích thước vũ khí", 0, 300, "ReachSize")
 createToggle(page3, "🎯 Hitbox", "Hitbox")
@@ -656,11 +672,10 @@ end
 createDualButtons(page4, "🌞 Trời SÁNG (Fake)", Color3.fromRGB(243, 156, 18), function() Lighting.ClockTime = 12 end, "🌚 Trời TỐI (Fake)", Color3.fromRGB(160, 32, 240), function() Lighting.ClockTime = 0 end)
 createDualButtons(page4, "🔄 VÀO LẠI SV", Theme.AccentOn, rejoinServer, "🎲 ĐỔI SV NGẪU NHIÊN", Theme.Brand, function() hopServer("Desc") end)
 createDualButtons(page4, "📉 ĐỔI SV ÍT NGƯỜI", Color3.fromRGB(52, 152, 219), function() hopServer("Asc") end, "📈 ĐỔI SV NHIỀU NGƯỜI", Color3.fromRGB(231, 76, 60), function() hopServer("Desc") end)
-createDualButtons(page4, "💻 LỆNH ADMIN", Theme.AccentOn, function() pcall(function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end) end, "📂 SCRIPT TP SAVE", Theme.Brand, function() pcall(function() loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/Tp%20Place%20GUI'),true))() end) end)
-createDualButtons(page4, "🕊️ FLY V1", Theme.Brand, function() pcall(function() loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")() end) end, "🕊️ FLY V3", Theme.Brand, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-V3-X-132770"))() end) end)
 
 -- ==========================================
--- [TAB 5: NHẠC ID]
+-- [TAB 5: NHẠC ID] & [TAB 6: TP SAVE] 
+-- (Được giữ nguyên hoàn toàn như phiên bản cũ của bạn)
 -- ==========================================
 local currentSound = nil; local currentMusicId = ""; local savedMusicList = {}
 local musicControlFrame = Instance.new("Frame", page5); musicControlFrame.Size = UDim2.new(0.9, 0, 0, 85); musicControlFrame.BackgroundColor3 = Theme.ItemBg; musicControlFrame.ZIndex = 10; musicControlFrame.LayoutOrder = 1; Instance.new("UICorner", musicControlFrame).CornerRadius = UDim.new(0, 8)
@@ -696,7 +711,6 @@ sLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() saved
 local fileName = "MenuVipProMax_SavedMusic.json"
 pcall(function() if isfile and isfile(fileName) then local decoded = HttpService:JSONDecode(readfile(fileName)); if type(decoded) == "table" then savedMusicList = decoded end end end)
 local function saveMusicData() pcall(function() if writefile then writefile(fileName, HttpService:JSONEncode(savedMusicList)) end end) end
-
 local function renderSavedMusic()
     for _, child in pairs(savedMusicContent:GetChildren()) do if child:IsA("Frame") then child:Destroy() end end
     for i, data in ipairs(savedMusicList) do
@@ -713,9 +727,6 @@ end
 saveIdBtn.MouseButton1Click:Connect(function() clickAnimate(saveIdBtn); local rawId = musicIdBox.Text:match("%d+"); if rawId and rawId ~= "" then saveIdBtn.Text = "⏳..."; task.spawn(function() local name = getSongName(rawId); table.insert(savedMusicList, {id = rawId, name = name}); saveMusicData(); renderSavedMusic(); saveIdBtn.Text = "💾 Lưu" end) end end)
 renderSavedMusic()
 
--- ==========================================
--- [TAB 6: TP SAVE]
--- ==========================================
 local tpFileName = "MenuVipProMax_SavedTPs.json"; local savedTpList = {}; pcall(function() if isfile and isfile(tpFileName) then local decoded = HttpService:JSONDecode(readfile(tpFileName)); if type(decoded) == "table" then savedTpList = decoded end end end)
 local function saveTpData() pcall(function() if writefile then local d = {}; for _, v in ipairs(savedTpList) do if not v.isTemp then table.insert(d, v) end end; writefile(tpFileName, HttpService:JSONEncode(d)) end end) end
 local pendingDeleteAll = false
@@ -751,7 +762,7 @@ end
 renderSavedTps()
 
 -- ==========================================
--- [TAB 7: TP NGƯỜI CHƠI]
+-- [TAB 7: TP NGƯỜI CHƠI] - ĐÃ SỬA LỖI INSTANCE
 -- ==========================================
 local function updatePlayerList()
     local cleanRGB = {}; for _, obj in ipairs(RGBElements) do if obj.Stroke and obj.Stroke.Parent then table.insert(cleanRGB, obj) end end; RGBElements = cleanRGB
@@ -770,9 +781,17 @@ local function updatePlayerList()
             btn.MouseButton1Click:Connect(function()
                 clickAnimate(btn); local myChar = player.Character
                 if myChar and myChar:FindFirstChild("HumanoidRootPart") then
-                    local targetCFrame = p.Character and (p.Character:FindFirstChild("HumanoidRootPart") or p.Character:GetPivot())
-                    if targetCFrame then myChar.HumanoidRootPart.CFrame = targetCFrame; MakeToast("Dịch Chuyển", "Đến " .. p.DisplayName, Theme.Brand)
-                    else MakeToast("Lỗi", "Người chơi bị ẩn map", Theme.AccentOff) end
+                    local targetCFrame = nil
+                    if p.Character then
+                        local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+                        targetCFrame = hrp and hrp.CFrame or p.Character:GetPivot()
+                    end
+                    if targetCFrame then 
+                        myChar.HumanoidRootPart.CFrame = targetCFrame
+                        MakeToast("Dịch Chuyển", "Đến " .. p.DisplayName, Theme.Brand)
+                    else 
+                        MakeToast("Lỗi", "Người chơi bị ẩn map", Theme.AccentOff) 
+                    end
                 end
             end)
         end
@@ -783,14 +802,19 @@ updatePlayerList(); Players.PlayerAdded:Connect(updatePlayerList); Players.Playe
 player.Idled:Connect(function() if State.AntiAfk then pcall(function() local cam = workspace.CurrentCamera or camera; VirtualUser:Button2Down(Vector2.new(0,0), cam and cam.CFrame or CFrame.new()); task.wait(1); VirtualUser:Button2Up(Vector2.new(0,0), cam and cam.CFrame or CFrame.new()) end) end end)
 
 -- ==========================================
--- [XỬ LÝ REACH VÀ NOCLIP TRƯỚC KHI VẬT LÝ TÍNH TOÁN]
+-- [XỬ LÝ NOCLIP CHỐNG LÚN SÀN & REACH]
 -- ==========================================
 RunService.Stepped:Connect(function()
     pcall(function()
         if State.Noclip and player.Character then
-            for _, part in ipairs(player.Character:GetChildren()) do
-                if part:IsA("BasePart") then part.CanCollide = false
-                elseif part:IsA("Accessory") and part:FindFirstChild("Handle") then part.Handle.CanCollide = false end
+            for _, part in ipairs(player.Character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    local n = part.Name
+                    -- Giữ lại chân để không lún đất, tắt va chạm các bộ phận khác
+                    if not (n == "LeftFoot" or n == "RightFoot" or n == "LeftLowerLeg" or n == "RightLowerLeg" or n == "Left Leg" or n == "Right Leg") then
+                        part.CanCollide = false
+                    end
+                end
             end
         end
         if State.Reach and player.Character then
@@ -813,13 +837,14 @@ RunService.Stepped:Connect(function()
 end)
 
 -- ==========================================
--- [HỆ THỐNG ĐIỀU KHIỂN FLY NATIVE]
+-- [HỆ THỐNG FLY BẰNG LINEAR VELOCITY MỚI]
 -- ==========================================
-local flyBV, flyBG = nil, nil
+local flyAttach, flyLinearVel, flyAlignOri = nil, nil, nil
 local function updateFly()
     if not State.Fly then
-        if flyBV then flyBV:Destroy(); flyBV = nil end
-        if flyBG then flyBG:Destroy(); flyBG = nil end
+        if flyLinearVel then flyLinearVel:Destroy(); flyLinearVel = nil end
+        if flyAlignOri then flyAlignOri:Destroy(); flyAlignOri = nil end
+        if flyAttach then flyAttach:Destroy(); flyAttach = nil end
         pcall(function() if player.Character and player.Character:FindFirstChildOfClass("Humanoid") then player.Character:FindFirstChildOfClass("Humanoid").PlatformStand = false end end)
         return
     end
@@ -830,36 +855,68 @@ local function updateFly()
         local hum = char and char:FindFirstChildOfClass("Humanoid")
         
         if root and hum then
-            if not flyBG or flyBG.Parent ~= root then
-                if flyBG then flyBG:Destroy() end
-                flyBG = Instance.new("BodyGyro", root)
-                flyBG.P = 9e4; flyBG.maxTorque = Vector3.new(9e9, 9e9, 9e9); flyBG.cframe = root.CFrame
+            hum.PlatformStand = true
+            if not flyAttach or flyAttach.Parent ~= root then
+                if flyAttach then flyAttach:Destroy() end
+                flyAttach = Instance.new("Attachment", root)
             end
-            if not flyBV or flyBV.Parent ~= root then
-                if flyBV then flyBV:Destroy() end
-                flyBV = Instance.new("BodyVelocity", root)
-                flyBV.maxForce = Vector3.new(9e9, 9e9, 9e9); flyBV.velocity = Vector3.new(0, 0.1, 0)
+            if not flyLinearVel or flyLinearVel.Parent ~= root then
+                if flyLinearVel then flyLinearVel:Destroy() end
+                flyLinearVel = Instance.new("LinearVelocity", root)
+                flyLinearVel.Attachment0 = flyAttach
+                flyLinearVel.MaxForce = math.huge
+                flyLinearVel.VelocityConstraintMode = Enum.VelocityConstraintMode.Vector
+                flyLinearVel.RelativeTo = Enum.ActuatorRelativeTo.World
+            end
+            if not flyAlignOri or flyAlignOri.Parent ~= root then
+                if flyAlignOri then flyAlignOri:Destroy() end
+                flyAlignOri = Instance.new("AlignOrientation", root)
+                flyAlignOri.Attachment0 = flyAttach
+                flyAlignOri.Mode = Enum.OrientationAlignmentMode.OneAttachment
+                flyAlignOri.MaxTorque = math.huge
             end
             
-            hum.PlatformStand = true
-            flyBG.cframe = camera.CFrame
+            flyAlignOri.CFrame = camera.CFrame
             
             local moveDir = hum.MoveDirection
             if moveDir.Magnitude > 0 then
                 local look = camera.CFrame.LookVector
-                -- Bay linh hoạt 3D theo hướng nút di chuyển (Joystick/WASD) và góc nhìn camera
-                flyBV.velocity = Vector3.new(moveDir.X * State.FlySpeed, look.Y * State.FlySpeed, moveDir.Z * State.FlySpeed)
+                flyLinearVel.VectorVelocity = Vector3.new(moveDir.X * State.FlySpeed, look.Y * State.FlySpeed, moveDir.Z * State.FlySpeed)
             else
-                flyBV.velocity = Vector3.new(0, 0.1, 0)
+                flyLinearVel.VectorVelocity = Vector3.new(0, 0, 0)
             end
         end
     end)
 end
 
 -- ==========================================
--- [VÀ VÁ LỖI CÔ LẬP LUỒNG ESP KHÔNG GÂY SẬP VÒNG LẶP]
+-- [CÔ LẬP LUỒNG ESP VÀ HITBOX]
 -- ==========================================
-local function updateESP()
+local function updateESP_Hitbox()
+    -- Xử lý Hitbox
+    if State.Hitbox then
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                local hrp = p.Character.HumanoidRootPart
+                if not originalHitboxSizes[p] then originalHitboxSizes[p] = hrp.Size end
+                hrp.Size = Vector3.new(State.HitboxSize, State.HitboxSize, State.HitboxSize)
+                hrp.Transparency = 0.5
+                hrp.CanCollide = false
+            end
+        end
+    else
+        if next(originalHitboxSizes) then
+            for p, size in pairs(originalHitboxSizes) do
+                if p and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                    p.Character.HumanoidRootPart.Size = size
+                    p.Character.HumanoidRootPart.Transparency = 1
+                end
+            end
+            originalHitboxSizes = {}
+        end
+    end
+
+    -- Xử lý ESP
     if not State.ESP then
         for p, bgui in pairs(ActiveESPs) do if bgui then bgui:Destroy() end; ActiveESPs[p] = nil end
         for _, p in pairs(Players:GetPlayers()) do
@@ -870,7 +927,6 @@ local function updateESP()
 
     for _, p in ipairs(Players:GetPlayers()) do
         if p ~= player then
-            -- Wrap pcall cho từng người chơi để chống lỗi đồng bộ bản đồ văng game (StreamingEnabled)
             pcall(function()
                 local tChar = p.Character
                 local espPart = tChar and (tChar:FindFirstChild("HumanoidRootPart") or tChar:FindFirstChild("Head") or tChar.PrimaryPart)
@@ -882,7 +938,6 @@ local function updateESP()
                     local bgui = ActiveESPs[p]
                     if not bgui or bgui.Adornee ~= espPart or not bgui.Parent then
                         if bgui then bgui:Destroy() end
-                        
                         bgui = Instance.new("BillboardGui")
                         bgui.Name = "MobileESP_" .. p.Name
                         bgui.Size = UDim2.new(0, 200, 0, 50)
@@ -892,13 +947,11 @@ local function updateESP()
                         bgui.LightInfluence = 0
                         bgui.Adornee = espPart
                         bgui.Parent = guiParent
-                        
                         local tLabel = Instance.new("TextLabel", bgui)
                         tLabel.Name = "NameLabel"
                         tLabel.Size = UDim2.new(1, 0, 1, 0); tLabel.BackgroundTransparency = 1
                         tLabel.TextColor3 = Color3.fromRGB(255, 60, 60); tLabel.TextStrokeTransparency = 0.2; tLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
                         tLabel.Font = Enum.Font.GothamBold; tLabel.TextSize = 12; tLabel.RichText = true
-                        
                         ActiveESPs[p] = bgui
                     end
                     
@@ -926,12 +979,6 @@ end
 -- BẢO TỒN HOẠT ĐỘNG LIÊN TỤC VÀ LUỒNG ĐỘC LẬP
 -- ==========================================
 RunService.RenderStepped:Connect(function()
-    if State.RGB then
-        local hue = tick() % 5 / 5; local color = Color3.fromHSV(hue, 1, 1)
-        titleLabel.TextColor3 = color; frameStroke.Color = color; headerStroke.Color = color; avatarStroke.Color = color; openStroke.Color = color
-        for _, obj in pairs(RGBElements) do if obj.Stroke and obj.Stroke.Parent then obj.Stroke.Color = color end end
-    end
-
     local char = player.Character
     local root = char and char:FindFirstChild("HumanoidRootPart")
     if char and char:FindFirstChildOfClass("Humanoid") then
@@ -940,13 +987,9 @@ RunService.RenderStepped:Connect(function()
         if State.Speed then hum.WalkSpeed = State.SpeedValue end
         if State.Jump then hum.UseJumpPower = true; hum.JumpPower = State.JumpValue end
         
-        if State.FastAttack then
-            pcall(function()
-                for _, anim in pairs(hum:GetPlayingAnimationTracks()) do 
-                    local p = anim.Priority
-                    if p == Enum.AnimationPriority.Action or p == Enum.AnimationPriority.Action2 or p == Enum.AnimationPriority.Action3 or p == Enum.AnimationPriority.Action4 or p == Enum.AnimationPriority.Weapon then anim:AdjustSpeed(State.FastAttackSpeed) end
-                end
-            end)
+        -- Logic Lướt liên tục (Dash)
+        if State.AutoDash and root and hum.MoveDirection.Magnitude > 0 then
+            root.CFrame = root.CFrame + (hum.MoveDirection * (State.DashSpeed / 10))
         end
         
         if State.AntiStun then 
@@ -962,12 +1005,10 @@ RunService.RenderStepped:Connect(function()
                 light.Brightness = State.LightBrightness; light.Range = State.LightRange
             else if light then light:Destroy() end end
         end
-        if State.Hitbox then for _, p in pairs(Players:GetPlayers()) do if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then p.Character.HumanoidRootPart.CanCollide = false end end end
     end
 end)
 
--- Luồng độc lập bảo vệ ESP và Fly hoạt động mượt mà không bị Crash chéo
 RunService.Heartbeat:Connect(function()
-    updateESP()
+    updateESP_Hitbox()
     updateFly()
 end)
