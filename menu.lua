@@ -1,5 +1,5 @@
 -- ============================================================
--- SNAKE ARCADE v7.0 - VONG QUAY + HONG NGOC + QUA CAP DO + CODE + FULL MAN HINH + TAY TRAI/PHAI
+-- SNAKE ARCADE v7.1 - VONG QUAY + HONG NGOC + QUA CAP DO + CODE + FULL MAN HINH + TAY TRAI/PHAI
 -- Tu dong luu ngam (giu nguyen tien trinh cu) | Phim tat PC: RightShift
 -- ============================================================
 local _ok, _err = pcall(function()
@@ -591,6 +591,189 @@ local function makeCartoonFruit(parent, sizePx, pos, data)
 	addStroke(leaf, THEME.Outline, 1.4)
 	return wrap
 end
+
+-- Ve do hoa vector 3D cho 5 vat pham bo tro (Khien, Nam Cham, Tang Toc, Bong Ma, 2x Diem)
+local function makePowerupGraphic(parent, sizePx, pos, data)
+	local wrap = Instance.new("Frame")
+	wrap.Size = UDim2.fromOffset(sizePx, sizePx)
+	wrap.Position = pos or UDim2.fromScale(0.5, 0.5)
+	wrap.AnchorPoint = Vector2.new(0.5, 0.5)
+	wrap.BackgroundTransparency = 1
+	wrap.ZIndex = 3
+	wrap.Parent = parent
+
+	local id = data.Id
+	if id == "Shield" then
+		-- Khien bao ve xanh duong vien bac 3D
+		local outer = Instance.new("Frame")
+		outer.Size = UDim2.fromScale(0.84, 0.88)
+		outer.Position = UDim2.fromScale(0.5, 0.5)
+		outer.AnchorPoint = Vector2.new(0.5, 0.5)
+		outer.BackgroundColor3 = Color3.fromRGB(206, 222, 236)
+		outer.BorderSizePixel = 0
+		outer.ZIndex = 3
+		outer.Parent = wrap
+		addCorner(outer, 7)
+		addStroke(outer, THEME.Outline, 2)
+
+		local inner = Instance.new("Frame")
+		inner.Size = UDim2.fromScale(0.76, 0.78)
+		inner.Position = UDim2.fromScale(0.5, 0.5)
+		inner.AnchorPoint = Vector2.new(0.5, 0.5)
+		inner.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		inner.BorderSizePixel = 0
+		inner.ZIndex = 4
+		inner.Parent = outer
+		addCorner(inner, 5)
+		addGradient(inner, Color3.fromRGB(86, 198, 238), Color3.fromRGB(32, 102, 198), 135)
+
+		local shine = Instance.new("Frame")
+		shine.Size = UDim2.fromScale(0.32, 0.72)
+		shine.Position = UDim2.fromScale(0.14, 0.12)
+		shine.BackgroundColor3 = Color3.fromRGB(230, 244, 252)
+		shine.BackgroundTransparency = 0.55
+		shine.BorderSizePixel = 0
+		shine.ZIndex = 5
+		shine.Parent = inner
+		addCorner(shine, 4)
+
+	elseif id == "Magnet" then
+		-- Nam cham hinh chu U do + 2 dau bac
+		local uOuter = Instance.new("Frame")
+		uOuter.Size = UDim2.fromScale(0.84, 0.84)
+		uOuter.Position = UDim2.fromScale(0.5, 0.52)
+		uOuter.AnchorPoint = Vector2.new(0.5, 0.5)
+		uOuter.BackgroundColor3 = Color3.fromRGB(218, 48, 56)
+		uOuter.BorderSizePixel = 0
+		uOuter.ZIndex = 3
+		uOuter.Parent = wrap
+		addCorner(uOuter, 9)
+		addStroke(uOuter, THEME.Outline, 2)
+
+		local hole = Instance.new("Frame")
+		hole.Size = UDim2.fromScale(0.38, 0.58)
+		hole.Position = UDim2.fromScale(0.5, 0.28)
+		hole.AnchorPoint = Vector2.new(0.5, 0.5)
+		hole.BackgroundColor3 = Color3.fromRGB(16, 20, 36)
+		hole.BorderSizePixel = 0
+		hole.ZIndex = 4
+		hole.Parent = uOuter
+		addCorner(hole, 4)
+		addStroke(hole, THEME.Outline, 1.3)
+
+		for _, xT in ipairs({ 0.0, 0.68 }) do
+			local tip = Instance.new("Frame")
+			tip.Size = UDim2.fromScale(0.32, 0.3)
+			tip.Position = UDim2.fromScale(xT, -0.04)
+			tip.BackgroundColor3 = Color3.fromRGB(216, 224, 234)
+			tip.BorderSizePixel = 0
+			tip.ZIndex = 5
+			tip.Parent = uOuter
+			addCorner(tip, 3)
+			addStroke(tip, THEME.Outline, 1.4)
+		end
+
+	elseif id == "Speed" then
+		-- Tia set vang cam phat sang
+		local halo = Instance.new("Frame")
+		halo.Size = UDim2.fromScale(0.92, 0.92)
+		halo.Position = UDim2.fromScale(0.5, 0.5)
+		halo.AnchorPoint = Vector2.new(0.5, 0.5)
+		halo.BackgroundColor3 = Color3.fromRGB(224, 178, 42)
+		halo.BackgroundTransparency = 0.62
+		halo.BorderSizePixel = 0
+		halo.ZIndex = 2
+		halo.Parent = wrap
+		addCorner(halo, 99)
+
+		local topBolt = Instance.new("Frame")
+		topBolt.Size = UDim2.fromScale(0.34, 0.56)
+		topBolt.Position = UDim2.fromScale(0.46, 0.34)
+		topBolt.AnchorPoint = Vector2.new(0.5, 0.5)
+		topBolt.Rotation = 24
+		topBolt.BackgroundColor3 = Color3.fromRGB(238, 206, 48)
+		topBolt.BorderSizePixel = 0
+		topBolt.ZIndex = 4
+		topBolt.Parent = wrap
+		addCorner(topBolt, 3)
+		addStroke(topBolt, THEME.Outline, 1.6)
+
+		local botBolt = Instance.new("Frame")
+		botBolt.Size = UDim2.fromScale(0.32, 0.56)
+		botBolt.Position = UDim2.fromScale(0.56, 0.66)
+		botBolt.AnchorPoint = Vector2.new(0.5, 0.5)
+		botBolt.Rotation = 24
+		botBolt.BackgroundColor3 = Color3.fromRGB(232, 162, 32)
+		botBolt.BorderSizePixel = 0
+		botBolt.ZIndex = 4
+		botBolt.Parent = wrap
+		addCorner(botBolt, 3)
+		addStroke(botBolt, THEME.Outline, 1.6)
+
+	elseif id == "Ghost" then
+		-- Bong ma trang tim de thuong co mat
+		local body = Instance.new("Frame")
+		body.Size = UDim2.fromScale(0.82, 0.84)
+		body.Position = UDim2.fromScale(0.5, 0.48)
+		body.AnchorPoint = Vector2.new(0.5, 0.5)
+		body.BackgroundColor3 = Color3.fromRGB(224, 218, 240)
+		body.BorderSizePixel = 0
+		body.ZIndex = 3
+		body.Parent = wrap
+		addCorner(body, 10)
+		addStroke(body, THEME.Outline, 1.8)
+		addGradient(body, Color3.fromRGB(236, 232, 248), Color3.fromRGB(168, 146, 214), 90)
+
+		for _, xE in ipairs({ 0.24, 0.58 }) do
+			local eye = Instance.new("Frame")
+			eye.Size = UDim2.fromScale(0.2, 0.24)
+			eye.Position = UDim2.fromScale(xE, 0.3)
+			eye.BackgroundColor3 = Color3.fromRGB(28, 24, 48)
+			eye.BorderSizePixel = 0
+			eye.ZIndex = 5
+			eye.Parent = body
+			addCorner(eye, 99)
+		end
+
+		local mouth = Instance.new("Frame")
+		mouth.Size = UDim2.fromScale(0.22, 0.16)
+		mouth.Position = UDim2.fromScale(0.39, 0.6)
+		mouth.BackgroundColor3 = Color3.fromRGB(198, 76, 112)
+		mouth.BorderSizePixel = 0
+		mouth.ZIndex = 5
+		mouth.Parent = body
+		addCorner(mouth, 99)
+
+	else
+		-- 2x Diem: Ngoi sao vang 8 canh noi bat + chu 2X
+		for _, rot in ipairs({ 0, 45 }) do
+			local sq = Instance.new("Frame")
+			sq.Size = UDim2.fromScale(0.7, 0.7)
+			sq.Position = UDim2.fromScale(0.5, 0.5)
+			sq.AnchorPoint = Vector2.new(0.5, 0.5)
+			sq.Rotation = rot
+			sq.BackgroundColor3 = Color3.fromRGB(232, 192, 46)
+			sq.BorderSizePixel = 0
+			sq.ZIndex = 3
+			sq.Parent = wrap
+			addCorner(sq, 4)
+			addStroke(sq, THEME.Outline, 1.6)
+		end
+		local lbl = Instance.new("TextLabel")
+		lbl.Size = UDim2.fromScale(1, 1)
+		lbl.BackgroundTransparency = 1
+		lbl.Text = "2X"
+		lbl.TextColor3 = Color3.fromRGB(236, 238, 244)
+		lbl.Font = THEME.FontHead
+		lbl.TextSize = 10
+		lbl.ZIndex = 6
+		lbl.Parent = wrap
+		addTextOutline(lbl, 1.5, THEME.Outline)
+	end
+
+	return wrap
+end
+
 
 local function makeArcadeBtn(parent, text, size, pos, topColor, botColor, cornerRadius, opts)
 	opts = opts or {}
@@ -1297,6 +1480,17 @@ end
 local floatDragged = false
 makeDraggable(floatBtn, floatBtn, function(v) floatDragged = v end)
 
+-- Nen tran vien toan man hinh khi bat che do FullScreen (che kin 100% man hinh dien thoai)
+local fullBackdrop = Instance.new("Frame")
+fullBackdrop.Size = UDim2.fromScale(1, 1)
+fullBackdrop.Position = UDim2.fromScale(0, 0)
+fullBackdrop.BackgroundColor3 = Color3.fromRGB(14, 16, 30)
+fullBackdrop.BorderSizePixel = 0
+fullBackdrop.Visible = false
+fullBackdrop.ZIndex = 1
+fullBackdrop.Parent = screenGui
+addGradient(fullBackdrop, Color3.fromRGB(24, 26, 52), Color3.fromRGB(10, 12, 24), 90)
+
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.fromOffset(BASE_W, BASE_H)
 mainFrame.Position = UDim2.new(0.5, 0, 0.5, 16)
@@ -1304,9 +1498,10 @@ mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 mainFrame.BackgroundColor3 = Color3.fromRGB(16, 19, 34)
 mainFrame.BorderSizePixel = 0
 mainFrame.ClipsDescendants = true
+mainFrame.ZIndex = 2
 mainFrame.Parent = screenGui
-addCorner(mainFrame, 18)
-addStroke(mainFrame, Color3.fromRGB(116, 72, 210), 2.8)
+local mainCorner = addCorner(mainFrame, 18)
+local mainStroke = addStroke(mainFrame, Color3.fromRGB(116, 72, 210), 2.8)
 addGradient(mainFrame, Color3.fromRGB(26, 28, 54), Color3.fromRGB(13, 15, 28), 90)
 
 local uiScale = Instance.new("UIScale")
@@ -1317,22 +1512,29 @@ local function calcScale()
 	if not cam then return 1 end
 	local vp = cam.ViewportSize
 	if state.Settings.FullScreen then
-		local sx = (vp.X - 8) / BASE_W
-		local sy = (vp.Y - 12) / BASE_H
-		return math.clamp(math.min(sx, sy), 0.5, 1.85)
+		local sx = vp.X / BASE_W
+		local sy = vp.Y / BASE_H
+		return math.clamp(math.min(sx, sy), 0.5, 2.2)
 	else
 		local sx = (vp.X - 24) / BASE_W
-		local sy = (vp.Y - 60) / BASE_H
-		return math.clamp(math.min(1.18, sx, sy), 0.48, 1.18)
+		local sy = (vp.Y - 62) / BASE_H
+		return math.clamp(math.min(1.12, sx, sy), 0.48, 1.12)
 	end
 end
 
 local function applyWindowScale()
+	local isFull = (state.Settings.FullScreen == true)
+	screenGui.IgnoreGuiInset = isFull
+	fullBackdrop.Visible = isFull and mainFrame.Visible
 	uiScale.Scale = calcScale()
-	if state.Settings.FullScreen then
+	if isFull then
 		mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+		mainCorner.CornerRadius = UDim.new(0, 0)
+		mainStroke.Thickness = 0
 	else
 		mainFrame.Position = UDim2.new(0.5, 0, 0.5, 16)
+		mainCorner.CornerRadius = UDim.new(0, 18)
+		mainStroke.Thickness = 2.8
 	end
 end
 applyWindowScale()
@@ -2236,66 +2438,137 @@ local function openShop()
 	end
 end
 
--- POPUP VONG QUAY MAY MAN (XOAY MUOT + TRUNG XU / KIM CUONG / HONG NGOC)
+-- POPUP VONG QUAY MAY MAN (DO HOA CARTOON ARCADE 3D + DE VONG QUAY + DEN NHAP NHAY)
+local wheelBulbs = {}
 local function openWheel()
 	openModal("Wheel", "VÒNG QUAY MAY MẮN", false)
+	wheelBulbs = {}
 
 	local stage = Instance.new("Frame")
-	stage.Size = UDim2.new(1, 0, 0, 320)
+	stage.Size = UDim2.new(1, 0, 0, 326)
 	stage.BackgroundTransparency = 1
 	stage.ZIndex = 33
 	stage.Parent = UI.modalBody
 
-	-- Khung banh xe ben trai
+	-- Hieu ung vong sang nen phia sau banh xe
+	local aura = Instance.new("Frame")
+	aura.Size = UDim2.fromOffset(274, 274)
+	aura.Position = UDim2.fromOffset(8, 12)
+	aura.BackgroundColor3 = Color3.fromRGB(168, 76, 224)
+	aura.BackgroundTransparency = 0.78
+	aura.BorderSizePixel = 0
+	aura.ZIndex = 33
+	aura.Parent = stage
+	addCorner(aura, 999)
+
+	-- De dung Vong Quay tim-vang 3D (giong mau)
+	local standBase = Instance.new("Frame")
+	standBase.Size = UDim2.fromOffset(172, 34)
+	standBase.Position = UDim2.fromOffset(59, 266)
+	standBase.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	standBase.BorderSizePixel = 0
+	standBase.ZIndex = 34
+	standBase.Parent = stage
+	addCorner(standBase, 10)
+	addStroke(standBase, THEME.Outline, 2.6)
+	addGradient(standBase, Color3.fromRGB(152, 62, 224), Color3.fromRGB(82, 28, 158), 90)
+
+	local standTrim = Instance.new("Frame")
+	standTrim.Size = UDim2.new(1, -12, 0, 6)
+	standTrim.Position = UDim2.fromOffset(6, 5)
+	standTrim.BackgroundColor3 = Color3.fromRGB(228, 186, 48)
+	standTrim.BorderSizePixel = 0
+	standTrim.ZIndex = 35
+	standTrim.Parent = standBase
+	addCorner(standTrim, 4)
+
+	local standFoot = Instance.new("Frame")
+	standFoot.Size = UDim2.fromOffset(198, 14)
+	standFoot.Position = UDim2.fromOffset(46, 294)
+	standFoot.BackgroundColor3 = Color3.fromRGB(224, 174, 38)
+	standFoot.BorderSizePixel = 0
+	standFoot.ZIndex = 34
+	standFoot.Parent = stage
+	addCorner(standFoot, 7)
+	addStroke(standFoot, THEME.Outline, 2.4)
+
+	-- Vien vang kep ngoai cung
 	local wheelBase = Instance.new("Frame")
-	wheelBase.Size = UDim2.fromOffset(244, 244)
-	wheelBase.Position = UDim2.fromOffset(22, 34)
-	wheelBase.BackgroundColor3 = Color3.fromRGB(228, 184, 44)
+	wheelBase.Size = UDim2.fromOffset(256, 256)
+	wheelBase.Position = UDim2.fromOffset(17, 20)
+	wheelBase.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 	wheelBase.BorderSizePixel = 0
-	wheelBase.ZIndex = 34
+	wheelBase.ZIndex = 35
 	wheelBase.Parent = stage
 	addCorner(wheelBase, 999)
 	addStroke(wheelBase, THEME.Outline, 3.2)
-	addGradient(wheelBase, Color3.fromRGB(234, 202, 66), Color3.fromRGB(192, 126, 20), 90)
+	addGradient(wheelBase, Color3.fromRGB(242, 208, 68), Color3.fromRGB(196, 122, 18), 90)
 
-	-- Cham den trang tri vien ngoai
-	for i = 0, 11 do
-		local ang = math.rad(i * 30)
-		local lx = 122 + math.cos(ang) * 112
-		local ly = 122 + math.sin(ang) * 112
+	local innerBezel = Instance.new("Frame")
+	innerBezel.Size = UDim2.fromOffset(224, 224)
+	innerBezel.Position = UDim2.fromScale(0.5, 0.5)
+	innerBezel.AnchorPoint = Vector2.new(0.5, 0.5)
+	innerBezel.BackgroundColor3 = Color3.fromRGB(152, 86, 16)
+	innerBezel.BorderSizePixel = 0
+	innerBezel.ZIndex = 35
+	innerBezel.Parent = wheelBase
+	addCorner(innerBezel, 999)
+	addStroke(innerBezel, THEME.Outline, 2)
+
+	-- 16 bong den led nhap nhay quanh vanh vang
+	for i = 0, 15 do
+		local ang = math.rad(i * 22.5)
+		local lx = 128 + math.cos(ang) * 119
+		local ly = 128 + math.sin(ang) * 119
 		local bulb = Instance.new("Frame")
-		bulb.Size = UDim2.fromOffset(8, 8)
+		bulb.Size = UDim2.fromOffset(9, 9)
 		bulb.Position = UDim2.fromOffset(lx, ly)
 		bulb.AnchorPoint = Vector2.new(0.5, 0.5)
-		bulb.BackgroundColor3 = (i % 2 == 0) and Color3.fromRGB(240, 232, 164) or Color3.fromRGB(224, 152, 46)
+		bulb.BackgroundColor3 = (i % 2 == 0) and Color3.fromRGB(248, 240, 178) or Color3.fromRGB(224, 148, 42)
 		bulb.BorderSizePixel = 0
-		bulb.ZIndex = 35
+		bulb.ZIndex = 36
 		bulb.Parent = wheelBase
 		addCorner(bulb, 99)
+		addStroke(bulb, Color3.fromRGB(122, 68, 12), 1)
+		table.insert(wheelBulbs, bulb)
 	end
 
-	-- Dia quay ben trong (xoay khi quay)
+	-- Dia quay ben trong
 	local disc = Instance.new("Frame")
-	disc.Size = UDim2.fromOffset(204, 204)
+	disc.Size = UDim2.fromOffset(214, 214)
 	disc.Position = UDim2.fromScale(0.5, 0.5)
 	disc.AnchorPoint = Vector2.new(0.5, 0.5)
-	disc.BackgroundColor3 = Color3.fromRGB(26, 28, 54)
+	disc.BackgroundColor3 = Color3.fromRGB(36, 30, 74)
 	disc.BorderSizePixel = 0
+	disc.ClipsDescendants = true
 	disc.ZIndex = 36
 	disc.Parent = wheelBase
 	addCorner(disc, 999)
 	addStroke(disc, THEME.Outline, 2.4)
 
-	-- 8 o thuong xep deu quanh dia quay
+	-- 8 nan hoa vang chia deu 8 o thuong
+	for i = 0, 3 do
+		local spoke = Instance.new("Frame")
+		spoke.Size = UDim2.fromOffset(3, 214)
+		spoke.Position = UDim2.fromScale(0.5, 0.5)
+		spoke.AnchorPoint = Vector2.new(0.5, 0.5)
+		spoke.Rotation = 22.5 + (i * 45)
+		spoke.BackgroundColor3 = Color3.fromRGB(226, 188, 56)
+		spoke.BorderSizePixel = 0
+		spoke.ZIndex = 38
+		spoke.Parent = disc
+	end
+
+	-- 8 o thuong lon, mau ruc ro va icon tien te sac net
 	for idx, slot in ipairs(WHEEL_SLOTS) do
 		local deg = (idx - 1) * 45
 		local rad = math.rad(deg - 90)
-		local rDist = 68
-		local sx = 102 + math.cos(rad) * rDist
-		local sy = 102 + math.sin(rad) * rDist
+		local rDist = 66
+		local sx = 107 + math.cos(rad) * rDist
+		local sy = 107 + math.sin(rad) * rDist
 
 		local pill = Instance.new("Frame")
-		pill.Size = UDim2.fromOffset(52, 44)
+		pill.Size = UDim2.fromOffset(62, 56)
 		pill.Position = UDim2.fromOffset(sx, sy)
 		pill.AnchorPoint = Vector2.new(0.5, 0.5)
 		pill.Rotation = deg
@@ -2303,87 +2576,124 @@ local function openWheel()
 		pill.BorderSizePixel = 0
 		pill.ZIndex = 37
 		pill.Parent = disc
-		addCorner(pill, 10)
+		addCorner(pill, 12)
 		addStroke(pill, THEME.Outline, 1.8)
 
-		makeCurrencyIcon(pill, slot.Kind, 16, UDim2.new(0.5, 0, 0, 12), Vector2.new(0.5, 0.5), 38)
+		local pGloss = Instance.new("Frame")
+		pGloss.Size = UDim2.new(0.84, 0, 0.34, 0)
+		pGloss.Position = UDim2.new(0.08, 0, 0.06, 0)
+		pGloss.BackgroundColor3 = Color3.fromRGB(240, 244, 250)
+		pGloss.BackgroundTransparency = 0.72
+		pGloss.BorderSizePixel = 0
+		pGloss.ZIndex = 38
+		pGloss.Parent = pill
+		addCorner(pGloss, 6)
+
+		makeCurrencyIcon(pill, slot.Kind, 20, UDim2.new(0.5, 0, 0, 16), Vector2.new(0.5, 0.5), 39)
 
 		local vLbl = Instance.new("TextLabel")
-		vLbl.Size = UDim2.new(1, -4, 0, 16)
-		vLbl.Position = UDim2.new(0, 2, 1, -18)
+		vLbl.Size = UDim2.new(1, -4, 0, 18)
+		vLbl.Position = UDim2.new(0, 2, 1, -22)
 		vLbl.BackgroundTransparency = 1
 		vLbl.Text = slot.Label
 		vLbl.TextColor3 = THEME.TextMain
 		vLbl.Font = THEME.FontHead
-		vLbl.TextSize = 10
-		vLbl.ZIndex = 39
+		vLbl.TextSize = 11
+		vLbl.ZIndex = 40
 		vLbl.Parent = pill
-		addTextOutline(vLbl, 1.4, THEME.Outline)
+		addTextOutline(vLbl, 1.5, THEME.Outline)
 	end
 
-	-- Tam giua banh xe
+	-- Tam giua ngoi sao vang 3D (giong anh mau)
 	local hub = Instance.new("Frame")
-	hub.Size = UDim2.fromOffset(44, 44)
+	hub.Size = UDim2.fromOffset(52, 52)
 	hub.Position = UDim2.fromScale(0.5, 0.5)
 	hub.AnchorPoint = Vector2.new(0.5, 0.5)
-	hub.BackgroundColor3 = Color3.fromRGB(228, 190, 50)
+	hub.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 	hub.BorderSizePixel = 0
-	hub.ZIndex = 41
+	hub.ZIndex = 42
 	hub.Parent = wheelBase
 	addCorner(hub, 99)
-	addStroke(hub, THEME.Outline, 2.4)
+	addStroke(hub, THEME.Outline, 2.6)
+	addGradient(hub, Color3.fromRGB(244, 212, 72), Color3.fromRGB(196, 128, 22), 90)
 
-	local hubTxt = Instance.new("TextLabel")
-	hubTxt.Size = UDim2.fromScale(1, 1)
-	hubTxt.BackgroundTransparency = 1
-	hubTxt.Text = "SPIN"
-	hubTxt.TextColor3 = Color3.fromRGB(112, 54, 14)
-	hubTxt.Font = THEME.FontHead
-	hubTxt.TextSize = 11
-	hubTxt.ZIndex = 42
-	hubTxt.Parent = hub
+	for _, rot in ipairs({ 0, 45 }) do
+		local st = Instance.new("Frame")
+		st.Size = UDim2.fromOffset(22, 22)
+		st.Position = UDim2.fromScale(0.5, 0.5)
+		st.AnchorPoint = Vector2.new(0.5, 0.5)
+		st.Rotation = rot
+		st.BackgroundColor3 = Color3.fromRGB(246, 224, 96)
+		st.BorderSizePixel = 0
+		st.ZIndex = 43
+		st.Parent = hub
+		addCorner(st, 4)
+		addStroke(st, Color3.fromRGB(132, 74, 14), 1.4)
+	end
 
-	-- Mui ten do chi xuong tu dinh banh xe
+	-- Mui ten do-vang chi xuong o trung thuong
 	local pointer = Instance.new("Frame")
-	pointer.Size = UDim2.fromOffset(22, 22)
+	pointer.Size = UDim2.fromOffset(28, 28)
 	pointer.Position = UDim2.new(0.5, 0, 0, -4)
 	pointer.AnchorPoint = Vector2.new(0.5, 0.5)
 	pointer.Rotation = 45
-	pointer.BackgroundColor3 = Color3.fromRGB(218, 48, 54)
+	pointer.BackgroundColor3 = Color3.fromRGB(224, 46, 52)
 	pointer.BorderSizePixel = 0
-	pointer.ZIndex = 43
+	pointer.ZIndex = 44
 	pointer.Parent = wheelBase
-	addCorner(pointer, 4)
-	addStroke(pointer, THEME.Outline, 2.2)
+	addCorner(pointer, 5)
+	addStroke(pointer, THEME.Outline, 2.6)
+
+	local pDot = Instance.new("Frame")
+	pDot.Size = UDim2.fromOffset(10, 10)
+	pDot.Position = UDim2.fromScale(0.5, 0.5)
+	pDot.AnchorPoint = Vector2.new(0.5, 0.5)
+	pDot.BackgroundColor3 = Color3.fromRGB(242, 206, 62)
+	pDot.BorderSizePixel = 0
+	pDot.ZIndex = 45
+	pDot.Parent = pointer
+	addCorner(pDot, 99)
 
 	-- Bang thong tin & nut Quay ben phai
 	local infoPanel = Instance.new("Frame")
-	infoPanel.Size = UDim2.fromOffset(256, 266)
-	infoPanel.Position = UDim2.fromOffset(290, 24)
-	infoPanel.BackgroundColor3 = Color3.fromRGB(26, 30, 54)
+	infoPanel.Size = UDim2.fromOffset(252, 286)
+	infoPanel.Position = UDim2.fromOffset(296, 18)
+	infoPanel.BackgroundColor3 = Color3.fromRGB(24, 28, 52)
 	infoPanel.BorderSizePixel = 0
 	infoPanel.ZIndex = 34
 	infoPanel.Parent = stage
 	addCorner(infoPanel, 14)
-	addStroke(infoPanel, Color3.fromRGB(98, 72, 182), 2)
+	addStroke(infoPanel, Color3.fromRGB(118, 76, 206), 2.2)
+	addGradient(infoPanel, Color3.fromRGB(32, 34, 68), Color3.fromRGB(18, 20, 40), 90)
+
+	local spinsPill = Instance.new("Frame")
+	spinsPill.Size = UDim2.new(1, -24, 0, 38)
+	spinsPill.Position = UDim2.fromOffset(12, 14)
+	spinsPill.BackgroundColor3 = Color3.fromRGB(16, 20, 38)
+	spinsPill.BorderSizePixel = 0
+	spinsPill.ZIndex = 35
+	spinsPill.Parent = infoPanel
+	addCorner(spinsPill, 12)
+	addStroke(spinsPill, Color3.fromRGB(186, 144, 42), 1.8)
 
 	local spinsLbl = Instance.new("TextLabel")
-	spinsLbl.Size = UDim2.new(1, -16, 0, 32)
-	spinsLbl.Position = UDim2.fromOffset(8, 14)
+	spinsLbl.Size = UDim2.fromScale(1, 1)
 	spinsLbl.BackgroundTransparency = 1
-	spinsLbl.Text = "Lượt quay hiện có: " .. formatNum(state.Spins)
+	spinsLbl.Text = "Lượt quay: " .. formatNum(state.Spins)
 	spinsLbl.TextColor3 = THEME.TextGold
 	spinsLbl.Font = THEME.FontHead
 	spinsLbl.TextSize = 15
-	spinsLbl.ZIndex = 35
-	spinsLbl.Parent = infoPanel
+	spinsLbl.ZIndex = 36
+	spinsLbl.Parent = spinsPill
 	addTextOutline(spinsLbl, 1.6, THEME.Outline)
 
 	local tipLbl = Instance.new("TextLabel")
-	tipLbl.Size = UDim2.new(1, -20, 0, 52)
-	tipLbl.Position = UDim2.fromOffset(10, 48)
+	tipLbl.Size = UDim2.new(1, -20, 0, 56)
+	tipLbl.Position = UDim2.fromOffset(10, 62)
 	tipLbl.BackgroundTransparency = 1
-	tipLbl.Text = "Hoàn thành Nhiệm Vụ hoặc lên cấp\nđể nhận thêm lượt quay miễn phí.\nCó cơ hội trúng Hồng Ngọc cực hiếm!"
+	tipLbl.Text = "Làm Nhiệm Vụ hoặc tăng cấp để
+nhận thêm lượt quay miễn phí.
+Có cơ hội trúng Hồng Ngọc cực hiếm!"
 	tipLbl.TextColor3 = THEME.TextMuted
 	tipLbl.Font = THEME.FontBody
 	tipLbl.TextSize = 11
@@ -2392,14 +2702,14 @@ local function openWheel()
 	tipLbl.Parent = infoPanel
 
 	local resultBox = Instance.new("Frame")
-	resultBox.Size = UDim2.new(1, -24, 0, 54)
-	resultBox.Position = UDim2.fromOffset(12, 114)
-	resultBox.BackgroundColor3 = Color3.fromRGB(16, 20, 38)
+	resultBox.Size = UDim2.new(1, -24, 0, 62)
+	resultBox.Position = UDim2.fromOffset(12, 130)
+	resultBox.BackgroundColor3 = Color3.fromRGB(15, 18, 36)
 	resultBox.BorderSizePixel = 0
 	resultBox.ZIndex = 35
 	resultBox.Parent = infoPanel
-	addCorner(resultBox, 10)
-	addStroke(resultBox, Color3.fromRGB(72, 82, 128), 1.6)
+	addCorner(resultBox, 12)
+	addStroke(resultBox, Color3.fromRGB(78, 88, 142), 1.8)
 
 	local resultLbl = Instance.new("TextLabel")
 	resultLbl.Size = UDim2.new(1, -12, 1, 0)
@@ -2415,9 +2725,9 @@ local function openWheel()
 
 	local spinBtn, spinLbl = makeArcadeBtn(
 		infoPanel, "QUAY NGAY",
-		UDim2.new(1, -28, 0, 52), UDim2.fromOffset(14, 190),
-		Color3.fromRGB(74, 206, 66), Color3.fromRGB(28, 144, 44), 14,
-		{ TextSize = 16, ZIndex = 36, Depth = 4, Stroke = 2.4 }
+		UDim2.new(1, -28, 0, 56), UDim2.fromOffset(14, 212),
+		Color3.fromRGB(74, 210, 66), Color3.fromRGB(28, 144, 44), 16,
+		{ TextSize = 17, ZIndex = 36, Depth = 5, Stroke = 2.6 }
 	)
 
 	spinBtn.MouseButton1Click:Connect(function()
@@ -2429,14 +2739,13 @@ local function openWheel()
 		end
 		wheelSpinning = true
 		state.Spins -= 1
-		spinsLbl.Text = "Lượt quay hiện có: " .. formatNum(state.Spins)
+		spinsLbl.Text = "Lượt quay: " .. formatNum(state.Spins)
 		spinLbl.Text = "ĐANG QUAY..."
 		resultLbl.Text = "Chúc may mắn..."
 		resultLbl.TextColor3 = THEME.TextGold
 		refreshNotifDots()
 		saveData()
 
-		-- Chon o trung theo trong so Weight
 		local totalW = 0
 		for _, s in ipairs(WHEEL_SLOTS) do totalW += s.Weight end
 		local roll = math.random(1, totalW)
@@ -3216,27 +3525,7 @@ local function spawnItem(itemType, customData, lifeTime)
 	elseif itemType == "Food" then
 		node = makeCartoonFruit(UI.itemLayer, CELL, UDim2.fromOffset(cx, cy), customData)
 	else
-		node = Instance.new("Frame")
-		node.Size = UDim2.fromOffset(CELL - 2, CELL - 2)
-		node.AnchorPoint = Vector2.new(0.5, 0.5)
-		node.Position = UDim2.fromOffset(cx, cy)
-		node.BackgroundColor3 = customData.Color
-		node.BorderSizePixel = 0
-		node.ZIndex = 3
-		node.Parent = UI.itemLayer
-		addCorner(node, 99)
-		addStroke(node, THEME.Outline, 1.8)
-
-		local tag = Instance.new("TextLabel")
-		tag.Size = UDim2.fromScale(1, 1)
-		tag.BackgroundTransparency = 1
-		tag.Text = customData.Tag
-		tag.TextColor3 = THEME.TextMain
-		tag.Font = THEME.FontHead
-		tag.TextSize = 10
-		tag.ZIndex = 4
-		tag.Parent = node
-		addTextOutline(tag, 1.4, THEME.Outline)
+		node = makePowerupGraphic(UI.itemLayer, CELL, UDim2.fromOffset(cx, cy), customData)
 	end
 
 	table.insert(Game.boardItems, {
@@ -3703,6 +3992,15 @@ track(RunService.RenderStepped:Connect(function(dt)
 	dt = math.min(dt, 0.05)
 
 	local nowSec = os.time()
+	if UI.modalOverlay.Visible and activeModalTag == "Wheel" and #wheelBulbs > 0 then
+		local phase = math.floor(os.clock() * (wheelSpinning and 10 or 3)) % 2
+		for idxB, b in ipairs(wheelBulbs) do
+			if b and b.Parent then
+				b.BackgroundColor3 = ((idxB + phase) % 2 == 0) and Color3.fromRGB(248, 240, 178) or Color3.fromRGB(218, 134, 34)
+			end
+		end
+	end
+
 	if nowSec ~= lastSecondCheck then
 		lastSecondCheck = nowSec
 		refreshNotifDots()
@@ -3820,6 +4118,7 @@ local function minimizeMenu()
 	tw.Completed:Connect(function()
 		if uiScale.Scale < 0.1 then
 			mainFrame.Visible = false
+			fullBackdrop.Visible = false
 			floatBtn.Visible = true
 		end
 	end)
@@ -3828,6 +4127,7 @@ end
 local function restoreMenu()
 	floatBtn.Visible = false
 	mainFrame.Visible = true
+	fullBackdrop.Visible = (state.Settings.FullScreen == true)
 	uiScale.Scale = 0.1
 	TweenService:Create(uiScale, TweenInfo.new(0.22, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = calcScale() }):Play()
 end
@@ -3890,5 +4190,5 @@ updateTopStats()
 if not hadSavedData then saveData() end
 end)
 if not _ok then
-	warn("[SnakeArcade v7.0 ERROR]: " .. tostring(_err))
+	warn("[SnakeArcade v7.1 ERROR]: " .. tostring(_err))
 end
