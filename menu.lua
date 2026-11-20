@@ -1,16 +1,18 @@
 -- ============================================================
--- SNAKE ARCADE PRO - MENU RẮN SĂN MỒI ĐỘC LẬP (PC & MOBILE)
+-- SNAKE ARCADE PRO v2 - TỰ ĐỘNG LƯU + FIX FULL UI MOBILE & PC
 -- Phím tắt ẩn/hiện nhanh trên PC: RightShift
 -- ============================================================
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
+local HttpService = game:GetService("HttpService")
 
 local player = Players.LocalPlayer
 local GUI_NAME = "SnakeArcadePro_Standalone"
+local SAVE_FILE = "SnakeArcadePro_Save_" .. tostring(player.UserId) .. ".json"
 
--- Tự động chọn nơi gắn GUI an toàn (chạy được cả Executor lẫn Roblox Studio)
+-- Chọn nơi gắn GUI an toàn (chạy được cả Executor lẫn Roblox Studio)
 local function getGuiParent()
 	if typeof(gethui) == "function" then
 		local ok, hui = pcall(gethui)
@@ -39,58 +41,58 @@ local function track(conn)
 end
 
 -- ============================================================
--- DỮ LIỆU SKIN, ĐỒ ĂN, NHIỆM VỤ & BẢNG XẾP HẠNG
+-- DỮ LIỆU GỐC (SKIN, ĐỒ ĂN, KỸ NĂNG, BẢNG XẾP HẠNG)
 -- ============================================================
 local SKINS = {
 	{
 		Id = "classic_green", Name = "Rắn Xanh Lá", Price = 0, Currency = "Coins",
 		HeadColor = Color3.fromRGB(52, 211, 56), Body1 = Color3.fromRGB(34, 197, 54), Body2 = Color3.fromRGB(74, 222, 90),
-		Accent = Color3.fromRGB(22, 130, 38), Accessory = nil
+		Accessory = nil
 	},
 	{
 		Id = "classic_red", Name = "Rắn Đỏ Rực", Price = 100, Currency = "Coins",
 		HeadColor = Color3.fromRGB(239, 55, 55), Body1 = Color3.fromRGB(220, 38, 38), Body2 = Color3.fromRGB(248, 95, 95),
-		Accent = Color3.fromRGB(153, 27, 27), Accessory = nil
+		Accessory = nil
 	},
 	{
 		Id = "classic_blue", Name = "Rắn Xanh Biển", Price = 150, Currency = "Coins",
 		HeadColor = Color3.fromRGB(38, 155, 255), Body1 = Color3.fromRGB(29, 130, 235), Body2 = Color3.fromRGB(96, 185, 255),
-		Accent = Color3.fromRGB(22, 85, 175), Accessory = nil
+		Accessory = nil
 	},
 	{
 		Id = "classic_gold", Name = "Rắn Vàng Ong", Price = 200, Currency = "Coins",
 		HeadColor = Color3.fromRGB(250, 204, 21), Body1 = Color3.fromRGB(234, 179, 8), Body2 = Color3.fromRGB(254, 225, 85),
-		Accent = Color3.fromRGB(161, 98, 7), Accessory = nil
+		Accessory = nil
 	},
 	{
 		Id = "classic_purple", Name = "Rắn Tím Huyền", Price = 250, Currency = "Coins",
 		HeadColor = Color3.fromRGB(178, 75, 255), Body1 = Color3.fromRGB(147, 51, 234), Body2 = Color3.fromRGB(196, 118, 255),
-		Accent = Color3.fromRGB(107, 33, 168), Accessory = nil
+		Accessory = nil
 	},
 	{
 		Id = "king_snake", Name = "Vua Rắn", Price = 400, Currency = "Coins",
 		HeadColor = Color3.fromRGB(46, 220, 62), Body1 = Color3.fromRGB(34, 197, 54), Body2 = Color3.fromRGB(250, 204, 21),
-		Accent = Color3.fromRGB(250, 204, 21), Accessory = "Crown"
+		Accessory = "Crown"
 	},
 	{
 		Id = "fire_dragon", Name = "Rồng Lửa", Price = 15, Currency = "Gems",
 		HeadColor = Color3.fromRGB(42, 32, 48), Body1 = Color3.fromRGB(239, 68, 25), Body2 = Color3.fromRGB(251, 146, 30),
-		Accent = Color3.fromRGB(255, 190, 40), Accessory = "Fire"
+		Accessory = "Fire"
 	},
 	{
 		Id = "ice_dragon", Name = "Rồng Băng", Price = 20, Currency = "Gems",
 		HeadColor = Color3.fromRGB(56, 198, 255), Body1 = Color3.fromRGB(14, 165, 233), Body2 = Color3.fromRGB(186, 238, 255),
-		Accent = Color3.fromRGB(224, 248, 255), Accessory = "Ice"
+		Accessory = "Ice"
 	},
 	{
 		Id = "dj_rainbow", Name = "DJ Cầu Vồng", Price = 30, Currency = "Gems",
 		HeadColor = Color3.fromRGB(236, 72, 153), Body1 = Color3.fromRGB(236, 72, 153), Body2 = Color3.fromRGB(56, 189, 248),
-		Accent = Color3.fromRGB(255, 255, 255), Accessory = "Headphones", Rainbow = true
+		Accessory = "Headphones", Rainbow = true
 	},
 	{
 		Id = "golden_dragon", Name = "Rồng Vàng VIP", Price = 50, Currency = "Gems",
 		HeadColor = Color3.fromRGB(255, 195, 20), Body1 = Color3.fromRGB(245, 158, 11), Body2 = Color3.fromRGB(255, 235, 105),
-		Accent = Color3.fromRGB(255, 250, 180), Accessory = "GoldDragon"
+		Accessory = "GoldDragon"
 	},
 }
 
@@ -115,11 +117,11 @@ local FOODS = {
 }
 
 local POWERUPS = {
-	{ Id = "Double", Icon = "⭐", Color = Color3.fromRGB(250, 204, 21), Name = "2x Điểm (10s)" },
-	{ Id = "Ghost",  Icon = "👻", Color = Color3.fromRGB(196, 181, 253), Name = "Bóng Ma (8s)" },
-	{ Id = "Shield", Icon = "🛡️", Color = Color3.fromRGB(56, 189, 248), Name = "Khiên Bảo Vệ" },
-	{ Id = "Magnet", Icon = "🧲", Color = Color3.fromRGB(248, 113, 113), Name = "Nam Châm (10s)" },
-	{ Id = "Speed",  Icon = "⚡", Color = Color3.fromRGB(253, 224, 71), Name = "Tăng Tốc (7s)" },
+	{ Id = "Double", Icon = "⭐", Color = Color3.fromRGB(250, 204, 21), Name = "2x Điểm" },
+	{ Id = "Ghost",  Icon = "👻", Color = Color3.fromRGB(196, 181, 253), Name = "Bóng Ma" },
+	{ Id = "Shield", Icon = "🛡️", Color = Color3.fromRGB(56, 189, 248), Name = "Khiên" },
+	{ Id = "Magnet", Icon = "🧲", Color = Color3.fromRGB(248, 113, 113), Name = "Nam Châm" },
+	{ Id = "Speed",  Icon = "⚡", Color = Color3.fromRGB(253, 224, 71), Name = "Tăng Tốc" },
 }
 
 local BOT_SCORES = {
@@ -134,33 +136,178 @@ local BOT_SCORES = {
 	{ Name = "Star", Score = 60 },
 }
 
--- Trạng thái người chơi trong phiên
-local state = {
-	Coins = 250,
-	Gems = 12,
-	Level = 1,
-	Exp = 0,
-	ExpNeed = 100,
-	HighScore = 0,
-	OwnedSkins = { classic_green = true },
-	EquippedSkin = "classic_green",
-	NextGiftTime = 0,
-	Settings = {
-		WallPass = false,
-		SpeedMode = 2, -- 1 = Chậm, 2 = Vừa, 3 = Nhanh
-		BombsEnabled = true,
-		ShowDpad = true,
-	},
-	Quests = {
-		{ Id = "eat",   Title = "Ăn 15 món ăn bất kỳ",    Goal = 15,  Progress = 0, Reward = 120, Currency = "Coins", Claimed = false },
-		{ Id = "score", Title = "Đạt 150 điểm trong 1 ván", Goal = 150, Progress = 0, Reward = 8,   Currency = "Gems",  Claimed = false },
-		{ Id = "power", Title = "Nhặt 3 vật phẩm kỹ năng", Goal = 3,   Progress = 0, Reward = 10,  Currency = "Gems",  Claimed = false },
-		{ Id = "games", Title = "Chơi hoàn thành 3 ván",   Goal = 3,   Progress = 0, Reward = 200, Currency = "Coins", Claimed = false },
+local function createDefaultState()
+	return {
+		Coins = 250,
+		Gems = 12,
+		Level = 1,
+		Exp = 0,
+		ExpNeed = 100,
+		HighScore = 0,
+		OwnedSkins = { classic_green = true },
+		EquippedSkin = "classic_green",
+		NextGiftUnix = 0,
+		Settings = {
+			WallPass = false,
+			SpeedMode = 2,
+			BombsEnabled = true,
+			ShowDpad = true,
+		},
+		Quests = {
+			{ Id = "eat",   Title = "Ăn 15 món ăn bất kỳ",     Goal = 15,  Progress = 0, Reward = 120, Currency = "Coins", Claimed = false },
+			{ Id = "score", Title = "Đạt 150 điểm trong 1 ván", Goal = 150, Progress = 0, Reward = 8,   Currency = "Gems",  Claimed = false },
+			{ Id = "power", Title = "Nhặt 3 vật phẩm kỹ năng",  Goal = 3,   Progress = 0, Reward = 10,  Currency = "Gems",  Claimed = false },
+			{ Id = "games", Title = "Chơi hoàn thành 3 ván",    Goal = 3,   Progress = 0, Reward = 200, Currency = "Coins", Claimed = false },
+		}
 	}
-}
+end
+
+local state = createDefaultState()
 
 -- ============================================================
--- HÀM DỰNG UI HOẠT HÌNH BÓNG MƯỢT (CARTOON GLOSSY STYLE)
+-- HỆ THỐNG LƯU & TẢI DỮ LIỆU TỰ ĐỘNG (FILE JSON + BỘ NHỚ RAM)
+-- ============================================================
+local canWriteFile = (typeof(writefile) == "function") and (typeof(readfile) == "function")
+local saveModeName = canWriteFile and "File lưu vĩnh viễn" or "Bộ nhớ tạm (RAM)"
+local saveStatusLbl = nil
+
+local function getCacheRoot()
+	if typeof(getgenv) == "function" then
+		local ok, env = pcall(getgenv)
+		if ok and type(env) == "table" then return env end
+	end
+	return _G
+end
+
+local function packSaveData()
+	local questProgress = {}
+	for _, q in ipairs(state.Quests) do
+		questProgress[q.Id] = { Progress = q.Progress, Claimed = q.Claimed }
+	end
+	return {
+		Coins = state.Coins,
+		Gems = state.Gems,
+		Level = state.Level,
+		Exp = state.Exp,
+		ExpNeed = state.ExpNeed,
+		HighScore = state.HighScore,
+		OwnedSkins = state.OwnedSkins,
+		EquippedSkin = state.EquippedSkin,
+		NextGiftUnix = state.NextGiftUnix,
+		Settings = state.Settings,
+		QuestProgress = questProgress,
+	}
+end
+
+local function applyLoadedData(raw)
+	if type(raw) ~= "table" then return end
+	if type(raw.Coins) == "number" then state.Coins = raw.Coins end
+	if type(raw.Gems) == "number" then state.Gems = raw.Gems end
+	if type(raw.Level) == "number" then state.Level = math.max(1, raw.Level) end
+	if type(raw.Exp) == "number" then state.Exp = math.max(0, raw.Exp) end
+	if type(raw.ExpNeed) == "number" then state.ExpNeed = math.max(50, raw.ExpNeed) end
+	if type(raw.HighScore) == "number" then state.HighScore = math.max(0, raw.HighScore) end
+	if type(raw.NextGiftUnix) == "number" then state.NextGiftUnix = raw.NextGiftUnix end
+
+	if type(raw.OwnedSkins) == "table" then
+		state.OwnedSkins = { classic_green = true }
+		for k, v in pairs(raw.OwnedSkins) do
+			if v == true then state.OwnedSkins[k] = true end
+		end
+	end
+	if type(raw.EquippedSkin) == "string" and state.OwnedSkins[raw.EquippedSkin] then
+		state.EquippedSkin = raw.EquippedSkin
+	end
+	if type(raw.Settings) == "table" then
+		if type(raw.Settings.WallPass) == "boolean" then state.Settings.WallPass = raw.Settings.WallPass end
+		if type(raw.Settings.SpeedMode) == "number" then state.Settings.SpeedMode = math.clamp(raw.Settings.SpeedMode, 1, 3) end
+		if type(raw.Settings.BombsEnabled) == "boolean" then state.Settings.BombsEnabled = raw.Settings.BombsEnabled end
+		if type(raw.Settings.ShowDpad) == "boolean" then state.Settings.ShowDpad = raw.Settings.ShowDpad end
+	end
+	if type(raw.QuestProgress) == "table" then
+		for _, q in ipairs(state.Quests) do
+			local savedQ = raw.QuestProgress[q.Id]
+			if type(savedQ) == "table" then
+				if type(savedQ.Progress) == "number" then q.Progress = savedQ.Progress end
+				if type(savedQ.Claimed) == "boolean" then q.Claimed = savedQ.Claimed end
+			end
+		end
+	end
+end
+
+local function flashSaveBadge(text, color)
+	if not saveStatusLbl then return end
+	saveStatusLbl.Text = text
+	saveStatusLbl.TextColor3 = color
+	task.delay(1.6, function()
+		if saveStatusLbl and saveStatusLbl.Parent then
+			saveStatusLbl.Text = "💾 Tự động lưu"
+			saveStatusLbl.TextColor3 = Color3.fromRGB(134, 239, 172)
+		end
+	end)
+end
+
+local function saveData()
+	local payload = packSaveData()
+	local okEnc, encoded = pcall(function() return HttpService:JSONEncode(payload) end)
+	if not okEnc then return false end
+
+	-- Lớp 1: Lưu dự phòng vào bộ nhớ phiên
+	local cache = getCacheRoot()
+	cache["SnakeArcadePro_JSON_" .. tostring(player.UserId)] = encoded
+
+	-- Lớp 2: Ghi ra file cứng trên máy (nếu Executor hỗ trợ)
+	if canWriteFile then
+		local okWrite = pcall(writefile, SAVE_FILE, encoded)
+		if okWrite then
+			flashSaveBadge("✔ Đã lưu file", Color3.fromRGB(74, 222, 128))
+			return true
+		end
+	end
+	flashSaveBadge("✔ Đã lưu RAM", Color3.fromRGB(125, 211, 252))
+	return true
+end
+
+local function loadData()
+	local loadedJson = nil
+	if canWriteFile then
+		local hasFile = false
+		if typeof(isfile) == "function" then
+			local okCheck, exists = pcall(isfile, SAVE_FILE)
+			hasFile = okCheck and exists
+		else
+			hasFile = true
+		end
+		if hasFile then
+			local okRead, content = pcall(readfile, SAVE_FILE)
+			if okRead and type(content) == "string" and #content > 2 then
+				loadedJson = content
+			end
+		end
+	end
+
+	if not loadedJson then
+		local cache = getCacheRoot()
+		local mem = cache["SnakeArcadePro_JSON_" .. tostring(player.UserId)]
+		if type(mem) == "string" and #mem > 2 then
+			loadedJson = mem
+		end
+	end
+
+	if loadedJson then
+		local okDec, decoded = pcall(function() return HttpService:JSONDecode(loadedJson) end)
+		if okDec and type(decoded) == "table" then
+			applyLoadedData(decoded)
+			return true
+		end
+	end
+	return false
+end
+
+local hadSavedData = loadData()
+
+-- ============================================================
+-- HÀM DỰNG UI HOẠT HÌNH SẮC NÉT (KHÔNG LỖI FONT / VIỀN MẢNH)
 -- ============================================================
 local function addCorner(parent, r)
 	local c = Instance.new("UICorner")
@@ -171,7 +318,7 @@ end
 
 local function addStroke(parent, color, thickness)
 	local s = Instance.new("UIStroke")
-	s.Color = color or Color3.fromRGB(10, 12, 20)
+	s.Color = color or Color3.fromRGB(12, 15, 24)
 	s.Thickness = thickness or 2
 	s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 	s.Parent = parent
@@ -186,12 +333,38 @@ local function addGradient(parent, topColor, botColor, rot)
 	return g
 end
 
+-- Icon đồng xu vàng tự vẽ (thay thế hoàn toàn emoji bị lỗi ô vuông)
+local function makeCoinIcon(parent, sizePx, pos)
+	local coin = Instance.new("Frame")
+	coin.Size = UDim2.fromOffset(sizePx, sizePx)
+	coin.Position = pos
+	coin.AnchorPoint = Vector2.new(0, 0.5)
+	coin.BackgroundColor3 = Color3.fromRGB(250, 204, 21)
+	coin.BorderSizePixel = 0
+	coin.Parent = parent
+	addCorner(coin, 99)
+	addStroke(coin, Color3.fromRGB(161, 98, 7), 1.6)
+	addGradient(coin, Color3.fromRGB(254, 240, 138), Color3.fromRGB(234, 179, 8), 90)
+
+	local dollar = Instance.new("TextLabel")
+	dollar.Size = UDim2.fromScale(1, 1)
+	dollar.BackgroundTransparency = 1
+	dollar.Text = "$"
+	dollar.TextColor3 = Color3.fromRGB(146, 64, 14)
+	dollar.Font = Enum.Font.GothamBlack
+	dollar.TextSize = math.max(10, math.floor(sizePx * 0.72))
+	dollar.Parent = coin
+	return coin
+end
+
 local function makeGlossyBtn(parent, text, size, pos, topColor, botColor, cornerRadius)
 	local b = Instance.new("TextButton")
 	b.Size = size
 	b.Position = pos or UDim2.new()
 	b.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 	b.TextColor3 = Color3.fromRGB(255, 255, 255)
+	b.TextStrokeColor3 = Color3.fromRGB(15, 18, 30)
+	b.TextStrokeTransparency = 0.45 -- Viền mảnh giúp chữ nhỏ vẫn sáng rõ
 	b.Font = Enum.Font.GothamBlack
 	b.TextSize = 14
 	b.Text = text
@@ -199,14 +372,23 @@ local function makeGlossyBtn(parent, text, size, pos, topColor, botColor, corner
 	b.BorderSizePixel = 0
 	b.Parent = parent
 	addCorner(b, cornerRadius or 10)
-	addStroke(b, Color3.fromRGB(15, 18, 28), 2.2)
+	addStroke(b, Color3.fromRGB(15, 18, 28), 2)
 	addGradient(b, topColor, botColor or topColor, 90)
-
-	local txtStroke = Instance.new("UIStroke")
-	txtStroke.Color = Color3.fromRGB(15, 18, 28)
-	txtStroke.Thickness = 1.6
-	txtStroke.Parent = b
 	return b
+end
+
+local function makeNotifDot(parent)
+	local dot = Instance.new("Frame")
+	dot.Size = UDim2.fromOffset(12, 12)
+	dot.Position = UDim2.new(1, -14, 0, 4)
+	dot.BackgroundColor3 = Color3.fromRGB(239, 68, 68)
+	dot.BorderSizePixel = 0
+	dot.Visible = false
+	dot.ZIndex = 10
+	dot.Parent = parent
+	addCorner(dot, 99)
+	addStroke(dot, Color3.fromRGB(255, 255, 255), 1.5)
+	return dot
 end
 
 local function makeDraggable(handle, target, onMovedFlag)
@@ -236,7 +418,7 @@ local function makeDraggable(handle, target, onMovedFlag)
 	end))
 end
 
--- Hàm vẽ ĐẦU RẮN HOẠT HÌNH (mắt to, lưỡi đỏ, vương miện/lửa/băng/tai nghe)
+-- Vẽ ĐẦU RẮN HOẠT HÌNH (mắt to, lưỡi đỏ, vương miện/lửa/băng/tai nghe)
 local function buildCartoonHead(parent, sizePx, skin)
 	local head = Instance.new("Frame")
 	head.Size = UDim2.fromOffset(sizePx, sizePx)
@@ -246,24 +428,21 @@ local function buildCartoonHead(parent, sizePx, skin)
 	head.ZIndex = 6
 	head.Parent = parent
 	addCorner(head, math.floor(sizePx * 0.48))
-	addStroke(head, Color3.fromRGB(12, 14, 22), math.max(1.8, sizePx * 0.08))
+	addStroke(head, Color3.fromRGB(12, 14, 22), math.max(1.8, sizePx * 0.075))
 
-	-- Ánh sáng bóng trên đầu rắn
 	local shine = Instance.new("Frame")
-	shine.Size = UDim2.fromScale(0.45, 0.25)
-	shine.Position = UDim2.fromScale(0.18, 0.12)
+	shine.Size = UDim2.fromScale(0.42, 0.22)
+	shine.Position = UDim2.fromScale(0.16, 0.12)
 	shine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	shine.BackgroundTransparency = 0.65
+	shine.BackgroundTransparency = 0.62
 	shine.BorderSizePixel = 0
 	shine.ZIndex = 7
 	shine.Parent = head
 	addCorner(shine, 99)
 
-	-- Lưỡi đỏ thè ra phía trước (hướng mặc định: nhìn sang phải)
 	local tongue = Instance.new("Frame")
-	tongue.Name = "Tongue"
-	tongue.Size = UDim2.fromScale(0.38, 0.18)
-	tongue.Position = UDim2.fromScale(0.92, 0.41)
+	tongue.Size = UDim2.fromScale(0.36, 0.16)
+	tongue.Position = UDim2.fromScale(0.92, 0.42)
 	tongue.BackgroundColor3 = Color3.fromRGB(239, 45, 55)
 	tongue.BorderSizePixel = 0
 	tongue.ZIndex = 5
@@ -271,12 +450,10 @@ local function buildCartoonHead(parent, sizePx, skin)
 	addCorner(tongue, 4)
 	addStroke(tongue, Color3.fromRGB(20, 10, 12), 1.2)
 
-	-- Cặp mắt hoạt hình to tròn (có điểm sáng trắng)
-	local eyeOffsets = { 0.14, 0.54 }
-	for _, yPos in ipairs(eyeOffsets) do
+	for _, yPos in ipairs({ 0.14, 0.54 }) do
 		local eyeWhite = Instance.new("Frame")
-		eyeWhite.Size = UDim2.fromScale(0.34, 0.34)
-		eyeWhite.Position = UDim2.fromScale(0.48, yPos)
+		eyeWhite.Size = UDim2.fromScale(0.33, 0.33)
+		eyeWhite.Position = UDim2.fromScale(0.49, yPos)
 		eyeWhite.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 		eyeWhite.BorderSizePixel = 0
 		eyeWhite.ZIndex = 8
@@ -285,7 +462,7 @@ local function buildCartoonHead(parent, sizePx, skin)
 		addStroke(eyeWhite, Color3.fromRGB(15, 15, 22), 1.2)
 
 		local pupil = Instance.new("Frame")
-		pupil.Size = UDim2.fromScale(0.62, 0.62)
+		pupil.Size = UDim2.fromScale(0.6, 0.6)
 		pupil.Position = UDim2.fromScale(0.28, 0.2)
 		pupil.BackgroundColor3 = (skin.Id == "fire_dragon") and Color3.fromRGB(255, 110, 15) or Color3.fromRGB(22, 18, 28)
 		pupil.BorderSizePixel = 0
@@ -303,62 +480,54 @@ local function buildCartoonHead(parent, sizePx, skin)
 		addCorner(glint, 99)
 	end
 
-	-- Phụ kiện đặc trưng từng skin (Vương miện, Lửa, Băng, Tai nghe DJ, Sừng Rồng)
 	if skin.Accessory then
 		local acc = Instance.new("TextLabel")
-		acc.Name = "Accessory"
 		acc.BackgroundTransparency = 1
-		acc.Size = UDim2.fromScale(0.75, 0.75)
-		acc.Position = UDim2.fromScale(-0.18, 0.12)
+		acc.Size = UDim2.fromScale(0.66, 0.66)
+		acc.Position = UDim2.fromScale(-0.14, 0.17)
 		acc.ZIndex = 11
 		acc.TextScaled = true
 		acc.Font = Enum.Font.GothamBold
-		if skin.Accessory == "Crown" or skin.Accessory == "GoldDragon" then
-			acc.Text = "👑"
-		elseif skin.Accessory == "Fire" then
-			acc.Text = "🔥"
-		elseif skin.Accessory == "Ice" then
-			acc.Text = "❄️"
-		elseif skin.Accessory == "Headphones" then
-			acc.Text = "🎧"
-		end
+		if skin.Accessory == "Crown" or skin.Accessory == "GoldDragon" then acc.Text = "👑"
+		elseif skin.Accessory == "Fire" then acc.Text = "🔥"
+		elseif skin.Accessory == "Ice" then acc.Text = "❄️"
+		elseif skin.Accessory == "Headphones" then acc.Text = "🎧" end
 		acc.Parent = head
 	end
-
 	return head
 end
 
 -- ============================================================
--- KHỞI TẠO CỬA SỔ CHÍNH (620 x 400 - TỰ CO GIÃN MOBILE)
+-- CỬA SỔ CHÍNH (CHỪA KHOẢNG AN TOÀN TRÁNH THANH ROBLOX MOBILE)
 -- ============================================================
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = GUI_NAME
 screenGui.ResetOnSpawn = false
+screenGui.IgnoreGuiInset = false
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = guiParent
 
--- Nút nổi khi thu gọn menu
 local floatBtn = makeGlossyBtn(
 	screenGui, "🐍",
-	UDim2.fromOffset(52, 52),
-	UDim2.new(0, 18, 0.5, -26),
-	Color3.fromRGB(74, 222, 128), Color3.fromRGB(22, 163, 74), 26
+	UDim2.fromOffset(50, 50),
+	UDim2.new(0, 16, 0.5, -25),
+	Color3.fromRGB(74, 222, 128), Color3.fromRGB(22, 163, 74), 25
 )
-floatBtn.TextSize = 26
+floatBtn.TextSize = 24
 floatBtn.Visible = false
 local floatDragged = false
 makeDraggable(floatBtn, floatBtn, function(v) floatDragged = v end)
 
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.fromOffset(620, 400)
-mainFrame.Position = UDim2.fromScale(0.5, 0.5)
+mainFrame.Position = UDim2.new(0.5, 0, 0.5, 20) -- Đẩy nhẹ xuống để không bị thanh Roblox che góc trên trái
 mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 mainFrame.BackgroundColor3 = Color3.fromRGB(20, 22, 38)
 mainFrame.BorderSizePixel = 0
 mainFrame.ClipsDescendants = true
 mainFrame.Parent = screenGui
 addCorner(mainFrame, 16)
-addStroke(mainFrame, Color3.fromRGB(110, 82, 210), 2.5)
+addStroke(mainFrame, Color3.fromRGB(115, 88, 220), 2.5)
 addGradient(mainFrame, Color3.fromRGB(26, 28, 50), Color3.fromRGB(15, 17, 30), 90)
 
 local uiScale = Instance.new("UIScale")
@@ -368,12 +537,15 @@ local function calcScale()
 	local cam = workspace.CurrentCamera
 	if not cam then return 1 end
 	local vp = cam.ViewportSize
-	return math.clamp(math.min(1, (vp.X - 20) / 620, (vp.Y - 20) / 400), 0.5, 1)
+	-- Chừa 58px phía trên tránh cụm nút chat/mic của Roblox mobile
+	local scaleX = (vp.X - 24) / 620
+	local scaleY = (vp.Y - 68) / 400
+	return math.clamp(math.min(1, scaleX, scaleY), 0.48, 1)
 end
 uiScale.Scale = calcScale()
 
 -- ============================================================
--- THANH ĐẦU TRANG (HỒ SƠ + LEVEL + XU + KIM CƯƠNG + NÚT ĐÓNG)
+-- THANH ĐẦU TRANG (HỒ SƠ + XU + KIM CƯƠNG + ĐÈN BÁO LƯU)
 -- ============================================================
 local topBar = Instance.new("Frame")
 topBar.Size = UDim2.new(1, 0, 0, 48)
@@ -383,9 +555,8 @@ topBar.Parent = mainFrame
 addGradient(topBar, Color3.fromRGB(42, 38, 82), Color3.fromRGB(24, 26, 46), 90)
 makeDraggable(topBar, mainFrame)
 
--- Thẻ hồ sơ & cấp độ
 local profileBox = Instance.new("Frame")
-profileBox.Size = UDim2.fromOffset(175, 36)
+profileBox.Size = UDim2.fromOffset(176, 36)
 profileBox.Position = UDim2.fromOffset(10, 6)
 profileBox.BackgroundColor3 = Color3.fromRGB(20, 22, 38)
 profileBox.BorderSizePixel = 0
@@ -393,8 +564,14 @@ profileBox.Parent = topBar
 addCorner(profileBox, 18)
 addStroke(profileBox, Color3.fromRGB(115, 90, 220), 1.6)
 
+local avatarIconHolder = Instance.new("Frame")
+avatarIconHolder.Size = UDim2.fromOffset(28, 28)
+avatarIconHolder.Position = UDim2.fromOffset(6, 4)
+avatarIconHolder.BackgroundTransparency = 1
+avatarIconHolder.Parent = profileBox
+
 local profileName = Instance.new("TextLabel")
-profileName.Size = UDim2.fromOffset(122, 16)
+profileName.Size = UDim2.fromOffset(124, 16)
 profileName.Position = UDim2.fromOffset(42, 3)
 profileName.BackgroundTransparency = 1
 profileName.Text = player.DisplayName
@@ -404,12 +581,6 @@ profileName.TextSize = 12
 profileName.TextXAlignment = Enum.TextXAlignment.Left
 profileName.TextTruncate = Enum.TextTruncate.AtEnd
 profileName.Parent = profileBox
-
-local avatarIconHolder = Instance.new("Frame")
-avatarIconHolder.Size = UDim2.fromOffset(28, 28)
-avatarIconHolder.Position = UDim2.fromOffset(6, 4)
-avatarIconHolder.BackgroundTransparency = 1
-avatarIconHolder.Parent = profileBox
 
 local lvLabel = Instance.new("TextLabel")
 lvLabel.Size = UDim2.fromOffset(42, 12)
@@ -437,44 +608,63 @@ expFill.BorderSizePixel = 0
 expFill.Parent = expBg
 addCorner(expFill, 4)
 
--- Thanh Xu (Coins) & Kim Cương (Gems)
-local function makeCurrencyPill(xPos, icon, initVal, color)
-	local pill = Instance.new("Frame")
-	pill.Size = UDim2.fromOffset(118, 32)
-	pill.Position = UDim2.fromOffset(xPos, 8)
-	pill.BackgroundColor3 = Color3.fromRGB(20, 22, 38)
-	pill.BorderSizePixel = 0
-	pill.Parent = topBar
-	addCorner(pill, 16)
-	addStroke(pill, Color3.fromRGB(95, 78, 175), 1.5)
+-- Ô Xu (với icon đồng xu vàng tự vẽ, không bị ô vuông)
+local coinPill = Instance.new("Frame")
+coinPill.Size = UDim2.fromOffset(114, 32)
+coinPill.Position = UDim2.fromOffset(196, 8)
+coinPill.BackgroundColor3 = Color3.fromRGB(20, 22, 38)
+coinPill.BorderSizePixel = 0
+coinPill.Parent = topBar
+addCorner(coinPill, 16)
+addStroke(coinPill, Color3.fromRGB(95, 78, 175), 1.5)
+makeCoinIcon(coinPill, 20, UDim2.new(0, 8, 0.5, 0))
 
-	local lbl = Instance.new("TextLabel")
-	lbl.Size = UDim2.new(1, -10, 1, 0)
-	lbl.Position = UDim2.fromOffset(5, 0)
-	lbl.BackgroundTransparency = 1
-	lbl.Text = icon .. " " .. tostring(initVal)
-	lbl.TextColor3 = color
-	lbl.Font = Enum.Font.GothamBlack
-	lbl.TextSize = 14
-	lbl.Parent = pill
-	return lbl
-end
+local coinsLbl = Instance.new("TextLabel")
+coinsLbl.Size = UDim2.new(1, -34, 1, 0)
+coinsLbl.Position = UDim2.fromOffset(32, 0)
+coinsLbl.BackgroundTransparency = 1
+coinsLbl.Text = tostring(state.Coins)
+coinsLbl.TextColor3 = Color3.fromRGB(250, 204, 21)
+coinsLbl.Font = Enum.Font.GothamBlack
+coinsLbl.TextSize = 14
+coinsLbl.TextXAlignment = Enum.TextXAlignment.Left
+coinsLbl.Parent = coinPill
 
-local coinsLbl = makeCurrencyPill(198, "🪙", state.Coins, Color3.fromRGB(250, 204, 21))
-local gemsLbl  = makeCurrencyPill(324, "💎", state.Gems,  Color3.fromRGB(103, 232, 249))
+-- Ô Kim Cương
+local gemPill = Instance.new("Frame")
+gemPill.Size = UDim2.fromOffset(106, 32)
+gemPill.Position = UDim2.fromOffset(318, 8)
+gemPill.BackgroundColor3 = Color3.fromRGB(20, 22, 38)
+gemPill.BorderSizePixel = 0
+gemPill.Parent = topBar
+addCorner(gemPill, 16)
+addStroke(gemPill, Color3.fromRGB(95, 78, 175), 1.5)
 
-local hotkeyTip = Instance.new("TextLabel")
-hotkeyTip.Size = UDim2.fromOffset(86, 32)
-hotkeyTip.Position = UDim2.fromOffset(450, 8)
-hotkeyTip.BackgroundTransparency = 1
-hotkeyTip.Text = "[RightShift]"
-hotkeyTip.TextColor3 = Color3.fromRGB(148, 156, 196)
-hotkeyTip.Font = Enum.Font.GothamBold
-hotkeyTip.TextSize = 11
-hotkeyTip.Parent = topBar
+local gemsLbl = Instance.new("TextLabel")
+gemsLbl.Size = UDim2.new(1, -10, 1, 0)
+gemsLbl.Position = UDim2.fromOffset(5, 0)
+gemsLbl.BackgroundTransparency = 1
+gemsLbl.Text = "💎 " .. tostring(state.Gems)
+gemsLbl.TextColor3 = Color3.fromRGB(103, 232, 249)
+gemsLbl.Font = Enum.Font.GothamBlack
+gemsLbl.TextSize = 14
+gemsLbl.Parent = gemPill
 
-local minBtn   = makeGlossyBtn(topBar, "—", UDim2.fromOffset(30, 30), UDim2.new(1, -72, 0, 9), Color3.fromRGB(90, 100, 130), Color3.fromRGB(55, 62, 85), 8)
-local closeBtn = makeGlossyBtn(topBar, "✕", UDim2.fromOffset(30, 30), UDim2.new(1, -36, 0, 9), Color3.fromRGB(248, 70, 70), Color3.fromRGB(185, 28, 28), 8)
+-- Đèn báo trạng thái Tự Động Lưu (thay cho chữ [RightShift] thừa trên mobile)
+saveStatusLbl = Instance.new("TextLabel")
+saveStatusLbl.Size = UDim2.fromOffset(106, 32)
+saveStatusLbl.Position = UDim2.fromOffset(432, 8)
+saveStatusLbl.BackgroundTransparency = 1
+saveStatusLbl.Text = hadSavedData and "✔ Đã tải dữ liệu" or "💾 Tự động lưu"
+saveStatusLbl.TextColor3 = Color3.fromRGB(134, 239, 172)
+saveStatusLbl.Font = Enum.Font.GothamBold
+saveStatusLbl.TextSize = 11
+saveStatusLbl.Parent = topBar
+
+local minBtn   = makeGlossyBtn(topBar, "-", UDim2.fromOffset(30, 30), UDim2.new(1, -72, 0, 9), Color3.fromRGB(90, 100, 130), Color3.fromRGB(55, 62, 85), 8)
+local closeBtn = makeGlossyBtn(topBar, "X", UDim2.fromOffset(30, 30), UDim2.new(1, -36, 0, 9), Color3.fromRGB(248, 70, 70), Color3.fromRGB(185, 28, 28), 8)
+minBtn.TextSize = 18
+closeBtn.TextSize = 15
 
 -- ============================================================
 -- VÙNG NỘI DUNG: SẢNH CHỜ (LOBBY) & MÀN CHƠI (GAME)
@@ -497,7 +687,7 @@ gamePage.Visible = false
 gamePage.Parent = container
 
 -- ============================================================
--- 1. SẢNH CHỜ (SHOWCASE RẮN + NÚT PLAY + TOP 10 + THANH MENU DƯỚI)
+-- 1. SẢNH CHỜ (SHOWCASE RẮN + PLAY + TOP 10 + 5 NÚT DƯỚI)
 -- ============================================================
 local showcaseCard = Instance.new("Frame")
 showcaseCard.Size = UDim2.fromOffset(362, 268)
@@ -544,7 +734,7 @@ local playBtn = makeGlossyBtn(
 	UDim2.fromOffset(66, 174),
 	Color3.fromRGB(74, 240, 110), Color3.fromRGB(22, 163, 74), 26
 )
-playBtn.TextSize = 22
+playBtn.TextSize = 21
 
 local bestScoreTip = Instance.new("TextLabel")
 bestScoreTip.Size = UDim2.new(1, 0, 0, 24)
@@ -556,7 +746,7 @@ bestScoreTip.Font = Enum.Font.GothamBold
 bestScoreTip.TextSize = 12
 bestScoreTip.Parent = showcaseCard
 
--- Khung BẢNG XẾP HẠNG TOP 10 bên phải
+-- Bảng Xếp Hạng Top 10
 local lbCard = Instance.new("Frame")
 lbCard.Size = UDim2.fromOffset(228, 268)
 lbCard.Position = UDim2.fromOffset(372, 0)
@@ -650,7 +840,7 @@ local function refreshLeaderboard()
 	end
 end
 
--- Thanh 5 nút chức năng dưới cùng (SHOP, QUÀ TẶNG, NHIỆM VỤ, CÀI ĐẶT, THOÁT)
+-- 5 nút chức năng dưới cùng (đã sửa X THOÁT không lỗi ô vuông)
 local bottomBar = Instance.new("Frame")
 bottomBar.Size = UDim2.fromOffset(600, 56)
 bottomBar.Position = UDim2.fromOffset(0, 278)
@@ -666,9 +856,12 @@ local shopBtn     = makeGlossyBtn(bottomBar, "🏪 SHOP",     UDim2.fromOffset(1
 local giftBtn     = makeGlossyBtn(bottomBar, "🎁 QUÀ TẶNG", UDim2.fromOffset(114, 52), nil, Color3.fromRGB(192, 132, 252), Color3.fromRGB(126, 34, 206), 12)
 local questBtn    = makeGlossyBtn(bottomBar, "📋 NHIỆM VỤ", UDim2.fromOffset(114, 52), nil, Color3.fromRGB(56, 189, 248), Color3.fromRGB(29, 78, 216), 12)
 local settingsBtn = makeGlossyBtn(bottomBar, "⚙️ CÀI ĐẶT",  UDim2.fromOffset(114, 52), nil, Color3.fromRGB(250, 204, 21), Color3.fromRGB(217, 119, 6), 12)
-local exitBtn     = makeGlossyBtn(bottomBar, "✕ THOÁT",     UDim2.fromOffset(113, 52), nil, Color3.fromRGB(248, 113, 113), Color3.fromRGB(185, 28, 28), 12)
+local exitBtn     = makeGlossyBtn(bottomBar, "X THOÁT",     UDim2.fromOffset(113, 52), nil, Color3.fromRGB(248, 113, 113), Color3.fromRGB(185, 28, 28), 12)
 
--- Hiệu ứng rắn mẫu bơi uốn lượn ngoài Sảnh Chờ
+local giftDot  = makeNotifDot(giftBtn)
+local questDot = makeNotifDot(questBtn)
+
+-- Rắn mẫu ngoài Sảnh Chờ (đốt nối liền khít, không hở đuôi)
 local previewSegs = {}
 local previewHead = nil
 
@@ -680,38 +873,49 @@ local function rebuildLobbyPreview()
 	local skin = getSkinById(state.EquippedSkin)
 	equippedSkinLbl.Text = "Skin đang dùng: " .. skin.Name .. (skin.Accessory and " ✨" or "")
 
-	-- Avatar nhỏ ở góc trên trái
 	local miniAvatar = buildCartoonHead(avatarIconHolder, 24, skin)
 	miniAvatar.Position = UDim2.fromScale(0.5, 0.5)
 
-	-- 8 đốt thân uốn lượn
-	for i = 8, 1, -1 do
-		local sz = 28 - (i * 1.4)
+	for i = 10, 1, -1 do
+		local sz = math.max(16, 31 - (i * 1.25))
 		local seg = Instance.new("Frame")
 		seg.Size = UDim2.fromOffset(sz, sz)
 		seg.AnchorPoint = Vector2.new(0.5, 0.5)
 		seg.BackgroundColor3 = (i % 2 == 0) and skin.Body1 or skin.Body2
 		seg.BorderSizePixel = 0
-		seg.ZIndex = 5 - math.floor(i / 3)
+		seg.ZIndex = 5 - math.floor(i / 4)
 		seg.Parent = previewStage
 		addCorner(seg, 99)
 		addStroke(seg, Color3.fromRGB(12, 14, 22), 2)
 		previewSegs[i] = seg
 	end
 
-	previewHead = buildCartoonHead(previewStage, 34, skin)
+	previewHead = buildCartoonHead(previewStage, 35, skin)
 end
 
 -- ============================================================
--- HỆ THỐNG CẬP NHẬT CHỈ SỐ & POPUP MODAL (SHOP / QUÀ / NHIỆM VỤ / CÀI ĐẶT)
+-- CẬP NHẬT CHỈ SỐ, THÔNG BÁO & CÁC BẢNG POPUP
 -- ============================================================
+local function refreshNotifDots()
+	giftDot.Visible = (os.time() >= state.NextGiftUnix)
+	local hasQuest = false
+	for _, q in ipairs(state.Quests) do
+		if q.Progress >= q.Goal and not q.Claimed then
+			hasQuest = true
+			break
+		end
+	end
+	questDot.Visible = hasQuest
+end
+
 local function updateTopStats()
-	coinsLbl.Text = "🪙 " .. tostring(state.Coins)
+	coinsLbl.Text = tostring(state.Coins)
 	gemsLbl.Text  = "💎 " .. tostring(state.Gems)
 	lvLabel.Text  = "Lv. " .. tostring(state.Level)
-	expFill.Size  = UDim2.fromScale(math.clamp(state.Exp / state.ExpNeed, 0.05, 1), 1)
+	expFill.Size  = UDim2.fromScale(math.clamp(state.Exp / state.ExpNeed, 0.06, 1), 1)
 	bestScoreTip.Text = "🏆 Kỷ lục của bạn: " .. tostring(state.HighScore) .. " điểm"
 	refreshLeaderboard()
+	refreshNotifDots()
 end
 
 local function addExp(amount)
@@ -720,9 +924,10 @@ local function addExp(amount)
 		state.Exp -= state.ExpNeed
 		state.Level += 1
 		state.ExpNeed = math.floor(state.ExpNeed * 1.35)
-		state.Gems += 2 -- Thưởng 2 Kim Cương mỗi khi lên cấp
+		state.Gems += 2
 	end
 	updateTopStats()
+	saveData()
 end
 
 local function addQuestProgress(id, amount, isMax)
@@ -735,9 +940,10 @@ local function addQuestProgress(id, amount, isMax)
 			end
 		end
 	end
+	refreshNotifDots()
 end
 
--- Khung Popup dùng chung cho Shop / Quà / Nhiệm vụ / Cài đặt
+-- Popup dùng chung (đã thêm Padding để không bị cắt viền khi cuộn)
 local modalOverlay = Instance.new("Frame")
 modalOverlay.Size = UDim2.fromScale(1, 1)
 modalOverlay.BackgroundColor3 = Color3.fromRGB(5, 6, 12)
@@ -747,7 +953,7 @@ modalOverlay.ZIndex = 30
 modalOverlay.Parent = mainFrame
 
 local modalBox = Instance.new("Frame")
-modalBox.Size = UDim2.fromOffset(470, 320)
+modalBox.Size = UDim2.fromOffset(476, 326)
 modalBox.Position = UDim2.fromScale(0.5, 0.5)
 modalBox.AnchorPoint = Vector2.new(0.5, 0.5)
 modalBox.BackgroundColor3 = Color3.fromRGB(24, 27, 46)
@@ -768,12 +974,13 @@ modalTitle.TextXAlignment = Enum.TextXAlignment.Left
 modalTitle.ZIndex = 32
 modalTitle.Parent = modalBox
 
-local modalClose = makeGlossyBtn(modalBox, "✕", UDim2.fromOffset(28, 28), UDim2.new(1, -36, 0, 8), Color3.fromRGB(248, 70, 70), Color3.fromRGB(185, 28, 28), 8)
+local modalClose = makeGlossyBtn(modalBox, "X", UDim2.fromOffset(28, 28), UDim2.new(1, -36, 0, 8), Color3.fromRGB(248, 70, 70), Color3.fromRGB(185, 28, 28), 8)
+modalClose.TextSize = 15
 modalClose.ZIndex = 33
 
 local modalBody = Instance.new("ScrollingFrame")
-modalBody.Size = UDim2.new(1, -24, 1, -54)
-modalBody.Position = UDim2.fromOffset(12, 46)
+modalBody.Size = UDim2.new(1, -20, 1, -54)
+modalBody.Position = UDim2.fromOffset(10, 46)
 modalBody.BackgroundTransparency = 1
 modalBody.ScrollBarThickness = 5
 modalBody.CanvasSize = UDim2.new(0, 0, 0, 0)
@@ -781,19 +988,33 @@ modalBody.AutomaticCanvasSize = Enum.AutomaticSize.Y
 modalBody.ZIndex = 32
 modalBody.Parent = modalBox
 
+local activeModalTag = nil
+local liveGiftBtn = nil
+
 modalClose.MouseButton1Click:Connect(function()
 	modalOverlay.Visible = false
+	activeModalTag = nil
+	liveGiftBtn = nil
 end)
 
-local function openModal(titleText)
+local function openModal(tag, titleText)
 	for _, ch in ipairs(modalBody:GetChildren()) do ch:Destroy() end
+	local pad = Instance.new("UIPadding")
+	pad.PaddingTop = UDim.new(0, 4)
+	pad.PaddingBottom = UDim.new(0, 10)
+	pad.PaddingLeft = UDim.new(0, 4)
+	pad.PaddingRight = UDim.new(0, 8)
+	pad.Parent = modalBody
+
+	activeModalTag = tag
+	liveGiftBtn = nil
 	modalTitle.Text = titleText
 	modalOverlay.Visible = true
 end
 
 -- POPUP SHOP SKIN
 local function openShop()
-	openModal("🏪 CỬA HÀNG SKIN RẮN")
+	openModal("Shop", "🏪 CỬA HÀNG SKIN RẮN")
 	local grid = Instance.new("UIGridLayout")
 	grid.CellSize = UDim2.fromOffset(212, 76)
 	grid.CellPadding = UDim2.fromOffset(10, 10)
@@ -843,8 +1064,8 @@ local function openShop()
 			btnText = "TRANG BỊ"
 			c1, c2 = Color3.fromRGB(56, 189, 248), Color3.fromRGB(37, 99, 235)
 		else
-			local curIcon = (skin.Currency == "Gems") and "💎 " or "🪙 "
-			btnText = "MUA " .. curIcon .. skin.Price
+			local curLabel = (skin.Currency == "Gems") and ("💎 " .. skin.Price) or (skin.Price .. " Xu")
+			btnText = "MUA " .. curLabel
 			c1, c2 = Color3.fromRGB(250, 204, 21), Color3.fromRGB(217, 119, 6)
 		end
 
@@ -854,6 +1075,7 @@ local function openShop()
 		actBtn.MouseButton1Click:Connect(function()
 			if state.OwnedSkins[skin.Id] then
 				state.EquippedSkin = skin.Id
+				saveData()
 				rebuildLobbyPreview()
 				openShop()
 			else
@@ -862,6 +1084,7 @@ local function openShop()
 					state.OwnedSkins[skin.Id] = true
 					state.EquippedSkin = skin.Id
 					updateTopStats()
+					saveData()
 					rebuildLobbyPreview()
 					openShop()
 				elseif skin.Currency == "Gems" and state.Gems >= skin.Price then
@@ -869,6 +1092,7 @@ local function openShop()
 					state.OwnedSkins[skin.Id] = true
 					state.EquippedSkin = skin.Id
 					updateTopStats()
+					saveData()
 					rebuildLobbyPreview()
 					openShop()
 				else
@@ -882,53 +1106,56 @@ local function openShop()
 	end
 end
 
--- POPUP QUÀ TẶNG
+-- POPUP QUÀ TẶNG (TỰ ĐẾM NGƯỢC TRỰC TIẾP & LƯU THEO OS.TIME)
 local function openGift()
-	openModal("🎁 QUÀ TẶNG MIỄN PHÍ")
+	openModal("Gift", "🎁 QUÀ TẶNG MIỄN PHÍ")
 	local desc = Instance.new("TextLabel")
-	desc.Size = UDim2.new(1, 0, 0, 90)
-	desc.Position = UDim2.fromOffset(0, 15)
+	desc.Size = UDim2.new(1, 0, 0, 96)
+	desc.Position = UDim2.fromOffset(0, 12)
 	desc.BackgroundTransparency = 1
-	desc.Text = "🎁 HỘP QUÀ MAY MẮN\nNhận ngay +150 🪙 Xu và +5 💎 Kim Cương\n(Hồi lại sau mỗi 60 giây)"
+	desc.Text = "🎁 HỘP QUÀ MAY MẮN\nNhận ngay +150 Xu và +5 💎 Kim Cương\n(Hồi lại sau mỗi 60 giây - tự động lưu)"
 	desc.TextColor3 = Color3.fromRGB(240, 244, 255)
 	desc.Font = Enum.Font.GothamBold
 	desc.TextSize = 15
 	desc.ZIndex = 33
 	desc.Parent = modalBody
 
-	local remain = math.ceil(state.NextGiftTime - os.clock())
+	local remain = math.max(0, state.NextGiftUnix - os.time())
 	local ready = (remain <= 0)
 	local claimBtn = makeGlossyBtn(
 		modalBody,
 		ready and "🎉 NHẬN QUÀ NGAY!" or ("⏳ CHỜ " .. remain .. " GIÂY"),
-		UDim2.fromOffset(230, 52),
-		UDim2.fromOffset(108, 125),
-		ready and Color3.fromRGB(74, 222, 128) or Color3.fromRGB(80, 88, 115),
-		ready and Color3.fromRGB(22, 163, 74) or Color3.fromRGB(50, 56, 78),
+		UDim2.fromOffset(236, 52),
+		UDim2.fromOffset(102, 126),
+		ready and Color3.fromRGB(74, 222, 128) or Color3.fromRGB(95, 104, 136),
+		ready and Color3.fromRGB(22, 163, 74) or Color3.fromRGB(65, 72, 98),
 		14
 	)
 	claimBtn.TextSize = 16
 	claimBtn.ZIndex = 34
+	liveGiftBtn = claimBtn
+
 	claimBtn.MouseButton1Click:Connect(function()
-		if os.clock() < state.NextGiftTime then return end
-		state.NextGiftTime = os.clock() + 60
+		if os.time() < state.NextGiftUnix then return end
+		state.NextGiftUnix = os.time() + 60
 		state.Coins += 150
 		state.Gems += 5
 		updateTopStats()
+		saveData()
 		openGift()
 	end)
 end
 
 -- POPUP NHIỆM VỤ
 local function openQuests()
-	openModal("📋 NHIỆM VỤ NHẬN THƯỞNG")
+	openModal("Quests", "📋 NHIỆM VỤ NHẬN THƯỞNG")
 	local list = Instance.new("UIListLayout")
 	list.Padding = UDim.new(0, 8)
 	list.Parent = modalBody
 
 	for _, q in ipairs(state.Quests) do
 		local row = Instance.new("Frame")
-		row.Size = UDim2.new(1, -6, 0, 56)
+		row.Size = UDim2.new(1, -2, 0, 56)
 		row.BackgroundColor3 = Color3.fromRGB(32, 36, 62)
 		row.BorderSizePixel = 0
 		row.ZIndex = 33
@@ -937,7 +1164,7 @@ local function openQuests()
 		addStroke(row, Color3.fromRGB(68, 76, 115), 1.5)
 
 		local title = Instance.new("TextLabel")
-		title.Size = UDim2.fromOffset(290, 24)
+		title.Size = UDim2.fromOffset(286, 24)
 		title.Position = UDim2.fromOffset(12, 6)
 		title.BackgroundTransparency = 1
 		title.Text = q.Title .. " (" .. math.min(q.Progress, q.Goal) .. "/" .. q.Goal .. ")"
@@ -949,7 +1176,7 @@ local function openQuests()
 		title.Parent = row
 
 		local barBg = Instance.new("Frame")
-		barBg.Size = UDim2.fromOffset(275, 10)
+		barBg.Size = UDim2.fromOffset(272, 10)
 		barBg.Position = UDim2.fromOffset(12, 34)
 		barBg.BackgroundColor3 = Color3.fromRGB(20, 22, 38)
 		barBg.BorderSizePixel = 0
@@ -965,14 +1192,14 @@ local function openQuests()
 		barFill.Parent = barBg
 		addCorner(barFill, 5)
 
-		local curIcon = (q.Currency == "Gems") and "💎" or "🪙"
+		local rewardTxt = (q.Currency == "Gems") and (q.Reward .. " 💎") or (q.Reward .. " Xu")
 		local canClaim = (q.Progress >= q.Goal) and not q.Claimed
-		local btnText = q.Claimed and "✔ ĐÃ NHẬN" or (canClaim and ("NHẬN +" .. q.Reward .. curIcon) or (q.Reward .. " " .. curIcon))
+		local btnText = q.Claimed and "✔ ĐÃ NHẬN" or (canClaim and ("NHẬN +" .. rewardTxt) or rewardTxt)
 		local cBtn = makeGlossyBtn(
 			row, btnText,
-			UDim2.fromOffset(124, 34), UDim2.new(1, -134, 0, 11),
-			canClaim and Color3.fromRGB(74, 222, 128) or Color3.fromRGB(70, 78, 105),
-			canClaim and Color3.fromRGB(22, 163, 74) or Color3.fromRGB(48, 54, 76),
+			UDim2.fromOffset(126, 34), UDim2.new(1, -136, 0, 11),
+			canClaim and Color3.fromRGB(74, 222, 128) or Color3.fromRGB(85, 95, 128),
+			canClaim and Color3.fromRGB(22, 163, 74) or Color3.fromRGB(58, 66, 92),
 			8
 		)
 		cBtn.TextSize = 12
@@ -987,16 +1214,16 @@ local function openQuests()
 	end
 end
 
--- POPUP CÀI ĐẶT
+-- POPUP CÀI ĐẶT + QUẢN LÝ LƯU DỮ LIỆU
 local function openSettings()
-	openModal("⚙️ CÀI ĐẶT TRÒ CHƠI")
+	openModal("Settings", "⚙️ CÀI ĐẶT & LƯU DỮ LIỆU")
 	local list = Instance.new("UIListLayout")
-	list.Padding = UDim.new(0, 10)
+	list.Padding = UDim.new(0, 8)
 	list.Parent = modalBody
 
-	local function addSettingRow(labelTxt, getText, onToggle)
+	local function addSettingRow(labelTxt, getText, onToggle, c1, c2)
 		local row = Instance.new("Frame")
-		row.Size = UDim2.new(1, -6, 0, 48)
+		row.Size = UDim2.new(1, -2, 0, 46)
 		row.BackgroundColor3 = Color3.fromRGB(32, 36, 62)
 		row.BorderSizePixel = 0
 		row.ZIndex = 33
@@ -1004,42 +1231,80 @@ local function openSettings()
 		addCorner(row, 10)
 
 		local l = Instance.new("TextLabel")
-		l.Size = UDim2.fromOffset(260, 48)
-		l.Position = UDim2.fromOffset(14, 0)
+		l.Size = UDim2.fromOffset(255, 46)
+		l.Position = UDim2.fromOffset(12, 0)
 		l.BackgroundTransparency = 1
 		l.Text = labelTxt
 		l.TextColor3 = Color3.fromRGB(255, 255, 255)
 		l.Font = Enum.Font.GothamBold
-		l.TextSize = 14
+		l.TextSize = 13
 		l.TextXAlignment = Enum.TextXAlignment.Left
 		l.ZIndex = 34
 		l.Parent = row
 
-		local b = makeGlossyBtn(row, getText(), UDim2.fromOffset(140, 32), UDim2.new(1, -152, 0, 8), Color3.fromRGB(56, 189, 248), Color3.fromRGB(37, 99, 235), 8)
+		local b = makeGlossyBtn(row, getText(), UDim2.fromOffset(146, 32), UDim2.new(1, -156, 0, 7), c1 or Color3.fromRGB(56, 189, 248), c2 or Color3.fromRGB(37, 99, 235), 8)
 		b.TextSize = 12
 		b.ZIndex = 35
 		b.MouseButton1Click:Connect(function()
-			onToggle()
+			onToggle(b)
 			b.Text = getText()
 		end)
 	end
 
 	addSettingRow("🧱 Chế độ Xuyên Tường", function()
-		return state.Settings.WallPass and "BẬT (Không chết tường)" or "TẮT (Cổ điển)"
-	end, function() state.Settings.WallPass = not state.Settings.WallPass end)
+		return state.Settings.WallPass and "BẬT (Xuyên tường)" or "TẮT (Cổ điển)"
+	end, function()
+		state.Settings.WallPass = not state.Settings.WallPass
+		saveData()
+	end)
 
 	local speedNames = { "Chậm", "Vừa", "Nhanh" }
 	addSettingRow("⚡ Tốc độ Rắn", function()
 		return speedNames[state.Settings.SpeedMode]
-	end, function() state.Settings.SpeedMode = (state.Settings.SpeedMode % 3) + 1 end)
+	end, function()
+		state.Settings.SpeedMode = (state.Settings.SpeedMode % 3) + 1
+		saveData()
+	end)
 
 	addSettingRow("💣 Xuất hiện Bom né tránh", function()
 		return state.Settings.BombsEnabled and "BẬT" or "TẮT"
-	end, function() state.Settings.BombsEnabled = not state.Settings.BombsEnabled end)
+	end, function()
+		state.Settings.BombsEnabled = not state.Settings.BombsEnabled
+		saveData()
+	end)
 
 	addSettingRow("🎮 Cụm phím cảm ứng D-Pad", function()
 		return state.Settings.ShowDpad and "HIỆN" or "ẨN"
-	end, function() state.Settings.ShowDpad = not state.Settings.ShowDpad end)
+	end, function()
+		state.Settings.ShowDpad = not state.Settings.ShowDpad
+		saveData()
+	end)
+
+	addSettingRow("💾 Lưu dữ liệu (" .. saveModeName .. ")", function()
+		return "LƯU NGAY"
+	end, function(btn)
+		saveData()
+		btn.Text = "✔ ĐÃ LƯU!"
+		task.delay(0.9, function()
+			if btn.Parent then btn.Text = "LƯU NGAY" end
+		end)
+	end, Color3.fromRGB(74, 222, 128), Color3.fromRGB(22, 163, 74))
+
+	local confirmReset = false
+	addSettingRow("🗑️ Xóa toàn bộ dữ liệu đã lưu", function()
+		return confirmReset and "BẤM LẠI ĐỂ XÓA!" or "RESET DỮ LIỆU"
+	end, function()
+		if not confirmReset then
+			confirmReset = true
+			return
+		end
+		confirmReset = false
+		state = createDefaultState()
+		saveData()
+		rebuildLobbyPreview()
+		updateTopStats()
+		openSettings()
+	end, Color3.fromRGB(248, 113, 113), Color3.fromRGB(185, 28, 28))
 end
 
 shopBtn.MouseButton1Click:Connect(openShop)
@@ -1048,9 +1313,9 @@ questBtn.MouseButton1Click:Connect(openQuests)
 settingsBtn.MouseButton1Click:Connect(openSettings)
 
 -- ============================================================
--- 2. MÀN HÌNH CHƠI GAME RẮN SĂN MỒI (MƯỢT + POWER-UPS + D-PAD)
+-- 2. MÀN HÌNH CHƠI GAME RẮN SĂN MỒI
 -- ============================================================
-local COLS, ROWS, CELL = 16, 12, 24 -- Bàn cờ 384 x 288
+local COLS, ROWS, CELL = 16, 12, 24
 
 local hudBar = Instance.new("Frame")
 hudBar.Size = UDim2.fromOffset(600, 36)
@@ -1061,23 +1326,22 @@ addCorner(hudBar, 10)
 addStroke(hudBar, Color3.fromRGB(68, 76, 118), 1.5)
 
 local liveScoreLbl = Instance.new("TextLabel")
-liveScoreLbl.Size = UDim2.fromOffset(290, 36)
+liveScoreLbl.Size = UDim2.fromOffset(310, 36)
 liveScoreLbl.Position = UDim2.fromOffset(12, 0)
 liveScoreLbl.BackgroundTransparency = 1
-liveScoreLbl.Text = "Điểm: 0   |   🪙 +0   |   💎 +0"
+liveScoreLbl.Text = "Điểm: 0   |   +0 Xu   |   +0 💎"
 liveScoreLbl.TextColor3 = Color3.fromRGB(250, 204, 21)
 liveScoreLbl.Font = Enum.Font.GothamBlack
 liveScoreLbl.TextSize = 14
 liveScoreLbl.TextXAlignment = Enum.TextXAlignment.Left
 liveScoreLbl.Parent = hudBar
 
-local pauseBtn   = makeGlossyBtn(hudBar, "⏸", UDim2.fromOffset(38, 28), UDim2.new(1, -206, 0, 4), Color3.fromRGB(56, 189, 248), Color3.fromRGB(37, 99, 235), 8)
+local pauseBtn   = makeGlossyBtn(hudBar, "II", UDim2.fromOffset(38, 28), UDim2.new(1, -206, 0, 4), Color3.fromRGB(56, 189, 248), Color3.fromRGB(37, 99, 235), 8)
 local restartBtn = makeGlossyBtn(hudBar, "🔄 Lại", UDim2.fromOffset(72, 28), UDim2.new(1, -162, 0, 4), Color3.fromRGB(74, 222, 128), Color3.fromRGB(22, 163, 74), 8)
 local lobbyBtn   = makeGlossyBtn(hudBar, "🏠 Sảnh", UDim2.fromOffset(78, 28), UDim2.new(1, -84, 0, 4), Color3.fromRGB(168, 85, 247), Color3.fromRGB(109, 40, 217), 8)
 restartBtn.TextSize = 12
 lobbyBtn.TextSize = 12
 
--- Bàn chơi cờ caro tối màu
 local board = Instance.new("Frame")
 board.Size = UDim2.fromOffset(COLS * CELL, ROWS * CELL)
 board.Position = UDim2.fromOffset(0, 44)
@@ -1114,9 +1378,8 @@ snakeLayer.BackgroundTransparency = 1
 snakeLayer.ZIndex = 4
 snakeLayer.Parent = board
 
--- Bảng Game Over đè giữa bàn cờ
 local gameOverCard = Instance.new("Frame")
-gameOverCard.Size = UDim2.fromOffset(290, 175)
+gameOverCard.Size = UDim2.fromOffset(296, 178)
 gameOverCard.Position = UDim2.fromScale(0.5, 0.5)
 gameOverCard.AnchorPoint = Vector2.new(0.5, 0.5)
 gameOverCard.BackgroundColor3 = Color3.fromRGB(22, 24, 44)
@@ -1149,12 +1412,11 @@ goStats.TextSize = 13
 goStats.ZIndex = 21
 goStats.Parent = gameOverCard
 
-local goReplayBtn = makeGlossyBtn(gameOverCard, "🔄 CHƠI LẠI", UDim2.fromOffset(122, 38), UDim2.fromOffset(18, 122), Color3.fromRGB(74, 222, 128), Color3.fromRGB(22, 163, 74), 10)
-local goLobbyBtn  = makeGlossyBtn(gameOverCard, "🏠 VỀ SẢNH", UDim2.fromOffset(122, 38), UDim2.fromOffset(150, 122), Color3.fromRGB(168, 85, 247), Color3.fromRGB(109, 40, 217), 10)
+local goReplayBtn = makeGlossyBtn(gameOverCard, "🔄 CHƠI LẠI", UDim2.fromOffset(124, 38), UDim2.fromOffset(18, 124), Color3.fromRGB(74, 222, 128), Color3.fromRGB(22, 163, 74), 10)
+local goLobbyBtn  = makeGlossyBtn(gameOverCard, "🏠 VỀ SẢNH", UDim2.fromOffset(124, 38), UDim2.fromOffset(154, 124), Color3.fromRGB(168, 85, 247), Color3.fromRGB(109, 40, 217), 10)
 goReplayBtn.ZIndex = 22
 goLobbyBtn.ZIndex  = 22
 
--- Khu vực bên phải bàn chơi: Trạng thái Buff & Cụm D-Pad tròn màu xanh
 local rightPanel = Instance.new("Frame")
 rightPanel.Size = UDim2.fromOffset(204, 288)
 rightPanel.Position = UDim2.fromOffset(396, 44)
@@ -1190,7 +1452,6 @@ buffStatusLbl.TextSize = 11
 buffStatusLbl.TextWrapped = true
 buffStatusLbl.Parent = buffBox
 
--- Cụm D-Pad tròn màu xanh bóng (hỗ trợ cảm ứng mượt)
 local dpadFrame = Instance.new("Frame")
 dpadFrame.Size = UDim2.fromOffset(204, 166)
 dpadFrame.Position = UDim2.fromOffset(0, 122)
@@ -1207,25 +1468,18 @@ local dDown  = makeGlossyBtn(dpadFrame, "▼", UDim2.fromOffset(48, 48), UDim2.f
 dUp.TextSize, dLeft.TextSize, dRight.TextSize, dDown.TextSize = 18, 18, 18, 18
 
 -- ============================================================
--- LOGIC GAME RẮN SĂN MỒI (CHUYỂN ĐỘNG MƯỢT + KỸ NĂNG)
+-- LOGIC GAME RẮN SĂN MỒI
 -- ============================================================
-local playing = false
-local paused = false
-local snake = {}
-local prevSnake = {}
+local playing, paused = false, false
+local snake, prevSnake, turnQueue = {}, {}, {}
 local dir = { x = 1, y = 0 }
-local turnQueue = {}
-
 local runScore, runCoins, runGems = 0, 0, 0
 local stepTimer, stepDuration = 0, 0.16
 local powerSpawnTimer, bombSpawnTimer = 0, 0
-
 local buffs = { Double = 0, Ghost = 0, Magnet = 0, Speed = 0, Shield = false, Invuln = 0 }
-local boardItems = {} -- { {Type="Food"/"Coin"/"Gem"/"Power"/"Bomb", X=..., Y=..., Data=..., Node=..., Life=...} }
-
+local boardItems = {}
 local bodyFrames = {}
-local activeHeadNode = nil
-local shieldRing = nil
+local activeHeadNode, shieldRing = nil, nil
 
 local function cellToCenter(gx, gy)
 	return (gx - 0.5) * CELL, (gy - 0.5) * CELL
@@ -1279,30 +1533,50 @@ local function spawnItem(itemType, customData, lifeTime)
 	local pos = findFreeCell(itemType == "Bomb")
 	if not pos then return end
 
-	local node = Instance.new("TextLabel")
-	node.Size = UDim2.fromOffset(CELL, CELL)
-	node.AnchorPoint = Vector2.new(0.5, 0.5)
 	local cx, cy = cellToCenter(pos.x, pos.y)
-	node.Position = UDim2.fromOffset(cx, cy)
-	node.BackgroundTransparency = (itemType == "Power") and 0.72 or 1
-	node.BackgroundColor3 = (customData and customData.Color) or Color3.fromRGB(255, 255, 255)
-	node.Font = Enum.Font.GothamBold
-	node.TextScaled = true
-	node.ZIndex = 3
-	if itemType == "Food" then
-		node.Text = customData.Icon
-	elseif itemType == "Coin" then
-		node.Text = "🪙"
-	elseif itemType == "Gem" then
-		node.Text = "💎"
-	elseif itemType == "Power" then
-		node.Text = customData.Icon
+	local node
+
+	if itemType == "Coin" then
+		-- Đồng xu vàng tự vẽ rơi trên bàn chơi (không bị lỗi ô vuông)
+		node = Instance.new("Frame")
+		node.Size = UDim2.fromOffset(CELL - 4, CELL - 4)
+		node.AnchorPoint = Vector2.new(0.5, 0.5)
+		node.Position = UDim2.fromOffset(cx, cy)
+		node.BackgroundColor3 = Color3.fromRGB(250, 204, 21)
+		node.BorderSizePixel = 0
+		node.ZIndex = 3
+		node.Parent = itemLayer
 		addCorner(node, 99)
-		addStroke(node, customData.Color, 1.5)
-	elseif itemType == "Bomb" then
-		node.Text = "💣"
+		addStroke(node, Color3.fromRGB(161, 98, 7), 1.8)
+
+		local sym = Instance.new("TextLabel")
+		sym.Size = UDim2.fromScale(1, 1)
+		sym.BackgroundTransparency = 1
+		sym.Text = "$"
+		sym.TextColor3 = Color3.fromRGB(146, 64, 14)
+		sym.Font = Enum.Font.GothamBlack
+		sym.TextSize = 14
+		sym.ZIndex = 4
+		sym.Parent = node
+	else
+		node = Instance.new("TextLabel")
+		node.Size = UDim2.fromOffset(CELL, CELL)
+		node.AnchorPoint = Vector2.new(0.5, 0.5)
+		node.Position = UDim2.fromOffset(cx, cy)
+		node.BackgroundTransparency = (itemType == "Power") and 0.72 or 1
+		node.BackgroundColor3 = (customData and customData.Color) or Color3.fromRGB(255, 255, 255)
+		node.Font = Enum.Font.GothamBold
+		node.TextScaled = true
+		node.ZIndex = 3
+		if itemType == "Food" then node.Text = customData.Icon
+		elseif itemType == "Gem" then node.Text = "💎"
+		elseif itemType == "Power" then
+			node.Text = customData.Icon
+			addCorner(node, 99)
+			addStroke(node, customData.Color, 1.5)
+		elseif itemType == "Bomb" then node.Text = "💣" end
+		node.Parent = itemLayer
 	end
-	node.Parent = itemLayer
 
 	table.insert(boardItems, {
 		Type = itemType, X = pos.x, Y = pos.y,
@@ -1322,7 +1596,7 @@ local function ensureFoodExists()
 end
 
 local function updateHUD()
-	liveScoreLbl.Text = string.format("Điểm: %d   |   🪙 +%d   |   💎 +%d", runScore, runCoins, runGems)
+	liveScoreLbl.Text = string.format("Điểm: %d   |   +%d Xu   |   +%d 💎", runScore, runCoins, runGems)
 	local lines = {}
 	if buffs.Double > 0 then table.insert(lines, string.format("⭐ 2x Điểm: %.1fs", buffs.Double)) end
 	if buffs.Ghost  > 0 then table.insert(lines, string.format("👻 Bóng Ma: %.1fs", buffs.Ghost)) end
@@ -1371,9 +1645,8 @@ local function syncSnakeNodes()
 	for i = 1, #bodyFrames do
 		bodyFrames[i].Visible = (i <= needBody)
 		if i <= needBody then
-			-- Thu nhỏ dần về phía đuôi giống rắn hoạt hình
-			local taper = (i > needBody - 3) and (CELL - 2 - (3 - (needBody - i)) * 2.2) or (CELL - 1)
-			taper = math.max(12, taper)
+			local taper = (i > needBody - 3) and (CELL - 1 - (3 - (needBody - i)) * 2) or CELL
+			taper = math.max(14, taper)
 			bodyFrames[i].Size = UDim2.fromOffset(taper, taper)
 		end
 	end
@@ -1437,12 +1710,12 @@ local function endRun(reasonText)
 	state.Gems  += runGems
 	addQuestProgress("games", 1, false)
 	addQuestProgress("score", runScore, true)
-	addExp(math.floor(runScore * 0.4) + 10)
+	addExp(math.floor(runScore * 0.4) + 10) -- addExp tự gọi updateTopStats() và saveData()
 
 	goTitle.Text = "💀 " .. reasonText
 	goStats.Text = string.format(
-		"Điểm ván này: %d %s\nNhận được: +%d 🪙 Xu   |   +%d 💎 Kim Cương",
-		runScore, isRecord and "🏆(KỶ LỤC MỚI!)" or "", runCoins, runGems
+		"Điểm ván này: %d %s\nNhận: +%d Xu  |  +%d 💎  (Đã tự lưu!)",
+		runScore, isRecord and "🏆(KỶ LỤC!)" or "", runCoins, runGems
 	)
 	gameOverCard.Visible = true
 end
@@ -1453,12 +1726,7 @@ local function startNewRun()
 	gameOverCard.Visible = false
 	dpadFrame.Visible = state.Settings.ShowDpad
 
-	snake = {
-		{ x = 6, y = 6 },
-		{ x = 5, y = 6 },
-		{ x = 4, y = 6 },
-		{ x = 3, y = 6 },
-	}
+	snake = { { x = 6, y = 6 }, { x = 5, y = 6 }, { x = 4, y = 6 }, { x = 3, y = 6 } }
 	prevSnake = {}
 	for i, s in ipairs(snake) do prevSnake[i] = { x = s.x, y = s.y } end
 
@@ -1468,7 +1736,7 @@ local function startNewRun()
 	buffs = { Double = 0, Ghost = 0, Magnet = 0, Speed = 0, Shield = false, Invuln = 0 }
 	stepTimer, powerSpawnTimer, bombSpawnTimer = 0, 4, 6
 	paused = false
-	pauseBtn.Text = "⏸"
+	pauseBtn.Text = "II"
 	playing = true
 
 	syncSnakeNodes()
@@ -1479,6 +1747,14 @@ local function startNewRun()
 end
 
 local function openLobby()
+	if playing and (runCoins > 0 or runGems > 0 or runScore > 0) then
+		-- Lưu lại phần thưởng người chơi vừa nhặt nếu thoát sớm về Sảnh
+		state.Coins += runCoins
+		state.Gems  += runGems
+		if runScore > state.HighScore then state.HighScore = runScore end
+		runScore, runCoins, runGems = 0, 0, 0
+		saveData()
+	end
 	playing = false
 	paused = false
 	gamePage.Visible = false
@@ -1489,24 +1765,21 @@ end
 
 local function openGame()
 	modalOverlay.Visible = false
+	activeModalTag = nil
+	liveGiftBtn = nil
 	lobbyPage.Visible = false
 	gamePage.Visible = true
 	startNewRun()
 end
 
 local function stepSnakeLogic()
-	if #turnQueue > 0 then
-		dir = table.remove(turnQueue, 1)
-	end
-
-	-- Lưu vị trí cũ để nội suy mượt
+	if #turnQueue > 0 then dir = table.remove(turnQueue, 1) end
 	prevSnake = {}
 	for i, s in ipairs(snake) do prevSnake[i] = { x = s.x, y = s.y } end
 
 	local head = snake[1]
 	local nx, ny = head.x + dir.x, head.y + dir.y
 
-	-- Xử lý đụng tường
 	local canWrap = state.Settings.WallPass or buffs.Ghost > 0 or buffs.Invuln > 0
 	if nx < 1 or nx > COLS or ny < 1 or ny > ROWS then
 		if canWrap then
@@ -1523,7 +1796,6 @@ local function stepSnakeLogic()
 		end
 	end
 
-	-- Hiệu ứng Nam Châm: hút đồ ăn/xu/kim cương lại gần đầu rắn
 	if buffs.Magnet > 0 then
 		for _, it in ipairs(boardItems) do
 			if it.Type == "Food" or it.Type == "Coin" or it.Type == "Gem" then
@@ -1538,7 +1810,6 @@ local function stepSnakeLogic()
 		end
 	end
 
-	-- Kiểm tra ăn vật phẩm tại ô mới
 	local grew = false
 	for i = #boardItems, 1, -1 do
 		local it = boardItems[i]
@@ -1594,7 +1865,6 @@ local function stepSnakeLogic()
 		table.insert(prevSnake, prevSnake[#prevSnake])
 	end
 
-	-- Kiểm tra tự cắn thân
 	if buffs.Ghost <= 0 and buffs.Invuln <= 0 then
 		for _, seg in ipairs(snake) do
 			if seg.x == nx and seg.y == ny then
@@ -1614,7 +1884,6 @@ local function stepSnakeLogic()
 	syncSnakeNodes()
 	ensureFoodExists()
 
-	-- Thỉnh thoảng rơi thêm Xu hoặc Kim Cương khi ăn
 	if grew then
 		local roll = math.random(1, 100)
 		if roll <= 22 then spawnItem("Coin", nil, 14)
@@ -1623,15 +1892,31 @@ local function stepSnakeLogic()
 	updateHUD()
 end
 
--- Vòng lặp RenderStepped: hiệu ứng rắn ngoài Sảnh + chuyển động mượt trong Game
+-- Vòng lặp chính (Animation Sảnh + Đếm ngược Quà + Chuyển động Game)
+local lastSecondCheck = 0
 track(RunService.RenderStepped:Connect(function(dt)
 	dt = math.min(dt, 0.05)
 
-	-- Animation rắn uốn lượn ngoài sảnh chờ
+	-- Cập nhật chấm thông báo & đồng hồ Quà Tặng mỗi giây
+	local nowSec = os.time()
+	if nowSec ~= lastSecondCheck then
+		lastSecondCheck = nowSec
+		refreshNotifDots()
+		if modalOverlay.Visible and activeModalTag == "Gift" and liveGiftBtn and liveGiftBtn.Parent then
+			local remain = math.max(0, state.NextGiftUnix - nowSec)
+			if remain <= 0 then
+				if liveGiftBtn.Text ~= "🎉 NHẬN QUÀ NGAY!" then openGift() end
+			else
+				liveGiftBtn.Text = "⏳ CHỜ " .. remain .. " GIÂY"
+			end
+		end
+	end
+
+	-- Animation rắn ngoài Sảnh (nối khít từng đốt)
 	if mainFrame.Visible and lobbyPage.Visible and previewHead then
 		local t = os.clock() * 3.2
 		local skin = getSkinById(state.EquippedSkin)
-		local hx = 232
+		local hx = 246
 		local hy = 48 + math.sin(t) * 14
 		previewHead.Position = UDim2.fromOffset(hx, hy)
 		previewHead.Rotation = math.cos(t) * 14
@@ -1639,8 +1924,8 @@ track(RunService.RenderStepped:Connect(function(dt)
 			previewHead.BackgroundColor3 = Color3.fromHSV((os.clock() * 0.4) % 1, 0.85, 1)
 		end
 		for i, seg in ipairs(previewSegs) do
-			local sx = hx - (i * 21)
-			local sy = 48 + math.sin(t - i * 0.55) * 14
+			local sx = hx - (i * 16.5) -- Khoảng cách khít, không hở đuôi
+			local sy = 48 + math.sin(t - i * 0.42) * 14
 			seg.Position = UDim2.fromOffset(sx, sy)
 			if skin.Rainbow then
 				seg.BackgroundColor3 = Color3.fromHSV((os.clock() * 0.4 + i * 0.07) % 1, 0.85, 1)
@@ -1648,10 +1933,8 @@ track(RunService.RenderStepped:Connect(function(dt)
 		end
 	end
 
-	-- Vòng lặp game đang chạy
 	if not mainFrame.Visible or not gamePage.Visible or not playing or paused then return end
 
-	-- Giảm thời gian buff
 	local buffChanged = false
 	for _, key in ipairs({ "Double", "Ghost", "Magnet", "Speed", "Invuln" }) do
 		if buffs[key] > 0 then
@@ -1660,13 +1943,17 @@ track(RunService.RenderStepped:Connect(function(dt)
 		end
 	end
 
-	-- Giảm tuổi thọ vật phẩm tạm (Power-up, Bom, Xu, Kim Cương)
 	for i = #boardItems, 1, -1 do
 		local it = boardItems[i]
 		if it.Life then
 			it.Life -= dt
 			if it.Life <= 2.5 then
-				it.Node.TextTransparency = (math.floor(os.clock() * 8) % 2 == 0) and 0.6 or 0
+				local blink = (math.floor(os.clock() * 8) % 2 == 0)
+				if it.Node:IsA("TextLabel") then
+					it.Node.TextTransparency = blink and 0.6 or 0
+				else
+					it.Node.BackgroundTransparency = blink and 0.6 or 0
+				end
 			end
 			if it.Life <= 0 then
 				it.Node:Destroy()
@@ -1675,7 +1962,6 @@ track(RunService.RenderStepped:Connect(function(dt)
 		end
 	end
 
-	-- Spawn Power-up & Bom định kỳ
 	powerSpawnTimer -= dt
 	if powerSpawnTimer <= 0 then
 		powerSpawnTimer = math.random(8, 13)
@@ -1690,7 +1976,6 @@ track(RunService.RenderStepped:Connect(function(dt)
 		end
 	end
 
-	-- Tốc độ theo cài đặt + buff Tăng Tốc
 	local baseSpeeds = { 0.21, 0.16, 0.115 }
 	local speed = baseSpeeds[state.Settings.SpeedMode] or 0.16
 	speed = math.max(0.085, speed - math.min(0.04, runScore * 0.0001))
@@ -1710,7 +1995,7 @@ track(RunService.RenderStepped:Connect(function(dt)
 end))
 
 -- ============================================================
--- KẾT NỐI NÚT BẤM, PHÍM TẮT & THU GỌN MENU
+-- KẾT NỐI NÚT BẤM, PHÍM TẮT & LƯU KHI ĐÓNG
 -- ============================================================
 playBtn.MouseButton1Click:Connect(openGame)
 restartBtn.MouseButton1Click:Connect(startNewRun)
@@ -1721,7 +2006,7 @@ goLobbyBtn.MouseButton1Click:Connect(openLobby)
 pauseBtn.MouseButton1Click:Connect(function()
 	if not playing then return end
 	paused = not paused
-	pauseBtn.Text = paused and "▶" or "⏸"
+	pauseBtn.Text = paused and "▶" or "II"
 end)
 
 dUp.MouseButton1Click:Connect(function() queueTurn(0, -1) end)
@@ -1754,6 +2039,12 @@ floatBtn.MouseButton1Click:Connect(function()
 end)
 
 local function destroyMenu()
+	if playing and (runCoins > 0 or runGems > 0 or runScore > 0) then
+		state.Coins += runCoins
+		state.Gems  += runGems
+		if runScore > state.HighScore then state.HighScore = runScore end
+	end
+	saveData()
 	screenGui:Destroy()
 end
 closeBtn.MouseButton1Click:Connect(destroyMenu)
@@ -1766,21 +2057,16 @@ track(UserInputService.InputBegan:Connect(function(input, gp)
 		return
 	end
 	if not mainFrame.Visible or not gamePage.Visible then return end
-	if input.KeyCode == Enum.KeyCode.Up or input.KeyCode == Enum.KeyCode.W then
-		queueTurn(0, -1)
-	elseif input.KeyCode == Enum.KeyCode.Down or input.KeyCode == Enum.KeyCode.S then
-		queueTurn(0, 1)
-	elseif input.KeyCode == Enum.KeyCode.Left or input.KeyCode == Enum.KeyCode.A then
-		queueTurn(-1, 0)
-	elseif input.KeyCode == Enum.KeyCode.Right or input.KeyCode == Enum.KeyCode.D then
-		queueTurn(1, 0)
+	if input.KeyCode == Enum.KeyCode.Up or input.KeyCode == Enum.KeyCode.W then queueTurn(0, -1)
+	elseif input.KeyCode == Enum.KeyCode.Down or input.KeyCode == Enum.KeyCode.S then queueTurn(0, 1)
+	elseif input.KeyCode == Enum.KeyCode.Left or input.KeyCode == Enum.KeyCode.A then queueTurn(-1, 0)
+	elseif input.KeyCode == Enum.KeyCode.Right or input.KeyCode == Enum.KeyCode.D then queueTurn(1, 0)
 	elseif input.KeyCode == Enum.KeyCode.Space and playing then
 		paused = not paused
-		pauseBtn.Text = paused and "▶" or "⏸"
+		pauseBtn.Text = paused and "▶" or "II"
 	end
 end))
 
--- Tự co giãn lại nếu người chơi đổi kích thước màn hình
 local cam = workspace.CurrentCamera
 if cam then
 	track(cam:GetPropertyChangedSignal("ViewportSize"):Connect(function()
@@ -1795,6 +2081,7 @@ screenGui.Destroying:Connect(function()
 	end
 end)
 
--- Khởi chạy Sảnh Chờ
+-- Khởi chạy Sảnh Chờ & lưu khởi tạo lần đầu
 rebuildLobbyPreview()
 updateTopStats()
+if not hadSavedData then saveData() end
