@@ -1,64 +1,6 @@
 -- ============================================================
--- SNAKE ARCADE PRO v4 - 27 SKIN + GIÁ CAO + CUA 1 Ô + TỰ LƯU
--- Phím tắt ẩn/hiện nhanh trên PC: RightShift
--- ============================================================
-local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
-local HttpService = game:GetService("HttpService")
-
-local player = Players.LocalPlayer
-local GUI_NAME = "SnakeArcadePro_Standalone"
-local SAVE_FILE = "SnakeArcadePro_Mình đã nâng cấp lên bản **v4** dựa theo bộ mẫu rắn mới bạn gửi: **mở rộng lên 22 Skin chia thành 5 bậc hiếm**, **nâng mặt bằng giá cao hơn hẳn** (từ **500 Xu** đến **15,000 Xu** và **50 💎** đến **1,000 💎**), kèm **nội tại tăng % Xu theo bậc Skin** để người chơi có mục tiêu cày cuốc lâu dài.
-
----
-
-## 1. Danh sách rắn mới & Bảng giá nâng cấp
-
-Toàn bộ skin cũ vẫn giữ nguyên mã lưu (`Id`) nên **dữ liệu cũ của bạn không bị mất** khi chạy bản mới:
-
-| Bậc hiếm | Nội tại | Các mẫu rắn (Vẽ đầu & họa tiết thân riêng) | Mức giá |
-| :--- | :--- | :--- | :--- |
-| **Thường** | +0% Xu | Rắn Xanh Lá, **Rắn Quỷ Đỏ** (sừng đỏ)[span_27](start_span)[span_27](end_span), Rắn Xanh Biển, **Rắn Ong Vàng** (sọc vàng đen)[span_28](start_span)[span_28](end_span), **Rắn Tím Sao Đêm**[span_29](start_span)[span_29](end_span) | Miễn phí – **1,600 Xu** |
-| **Hiếm** | +20% Xu | **Rắn Dưa Hấu**[span_30](start_span)[span_30](end_span), **Rắn Mèo Nơ Hồng** (tai mèo + nơ)[span_31](start_span)[span_31](end_span), **Rắn Gấu Trúc** (tai đen + mắt gấu)[span_32](start_span)[span_32](end_span), **Rắn Cá Koi** (trắng cam đỏ)[span_33](start_span)[span_33](end_span), **Vua Rắn** (vương miện vàng)[span_34](start_span)[span_34](end_span) | **2,500 – 8,000 Xu** |
-| **Sử Thi** | +40% Xu | **Rắn Zombie Độc** (mắt đỏ vàng + vết sẹo)[span_35](start_span)[span_35](end_span), **Rắn Bí Ngô Halloween**[span_36](start_span)[span_36](end_span), **Rắn Hươu Rừng** (gạc hươu)[span_37](start_span)[span_37](end_span), **Rắn Kỳ Lân** (sừng cầu vồng)[span_38](start_span)[span_38](end_span), **Rắn Đầu Lâu** (sọ trắng mắt đỏ)[span_39](start_span)[span_39](end_span) | **12,000 – 15,000 Xu** / **50 – 120 💎** |
-| **Huyền Thoại** | +70% Xu | **Rồng Dung Nham** (đầu lửa nham thạch)[span_40](start_span)[span_40](end_span), **Rồng Pha Lê Băng** (gai băng)[span_41](start_span)[span_41](end_span), **DJ Cầu Vồng RGB** (đổi màu liên tục)[span_42](start_span)[span_42](end_span), **Rắn Lỗi Cyber** (nhấp nháy neon Glitch)[span_43](start_span)[span_43](end_span) | **180 – 350 💎** |
-| **Thần Thoại** | +100% Xu & +1 💎 thêm | **Rồng Vàng VIP**[span_44](start_span)[span_44](end_span), **Rắn Thiên Thần** (cánh trắng + vòng hào quang vàng)[span_45](start_span)[span_45](end_span), **Rắn Vũ Trụ Tinh Vân** (tinh vân sao lấp lánh + vành hành tinh)[span_46](start_span)[span_46](end_span) | **500 – 1,000 💎** |
-
----
-
-## 2. Code hoàn chỉnh (Snake Arcade Pro v4)
-
-Copy toàn bộ đoạn code dưới đây và chạy trực tiếp (giữ nguyên toàn bộ tính năng **cua chuẩn 1 ô, vuốt bàn cờ, lướt D-Pad và tự động lưu** từ bản v3):
-
-```lua
--- ============================================================
--- SNAKE ARCADE PRO v4 - 22 SKIN 5 BẬC + GIÁ CAO + CUA CHUẨN 1 Ô
--- Tự động lưu file JSON (giữ nguyên tiến trình bản cũ)
--- ============================================================
-local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
-local HttpService = game:GetService("HttpService")
-
-local player = Players.LocalPlayer
-local GUI_NAME = "SnakeArcadePro_Standalone"
-local SAVE_FILE = "SnakeMình đã bổ sung bộ sưu tập lên **22 skin rắn** dựa theo các mẫu đầu và họa tiết thân trong ảnh bạn gửi[span_47](start_span)[span_47](end_span), đồng thời **nâng mức giá lên cao** (tối đa **25,000 Xu** và **1,000 💎**) chia theo **5 bậc hiếm** có cộng thêm **% Xu khi chơi** để tạo động lực cày cuốc lâu dài.
-
-### Các skin mới & bảng giá nâng cấp
-* **Bậc Thường & Hiếm (Mua bằng Xu — 500 đến 25,000 Xu):** Rắn Ác Quỷ Đỏ (sừng đỏ)[span_48](start_span)[span_48](end_span), Rắn Băng Tuyết[span_49](start_span)[span_49](end_span), Rắn Ong Vàng (sọc vàng đen)[span_50](start_span)[span_50](end_span), Rắn Hắc Long Tím[span_51](start_span)[span_51](end_span), Rắn Dưa Hấu[span_52](start_span)[span_52](end_span), Rắn Gấu Trúc (tai đen + thân đốm trắng đen)[span_53](start_span)[span_53](end_span), Rắn Mèo Nơ Hồng (tai mèo + nơ hồng)[span_54](start_span)[span_54](end_span), Rắn Zombie (mắt 2 màu)[span_55](start_span)[span_55](end_span), Rắn Bí Ngô Halloween[span_56](start_span)[span_56](end_span) và Vua Rắn Hoàng Kim[span_57](start_span)[span_57](end_span).
-* **Bậc Sử Thi, Huyền Thoại & Thần Thoại (Mua bằng Kim Cương — 35 đến 1,000 💎):** Thanh Long Hươu (có sừng hươu)[span_58](start_span)[span_58](end_span), Rắn Kỳ Lân[span_59](start_span)[span_59](end_span), Rắn Đầu Lâu (sọ trắng mắt đỏ + thân xương)[span_60](start_span)[span_60](end_span), Rồng Dung Nham (bờm lửa + thân nứt dung nham)[span_61](start_span)[span_61](end_span), Rồng Pha Lê Băng[span_62](start_span)[span_62](end_span), Rắn Bóng Ma (thân mờ ảo)[span_63](start_span)[span_63](end_span), Rắn Cầu Vồng RGB[span_64](start_span)[span_64](end_span), Rắn Ngân Hà[span_65](start_span)[span_65](end_span), Rồng Vàng Hoàng Đế[span_66](start_span)[span_66](end_span), **Rắn Thiên Thần** (cánh + vòng hào quang — **650 💎**)[span_67](start_span)[span_67](end_span) và **Thần Vũ Trụ** (vòng sao Thổ phát sáng — **1,000 💎**)[span_68](start_span)[span_68](end_span).
-* **Giữ nguyên toàn bộ nâng cấp trước:** Tự động lưu file (không mất dữ liệu cũ bạn đã cày), cua chuẩn 1 ô (chạm tức thì + vuốt bàn cờ + lướt D-Pad), và hiển thị sắc nét trên điện thoại.
-
----
-
-## Code hoàn chỉnh (Snake Arcade Pro v4 — 22 Skin + Giá Cao)
-
-```lua
--- ============================================================
--- SNAKE ARCADE PRO v4 - 22 SKIN RẮN + GIÁ CAO + CUA 1 Ô + TỰ LƯU
+-- SNAKE ARCADE PRO v5.0 - 27 SKIN + COMBO + LỌC SHOP + TỐI ƯU MOBILE
+-- Đã dọn sạch lỗi cú pháp, giữ nguyên file lưu cũ, chữ lì chống lóa
 -- Phím tắt ẩn/hiện nhanh trên PC: RightShift
 -- ============================================================
 local Players = game:GetService("Players")
@@ -70,6 +12,21 @@ local HttpService = game:GetService("HttpService")
 local player = Players.LocalPlayer
 local GUI_NAME = "SnakeArcadePro_Standalone"
 local SAVE_FILE = "SnakeArcadePro_Save_" .. tostring(player.UserId) .. ".json"
+local VERSION_TEXT = "v5.0"
+
+-- Bảng màu chữ lì (Matte, RGB <= 212) chống lóa trên màn hình mobile
+local THEME = {
+	TextMain   = Color3.fromRGB(206, 210, 214),
+	TextMuted  = Color3.fromRGB(154, 164, 182),
+	TextGold   = Color3.fromRGB(210, 178, 74),
+	TextGem    = Color3.fromRGB(104, 186, 204),
+	TextGreen  = Color3.fromRGB(102, 192, 132),
+	TextRed    = Color3.fromRGB(206, 104, 108),
+	TextPurple = Color3.fromRGB(178, 132, 210),
+	TextBlue   = Color3.fromRGB(96, 168, 210),
+	FontHead   = Enum.Font.GothamSemibold,
+	FontBody   = Enum.Font.GothamMedium,
+}
 
 -- Chọn nơi gắn GUI an toàn (chạy được cả Executor lẫn Roblox Studio)
 local function getGuiParent()
@@ -110,152 +67,189 @@ local function formatNum(n)
 end
 
 -- ============================================================
--- BẬC HIẾM & 22 SKIN RẮN (GIÁ CAO + HIỆU ỨNG CỘNG % XU)
+-- BẬC HIẾM & 27 SKIN RẮN (GIỮ NGUYÊN 22 ID CŨ + 5 SKIN MỚI)
 -- ============================================================
+local RARITY_ORDER = { "All", "Common", "Rare", "Epic", "Legendary", "Mythic" }
+
 local RARITIES = {
-	Common    = { Label = "Thường",      Color = Color3.fromRGB(148, 163, 184), BonusText = "" },
-	Rare      = { Label = "Hiếm",        Color = Color3.fromRGB(56, 189, 248),  BonusText = "+15% Xu" },
-	Epic      = { Label = "Sử Thi",      Color = Color3.fromRGB(192, 132, 252), BonusText = "+35% Xu" },
-	Legendary = { Label = "Huyền Thoại", Color = Color3.fromRGB(250, 204, 21),  BonusText = "+60% Xu" },
-	Mythic    = { Label = "Thần Thoại",  Color = Color3.fromRGB(244, 63, 94),   BonusText = "+100% Xu" },
+	All       = { Label = "Tất cả",      Color = Color3.fromRGB(180, 188, 202), BonusText = "" },
+	Common    = { Label = "Thường",      Color = Color3.fromRGB(156, 168, 184), BonusText = "" },
+	Rare      = { Label = "Hiếm",        Color = Color3.fromRGB(96, 168, 210),  BonusText = "+15% Xu" },
+	Epic      = { Label = "Sử Thi",      Color = Color3.fromRGB(178, 132, 210), BonusText = "+35% Xu" },
+	Legendary = { Label = "Huyền Thoại", Color = Color3.fromRGB(210, 178, 74),  BonusText = "+60% Xu" },
+	Mythic    = { Label = "Thần Thoại",  Color = Color3.fromRGB(208, 96, 118),  BonusText = "+100% Xu & +1💎/150đ" },
 }
 
 local SKINS = {
-	-- BẬC THƯỜNG & HIẾM (MUA BẰNG XU - GIÁ TĂNG DẦN ĐẾN 25,000 XU)
+	-- BẬC THƯỜNG & HIẾM (MUA BẰNG XU)
 	{
 		Id = "classic_green", Name = "Rắn Xanh Lá", Rarity = "Common", CoinMult = 1.0,
 		Price = 0, Currency = "Coins",
-		HeadColor = Color3.fromRGB(52, 211, 56), Body1 = Color3.fromRGB(34, 197, 54), Body2 = Color3.fromRGB(134, 239, 90),
+		HeadColor = Color3.fromRGB(52, 198, 66), Body1 = Color3.fromRGB(36, 178, 56), Body2 = Color3.fromRGB(118, 210, 92),
 	},
 	{
 		Id = "classic_red", Name = "Rắn Ác Quỷ Đỏ", Rarity = "Common", CoinMult = 1.0,
 		Price = 500, Currency = "Coins",
-		HeadColor = Color3.fromRGB(235, 42, 48), Body1 = Color3.fromRGB(220, 38, 38), Body2 = Color3.fromRGB(250, 240, 240),
-		Style = "Devil", EyeColor = Color3.fromRGB(20, 10, 15),
+		HeadColor = Color3.fromRGB(210, 52, 58), Body1 = Color3.fromRGB(192, 42, 46), Body2 = Color3.fromRGB(216, 204, 204),
+		Style = "Devil", EyeColor = Color3.fromRGB(22, 12, 16),
 	},
 	{
 		Id = "classic_blue", Name = "Rắn Băng Tuyết", Rarity = "Common", CoinMult = 1.0,
 		Price = 1000, Currency = "Coins",
-		HeadColor = Color3.fromRGB(38, 165, 255), Body1 = Color3.fromRGB(29, 130, 235), Body2 = Color3.fromRGB(125, 211, 252),
+		HeadColor = Color3.fromRGB(48, 152, 215), Body1 = Color3.fromRGB(34, 124, 200), Body2 = Color3.fromRGB(122, 192, 218),
 		Accessory = "❄️",
 	},
 	{
 		Id = "classic_gold", Name = "Rắn Ong Vàng", Rarity = "Rare", CoinMult = 1.15,
 		Price = 1800, Currency = "Coins",
-		HeadColor = Color3.fromRGB(250, 204, 21), Body1 = Color3.fromRGB(245, 185, 11), Body2 = Color3.fromRGB(35, 30, 28),
+		HeadColor = Color3.fromRGB(214, 178, 42), Body1 = Color3.fromRGB(205, 162, 28), Body2 = Color3.fromRGB(36, 32, 30),
 	},
 	{
 		Id = "classic_purple", Name = "Rắn Hắc Long Tím", Rarity = "Rare", CoinMult = 1.15,
 		Price = 2800, Currency = "Coins",
-		HeadColor = Color3.fromRGB(168, 70, 255), Body1 = Color3.fromRGB(147, 51, 234), Body2 = Color3.fromRGB(216, 132, 255),
+		HeadColor = Color3.fromRGB(152, 74, 215), Body1 = Color3.fromRGB(132, 54, 198), Body2 = Color3.fromRGB(186, 128, 216),
 		Style = "DarkHorn",
 	},
 	{
 		Id = "watermelon", Name = "Rắn Dưa Hấu", Rarity = "Rare", CoinMult = 1.15,
 		Price = 4000, Currency = "Coins",
-		HeadColor = Color3.fromRGB(239, 68, 85), Body1 = Color3.fromRGB(239, 68, 85), Body2 = Color3.fromRGB(34, 197, 94),
-		Body3 = Color3.fromRGB(20, 20, 25),
+		HeadColor = Color3.fromRGB(208, 68, 82), Body1 = Color3.fromRGB(208, 68, 82), Body2 = Color3.fromRGB(42, 178, 88),
+		Body3 = Color3.fromRGB(26, 26, 32),
+	},
+	{
+		Id = "koi_fish", Name = "Rắn Cá Koi", Rarity = "Rare", CoinMult = 1.15,
+		Price = 5000, Currency = "Coins",
+		HeadColor = Color3.fromRGB(216, 212, 206), Body1 = Color3.fromRGB(214, 108, 42), Body2 = Color3.fromRGB(214, 210, 205),
+		Body3 = Color3.fromRGB(198, 52, 46), Style = "Koi",
 	},
 	{
 		Id = "panda", Name = "Rắn Gấu Trúc", Rarity = "Rare", CoinMult = 1.15,
 		Price = 6000, Currency = "Coins",
-		HeadColor = Color3.fromRGB(245, 247, 252), Body1 = Color3.fromRGB(245, 247, 252), Body2 = Color3.fromRGB(30, 32, 42),
+		HeadColor = Color3.fromRGB(214, 216, 222), Body1 = Color3.fromRGB(214, 216, 222), Body2 = Color3.fromRGB(32, 34, 44),
 		Style = "Panda",
 	},
 	{
 		Id = "kitty", Name = "Rắn Mèo Nơ Hồng", Rarity = "Epic", CoinMult = 1.35,
 		Price = 8500, Currency = "Coins",
-		HeadColor = Color3.fromRGB(255, 240, 248), Body1 = Color3.fromRGB(244, 114, 182), Body2 = Color3.fromRGB(255, 228, 242),
+		HeadColor = Color3.fromRGB(220, 202, 212), Body1 = Color3.fromRGB(208, 104, 158), Body2 = Color3.fromRGB(222, 194, 208),
 		Style = "Kitty", Accessory = "🎀",
 	},
 	{
 		Id = "zombie", Name = "Rắn Zombie", Rarity = "Epic", CoinMult = 1.35,
 		Price = 12000, Currency = "Coins",
-		HeadColor = Color3.fromRGB(98, 178, 92), Body1 = Color3.fromRGB(76, 168, 68), Body2 = Color3.fromRGB(163, 230, 53),
-		Body3 = Color3.fromRGB(115, 72, 65), Style = "Zombie",
+		HeadColor = Color3.fromRGB(96, 168, 90), Body1 = Color3.fromRGB(76, 152, 70), Body2 = Color3.fromRGB(148, 198, 62),
+		Body3 = Color3.fromRGB(112, 72, 66), Style = "Zombie",
 	},
 	{
 		Id = "pumpkin", Name = "Rắn Bí Ngô", Rarity = "Epic", CoinMult = 1.35,
 		Price = 16000, Currency = "Coins",
-		HeadColor = Color3.fromRGB(249, 115, 22), Body1 = Color3.fromRGB(234, 88, 12), Body2 = Color3.fromRGB(154, 52, 18),
-		Style = "Pumpkin", EyeColor = Color3.fromRGB(254, 240, 138),
+		HeadColor = Color3.fromRGB(212, 108, 32), Body1 = Color3.fromRGB(196, 86, 22), Body2 = Color3.fromRGB(138, 52, 20),
+		Style = "Pumpkin", EyeColor = Color3.fromRGB(214, 196, 110),
 	},
 	{
 		Id = "king_snake", Name = "Vua Rắn Hoàng Kim", Rarity = "Legendary", CoinMult = 1.6,
 		Price = 25000, Currency = "Coins",
-		HeadColor = Color3.fromRGB(250, 200, 30), Body1 = Color3.fromRGB(245, 175, 18), Body2 = Color3.fromRGB(254, 240, 138),
-		GlowColor = Color3.fromRGB(250, 204, 21), Accessory = "👑",
+		HeadColor = Color3.fromRGB(214, 174, 42), Body1 = Color3.fromRGB(202, 152, 26), Body2 = Color3.fromRGB(216, 200, 118),
+		GlowColor = Color3.fromRGB(206, 172, 46), Accessory = "👑",
 	},
 
-	-- BẬC SỬ THI, HUYỀN THOẠI & THẦN THOẠI (MUA BẰNG KIM CƯƠNG - 35 ĐẾN 1,000 💎)
+	-- BẬC SỬ THI, HUYỀN THOẠI & THẦN THOẠI (MUA BẰNG KIM CƯƠNG)
 	{
 		Id = "deer_dragon", Name = "Thanh Long Hươu", Rarity = "Epic", CoinMult = 1.35,
 		Price = 35, Currency = "Gems",
-		HeadColor = Color3.fromRGB(20, 196, 212), Body1 = Color3.fromRGB(14, 165, 195), Body2 = Color3.fromRGB(16, 48, 72),
-		Style = "Antlers", GlowColor = Color3.fromRGB(34, 211, 238),
+		HeadColor = Color3.fromRGB(30, 176, 192), Body1 = Color3.fromRGB(22, 148, 176), Body2 = Color3.fromRGB(20, 52, 76),
+		Style = "Antlers", GlowColor = Color3.fromRGB(56, 182, 204),
 	},
 	{
 		Id = "unicorn", Name = "Rắn Kỳ Lân", Rarity = "Epic", CoinMult = 1.35,
 		Price = 55, Currency = "Gems",
-		HeadColor = Color3.fromRGB(252, 238, 255), Body1 = Color3.fromRGB(244, 162, 255), Body2 = Color3.fromRGB(165, 243, 252),
-		Body3 = Color3.fromRGB(254, 240, 138), Style = "Unicorn", GlowColor = Color3.fromRGB(232, 121, 249),
+		HeadColor = Color3.fromRGB(218, 204, 222), Body1 = Color3.fromRGB(206, 142, 214), Body2 = Color3.fromRGB(142, 206, 214),
+		Body3 = Color3.fromRGB(216, 204, 126), Style = "Unicorn", GlowColor = Color3.fromRGB(196, 118, 212),
 	},
 	{
 		Id = "skull", Name = "Rắn Đầu Lâu", Rarity = "Legendary", CoinMult = 1.6,
 		Price = 80, Currency = "Gems",
-		HeadColor = Color3.fromRGB(238, 238, 244), Body1 = Color3.fromRGB(24, 24, 32), Body2 = Color3.fromRGB(235, 235, 242),
-		Style = "Skull", EyeColor = Color3.fromRGB(239, 45, 45),
+		HeadColor = Color3.fromRGB(210, 210, 216), Body1 = Color3.fromRGB(28, 28, 38), Body2 = Color3.fromRGB(206, 206, 214),
+		Style = "Skull", EyeColor = Color3.fromRGB(206, 54, 54),
 	},
 	{
 		Id = "fire_dragon", Name = "Rồng Dung Nham", Rarity = "Legendary", CoinMult = 1.6,
 		Price = 110, Currency = "Gems",
-		HeadColor = Color3.fromRGB(45, 34, 42), Body1 = Color3.fromRGB(34, 24, 28), Body2 = Color3.fromRGB(249, 115, 22),
-		Body3 = Color3.fromRGB(239, 68, 45), EyeColor = Color3.fromRGB(255, 130, 20),
-		GlowColor = Color3.fromRGB(251, 146, 60), Accessory = "🔥",
+		HeadColor = Color3.fromRGB(48, 36, 44), Body1 = Color3.fromRGB(36, 26, 30), Body2 = Color3.fromRGB(212, 108, 32),
+		Body3 = Color3.fromRGB(202, 68, 48), EyeColor = Color3.fromRGB(218, 122, 34),
+		GlowColor = Color3.fromRGB(210, 132, 62), Accessory = "🔥",
 	},
 	{
 		Id = "ice_dragon", Name = "Rồng Pha Lê Băng", Rarity = "Legendary", CoinMult = 1.6,
 		Price = 140, Currency = "Gems",
-		HeadColor = Color3.fromRGB(56, 204, 255), Body1 = Color3.fromRGB(14, 165, 233), Body2 = Color3.fromRGB(210, 248, 255),
-		GlowColor = Color3.fromRGB(125, 211, 252), Accessory = "❄️",
+		HeadColor = Color3.fromRGB(64, 182, 218), Body1 = Color3.fromRGB(26, 148, 204), Body2 = Color3.fromRGB(184, 214, 222),
+		GlowColor = Color3.fromRGB(112, 188, 216), Accessory = "❄️",
 	},
 	{
 		Id = "ghost_snake", Name = "Rắn Bóng Ma", Rarity = "Legendary", CoinMult = 1.6,
 		Price = 180, Currency = "Gems",
-		HeadColor = Color3.fromRGB(224, 242, 254), Body1 = Color3.fromRGB(186, 230, 253), Body2 = Color3.fromRGB(240, 249, 255),
-		BodyAlpha = 0.32, GlowColor = Color3.fromRGB(147, 197, 253), EyeColor = Color3.fromRGB(56, 189, 248),
+		HeadColor = Color3.fromRGB(196, 212, 222), Body1 = Color3.fromRGB(162, 198, 216), Body2 = Color3.fromRGB(206, 216, 224),
+		BodyAlpha = 0.34, GlowColor = Color3.fromRGB(126, 174, 212), EyeColor = Color3.fromRGB(62, 166, 210),
 	},
 	{
 		Id = "dj_rainbow", Name = "Rắn Cầu Vồng RGB", Rarity = "Legendary", CoinMult = 1.6,
 		Price = 220, Currency = "Gems",
-		HeadColor = Color3.fromRGB(236, 72, 153), Body1 = Color3.fromRGB(236, 72, 153), Body2 = Color3.fromRGB(56, 189, 248),
-		Rainbow = true, GlowColor = Color3.fromRGB(255, 255, 255), Accessory = "🎧",
+		HeadColor = Color3.fromRGB(202, 78, 142), Body1 = Color3.fromRGB(202, 78, 142), Body2 = Color3.fromRGB(62, 166, 210),
+		Rainbow = true, GlowColor = Color3.fromRGB(196, 202, 212), Accessory = "🎧",
 	},
 	{
-		Id = "galaxy", Name = "Rắn Ngân Hà", Rarity = "Mythic", CoinMult = 2.0,
-		Price = 300, Currency = "Gems",
-		HeadColor = Color3.fromRGB(48, 25, 110), Body1 = Color3.fromRGB(38, 20, 95), Body2 = Color3.fromRGB(124, 58, 237),
-		Body3 = Color3.fromRGB(56, 189, 248), EyeColor = Color3.fromRGB(103, 232, 249),
-		GlowColor = Color3.fromRGB(168, 85, 247), Accessory = "✨",
+		Id = "cyber_glitch", Name = "Rắn Lỗi Cyber", Rarity = "Legendary", CoinMult = 1.6,
+		Price = 260, Currency = "Gems",
+		HeadColor = Color3.fromRGB(24, 30, 44), Body1 = Color3.fromRGB(48, 192, 204), Body2 = Color3.fromRGB(198, 62, 148),
+		Body3 = Color3.fromRGB(28, 34, 52), Glitch = true, Style = "Cyber",
+		EyeColor = Color3.fromRGB(76, 208, 214), GlowColor = Color3.fromRGB(56, 192, 206),
 	},
 	{
-		Id = "golden_dragon", Name = "Rồng Vàng Hoàng Đế", Rarity = "Mythic", CoinMult = 2.0,
-		Price = 450, Currency = "Gems",
-		HeadColor = Color3.fromRGB(255, 195, 20), Body1 = Color3.fromRGB(245, 158, 11), Body2 = Color3.fromRGB(255, 240, 125),
-		GlowColor = Color3.fromRGB(254, 240, 138), Accessory = "👑",
+		Id = "samurai", Name = "Rắn Samurai Đỏ", Rarity = "Legendary", CoinMult = 1.6,
+		Price = 320, Currency = "Gems",
+		HeadColor = Color3.fromRGB(178, 36, 44), Body1 = Color3.fromRGB(152, 32, 38), Body2 = Color3.fromRGB(44, 38, 46),
+		Body3 = Color3.fromRGB(206, 172, 54), Style = "Samurai",
+		EyeColor = Color3.fromRGB(214, 186, 68), GlowColor = Color3.fromRGB(204, 168, 52),
 	},
 	{
-		Id = "angel", Name = "Rắn Thiên Thần", Rarity = "Mythic", CoinMult = 2.0,
+		Id = "galaxy", Name = "Rắn Ngân Hà", Rarity = "Mythic", CoinMult = 2.0, GemBonus = true,
+		Price = 380, Currency = "Gems",
+		HeadColor = Color3.fromRGB(52, 30, 114), Body1 = Color3.fromRGB(42, 24, 98), Body2 = Color3.fromRGB(124, 64, 204),
+		Body3 = Color3.fromRGB(64, 168, 212), EyeColor = Color3.fromRGB(112, 204, 216),
+		GlowColor = Color3.fromRGB(158, 92, 212), Accessory = "✨",
+	},
+	{
+		Id = "golden_dragon", Name = "Rồng Vàng Hoàng Đế", Rarity = "Mythic", CoinMult = 2.0, GemBonus = true,
+		Price = 500, Currency = "Gems",
+		HeadColor = Color3.fromRGB(216, 172, 34), Body1 = Color3.fromRGB(204, 146, 24), Body2 = Color3.fromRGB(218, 204, 118),
+		GlowColor = Color3.fromRGB(212, 192, 108), Accessory = "👑",
+	},
+	{
+		Id = "angel", Name = "Rắn Thiên Thần", Rarity = "Mythic", CoinMult = 2.0, GemBonus = true,
 		Price = 650, Currency = "Gems",
-		HeadColor = Color3.fromRGB(255, 252, 240), Body1 = Color3.fromRGB(255, 255, 255), Body2 = Color3.fromRGB(250, 204, 21),
-		Style = "Angel", GlowColor = Color3.fromRGB(254, 240, 138),
+		HeadColor = Color3.fromRGB(218, 214, 204), Body1 = Color3.fromRGB(214, 214, 218), Body2 = Color3.fromRGB(208, 176, 52),
+		Style = "Angel", GlowColor = Color3.fromRGB(212, 194, 114),
 	},
 	{
-		Id = "cosmic_god", Name = "Thần Vũ Trụ", Rarity = "Mythic", CoinMult = 2.0,
+		Id = "phoenix", Name = "Phượng Hoàng Lửa", Rarity = "Mythic", CoinMult = 2.0, GemBonus = true,
+		Price = 800, Currency = "Gems",
+		HeadColor = Color3.fromRGB(208, 72, 34), Body1 = Color3.fromRGB(196, 52, 34), Body2 = Color3.fromRGB(214, 142, 34),
+		Body3 = Color3.fromRGB(216, 188, 66), Style = "Phoenix",
+		EyeColor = Color3.fromRGB(218, 204, 92), GlowColor = Color3.fromRGB(212, 134, 46),
+	},
+	{
+		Id = "cosmic_god", Name = "Thần Vũ Trụ", Rarity = "Mythic", CoinMult = 2.0, GemBonus = true,
 		Price = 1000, Currency = "Gems",
-		HeadColor = Color3.fromRGB(24, 12, 65), Body1 = Color3.fromRGB(30, 15, 85), Body2 = Color3.fromRGB(250, 204, 21),
-		Body3 = Color3.fromRGB(168, 85, 247), EyeColor = Color3.fromRGB(254, 240, 138),
-		Style = "Cosmic", GlowColor = Color3.fromRGB(250, 204, 21),
+		HeadColor = Color3.fromRGB(28, 16, 68), Body1 = Color3.fromRGB(34, 18, 86), Body2 = Color3.fromRGB(208, 176, 48),
+		Body3 = Color3.fromRGB(154, 86, 206), EyeColor = Color3.fromRGB(214, 196, 110),
+		Style = "Cosmic", GlowColor = Color3.fromRGB(206, 174, 52),
+	},
+	{
+		Id = "void_emperor", Name = "Đế Vương Hư Không", Rarity = "Mythic", CoinMult = 2.0, GemBonus = true,
+		Price = 1250, Currency = "Gems",
+		HeadColor = Color3.fromRGB(20, 14, 34), Body1 = Color3.fromRGB(28, 18, 48), Body2 = Color3.fromRGB(132, 54, 196),
+		Body3 = Color3.fromRGB(76, 32, 132), Style = "Void",
+		EyeColor = Color3.fromRGB(192, 116, 216), GlowColor = Color3.fromRGB(154, 78, 212),
 	},
 }
 
@@ -280,11 +274,11 @@ local FOODS = {
 }
 
 local POWERUPS = {
-	{ Id = "Double", Icon = "⭐", Color = Color3.fromRGB(250, 204, 21), Name = "2x Điểm" },
-	{ Id = "Ghost",  Icon = "👻", Color = Color3.fromRGB(196, 181, 253), Name = "Bóng Ma" },
-	{ Id = "Shield", Icon = "🛡️", Color = Color3.fromRGB(56, 189, 248), Name = "Khiên" },
-	{ Id = "Magnet", Icon = "🧲", Color = Color3.fromRGB(248, 113, 113), Name = "Nam Châm" },
-	{ Id = "Speed",  Icon = "⚡", Color = Color3.fromRGB(253, 224, 71), Name = "Tăng Tốc" },
+	{ Id = "Double", Icon = "⭐", Color = Color3.fromRGB(208, 176, 52), Name = "2x Điểm" },
+	{ Id = "Ghost",  Icon = "👻", Color = Color3.fromRGB(172, 152, 210), Name = "Bóng Ma" },
+	{ Id = "Shield", Icon = "🛡️", Color = Color3.fromRGB(82, 168, 210),  Name = "Khiên" },
+	{ Id = "Magnet", Icon = "🧲", Color = Color3.fromRGB(204, 102, 104), Name = "Nam Châm" },
+	{ Id = "Speed",  Icon = "⚡", Color = Color3.fromRGB(210, 190, 74),  Name = "Tăng Tốc" },
 }
 
 local BOT_SCORES = {
@@ -298,6 +292,15 @@ local BOT_SCORES = {
 	{ Name = "Hero", Score = 110 },
 	{ Name = "Star", Score = 60 },
 }
+
+local function createDefaultQuests()
+	return {
+		{ Id = "eat",   Title = "Ăn 15 món ăn bất kỳ",     Goal = 15,  Progress = 0, Reward = 180, Currency = "Coins", Claimed = false },
+		{ Id = "score", Title = "Đạt 150 điểm trong 1 ván", Goal = 150, Progress = 0, Reward = 12,  Currency = "Gems",  Claimed = false },
+		{ Id = "power", Title = "Nhặt 3 vật phẩm kỹ năng",  Goal = 3,   Progress = 0, Reward = 15,  Currency = "Gems",  Claimed = false },
+		{ Id = "games", Title = "Chơi hoàn thành 3 ván",    Goal = 3,   Progress = 0, Reward = 350, Currency = "Coins", Claimed = false },
+	}
+end
 
 local function createDefaultState()
 	return {
@@ -317,12 +320,7 @@ local function createDefaultState()
 			BombsEnabled = true,
 			ShowDpad = true,
 		},
-		Quests = {
-			{ Id = "eat",   Title = "Ăn 15 món ăn bất kỳ",     Goal = 15,  Progress = 0, Reward = 150, Currency = "Coins", Claimed = false },
-			{ Id = "score", Title = "Đạt 150 điểm trong 1 ván", Goal = 150, Progress = 0, Reward = 10,  Currency = "Gems",  Claimed = false },
-			{ Id = "power", Title = "Nhặt 3 vật phẩm kỹ năng",  Goal = 3,   Progress = 0, Reward = 12,  Currency = "Gems",  Claimed = false },
-			{ Id = "games", Title = "Chơi hoàn thành 3 ván",    Goal = 3,   Progress = 0, Reward = 300, Currency = "Coins", Claimed = false },
-		}
+		Quests = createDefaultQuests(),
 	}
 end
 
@@ -333,7 +331,7 @@ local state = createDefaultState()
 -- ============================================================
 local canWriteFile = (typeof(writefile) == "function") and (typeof(readfile) == "function")
 local saveModeName = canWriteFile and "File lưu vĩnh viễn" or "Bộ nhớ tạm (RAM)"
-local saveStatusLbl = nil
+local UI = {}
 
 local function getCacheRoot()
 	if typeof(getgenv) == "function" then
@@ -401,13 +399,14 @@ local function applyLoadedData(raw)
 end
 
 local function flashSaveBadge(text, color)
-	if not saveStatusLbl then return end
-	saveStatusLbl.Text = text
-	saveStatusLbl.TextColor3 = color
+	local lbl = UI.saveStatusLbl
+	if not lbl then return end
+	lbl.Text = text
+	lbl.TextColor3 = color
 	task.delay(1.6, function()
-		if saveStatusLbl and saveStatusLbl.Parent then
-			saveStatusLbl.Text = "💾 Tự động lưu"
-			saveStatusLbl.TextColor3 = Color3.fromRGB(134, 239, 172)
+		if lbl and lbl.Parent then
+			lbl.Text = "💾 Tự động lưu"
+			lbl.TextColor3 = THEME.TextGreen
 		end
 	end)
 end
@@ -423,11 +422,11 @@ local function saveData()
 	if canWriteFile then
 		local okWrite = pcall(writefile, SAVE_FILE, encoded)
 		if okWrite then
-			flashSaveBadge("✔ Đã lưu file", Color3.fromRGB(74, 222, 128))
+			flashSaveBadge("✔ Đã lưu file", THEME.TextGreen)
 			return true
 		end
 	end
-	flashSaveBadge("✔ Đã lưu RAM", Color3.fromRGB(125, 211, 252))
+	flashSaveBadge("✔ Đã lưu RAM", THEME.TextGem)
 	return true
 end
 
@@ -470,7 +469,7 @@ end
 local hadSavedData = loadData()
 
 -- ============================================================
--- HÀM DỰNG UI & ĐẦU RẮN ĐẶC TRƯNG CHO TỪNG SKIN
+-- HÀM DỰNG UI & ĐẦU RẮN ĐẶC TRƯNG CHO 27 SKIN
 -- ============================================================
 local function addCorner(parent, r)
 	local c = Instance.new("UICorner")
@@ -481,8 +480,8 @@ end
 
 local function addStroke(parent, color, thickness)
 	local s = Instance.new("UIStroke")
-	s.Color = color or Color3.fromRGB(12, 15, 24)
-	s.Thickness = thickness or 2
+	s.Color = color or Color3.fromRGB(14, 17, 26)
+	s.Thickness = thickness or 1.6
 	s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 	s.Parent = parent
 	return s
@@ -501,20 +500,20 @@ local function makeCoinIcon(parent, sizePx, pos)
 	coin.Size = UDim2.fromOffset(sizePx, sizePx)
 	coin.Position = pos
 	coin.AnchorPoint = Vector2.new(0, 0.5)
-	coin.BackgroundColor3 = Color3.fromRGB(250, 204, 21)
+	coin.BackgroundColor3 = Color3.fromRGB(206, 172, 46)
 	coin.BorderSizePixel = 0
 	coin.Parent = parent
 	addCorner(coin, 99)
-	addStroke(coin, Color3.fromRGB(161, 98, 7), 1.6)
-	addGradient(coin, Color3.fromRGB(254, 240, 138), Color3.fromRGB(234, 179, 8), 90)
+	addStroke(coin, Color3.fromRGB(132, 82, 16), 1.4)
+	addGradient(coin, Color3.fromRGB(214, 196, 110), Color3.fromRGB(192, 146, 22), 90)
 
 	local dollar = Instance.new("TextLabel")
 	dollar.Size = UDim2.fromScale(1, 1)
 	dollar.BackgroundTransparency = 1
 	dollar.Text = "$"
-	dollar.TextColor3 = Color3.fromRGB(146, 64, 14)
-	dollar.Font = Enum.Font.GothamBlack
-	dollar.TextSize = math.max(10, math.floor(sizePx * 0.72))
+	dollar.TextColor3 = Color3.fromRGB(108, 52, 14)
+	dollar.Font = THEME.FontHead
+	dollar.TextSize = math.max(10, math.floor(sizePx * 0.7))
 	dollar.Parent = coin
 	return coin
 end
@@ -524,32 +523,31 @@ local function makeGlossyBtn(parent, text, size, pos, topColor, botColor, corner
 	b.Size = size
 	b.Position = pos or UDim2.new()
 	b.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	b.TextColor3 = Color3.fromRGB(255, 255, 255)
-	b.TextStrokeColor3 = Color3.fromRGB(15, 18, 30)
-	b.TextStrokeTransparency = 0.45
-	b.Font = Enum.Font.GothamBlack
-	b.TextSize = 14
+	b.TextColor3 = THEME.TextMain
+	b.TextStrokeTransparency = 1
+	b.Font = THEME.FontHead
+	b.TextSize = 13
 	b.Text = text
 	b.AutoButtonColor = true
 	b.BorderSizePixel = 0
 	b.Parent = parent
 	addCorner(b, cornerRadius or 10)
-	addStroke(b, Color3.fromRGB(15, 18, 28), 2)
+	addStroke(b, Color3.fromRGB(16, 20, 32), 1.6)
 	addGradient(b, topColor, botColor or topColor, 90)
 	return b
 end
 
 local function makeNotifDot(parent)
 	local dot = Instance.new("Frame")
-	dot.Size = UDim2.fromOffset(12, 12)
-	dot.Position = UDim2.new(1, -14, 0, 4)
-	dot.BackgroundColor3 = Color3.fromRGB(239, 68, 68)
+	dot.Size = UDim2.fromOffset(11, 11)
+	dot.Position = UDim2.new(1, -13, 0, 4)
+	dot.BackgroundColor3 = Color3.fromRGB(208, 66, 66)
 	dot.BorderSizePixel = 0
 	dot.Visible = false
 	dot.ZIndex = 10
 	dot.Parent = parent
 	addCorner(dot, 99)
-	addStroke(dot, Color3.fromRGB(255, 255, 255), 1.5)
+	addStroke(dot, Color3.fromRGB(200, 206, 212), 1.3)
 	return dot
 end
 
@@ -580,7 +578,6 @@ local function makeDraggable(handle, target, onMovedFlag)
 	end))
 end
 
--- Lấy màu đốt thân (hỗ trợ 2 màu hoặc 3 màu như Dưa Hấu, Zombie, Ngân Hà, Thần Vũ Trụ)
 local function getSegmentColor(skin, idx)
 	if skin.Body3 then
 		local m = idx % 3
@@ -591,7 +588,6 @@ local function getSegmentColor(skin, idx)
 	return (idx % 2 == 0) and skin.Body1 or skin.Body2
 end
 
--- Vẽ ĐẦU RẮN HOẠT HÌNH ĐA PHONG CÁCH (Tai Gấu Trúc, Tai Mèo, Sừng Quỷ/Hươu/Kỳ Lân, Hào Quang, Vòng Vũ Trụ...)
 local function buildCartoonHead(parent, sizePx, skin)
 	local head = Instance.new("Frame")
 	head.Size = UDim2.fromOffset(sizePx, sizePx)
@@ -602,34 +598,31 @@ local function buildCartoonHead(parent, sizePx, skin)
 	head.ZIndex = 6
 	head.Parent = parent
 	addCorner(head, math.floor(sizePx * 0.48))
-	addStroke(head, skin.GlowColor or Color3.fromRGB(12, 14, 22), math.max(1.8, sizePx * 0.075))
+	addStroke(head, skin.GlowColor or Color3.fromRGB(14, 16, 24), math.max(1.6, sizePx * 0.07))
 
-	-- Ánh sáng bóng
 	local shine = Instance.new("Frame")
-	shine.Size = UDim2.fromScale(0.42, 0.22)
+	shine.Size = UDim2.fromScale(0.4, 0.2)
 	shine.Position = UDim2.fromScale(0.16, 0.12)
-	shine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	shine.BackgroundTransparency = 0.65
+	shine.BackgroundColor3 = Color3.fromRGB(220, 224, 230)
+	shine.BackgroundTransparency = 0.72
 	shine.BorderSizePixel = 0
 	shine.ZIndex = 7
 	shine.Parent = head
 	addCorner(shine, 99)
 
-	-- Lưỡi đỏ thè ra phía trước
 	local tongue = Instance.new("Frame")
 	tongue.Size = UDim2.fromScale(0.36, 0.16)
 	tongue.Position = UDim2.fromScale(0.92, 0.42)
-	tongue.BackgroundColor3 = Color3.fromRGB(239, 45, 55)
+	tongue.BackgroundColor3 = Color3.fromRGB(206, 52, 62)
 	tongue.BorderSizePixel = 0
 	tongue.ZIndex = 5
 	tongue.Parent = head
 	addCorner(tongue, 4)
-	addStroke(tongue, Color3.fromRGB(20, 10, 12), 1.2)
+	addStroke(tongue, Color3.fromRGB(20, 10, 12), 1.1)
 
-	-- Chi tiết tai / sừng đối xứng 2 bên đầu theo từng Style
 	local st = skin.Style
 	if st == "Panda" or st == "Kitty" then
-		local earColor = (st == "Panda") and Color3.fromRGB(25, 26, 35) or Color3.fromRGB(255, 232, 244)
+		local earColor = (st == "Panda") and Color3.fromRGB(26, 28, 36) or Color3.fromRGB(220, 198, 210)
 		for _, yE in ipairs({ -0.06, 0.72 }) do
 			local ear = Instance.new("Frame")
 			ear.Size = UDim2.fromScale(0.34, 0.34)
@@ -639,11 +632,23 @@ local function buildCartoonHead(parent, sizePx, skin)
 			ear.ZIndex = 5
 			ear.Parent = head
 			addCorner(ear, (st == "Panda") and 99 or 6)
-			addStroke(ear, Color3.fromRGB(15, 16, 24), 1.4)
+			addStroke(ear, Color3.fromRGB(16, 18, 26), 1.3)
+		end
+	elseif st == "Koi" then
+		for _, yF in ipairs({ -0.14, 0.84 }) do
+			local fin = Instance.new("Frame")
+			fin.Size = UDim2.fromScale(0.36, 0.28)
+			fin.Position = UDim2.fromScale(0.16, yF)
+			fin.BackgroundColor3 = Color3.fromRGB(214, 112, 46)
+			fin.BorderSizePixel = 0
+			fin.ZIndex = 5
+			fin.Parent = head
+			addCorner(fin, 99)
+			addStroke(fin, Color3.fromRGB(140, 56, 24), 1.1)
 		end
 	elseif st == "Devil" or st == "DarkHorn" or st == "Antlers" then
-		local hColor = (st == "Devil") and Color3.fromRGB(190, 22, 32)
-			or (st == "DarkHorn" and Color3.fromRGB(95, 28, 165) or Color3.fromRGB(168, 120, 68))
+		local hColor = (st == "Devil") and Color3.fromRGB(178, 26, 36)
+			or (st == "DarkHorn" and Color3.fromRGB(92, 32, 158) or Color3.fromRGB(158, 114, 66))
 		for _, yH in ipairs({ -0.08, 0.78 }) do
 			local horn = Instance.new("Frame")
 			horn.Size = UDim2.fromScale(0.34, 0.26)
@@ -653,72 +658,101 @@ local function buildCartoonHead(parent, sizePx, skin)
 			horn.ZIndex = 5
 			horn.Parent = head
 			addCorner(horn, 6)
-			addStroke(horn, Color3.fromRGB(15, 15, 22), 1.3)
+			addStroke(horn, Color3.fromRGB(16, 16, 24), 1.2)
 		end
 	elseif st == "Unicorn" then
 		local uHorn = Instance.new("Frame")
 		uHorn.Size = UDim2.fromScale(0.46, 0.2)
 		uHorn.Position = UDim2.fromScale(-0.24, 0.4)
-		uHorn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		uHorn.BackgroundColor3 = Color3.fromRGB(210, 210, 220)
 		uHorn.BorderSizePixel = 0
 		uHorn.ZIndex = 10
 		uHorn.Parent = head
 		addCorner(uHorn, 5)
-		addStroke(uHorn, Color3.fromRGB(88, 28, 135), 1.2)
-		addGradient(uHorn, Color3.fromRGB(56, 189, 248), Color3.fromRGB(244, 114, 182), 0)
+		addStroke(uHorn, Color3.fromRGB(88, 32, 132), 1.1)
+		addGradient(uHorn, Color3.fromRGB(82, 178, 214), Color3.fromRGB(208, 108, 166), 0)
 	elseif st == "Pumpkin" then
 		local stem = Instance.new("Frame")
 		stem.Size = UDim2.fromScale(0.28, 0.22)
 		stem.Position = UDim2.fromScale(-0.18, 0.39)
-		stem.BackgroundColor3 = Color3.fromRGB(34, 160, 52)
+		stem.BackgroundColor3 = Color3.fromRGB(40, 148, 56)
 		stem.BorderSizePixel = 0
 		stem.ZIndex = 10
 		stem.Parent = head
 		addCorner(stem, 4)
-		addStroke(stem, Color3.fromRGB(15, 30, 15), 1.2)
-	elseif st == "Angel" then
-		-- Vòng hào quang vàng + 2 cánh trắng
-		local halo = Instance.new("Frame")
-		halo.Size = UDim2.fromScale(0.22, 0.62)
-		halo.Position = UDim2.fromScale(-0.22, 0.19)
-		halo.BackgroundTransparency = 1
-		halo.ZIndex = 11
-		halo.Parent = head
-		addCorner(halo, 99)
-		addStroke(halo, Color3.fromRGB(250, 204, 21), 2.2)
-
+		addStroke(stem, Color3.fromRGB(16, 30, 16), 1.1)
+	elseif st == "Cyber" then
+		local visor = Instance.new("Frame")
+		visor.Size = UDim2.fromScale(0.24, 0.76)
+		visor.Position = UDim2.fromScale(0.56, 0.12)
+		visor.BackgroundColor3 = Color3.fromRGB(56, 194, 206)
+		visor.BackgroundTransparency = 0.25
+		visor.BorderSizePixel = 0
+		visor.ZIndex = 10
+		visor.Parent = head
+		addCorner(visor, 4)
+		addStroke(visor, Color3.fromRGB(196, 62, 146), 1.1)
+	elseif st == "Samurai" then
+		local crest = Instance.new("Frame")
+		crest.Size = UDim2.fromScale(0.22, 0.86)
+		crest.Position = UDim2.fromScale(-0.14, 0.07)
+		crest.BackgroundColor3 = Color3.fromRGB(208, 174, 52)
+		crest.BorderSizePixel = 0
+		crest.ZIndex = 10
+		crest.Parent = head
+		addCorner(crest, 6)
+		addStroke(crest, Color3.fromRGB(108, 72, 18), 1.2)
+	elseif st == "Angel" or st == "Phoenix" then
+		local isPhx = (st == "Phoenix")
+		if not isPhx then
+			local halo = Instance.new("Frame")
+			halo.Size = UDim2.fromScale(0.22, 0.62)
+			halo.Position = UDim2.fromScale(-0.22, 0.19)
+			halo.BackgroundTransparency = 1
+			halo.ZIndex = 11
+			halo.Parent = head
+			addCorner(halo, 99)
+			addStroke(halo, Color3.fromRGB(208, 176, 48), 2)
+		else
+			local crest = Instance.new("Frame")
+			crest.Size = UDim2.fromScale(0.4, 0.28)
+			crest.Position = UDim2.fromScale(-0.22, 0.36)
+			crest.BackgroundColor3 = Color3.fromRGB(214, 152, 36)
+			crest.BorderSizePixel = 0
+			crest.ZIndex = 10
+			crest.Parent = head
+			addCorner(crest, 99)
+		end
 		for _, yW in ipairs({ -0.22, 0.88 }) do
 			local wing = Instance.new("Frame")
 			wing.Size = UDim2.fromScale(0.42, 0.32)
 			wing.Position = UDim2.fromScale(0.08, yW)
-			wing.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			wing.BackgroundColor3 = isPhx and Color3.fromRGB(214, 126, 36) or Color3.fromRGB(214, 216, 222)
 			wing.BorderSizePixel = 0
 			wing.ZIndex = 5
 			wing.Parent = head
 			addCorner(wing, 99)
-			addStroke(wing, Color3.fromRGB(250, 204, 21), 1.4)
+			addStroke(wing, isPhx and Color3.fromRGB(186, 56, 28) or Color3.fromRGB(204, 174, 52), 1.3)
 		end
-	elseif st == "Cosmic" then
-		-- Vòng sao Thổ phát sáng bao quanh đầu
+	elseif st == "Cosmic" or st == "Void" then
 		local orbit = Instance.new("Frame")
-		orbit.Size = UDim2.fromScale(1.45, 0.44)
+		orbit.Size = UDim2.fromScale(1.42, 0.42)
 		orbit.Position = UDim2.fromScale(0.5, 0.5)
 		orbit.AnchorPoint = Vector2.new(0.5, 0.5)
-		orbit.Rotation = -28
+		orbit.Rotation = (st == "Void") and 28 or -28
 		orbit.BackgroundTransparency = 1
 		orbit.ZIndex = 11
 		orbit.Parent = head
 		addCorner(orbit, 99)
-		addStroke(orbit, Color3.fromRGB(250, 204, 21), 2)
+		addStroke(orbit, (st == "Void") and Color3.fromRGB(162, 82, 212) or Color3.fromRGB(208, 176, 50), 1.8)
 	end
 
-	-- Cặp mắt hoạt hình (tùy biến cho Panda, Zombie, Skull, Pumpkin...)
 	for idxEye, yPos in ipairs({ 0.14, 0.54 }) do
 		if st == "Panda" then
 			local patch = Instance.new("Frame")
 			patch.Size = UDim2.fromScale(0.44, 0.42)
 			patch.Position = UDim2.fromScale(0.43, yPos - 0.04)
-			patch.BackgroundColor3 = Color3.fromRGB(24, 25, 34)
+			patch.BackgroundColor3 = Color3.fromRGB(24, 26, 36)
 			patch.BorderSizePixel = 0
 			patch.ZIndex = 7
 			patch.Parent = head
@@ -728,16 +762,16 @@ local function buildCartoonHead(parent, sizePx, skin)
 		local eyeWhite = Instance.new("Frame")
 		eyeWhite.Size = UDim2.fromScale(0.32, 0.32)
 		eyeWhite.Position = UDim2.fromScale(0.49, yPos)
-		eyeWhite.BackgroundColor3 = (st == "Skull" or st == "Pumpkin") and Color3.fromRGB(22, 18, 25) or Color3.fromRGB(255, 255, 255)
+		eyeWhite.BackgroundColor3 = (st == "Skull" or st == "Pumpkin" or st == "Void") and Color3.fromRGB(22, 18, 28) or Color3.fromRGB(218, 220, 226)
 		eyeWhite.BorderSizePixel = 0
 		eyeWhite.ZIndex = 8
 		eyeWhite.Parent = head
 		addCorner(eyeWhite, 99)
-		addStroke(eyeWhite, Color3.fromRGB(15, 15, 22), 1.2)
+		addStroke(eyeWhite, Color3.fromRGB(16, 16, 24), 1.1)
 
 		local pupilColor = skin.EyeColor or Color3.fromRGB(22, 18, 28)
 		if st == "Zombie" then
-			pupilColor = (idxEye == 1) and Color3.fromRGB(239, 45, 45) or Color3.fromRGB(250, 204, 21)
+			pupilColor = (idxEye == 1) and Color3.fromRGB(204, 52, 54) or Color3.fromRGB(208, 178, 52)
 		end
 
 		local pupil = Instance.new("Frame")
@@ -750,24 +784,23 @@ local function buildCartoonHead(parent, sizePx, skin)
 		addCorner(pupil, 99)
 
 		local glint = Instance.new("Frame")
-		glint.Size = UDim2.fromScale(0.34, 0.34)
-		glint.Position = UDim2.fromScale(0.15, 0.12)
-		glint.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		glint.Size = UDim2.fromScale(0.32, 0.32)
+		glint.Position = UDim2.fromScale(0.16, 0.14)
+		glint.BackgroundColor3 = Color3.fromRGB(218, 222, 228)
 		glint.BorderSizePixel = 0
 		glint.ZIndex = 10
 		glint.Parent = pupil
 		addCorner(glint, 99)
 	end
 
-	-- Phụ kiện biểu tượng trên đỉnh đầu (nếu có)
 	if skin.Accessory then
 		local acc = Instance.new("TextLabel")
 		acc.BackgroundTransparency = 1
-		acc.Size = UDim2.fromScale(0.64, 0.64)
-		acc.Position = UDim2.fromScale(-0.14, 0.18)
+		acc.Size = UDim2.fromScale(0.62, 0.62)
+		acc.Position = UDim2.fromScale(-0.14, 0.19)
 		acc.ZIndex = 11
 		acc.TextScaled = true
-		acc.Font = Enum.Font.GothamBold
+		acc.Font = THEME.FontHead
 		acc.Text = skin.Accessory
 		acc.Parent = head
 	end
@@ -776,7 +809,7 @@ local function buildCartoonHead(parent, sizePx, skin)
 end
 
 -- ============================================================
--- CỬA SỔ CHÍNH (CHỪA KHOẢNG AN TOÀN TRÁNH THANH ROBLOX MOBILE)
+-- CỬA SỔ CHÍNH & THANH ĐẦU TRANG
 -- ============================================================
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = GUI_NAME
@@ -787,26 +820,26 @@ screenGui.Parent = guiParent
 
 local floatBtn = makeGlossyBtn(
 	screenGui, "🐍",
-	UDim2.fromOffset(50, 50),
-	UDim2.new(0, 16, 0.5, -25),
-	Color3.fromRGB(74, 222, 128), Color3.fromRGB(22, 163, 74), 25
+	UDim2.fromOffset(48, 48),
+	UDim2.new(0, 16, 0.5, -24),
+	Color3.fromRGB(58, 178, 98), Color3.fromRGB(28, 128, 66), 24
 )
-floatBtn.TextSize = 24
+floatBtn.TextSize = 22
 floatBtn.Visible = false
 local floatDragged = false
 makeDraggable(floatBtn, floatBtn, function(v) floatDragged = v end)
 
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.fromOffset(620, 400)
-mainFrame.Position = UDim2.new(0.5, 0, 0.5, 20)
+mainFrame.Size = UDim2.fromOffset(620, 404)
+mainFrame.Position = UDim2.new(0.5, 0, 0.5, 18)
 mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-mainFrame.BackgroundColor3 = Color3.fromRGB(20, 22, 38)
+mainFrame.BackgroundColor3 = Color3.fromRGB(18, 20, 34)
 mainFrame.BorderSizePixel = 0
 mainFrame.ClipsDescendants = true
 mainFrame.Parent = screenGui
 addCorner(mainFrame, 16)
-addStroke(mainFrame, Color3.fromRGB(115, 88, 220), 2.5)
-addGradient(mainFrame, Color3.fromRGB(26, 28, 50), Color3.fromRGB(15, 17, 30), 90)
+addStroke(mainFrame, Color3.fromRGB(96, 78, 182), 2)
+addGradient(mainFrame, Color3.fromRGB(24, 26, 46), Color3.fromRGB(14, 16, 28), 90)
 
 local uiScale = Instance.new("UIScale")
 uiScale.Parent = mainFrame
@@ -816,135 +849,141 @@ local function calcScale()
 	if not cam then return 1 end
 	local vp = cam.ViewportSize
 	local scaleX = (vp.X - 24) / 620
-	local scaleY = (vp.Y - 68) / 400
+	local scaleY = (vp.Y - 68) / 404
 	return math.clamp(math.min(1, scaleX, scaleY), 0.48, 1)
 end
 uiScale.Scale = calcScale()
 
--- ============================================================
--- THANH ĐẦU TRANG
--- ============================================================
-local topBar = Instance.new("Frame")
-topBar.Size = UDim2.new(1, 0, 0, 48)
-topBar.BackgroundColor3 = Color3.fromRGB(30, 32, 58)
-topBar.BorderSizePixel = 0
-topBar.Parent = mainFrame
-addGradient(topBar, Color3.fromRGB(42, 38, 82), Color3.fromRGB(24, 26, 46), 90)
-makeDraggable(topBar, mainFrame)
+-- Dựng thanh Top Bar trong khối do..end để tiết kiệm biến local
+do
+	local topBar = Instance.new("Frame")
+	topBar.Size = UDim2.new(1, 0, 0, 48)
+	topBar.BackgroundColor3 = Color3.fromRGB(28, 30, 52)
+	topBar.BorderSizePixel = 0
+	topBar.Parent = mainFrame
+	addGradient(topBar, Color3.fromRGB(38, 36, 72), Color3.fromRGB(22, 24, 42), 90)
+	makeDraggable(topBar, mainFrame)
 
-local profileBox = Instance.new("Frame")
-profileBox.Size = UDim2.fromOffset(176, 36)
-profileBox.Position = UDim2.fromOffset(10, 6)
-profileBox.BackgroundColor3 = Color3.fromRGB(20, 22, 38)
-profileBox.BorderSizePixel = 0
-profileBox.Parent = topBar
-addCorner(profileBox, 18)
-addStroke(profileBox, Color3.fromRGB(115, 90, 220), 1.6)
+	local profileBox = Instance.new("Frame")
+	profileBox.Size = UDim2.fromOffset(176, 36)
+	profileBox.Position = UDim2.fromOffset(10, 6)
+	profileBox.BackgroundColor3 = Color3.fromRGB(18, 20, 34)
+	profileBox.BorderSizePixel = 0
+	profileBox.Parent = topBar
+	addCorner(profileBox, 18)
+	addStroke(profileBox, Color3.fromRGB(92, 76, 174), 1.4)
 
-local avatarIconHolder = Instance.new("Frame")
-avatarIconHolder.Size = UDim2.fromOffset(28, 28)
-avatarIconHolder.Position = UDim2.fromOffset(6, 4)
-avatarIconHolder.BackgroundTransparency = 1
-avatarIconHolder.Parent = profileBox
+	local avatarIconHolder = Instance.new("Frame")
+	avatarIconHolder.Size = UDim2.fromOffset(28, 28)
+	avatarIconHolder.Position = UDim2.fromOffset(6, 4)
+	avatarIconHolder.BackgroundTransparency = 1
+	avatarIconHolder.Parent = profileBox
+	UI.avatarIconHolder = avatarIconHolder
 
-local profileName = Instance.new("TextLabel")
-profileName.Size = UDim2.fromOffset(124, 16)
-profileName.Position = UDim2.fromOffset(42, 3)
-profileName.BackgroundTransparency = 1
-profileName.Text = player.DisplayName
-profileName.TextColor3 = Color3.fromRGB(255, 255, 255)
-profileName.Font = Enum.Font.GothamBlack
-profileName.TextSize = 12
-profileName.TextXAlignment = Enum.TextXAlignment.Left
-profileName.TextTruncate = Enum.TextTruncate.AtEnd
-profileName.Parent = profileBox
+	local profileName = Instance.new("TextLabel")
+	profileName.Size = UDim2.fromOffset(124, 16)
+	profileName.Position = UDim2.fromOffset(42, 3)
+	profileName.BackgroundTransparency = 1
+	profileName.Text = player.DisplayName
+	profileName.TextColor3 = THEME.TextMain
+	profileName.Font = THEME.FontHead
+	profileName.TextSize = 12
+	profileName.TextXAlignment = Enum.TextXAlignment.Left
+	profileName.TextTruncate = Enum.TextTruncate.AtEnd
+	profileName.Parent = profileBox
 
-local lvLabel = Instance.new("TextLabel")
-lvLabel.Size = UDim2.fromOffset(42, 12)
-lvLabel.Position = UDim2.fromOffset(42, 20)
-lvLabel.BackgroundTransparency = 1
-lvLabel.Text = "Lv. 1"
-lvLabel.TextColor3 = Color3.fromRGB(250, 204, 21)
-lvLabel.Font = Enum.Font.GothamBlack
-lvLabel.TextSize = 11
-lvLabel.TextXAlignment = Enum.TextXAlignment.Left
-lvLabel.Parent = profileBox
+	local lvLabel = Instance.new("TextLabel")
+	lvLabel.Size = UDim2.fromOffset(42, 12)
+	lvLabel.Position = UDim2.fromOffset(42, 20)
+	lvLabel.BackgroundTransparency = 1
+	lvLabel.Text = "Lv. 1"
+	lvLabel.TextColor3 = THEME.TextGold
+	lvLabel.Font = THEME.FontHead
+	lvLabel.TextSize = 11
+	lvLabel.TextXAlignment = Enum.TextXAlignment.Left
+	lvLabel.Parent = profileBox
+	UI.lvLabel = lvLabel
 
-local expBg = Instance.new("Frame")
-expBg.Size = UDim2.fromOffset(78, 8)
-expBg.Position = UDim2.fromOffset(86, 22)
-expBg.BackgroundColor3 = Color3.fromRGB(40, 44, 68)
-expBg.BorderSizePixel = 0
-expBg.Parent = profileBox
-addCorner(expBg, 4)
+	local expBg = Instance.new("Frame")
+	expBg.Size = UDim2.fromOffset(78, 8)
+	expBg.Position = UDim2.fromOffset(86, 22)
+	expBg.BackgroundColor3 = Color3.fromRGB(36, 40, 62)
+	expBg.BorderSizePixel = 0
+	expBg.Parent = profileBox
+	addCorner(expBg, 4)
 
-local expFill = Instance.new("Frame")
-expFill.Size = UDim2.fromScale(0.1, 1)
-expFill.BackgroundColor3 = Color3.fromRGB(74, 222, 128)
-expFill.BorderSizePixel = 0
-expFill.Parent = expBg
-addCorner(expFill, 4)
+	local expFill = Instance.new("Frame")
+	expFill.Size = UDim2.fromScale(0.1, 1)
+	expFill.BackgroundColor3 = Color3.fromRGB(72, 186, 112)
+	expFill.BorderSizePixel = 0
+	expFill.Parent = expBg
+	addCorner(expFill, 4)
+	UI.expFill = expFill
 
-local coinPill = Instance.new("Frame")
-coinPill.Size = UDim2.fromOffset(118, 32)
-coinPill.Position = UDim2.fromOffset(194, 8)
-coinPill.BackgroundColor3 = Color3.fromRGB(20, 22, 38)
-coinPill.BorderSizePixel = 0
-coinPill.Parent = topBar
-addCorner(coinPill, 16)
-addStroke(coinPill, Color3.fromRGB(95, 78, 175), 1.5)
-makeCoinIcon(coinPill, 20, UDim2.new(0, 7, 0.5, 0))
+	local coinPill = Instance.new("Frame")
+	coinPill.Size = UDim2.fromOffset(118, 32)
+	coinPill.Position = UDim2.fromOffset(194, 8)
+	coinPill.BackgroundColor3 = Color3.fromRGB(18, 20, 34)
+	coinPill.BorderSizePixel = 0
+	coinPill.Parent = topBar
+	addCorner(coinPill, 16)
+	addStroke(coinPill, Color3.fromRGB(82, 70, 150), 1.4)
+	makeCoinIcon(coinPill, 20, UDim2.new(0, 7, 0.5, 0))
 
-local coinsLbl = Instance.new("TextLabel")
-coinsLbl.Size = UDim2.new(1, -32, 1, 0)
-coinsLbl.Position = UDim2.fromOffset(30, 0)
-coinsLbl.BackgroundTransparency = 1
-coinsLbl.Text = formatNum(state.Coins)
-coinsLbl.TextColor3 = Color3.fromRGB(250, 204, 21)
-coinsLbl.Font = Enum.Font.GothamBlack
-coinsLbl.TextSize = 13
-coinsLbl.TextXAlignment = Enum.TextXAlignment.Left
-coinsLbl.Parent = coinPill
+	local coinsLbl = Instance.new("TextLabel")
+	coinsLbl.Size = UDim2.new(1, -32, 1, 0)
+	coinsLbl.Position = UDim2.fromOffset(30, 0)
+	coinsLbl.BackgroundTransparency = 1
+	coinsLbl.Text = formatNum(state.Coins)
+	coinsLbl.TextColor3 = THEME.TextGold
+	coinsLbl.Font = THEME.FontHead
+	coinsLbl.TextSize = 13
+	coinsLbl.TextXAlignment = Enum.TextXAlignment.Left
+	coinsLbl.Parent = coinPill
+	UI.coinsLbl = coinsLbl
 
-local gemPill = Instance.new("Frame")
-gemPill.Size = UDim2.fromOffset(106, 32)
-gemPill.Position = UDim2.fromOffset(318, 8)
-gemPill.BackgroundColor3 = Color3.fromRGB(20, 22, 38)
-gemPill.BorderSizePixel = 0
-gemPill.Parent = topBar
-addCorner(gemPill, 16)
-addStroke(gemPill, Color3.fromRGB(95, 78, 175), 1.5)
+	local gemPill = Instance.new("Frame")
+	gemPill.Size = UDim2.fromOffset(106, 32)
+	gemPill.Position = UDim2.fromOffset(318, 8)
+	gemPill.BackgroundColor3 = Color3.fromRGB(18, 20, 34)
+	gemPill.BorderSizePixel = 0
+	gemPill.Parent = topBar
+	addCorner(gemPill, 16)
+	addStroke(gemPill, Color3.fromRGB(82, 70, 150), 1.4)
 
-local gemsLbl = Instance.new("TextLabel")
-gemsLbl.Size = UDim2.new(1, -8, 1, 0)
-gemsLbl.Position = UDim2.fromOffset(4, 0)
-gemsLbl.BackgroundTransparency = 1
-gemsLbl.Text = "💎 " .. formatNum(state.Gems)
-gemsLbl.TextColor3 = Color3.fromRGB(103, 232, 249)
-gemsLbl.Font = Enum.Font.GothamBlack
-gemsLbl.TextSize = 13
-gemsLbl.Parent = gemPill
+	local gemsLbl = Instance.new("TextLabel")
+	gemsLbl.Size = UDim2.new(1, -8, 1, 0)
+	gemsLbl.Position = UDim2.fromOffset(4, 0)
+	gemsLbl.BackgroundTransparency = 1
+	gemsLbl.Text = "💎 " .. formatNum(state.Gems)
+	gemsLbl.TextColor3 = THEME.TextGem
+	gemsLbl.Font = THEME.FontHead
+	gemsLbl.TextSize = 13
+	gemsLbl.Parent = gemPill
+	UI.gemsLbl = gemsLbl
 
-saveStatusLbl = Instance.new("TextLabel")
-saveStatusLbl.Size = UDim2.fromOffset(106, 32)
-saveStatusLbl.Position = UDim2.fromOffset(432, 8)
-saveStatusLbl.BackgroundTransparency = 1
-saveStatusLbl.Text = hadSavedData and "✔ Đã tải dữ liệu" or "💾 Tự động lưu"
-saveStatusLbl.TextColor3 = Color3.fromRGB(134, 239, 172)
-saveStatusLbl.Font = Enum.Font.GothamBold
-saveStatusLbl.TextSize = 11
-saveStatusLbl.Parent = topBar
+	local saveStatusLbl = Instance.new("TextLabel")
+	saveStatusLbl.Size = UDim2.fromOffset(108, 32)
+	saveStatusLbl.Position = UDim2.fromOffset(430, 8)
+	saveStatusLbl.BackgroundTransparency = 1
+	saveStatusLbl.Text = hadSavedData and "✔ Đã tải dữ liệu" or "💾 Tự động lưu"
+	saveStatusLbl.TextColor3 = THEME.TextGreen
+	saveStatusLbl.Font = THEME.FontBody
+	saveStatusLbl.TextSize = 11
+	saveStatusLbl.Parent = topBar
+	UI.saveStatusLbl = saveStatusLbl
 
-local minBtn   = makeGlossyBtn(topBar, "-", UDim2.fromOffset(30, 30), UDim2.new(1, -72, 0, 9), Color3.fromRGB(90, 100, 130), Color3.fromRGB(55, 62, 85), 8)
-local closeBtn = makeGlossyBtn(topBar, "X", UDim2.fromOffset(30, 30), UDim2.new(1, -36, 0, 9), Color3.fromRGB(248, 70, 70), Color3.fromRGB(185, 28, 28), 8)
-minBtn.TextSize = 18
-closeBtn.TextSize = 15
+	UI.minBtn = makeGlossyBtn(topBar, "-", UDim2.fromOffset(30, 30), UDim2.new(1, -72, 0, 9), Color3.fromRGB(76, 84, 110), Color3.fromRGB(48, 54, 74), 8)
+	UI.closeBtn = makeGlossyBtn(topBar, "X", UDim2.fromOffset(30, 30), UDim2.new(1, -36, 0, 9), Color3.fromRGB(192, 62, 64), Color3.fromRGB(142, 34, 38), 8)
+	UI.minBtn.TextSize = 16
+	UI.closeBtn.TextSize = 14
+end
 
 -- ============================================================
 -- VÙNG NỘI DUNG: SẢNH CHỜ & MÀN CHƠI
 -- ============================================================
 local container = Instance.new("Frame")
-container.Size = UDim2.fromOffset(600, 338)
+container.Size = UDim2.fromOffset(600, 342)
 container.Position = UDim2.fromOffset(10, 54)
 container.BackgroundTransparency = 1
 container.Parent = mainFrame
@@ -963,119 +1002,149 @@ gamePage.Parent = container
 -- ============================================================
 -- 1. SẢNH CHỜ (LOBBY)
 -- ============================================================
-local showcaseCard = Instance.new("Frame")
-showcaseCard.Size = UDim2.fromOffset(362, 268)
-showcaseCard.BackgroundColor3 = Color3.fromRGB(24, 28, 48)
-showcaseCard.BorderSizePixel = 0
-showcaseCard.Parent = lobbyPage
-addCorner(showcaseCard, 14)
-addStroke(showcaseCard, Color3.fromRGB(72, 65, 135), 1.8)
-addGradient(showcaseCard, Color3.fromRGB(34, 38, 68), Color3.fromRGB(18, 21, 36), 90)
+do
+	local showcaseCard = Instance.new("Frame")
+	showcaseCard.Size = UDim2.fromOffset(362, 270)
+	showcaseCard.BackgroundColor3 = Color3.fromRGB(22, 26, 44)
+	showcaseCard.BorderSizePixel = 0
+	showcaseCard.Parent = lobbyPage
+	addCorner(showcaseCard, 14)
+	addStroke(showcaseCard, Color3.fromRGB(66, 60, 122), 1.6)
+	addGradient(showcaseCard, Color3.fromRGB(30, 34, 60), Color3.fromRGB(16, 19, 32), 90)
 
-local showcaseTitle = Instance.new("TextLabel")
-showcaseTitle.Size = UDim2.new(1, 0, 0, 34)
-showcaseTitle.Position = UDim2.fromOffset(0, 6)
-showcaseTitle.BackgroundTransparency = 1
-showcaseTitle.Text = "🐍 RẮN SĂN MỒI PRO"
-showcaseTitle.TextColor3 = Color3.fromRGB(250, 204, 21)
-showcaseTitle.Font = Enum.Font.GothamBlack
-showcaseTitle.TextSize = 20
-showcaseTitle.Parent = showcaseCard
+	local showcaseTitle = Instance.new("TextLabel")
+	showcaseTitle.Size = UDim2.new(1, 0, 0, 32)
+	showcaseTitle.Position = UDim2.fromOffset(0, 6)
+	showcaseTitle.BackgroundTransparency = 1
+	showcaseTitle.Text = "🐍 RẮN SĂN MỒI PRO " .. VERSION_TEXT
+	showcaseTitle.TextColor3 = THEME.TextGold
+	showcaseTitle.Font = THEME.FontHead
+	showcaseTitle.TextSize = 18
+	showcaseTitle.Parent = showcaseCard
 
-local previewStage = Instance.new("Frame")
-previewStage.Size = UDim2.fromOffset(330, 96)
-previewStage.Position = UDim2.fromOffset(16, 44)
-previewStage.BackgroundColor3 = Color3.fromRGB(15, 18, 32)
-previewStage.BorderSizePixel = 0
-previewStage.ClipsDescendants = true
-previewStage.Parent = showcaseCard
-addCorner(previewStage, 12)
-addStroke(previewStage, Color3.fromRGB(58, 66, 105), 1.5)
+	local previewStage = Instance.new("Frame")
+	previewStage.Size = UDim2.fromOffset(330, 96)
+	previewStage.Position = UDim2.fromOffset(16, 42)
+	previewStage.BackgroundColor3 = Color3.fromRGB(14, 17, 30)
+	previewStage.BorderSizePixel = 0
+	previewStage.ClipsDescendants = true
+	previewStage.Parent = showcaseCard
+	addCorner(previewStage, 12)
+	addStroke(previewStage, Color3.fromRGB(54, 62, 96), 1.4)
+	UI.previewStage = previewStage
 
-local equippedSkinLbl = Instance.new("TextLabel")
-equippedSkinLbl.Size = UDim2.new(1, -12, 0, 24)
-equippedSkinLbl.Position = UDim2.fromOffset(6, 144)
-equippedSkinLbl.BackgroundTransparency = 1
-equippedSkinLbl.Text = "Skin: Rắn Xanh Lá"
-equippedSkinLbl.TextColor3 = Color3.fromRGB(165, 243, 252)
-equippedSkinLbl.Font = Enum.Font.GothamBold
-equippedSkinLbl.TextSize = 13
-equippedSkinLbl.Parent = showcaseCard
+	local equippedSkinLbl = Instance.new("TextLabel")
+	equippedSkinLbl.Size = UDim2.new(1, -12, 0, 24)
+	equippedSkinLbl.Position = UDim2.fromOffset(6, 142)
+	equippedSkinLbl.BackgroundTransparency = 1
+	equippedSkinLbl.Text = "Skin: Rắn Xanh Lá"
+	equippedSkinLbl.TextColor3 = THEME.TextGem
+	equippedSkinLbl.Font = THEME.FontBody
+	equippedSkinLbl.TextSize = 12
+	equippedSkinLbl.Parent = showcaseCard
+	UI.equippedSkinLbl = equippedSkinLbl
 
-local playBtn = makeGlossyBtn(
-	showcaseCard, "▶  CHƠI NGAY",
-	UDim2.fromOffset(230, 56),
-	UDim2.fromOffset(66, 174),
-	Color3.fromRGB(74, 240, 110), Color3.fromRGB(22, 163, 74), 26
-)
-playBtn.TextSize = 21
+	UI.playBtn = makeGlossyBtn(
+		showcaseCard, "▶  CHƠI NGAY",
+		UDim2.fromOffset(230, 54),
+		UDim2.fromOffset(66, 174),
+		Color3.fromRGB(56, 184, 96), Color3.fromRGB(26, 134, 66), 24
+	)
+	UI.playBtn.TextSize = 19
 
-local bestScoreTip = Instance.new("TextLabel")
-bestScoreTip.Size = UDim2.new(1, 0, 0, 24)
-bestScoreTip.Position = UDim2.fromOffset(0, 236)
-bestScoreTip.BackgroundTransparency = 1
-bestScoreTip.Text = "🏆 Kỷ lục của bạn: 0 điểm"
-bestScoreTip.TextColor3 = Color3.fromRGB(203, 213, 225)
-bestScoreTip.Font = Enum.Font.GothamBold
-bestScoreTip.TextSize = 12
-bestScoreTip.Parent = showcaseCard
+	local bestScoreTip = Instance.new("TextLabel")
+	bestScoreTip.Size = UDim2.new(1, 0, 0, 24)
+	bestScoreTip.Position = UDim2.fromOffset(0, 236)
+	bestScoreTip.BackgroundTransparency = 1
+	bestScoreTip.Text = "🏆 Kỷ lục của bạn: 0 điểm"
+	bestScoreTip.TextColor3 = THEME.TextMuted
+	bestScoreTip.Font = THEME.FontBody
+	bestScoreTip.TextSize = 12
+	bestScoreTip.Parent = showcaseCard
+	UI.bestScoreTip = bestScoreTip
 
--- Bảng Xếp Hạng Top 10
-local lbCard = Instance.new("Frame")
-lbCard.Size = UDim2.fromOffset(228, 268)
-lbCard.Position = UDim2.fromOffset(372, 0)
-lbCard.BackgroundColor3 = Color3.fromRGB(22, 24, 42)
-lbCard.BorderSizePixel = 0
-lbCard.Parent = lobbyPage
-addCorner(lbCard, 14)
-addStroke(lbCard, Color3.fromRGB(147, 51, 234), 2)
+	-- Bảng Xếp Hạng Top 10
+	local lbCard = Instance.new("Frame")
+	lbCard.Size = UDim2.fromOffset(228, 270)
+	lbCard.Position = UDim2.fromOffset(372, 0)
+	lbCard.BackgroundColor3 = Color3.fromRGB(20, 22, 38)
+	lbCard.BorderSizePixel = 0
+	lbCard.Parent = lobbyPage
+	addCorner(lbCard, 14)
+	addStroke(lbCard, Color3.fromRGB(116, 58, 184), 1.8)
 
-local lbHeader = Instance.new("Frame")
-lbHeader.Size = UDim2.new(1, 0, 0, 34)
-lbHeader.BackgroundColor3 = Color3.fromRGB(147, 51, 234)
-lbHeader.BorderSizePixel = 0
-lbHeader.Parent = lbCard
-addCorner(lbHeader, 12)
-addGradient(lbHeader, Color3.fromRGB(168, 85, 247), Color3.fromRGB(109, 40, 217), 90)
+	local lbHeader = Instance.new("Frame")
+	lbHeader.Size = UDim2.new(1, 0, 0, 34)
+	lbHeader.BackgroundColor3 = Color3.fromRGB(116, 52, 184)
+	lbHeader.BorderSizePixel = 0
+	lbHeader.Parent = lbCard
+	addCorner(lbHeader, 12)
+	addGradient(lbHeader, Color3.fromRGB(132, 68, 198), Color3.fromRGB(88, 36, 168), 90)
 
-local lbTitle = Instance.new("TextLabel")
-lbTitle.Size = UDim2.fromScale(1, 1)
-lbTitle.BackgroundTransparency = 1
-lbTitle.Text = "🏆 BẢNG XẾP HẠNG"
-lbTitle.TextColor3 = Color3.fromRGB(255, 240, 130)
-lbTitle.Font = Enum.Font.GothamBlack
-lbTitle.TextSize = 14
-lbTitle.Parent = lbHeader
+	local lbTitle = Instance.new("TextLabel")
+	lbTitle.Size = UDim2.fromScale(1, 1)
+	lbTitle.BackgroundTransparency = 1
+	lbTitle.Text = "🏆 BẢNG XẾP HẠNG"
+	lbTitle.TextColor3 = THEME.TextGold
+	lbTitle.Font = THEME.FontHead
+	lbTitle.TextSize = 13
+	lbTitle.Parent = lbHeader
 
-local lbList = Instance.new("Frame")
-lbList.Size = UDim2.new(1, -12, 1, -42)
-lbList.Position = UDim2.fromOffset(6, 38)
-lbList.BackgroundTransparency = 1
-lbList.Parent = lbCard
+	local lbList = Instance.new("Frame")
+	lbList.Size = UDim2.new(1, -12, 1, -42)
+	lbList.Position = UDim2.fromOffset(6, 38)
+	lbList.BackgroundTransparency = 1
+	lbList.Parent = lbCard
+	UI.lbList = lbList
 
-local lbLayout = Instance.new("UIListLayout")
-lbLayout.Padding = UDim.new(0, 2)
-lbLayout.Parent = lbList
+	local lbLayout = Instance.new("UIListLayout")
+	lbLayout.Padding = UDim.new(0, 2)
+	lbLayout.Parent = lbList
+
+	local bottomBar = Instance.new("Frame")
+	bottomBar.Size = UDim2.fromOffset(600, 56)
+	bottomBar.Position = UDim2.fromOffset(0, 280)
+	bottomBar.BackgroundTransparency = 1
+	bottomBar.Parent = lobbyPage
+
+	local bLayout = Instance.new("UIListLayout")
+	bLayout.FillDirection = Enum.FillDirection.Horizontal
+	bLayout.Padding = UDim.new(0, 8)
+	bLayout.Parent = bottomBar
+
+	UI.shopBtn     = makeGlossyBtn(bottomBar, "🏪 SHOP (27)", UDim2.fromOffset(113, 50), nil, Color3.fromRGB(196, 112, 48), Color3.fromRGB(168, 48, 44), 12)
+	UI.giftBtn     = makeGlossyBtn(bottomBar, "🎁 QUÀ TẶNG",  UDim2.fromOffset(114, 50), nil, Color3.fromRGB(146, 86, 198), Color3.fromRGB(98, 40, 164), 12)
+	UI.questBtn    = makeGlossyBtn(bottomBar, "📋 NHIỆM VỤ",  UDim2.fromOffset(114, 50), nil, Color3.fromRGB(48, 146, 198), Color3.fromRGB(30, 82, 168), 12)
+	UI.settingsBtn = makeGlossyBtn(bottomBar, "⚙️ CÀI ĐẶT",   UDim2.fromOffset(114, 50), nil, Color3.fromRGB(186, 148, 36), Color3.fromRGB(156, 94, 18), 12)
+	UI.exitBtn     = makeGlossyBtn(bottomBar, "X THOÁT",      UDim2.fromOffset(113, 50), nil, Color3.fromRGB(194, 72, 74),  Color3.fromRGB(142, 34, 38), 12)
+	UI.shopBtn.TextSize = 12
+
+	UI.giftDot  = makeNotifDot(UI.giftBtn)
+	UI.questDot = makeNotifDot(UI.questBtn)
+end
+
+local previewSegs = {}
+local previewHead = nil
 
 local function refreshLeaderboard()
-	for _, ch in ipairs(lbList:GetChildren()) do
+	for _, ch in ipairs(UI.lbList:GetChildren()) do
 		if ch:IsA("Frame") then ch:Destroy() end
 	end
 	local entries = {}
 	for _, b in ipairs(BOT_SCORES) do
 		table.insert(entries, { Name = b.Name, Score = b.Score, IsYou = false })
 	end
-	table.insert(entries, { Name = "You (" .. player.DisplayName .. ")", Score = state.HighScore, IsYou = true })
+	table.insert(entries, { Name = "Bạn (" .. player.DisplayName .. ")", Score = state.HighScore, IsYou = true })
 	table.sort(entries, function(a, b) return a.Score > b.Score end)
 
 	for i = 1, math.min(10, #entries) do
 		local e = entries[i]
 		local row = Instance.new("Frame")
 		row.Size = UDim2.new(1, 0, 0, 20)
-		row.BackgroundColor3 = e.IsYou and Color3.fromRGB(120, 82, 22) or Color3.fromRGB(30, 33, 56)
-		row.BackgroundTransparency = e.IsYou and 0.15 or 0.55
+		row.BackgroundColor3 = e.IsYou and Color3.fromRGB(96, 68, 22) or Color3.fromRGB(28, 31, 52)
+		row.BackgroundTransparency = e.IsYou and 0.2 or 0.55
 		row.BorderSizePixel = 0
-		row.Parent = lbList
+		row.Parent = UI.lbList
 		addCorner(row, 5)
 
 		local medal = (i == 1 and "👑") or (i == 2 and "🥈") or (i == 3 and "🥉") or tostring(i)
@@ -1084,8 +1153,8 @@ local function refreshLeaderboard()
 		rankLbl.Position = UDim2.fromOffset(4, 0)
 		rankLbl.BackgroundTransparency = 1
 		rankLbl.Text = medal
-		rankLbl.TextColor3 = Color3.fromRGB(250, 204, 21)
-		rankLbl.Font = Enum.Font.GothamBlack
+		rankLbl.TextColor3 = THEME.TextGold
+		rankLbl.Font = THEME.FontHead
 		rankLbl.TextSize = 11
 		rankLbl.Parent = row
 
@@ -1094,8 +1163,8 @@ local function refreshLeaderboard()
 		nLbl.Position = UDim2.fromOffset(28, 0)
 		nLbl.BackgroundTransparency = 1
 		nLbl.Text = e.Name
-		nLbl.TextColor3 = e.IsYou and Color3.fromRGB(254, 240, 138) or Color3.fromRGB(235, 240, 255)
-		nLbl.Font = e.IsYou and Enum.Font.GothamBlack or Enum.Font.GothamBold
+		nLbl.TextColor3 = e.IsYou and THEME.TextGold or THEME.TextMain
+		nLbl.Font = e.IsYou and THEME.FontHead or THEME.FontBody
 		nLbl.TextSize = 11
 		nLbl.TextXAlignment = Enum.TextXAlignment.Left
 		nLbl.TextTruncate = Enum.TextTruncate.AtEnd
@@ -1106,50 +1175,26 @@ local function refreshLeaderboard()
 		sLbl.Position = UDim2.new(1, -58, 0, 0)
 		sLbl.BackgroundTransparency = 1
 		sLbl.Text = formatNum(e.Score)
-		sLbl.TextColor3 = Color3.fromRGB(250, 204, 21)
-		sLbl.Font = Enum.Font.GothamBlack
+		sLbl.TextColor3 = THEME.TextGold
+		sLbl.Font = THEME.FontHead
 		sLbl.TextSize = 11
 		sLbl.TextXAlignment = Enum.TextXAlignment.Right
 		sLbl.Parent = row
 	end
 end
 
-local bottomBar = Instance.new("Frame")
-bottomBar.Size = UDim2.fromOffset(600, 56)
-bottomBar.Position = UDim2.fromOffset(0, 278)
-bottomBar.BackgroundTransparency = 1
-bottomBar.Parent = lobbyPage
-
-local bLayout = Instance.new("UIListLayout")
-bLayout.FillDirection = Enum.FillDirection.Horizontal
-bLayout.Padding = UDim.new(0, 8)
-bLayout.Parent = bottomBar
-
-local shopBtn     = makeGlossyBtn(bottomBar, "🏪 SHOP (22)", UDim2.fromOffset(113, 52), nil, Color3.fromRGB(251, 146, 60), Color3.fromRGB(220, 38, 38), 12)
-local giftBtn     = makeGlossyBtn(bottomBar, "🎁 QUÀ TẶNG",  UDim2.fromOffset(114, 52), nil, Color3.fromRGB(192, 132, 252), Color3.fromRGB(126, 34, 206), 12)
-local questBtn    = makeGlossyBtn(bottomBar, "📋 NHIỆM VỤ",  UDim2.fromOffset(114, 52), nil, Color3.fromRGB(56, 189, 248), Color3.fromRGB(29, 78, 216), 12)
-local settingsBtn = makeGlossyBtn(bottomBar, "⚙️ CÀI ĐẶT",   UDim2.fromOffset(114, 52), nil, Color3.fromRGB(250, 204, 21), Color3.fromRGB(217, 119, 6), 12)
-local exitBtn     = makeGlossyBtn(bottomBar, "X THOÁT",      UDim2.fromOffset(113, 52), nil, Color3.fromRGB(248, 113, 113), Color3.fromRGB(185, 28, 28), 12)
-shopBtn.TextSize = 13
-
-local giftDot  = makeNotifDot(giftBtn)
-local questDot = makeNotifDot(questBtn)
-
-local previewSegs = {}
-local previewHead = nil
-
 local function rebuildLobbyPreview()
-	for _, ch in ipairs(previewStage:GetChildren()) do ch:Destroy() end
-	for _, ch in ipairs(avatarIconHolder:GetChildren()) do ch:Destroy() end
+	for _, ch in ipairs(UI.previewStage:GetChildren()) do ch:Destroy() end
+	for _, ch in ipairs(UI.avatarIconHolder:GetChildren()) do ch:Destroy() end
 	previewSegs = {}
 
 	local skin = getSkinById(state.EquippedSkin)
 	local rar = RARITIES[skin.Rarity] or RARITIES.Common
-	local bonusStr = (rar.BonusText ~= "") and (" (" .. rar.BonusText .. ")") or ""
-	equippedSkinLbl.Text = skin.Name .. "  [" .. rar.Label .. "]" .. bonusStr
-	equippedSkinLbl.TextColor3 = rar.Color
+	local bonusStr = (rar.BonusText ~= "") and (" • " .. rar.BonusText) or ""
+	UI.equippedSkinLbl.Text = skin.Name .. "  [" .. rar.Label .. "]" .. bonusStr
+	UI.equippedSkinLbl.TextColor3 = rar.Color
 
-	local miniAvatar = buildCartoonHead(avatarIconHolder, 24, skin)
+	local miniAvatar = buildCartoonHead(UI.avatarIconHolder, 24, skin)
 	miniAvatar.Position = UDim2.fromScale(0.5, 0.5)
 
 	for i = 10, 1, -1 do
@@ -1161,19 +1206,19 @@ local function rebuildLobbyPreview()
 		seg.BackgroundTransparency = skin.BodyAlpha or 0
 		seg.BorderSizePixel = 0
 		seg.ZIndex = 5 - math.floor(i / 4)
-		seg.Parent = previewStage
+		seg.Parent = UI.previewStage
 		addCorner(seg, 99)
-		addStroke(seg, skin.GlowColor or Color3.fromRGB(12, 14, 22), 2)
+		addStroke(seg, skin.GlowColor or Color3.fromRGB(14, 16, 24), 1.8)
 		previewSegs[i] = seg
 	end
-	previewHead = buildCartoonHead(previewStage, 35, skin)
+	previewHead = buildCartoonHead(UI.previewStage, 35, skin)
 end
 
 -- ============================================================
--- CẬP NHẬT CHỈ SỐ & CÁC BẢNG POPUP
+-- CẬP NHẬT CHỈ SỐ & CÁC BẢNG POPUP (SHOP CÓ LỌC BẬC HIẾM)
 -- ============================================================
 local function refreshNotifDots()
-	giftDot.Visible = (os.time() >= state.NextGiftUnix)
+	UI.giftDot.Visible = (os.time() >= state.NextGiftUnix)
 	local hasQuest = false
 	for _, q in ipairs(state.Quests) do
 		if q.Progress >= q.Goal and not q.Claimed then
@@ -1181,15 +1226,15 @@ local function refreshNotifDots()
 			break
 		end
 	end
-	questDot.Visible = hasQuest
+	UI.questDot.Visible = hasQuest
 end
 
 local function updateTopStats()
-	coinsLbl.Text = formatNum(state.Coins)
-	gemsLbl.Text  = "💎 " .. formatNum(state.Gems)
-	lvLabel.Text  = "Lv. " .. tostring(state.Level)
-	expFill.Size  = UDim2.fromScale(math.clamp(state.Exp / state.ExpNeed, 0.06, 1), 1)
-	bestScoreTip.Text = "🏆 Kỷ lục của bạn: " .. formatNum(state.HighScore) .. " điểm"
+	UI.coinsLbl.Text = formatNum(state.Coins)
+	UI.gemsLbl.Text  = "💎 " .. formatNum(state.Gems)
+	UI.lvLabel.Text  = "Lv. " .. tostring(state.Level)
+	UI.expFill.Size  = UDim2.fromScale(math.clamp(state.Exp / state.ExpNeed, 0.06, 1), 1)
+	UI.bestScoreTip.Text = "🏆 Kỷ lục của bạn: " .. formatNum(state.HighScore) .. " điểm"
 	refreshLeaderboard()
 	refreshNotifDots()
 end
@@ -1219,226 +1264,279 @@ local function addQuestProgress(id, amount, isMax)
 	refreshNotifDots()
 end
 
-local modalOverlay = Instance.new("Frame")
-modalOverlay.Size = UDim2.fromScale(1, 1)
-modalOverlay.BackgroundColor3 = Color3.fromRGB(5, 6, 12)
-modalOverlay.BackgroundTransparency = 0.28
-modalOverlay.Visible = false
-modalOverlay.ZIndex = 30
-modalOverlay.Parent = mainFrame
-
-local modalBox = Instance.new("Frame")
-modalBox.Size = UDim2.fromOffset(486, 332)
-modalBox.Position = UDim2.fromScale(0.5, 0.5)
-modalBox.AnchorPoint = Vector2.new(0.5, 0.5)
-modalBox.BackgroundColor3 = Color3.fromRGB(24, 27, 46)
-modalBox.BorderSizePixel = 0
-modalBox.ZIndex = 31
-modalBox.Parent = modalOverlay
-addCorner(modalBox, 14)
-addStroke(modalBox, Color3.fromRGB(139, 92, 246), 2.4)
-
-local modalTitle = Instance.new("TextLabel")
-modalTitle.Size = UDim2.new(1, -55, 0, 38)
-modalTitle.Position = UDim2.fromOffset(14, 4)
-modalTitle.BackgroundTransparency = 1
-modalTitle.TextColor3 = Color3.fromRGB(250, 204, 21)
-modalTitle.Font = Enum.Font.GothamBlack
-modalTitle.TextSize = 16
-modalTitle.TextXAlignment = Enum.TextXAlignment.Left
-modalTitle.ZIndex = 32
-modalTitle.Parent = modalBox
-
-local modalClose = makeGlossyBtn(modalBox, "X", UDim2.fromOffset(28, 28), UDim2.new(1, -36, 0, 8), Color3.fromRGB(248, 70, 70), Color3.fromRGB(185, 28, 28), 8)
-modalClose.TextSize = 15
-modalClose.ZIndex = 33
-
-local modalBody = Instance.new("ScrollingFrame")
-modalBody.Size = UDim2.new(1, -18, 1, -52)
-modalBody.Position = UDim2.fromOffset(9, 44)
-modalBody.BackgroundTransparency = 1
-modalBody.ScrollBarThickness = 5
-modalBody.CanvasSize = UDim2.new(0, 0, 0, 0)
-modalBody.AutomaticCanvasSize = Enum.AutomaticSize.Y
-modalBody.ZIndex = 32
-modalBody.Parent = modalBox
-
 local activeModalTag = nil
 local liveGiftBtn = nil
+local shopFilter = "All"
 
-modalClose.MouseButton1Click:Connect(function()
+do
+	local modalOverlay = Instance.new("Frame")
+	modalOverlay.Size = UDim2.fromScale(1, 1)
+	modalOverlay.BackgroundColor3 = Color3.fromRGB(6, 8, 14)
+	modalOverlay.BackgroundTransparency = 0.28
 	modalOverlay.Visible = false
-	activeModalTag = nil
-	liveGiftBtn = nil
-end)
+	modalOverlay.ZIndex = 30
+	modalOverlay.Parent = mainFrame
+	UI.modalOverlay = modalOverlay
 
-local function openModal(tag, titleText)
-	for _, ch in ipairs(modalBody:GetChildren()) do ch:Destroy() end
+	local modalBox = Instance.new("Frame")
+	modalBox.Size = UDim2.fromOffset(500, 342)
+	modalBox.Position = UDim2.fromScale(0.5, 0.5)
+	modalBox.AnchorPoint = Vector2.new(0.5, 0.5)
+	modalBox.BackgroundColor3 = Color3.fromRGB(22, 25, 42)
+	modalBox.BorderSizePixel = 0
+	modalBox.ZIndex = 31
+	modalBox.Parent = modalOverlay
+	addCorner(modalBox, 14)
+	addStroke(modalBox, Color3.fromRGB(116, 82, 198), 2)
+
+	local modalTitle = Instance.new("TextLabel")
+	modalTitle.Size = UDim2.new(1, -55, 0, 36)
+	modalTitle.Position = UDim2.fromOffset(14, 4)
+	modalTitle.BackgroundTransparency = 1
+	modalTitle.TextColor3 = THEME.TextGold
+	modalTitle.Font = THEME.FontHead
+	modalTitle.TextSize = 15
+	modalTitle.TextXAlignment = Enum.TextXAlignment.Left
+	modalTitle.ZIndex = 32
+	modalTitle.Parent = modalBox
+	UI.modalTitle = modalTitle
+
+	local modalClose = makeGlossyBtn(modalBox, "X", UDim2.fromOffset(28, 28), UDim2.new(1, -36, 0, 8), Color3.fromRGB(194, 62, 64), Color3.fromRGB(142, 34, 38), 8)
+	modalClose.TextSize = 14
+	modalClose.ZIndex = 33
+	modalClose.MouseButton1Click:Connect(function()
+		modalOverlay.Visible = false
+		activeModalTag = nil
+		liveGiftBtn = nil
+	end)
+
+	local modalFilterBar = Instance.new("Frame")
+	modalFilterBar.Size = UDim2.new(1, -20, 0, 28)
+	modalFilterBar.Position = UDim2.fromOffset(10, 42)
+	modalFilterBar.BackgroundTransparency = 1
+	modalFilterBar.Visible = false
+	modalFilterBar.ZIndex = 32
+	modalFilterBar.Parent = modalBox
+	UI.modalFilterBar = modalFilterBar
+
+	local fLayout = Instance.new("UIListLayout")
+	fLayout.FillDirection = Enum.FillDirection.Horizontal
+	fLayout.Padding = UDim.new(0, 5)
+	fLayout.Parent = modalFilterBar
+
+	local modalBody = Instance.new("ScrollingFrame")
+	modalBody.Size = UDim2.new(1, -18, 1, -52)
+	modalBody.Position = UDim2.fromOffset(9, 44)
+	modalBody.BackgroundTransparency = 1
+	modalBody.ScrollBarThickness = 5
+	modalBody.CanvasSize = UDim2.new(0, 0, 0, 0)
+	modalBody.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	modalBody.ZIndex = 32
+	modalBody.Parent = modalBox
+	UI.modalBody = modalBody
+end
+
+local function openModal(tag, titleText, showFilterBar)
+	for _, ch in ipairs(UI.modalBody:GetChildren()) do ch:Destroy() end
 	local pad = Instance.new("UIPadding")
 	pad.PaddingTop = UDim.new(0, 4)
 	pad.PaddingBottom = UDim.new(0, 12)
 	pad.PaddingLeft = UDim.new(0, 4)
 	pad.PaddingRight = UDim.new(0, 8)
-	pad.Parent = modalBody
+	pad.Parent = UI.modalBody
+
+	UI.modalFilterBar.Visible = (showFilterBar == true)
+	if showFilterBar then
+		UI.modalBody.Position = UDim2.fromOffset(9, 76)
+		UI.modalBody.Size = UDim2.new(1, -18, 1, -84)
+	else
+		UI.modalBody.Position = UDim2.fromOffset(9, 44)
+		UI.modalBody.Size = UDim2.new(1, -18, 1, -52)
+	end
 
 	activeModalTag = tag
 	liveGiftBtn = nil
-	modalTitle.Text = titleText
-	modalOverlay.Visible = true
+	UI.modalTitle.Text = titleText
+	UI.modalOverlay.Visible = true
 end
 
--- POPUP SHOP 22 SKIN (PHÂN BẬC HIẾM + GIÁ CAO + CỘNG % XU)
+-- POPUP SHOP 27 SKIN + BỘ LỌC BẬC HIẾM
 local function openShop()
 	local ownedCount = 0
 	for _, s in ipairs(SKINS) do
 		if state.OwnedSkins[s.Id] then ownedCount += 1 end
 	end
-	openModal("Shop", "🏪 CỬA HÀNG RẮN (" .. ownedCount .. "/" .. #SKINS .. " SKIN)")
+	openModal("Shop", "🏪 CỬA HÀNG RẮN (" .. ownedCount .. "/" .. #SKINS .. " SKIN)", true)
+
+	for _, ch in ipairs(UI.modalFilterBar:GetChildren()) do
+		if ch:IsA("TextButton") then ch:Destroy() end
+	end
+	for _, key in ipairs(RARITY_ORDER) do
+		local rInfo = RARITIES[key]
+		local isSel = (shopFilter == key)
+		local fBtn = makeGlossyBtn(
+			UI.modalFilterBar, rInfo.Label,
+			UDim2.fromOffset(75, 26), nil,
+			isSel and Color3.fromRGB(92, 68, 178) or Color3.fromRGB(36, 40, 66),
+			isSel and Color3.fromRGB(64, 46, 134) or Color3.fromRGB(26, 30, 50),
+			7
+		)
+		fBtn.TextSize = 10
+		fBtn.TextColor3 = isSel and THEME.TextMain or rInfo.Color
+		fBtn.ZIndex = 34
+		fBtn.MouseButton1Click:Connect(function()
+			shopFilter = key
+			openShop()
+		end)
+	end
 
 	local grid = Instance.new("UIGridLayout")
-	grid.CellSize = UDim2.fromOffset(218, 86)
+	grid.CellSize = UDim2.fromOffset(224, 86)
 	grid.CellPadding = UDim2.fromOffset(10, 10)
 	grid.SortOrder = Enum.SortOrder.LayoutOrder
-	grid.Parent = modalBody
+	grid.Parent = UI.modalBody
 
 	for idx, skin in ipairs(SKINS) do
-		local rar = RARITIES[skin.Rarity] or RARITIES.Common
-		local equipped = (state.EquippedSkin == skin.Id)
-		local owned = state.OwnedSkins[skin.Id]
+		if shopFilter == "All" or skin.Rarity == shopFilter then
+			local rar = RARITIES[skin.Rarity] or RARITIES.Common
+			local equipped = (state.EquippedSkin == skin.Id)
+			local owned = state.OwnedSkins[skin.Id]
 
-		local card = Instance.new("Frame")
-		card.LayoutOrder = idx
-		card.BackgroundColor3 = Color3.fromRGB(30, 34, 60)
-		card.BorderSizePixel = 0
-		card.ZIndex = 33
-		card.Parent = modalBody
-		addCorner(card, 10)
-		addStroke(card, equipped and Color3.fromRGB(74, 222, 128) or rar.Color, equipped and 2.2 or 1.6)
+			local card = Instance.new("Frame")
+			card.LayoutOrder = idx
+			card.BackgroundColor3 = Color3.fromRGB(28, 32, 54)
+			card.BorderSizePixel = 0
+			card.ZIndex = 33
+			card.Parent = UI.modalBody
+			addCorner(card, 10)
+			addStroke(card, equipped and THEME.TextGreen or rar.Color, equipped and 2 or 1.4)
 
-		local headBox = Instance.new("Frame")
-		headBox.Size = UDim2.fromOffset(44, 44)
-		headBox.Position = UDim2.fromOffset(10, 21)
-		headBox.BackgroundTransparency = 1
-		headBox.ZIndex = 34
-		headBox.Parent = card
-		local h = buildCartoonHead(headBox, 32, skin)
-		h.Position = UDim2.fromScale(0.5, 0.5)
-		h.ZIndex = 35
-		for _, d in ipairs(h:GetDescendants()) do
-			if d:IsA("GuiObject") then d.ZIndex += 30 end
-		end
-
-		local nLbl = Instance.new("TextLabel")
-		nLbl.Size = UDim2.fromOffset(152, 18)
-		nLbl.Position = UDim2.fromOffset(60, 6)
-		nLbl.BackgroundTransparency = 1
-		nLbl.Text = skin.Name
-		nLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
-		nLbl.Font = Enum.Font.GothamBlack
-		nLbl.TextSize = 12
-		nLbl.TextXAlignment = Enum.TextXAlignment.Left
-		nLbl.TextTruncate = Enum.TextTruncate.AtEnd
-		nLbl.ZIndex = 34
-		nLbl.Parent = card
-
-		local rarLbl = Instance.new("TextLabel")
-		rarLbl.Size = UDim2.fromOffset(152, 15)
-		rarLbl.Position = UDim2.fromOffset(60, 24)
-		rarLbl.BackgroundTransparency = 1
-		rarLbl.Text = rar.Label .. (rar.BonusText ~= "" and ("  •  " .. rar.BonusText) or "")
-		rarLbl.TextColor3 = rar.Color
-		rarLbl.Font = Enum.Font.GothamBold
-		rarLbl.TextSize = 10
-		rarLbl.TextXAlignment = Enum.TextXAlignment.Left
-		rarLbl.ZIndex = 34
-		rarLbl.Parent = card
-
-		local btnText, c1, c2
-		if equipped then
-			btnText = "✔ ĐANG DÙNG"
-			c1, c2 = Color3.fromRGB(74, 222, 128), Color3.fromRGB(22, 163, 74)
-		elseif owned then
-			btnText = "TRANG BỊ"
-			c1, c2 = Color3.fromRGB(56, 189, 248), Color3.fromRGB(37, 99, 235)
-		else
-			local curLabel = (skin.Currency == "Gems") and ("💎 " .. formatNum(skin.Price)) or (formatNum(skin.Price) .. " Xu")
-			btnText = "MUA " .. curLabel
-			if skin.Currency == "Gems" then
-				c1, c2 = Color3.fromRGB(192, 132, 252), Color3.fromRGB(126, 34, 206)
-			else
-				c1, c2 = Color3.fromRGB(250, 204, 21), Color3.fromRGB(217, 119, 6)
+			local headBox = Instance.new("Frame")
+			headBox.Size = UDim2.fromOffset(44, 44)
+			headBox.Position = UDim2.fromOffset(10, 21)
+			headBox.BackgroundTransparency = 1
+			headBox.ZIndex = 34
+			headBox.Parent = card
+			local h = buildCartoonHead(headBox, 32, skin)
+			h.Position = UDim2.fromScale(0.5, 0.5)
+			h.ZIndex = 35
+			for _, d in ipairs(h:GetDescendants()) do
+				if d:IsA("GuiObject") then d.ZIndex += 30 end
 			end
-		end
 
-		local actBtn = makeGlossyBtn(card, btnText, UDim2.fromOffset(146, 30), UDim2.fromOffset(60, 46), c1, c2, 8)
-		actBtn.TextSize = 11
-		actBtn.ZIndex = 35
-		actBtn.MouseButton1Click:Connect(function()
-			if state.OwnedSkins[skin.Id] then
-				state.EquippedSkin = skin.Id
-				saveData()
-				rebuildLobbyPreview()
-				openShop()
+			local nLbl = Instance.new("TextLabel")
+			nLbl.Size = UDim2.fromOffset(158, 18)
+			nLbl.Position = UDim2.fromOffset(60, 6)
+			nLbl.BackgroundTransparency = 1
+			nLbl.Text = skin.Name
+			nLbl.TextColor3 = THEME.TextMain
+			nLbl.Font = THEME.FontHead
+			nLbl.TextSize = 12
+			nLbl.TextXAlignment = Enum.TextXAlignment.Left
+			nLbl.TextTruncate = Enum.TextTruncate.AtEnd
+			nLbl.ZIndex = 34
+			nLbl.Parent = card
+
+			local rarLbl = Instance.new("TextLabel")
+			rarLbl.Size = UDim2.fromOffset(158, 15)
+			rarLbl.Position = UDim2.fromOffset(60, 24)
+			rarLbl.BackgroundTransparency = 1
+			rarLbl.Text = rar.Label .. (rar.BonusText ~= "" and (" • " .. rar.BonusText) or "")
+			rarLbl.TextColor3 = rar.Color
+			rarLbl.Font = THEME.FontBody
+			rarLbl.TextSize = 10
+			rarLbl.TextXAlignment = Enum.TextXAlignment.Left
+			rarLbl.TextTruncate = Enum.TextTruncate.AtEnd
+			rarLbl.ZIndex = 34
+			rarLbl.Parent = card
+
+			local btnText, c1, c2
+			if equipped then
+				btnText = "✔ ĐANG DÙNG"
+				c1, c2 = Color3.fromRGB(54, 174, 94), Color3.fromRGB(28, 126, 62)
+			elseif owned then
+				btnText = "TRANG BỊ"
+				c1, c2 = Color3.fromRGB(48, 148, 198), Color3.fromRGB(32, 86, 172)
 			else
-				if skin.Currency == "Coins" and state.Coins >= skin.Price then
-					state.Coins -= skin.Price
-					state.OwnedSkins[skin.Id] = true
+				local curLabel = (skin.Currency == "Gems") and ("💎 " .. formatNum(skin.Price)) or (formatNum(skin.Price) .. " Xu")
+				btnText = "MUA " .. curLabel
+				if skin.Currency == "Gems" then
+					c1, c2 = Color3.fromRGB(146, 86, 198), Color3.fromRGB(98, 40, 164)
+				else
+					c1, c2 = Color3.fromRGB(186, 148, 34), Color3.fromRGB(152, 92, 18)
+				end
+			end
+
+			local actBtn = makeGlossyBtn(card, btnText, UDim2.fromOffset(152, 30), UDim2.fromOffset(60, 46), c1, c2, 8)
+			actBtn.TextSize = 11
+			actBtn.ZIndex = 35
+			actBtn.MouseButton1Click:Connect(function()
+				if state.OwnedSkins[skin.Id] then
 					state.EquippedSkin = skin.Id
-					updateTopStats()
-					saveData()
-					rebuildLobbyPreview()
-					openShop()
-				elseif skin.Currency == "Gems" and state.Gems >= skin.Price then
-					state.Gems -= skin.Price
-					state.OwnedSkins[skin.Id] = true
-					state.EquippedSkin = skin.Id
-					updateTopStats()
 					saveData()
 					rebuildLobbyPreview()
 					openShop()
 				else
-					actBtn.Text = "KHÔNG ĐỦ TIỀN!"
-					task.delay(0.8, function()
-						if actBtn.Parent then actBtn.Text = btnText end
-					end)
+					if skin.Currency == "Coins" and state.Coins >= skin.Price then
+						state.Coins -= skin.Price
+						state.OwnedSkins[skin.Id] = true
+						state.EquippedSkin = skin.Id
+						updateTopStats()
+						saveData()
+						rebuildLobbyPreview()
+						openShop()
+					elseif skin.Currency == "Gems" and state.Gems >= skin.Price then
+						state.Gems -= skin.Price
+						state.OwnedSkins[skin.Id] = true
+						state.EquippedSkin = skin.Id
+						updateTopStats()
+						saveData()
+						rebuildLobbyPreview()
+						openShop()
+					else
+						actBtn.Text = "KHÔNG ĐỦ TIỀN!"
+						task.delay(0.8, function()
+							if actBtn.Parent then actBtn.Text = btnText end
+						end)
+					end
 				end
-			end
-		end)
+			end)
+		end
 	end
 end
 
 local function openGift()
-	openModal("Gift", "🎁 QUÀ TẶNG MIỄN PHÍ")
+	openModal("Gift", "🎁 QUÀ TẶNG MIỄN PHÍ", false)
 	local desc = Instance.new("TextLabel")
 	desc.Size = UDim2.new(1, 0, 0, 96)
-	desc.Position = UDim2.fromOffset(0, 12)
+	desc.Position = UDim2.fromOffset(0, 14)
 	desc.BackgroundTransparency = 1
-	desc.Text = "🎁 HỘP QUÀ MAY MẮN\nNhận ngay +200 Xu và +6 💎 Kim Cương\n(Hồi lại sau mỗi 60 giây - tự động lưu)"
-	desc.TextColor3 = Color3.fromRGB(240, 244, 255)
-	desc.Font = Enum.Font.GothamBold
-	desc.TextSize = 15
+	desc.Text = "🎁 HỘP QUÀ MAY MẮN\nNhận ngay +220 Xu và +6 💎 Kim Cương\n(Hồi lại sau mỗi 60 giây - tự động lưu)"
+	desc.TextColor3 = THEME.TextMain
+	desc.Font = THEME.FontBody
+	desc.TextSize = 14
 	desc.ZIndex = 33
-	desc.Parent = modalBody
+	desc.Parent = UI.modalBody
 
 	local remain = math.max(0, state.NextGiftUnix - os.time())
 	local ready = (remain <= 0)
 	local claimBtn = makeGlossyBtn(
-		modalBody,
+		UI.modalBody,
 		ready and "🎉 NHẬN QUÀ NGAY!" or ("⏳ CHỜ " .. remain .. " GIÂY"),
-		UDim2.fromOffset(236, 52),
-		UDim2.fromOffset(108, 126),
-		ready and Color3.fromRGB(74, 222, 128) or Color3.fromRGB(95, 104, 136),
-		ready and Color3.fromRGB(22, 163, 74) or Color3.fromRGB(65, 72, 98),
+		UDim2.fromOffset(236, 50),
+		UDim2.fromOffset(116, 128),
+		ready and Color3.fromRGB(54, 174, 94) or Color3.fromRGB(78, 86, 114),
+		ready and Color3.fromRGB(28, 126, 62) or Color3.fromRGB(54, 60, 82),
 		14
 	)
-	claimBtn.TextSize = 16
+	claimBtn.TextSize = 15
 	claimBtn.ZIndex = 34
 	liveGiftBtn = claimBtn
 
 	claimBtn.MouseButton1Click:Connect(function()
 		if os.time() < state.NextGiftUnix then return end
 		state.NextGiftUnix = os.time() + 60
-		state.Coins += 200
+		state.Coins += 220
 		state.Gems += 6
 		updateTopStats()
 		saveData()
@@ -1447,37 +1545,39 @@ local function openGift()
 end
 
 local function openQuests()
-	openModal("Quests", "📋 NHIỆM VỤ NHẬN THƯỞNG")
+	openModal("Quests", "📋 NHIỆM VỤ NHẬN THƯỞNG", false)
 	local list = Instance.new("UIListLayout")
 	list.Padding = UDim.new(0, 8)
-	list.Parent = modalBody
+	list.Parent = UI.modalBody
 
+	local allClaimed = true
 	for _, q in ipairs(state.Quests) do
+		if not q.Claimed then allClaimed = false end
 		local row = Instance.new("Frame")
 		row.Size = UDim2.new(1, -2, 0, 56)
-		row.BackgroundColor3 = Color3.fromRGB(32, 36, 62)
+		row.BackgroundColor3 = Color3.fromRGB(28, 32, 54)
 		row.BorderSizePixel = 0
 		row.ZIndex = 33
-		row.Parent = modalBody
+		row.Parent = UI.modalBody
 		addCorner(row, 10)
-		addStroke(row, Color3.fromRGB(68, 76, 115), 1.5)
+		addStroke(row, Color3.fromRGB(62, 70, 104), 1.4)
 
 		local title = Instance.new("TextLabel")
-		title.Size = UDim2.fromOffset(292, 24)
+		title.Size = UDim2.fromOffset(304, 24)
 		title.Position = UDim2.fromOffset(12, 6)
 		title.BackgroundTransparency = 1
 		title.Text = q.Title .. " (" .. math.min(q.Progress, q.Goal) .. "/" .. q.Goal .. ")"
-		title.TextColor3 = Color3.fromRGB(255, 255, 255)
-		title.Font = Enum.Font.GothamBold
+		title.TextColor3 = THEME.TextMain
+		title.Font = THEME.FontBody
 		title.TextSize = 13
 		title.TextXAlignment = Enum.TextXAlignment.Left
 		title.ZIndex = 34
 		title.Parent = row
 
 		local barBg = Instance.new("Frame")
-		barBg.Size = UDim2.fromOffset(278, 10)
+		barBg.Size = UDim2.fromOffset(286, 10)
 		barBg.Position = UDim2.fromOffset(12, 34)
-		barBg.BackgroundColor3 = Color3.fromRGB(20, 22, 38)
+		barBg.BackgroundColor3 = Color3.fromRGB(18, 20, 34)
 		barBg.BorderSizePixel = 0
 		barBg.ZIndex = 34
 		barBg.Parent = row
@@ -1485,7 +1585,7 @@ local function openQuests()
 
 		local barFill = Instance.new("Frame")
 		barFill.Size = UDim2.fromScale(math.clamp(q.Progress / q.Goal, 0, 1), 1)
-		barFill.BackgroundColor3 = Color3.fromRGB(74, 222, 128)
+		barFill.BackgroundColor3 = Color3.fromRGB(64, 178, 104)
 		barFill.BorderSizePixel = 0
 		barFill.ZIndex = 35
 		barFill.Parent = barBg
@@ -1496,12 +1596,12 @@ local function openQuests()
 		local btnText = q.Claimed and "✔ ĐÃ NHẬN" or (canClaim and ("NHẬN +" .. rewardTxt) or rewardTxt)
 		local cBtn = makeGlossyBtn(
 			row, btnText,
-			UDim2.fromOffset(130, 34), UDim2.new(1, -140, 0, 11),
-			canClaim and Color3.fromRGB(74, 222, 128) or Color3.fromRGB(85, 95, 128),
-			canClaim and Color3.fromRGB(22, 163, 74) or Color3.fromRGB(58, 66, 92),
+			UDim2.fromOffset(132, 34), UDim2.new(1, -142, 0, 11),
+			canClaim and Color3.fromRGB(54, 174, 94) or Color3.fromRGB(72, 80, 108),
+			canClaim and Color3.fromRGB(28, 126, 62) or Color3.fromRGB(50, 56, 78),
 			8
 		)
-		cBtn.TextSize = 12
+		cBtn.TextSize = 11
 		cBtn.ZIndex = 35
 		cBtn.MouseButton1Click:Connect(function()
 			if not canClaim then return end
@@ -1511,37 +1611,62 @@ local function openQuests()
 			openQuests()
 		end)
 	end
+
+	-- Cho phép làm mới bộ nhiệm vụ sau khi đã hoàn thành toàn bộ 4/4
+	if allClaimed then
+		local refreshRow = Instance.new("Frame")
+		refreshRow.Size = UDim2.new(1, -2, 0, 48)
+		refreshRow.BackgroundColor3 = Color3.fromRGB(28, 34, 58)
+		refreshRow.BorderSizePixel = 0
+		refreshRow.ZIndex = 33
+		refreshRow.Parent = UI.modalBody
+		addCorner(refreshRow, 10)
+
+		local rBtn = makeGlossyBtn(
+			refreshRow, "🔄 LÀM MỚI BỘ NHIỆM VỤ (CÀY TIẾP)",
+			UDim2.fromOffset(290, 34), UDim2.new(0.5, -145, 0.5, -17),
+			Color3.fromRGB(146, 86, 198), Color3.fromRGB(98, 40, 164), 9
+		)
+		rBtn.TextSize = 12
+		rBtn.ZIndex = 35
+		rBtn.MouseButton1Click:Connect(function()
+			state.Quests = createDefaultQuests()
+			saveData()
+			refreshNotifDots()
+			openQuests()
+		end)
+	end
 end
 
 local function openSettings()
-	openModal("Settings", "⚙️ CÀI ĐẶT & LƯU DỮ LIỆU")
+	openModal("Settings", "⚙️ CÀI ĐẶT & LƯU DỮ LIỆU", false)
 	local list = Instance.new("UIListLayout")
 	list.Padding = UDim.new(0, 8)
-	list.Parent = modalBody
+	list.Parent = UI.modalBody
 
 	local function addSettingRow(labelTxt, getText, onToggle, c1, c2)
 		local row = Instance.new("Frame")
 		row.Size = UDim2.new(1, -2, 0, 46)
-		row.BackgroundColor3 = Color3.fromRGB(32, 36, 62)
+		row.BackgroundColor3 = Color3.fromRGB(28, 32, 54)
 		row.BorderSizePixel = 0
 		row.ZIndex = 33
-		row.Parent = modalBody
+		row.Parent = UI.modalBody
 		addCorner(row, 10)
 
 		local l = Instance.new("TextLabel")
-		l.Size = UDim2.fromOffset(265, 46)
+		l.Size = UDim2.fromOffset(275, 46)
 		l.Position = UDim2.fromOffset(12, 0)
 		l.BackgroundTransparency = 1
 		l.Text = labelTxt
-		l.TextColor3 = Color3.fromRGB(255, 255, 255)
-		l.Font = Enum.Font.GothamBold
+		l.TextColor3 = THEME.TextMain
+		l.Font = THEME.FontBody
 		l.TextSize = 13
 		l.TextXAlignment = Enum.TextXAlignment.Left
 		l.ZIndex = 34
 		l.Parent = row
 
-		local b = makeGlossyBtn(row, getText(), UDim2.fromOffset(148, 32), UDim2.new(1, -158, 0, 7), c1 or Color3.fromRGB(56, 189, 248), c2 or Color3.fromRGB(37, 99, 235), 8)
-		b.TextSize = 12
+		local b = makeGlossyBtn(row, getText(), UDim2.fromOffset(150, 32), UDim2.new(1, -160, 0, 7), c1 or Color3.fromRGB(48, 146, 198), c2 or Color3.fromRGB(30, 84, 168), 8)
+		b.TextSize = 11
 		b.ZIndex = 35
 		b.MouseButton1Click:Connect(function()
 			onToggle(b)
@@ -1593,7 +1718,7 @@ local function openSettings()
 		task.delay(0.9, function()
 			if btn.Parent then btn.Text = "LƯU NGAY" end
 		end)
-	end, Color3.fromRGB(74, 222, 128), Color3.fromRGB(22, 163, 74))
+	end, Color3.fromRGB(54, 174, 94), Color3.fromRGB(28, 126, 62))
 
 	local confirmReset = false
 	addSettingRow("🗑️ Xóa toàn bộ dữ liệu đã lưu", function()
@@ -1609,206 +1734,248 @@ local function openSettings()
 		rebuildLobbyPreview()
 		updateTopStats()
 		openSettings()
-	end, Color3.fromRGB(248, 113, 113), Color3.fromRGB(185, 28, 28))
+	end, Color3.fromRGB(194, 72, 74), Color3.fromRGB(142, 34, 38))
 end
 
-shopBtn.MouseButton1Click:Connect(openShop)
-giftBtn.MouseButton1Click:Connect(openGift)
-questBtn.MouseButton1Click:Connect(openQuests)
-settingsBtn.MouseButton1Click:Connect(openSettings)
+UI.shopBtn.MouseButton1Click:Connect(openShop)
+UI.giftBtn.MouseButton1Click:Connect(openGift)
+UI.questBtn.MouseButton1Click:Connect(openQuests)
+UI.settingsBtn.MouseButton1Click:Connect(openSettings)
 
 -- ============================================================
 -- 2. MÀN HÌNH CHƠI GAME RẮN SĂN MỒI
 -- ============================================================
 local COLS, ROWS, CELL = 16, 12, 24
 
-local hudBar = Instance.new("Frame")
-hudBar.Size = UDim2.fromOffset(600, 36)
-hudBar.BackgroundColor3 = Color3.fromRGB(26, 30, 52)
-hudBar.BorderSizePixel = 0
-hudBar.Parent = gamePage
-addCorner(hudBar, 10)
-addStroke(hudBar, Color3.fromRGB(68, 76, 118), 1.5)
+do
+	local hudBar = Instance.new("Frame")
+	hudBar.Size = UDim2.fromOffset(600, 36)
+	hudBar.BackgroundColor3 = Color3.fromRGB(24, 28, 46)
+	hudBar.BorderSizePixel = 0
+	hudBar.Parent = gamePage
+	addCorner(hudBar, 10)
+	addStroke(hudBar, Color3.fromRGB(62, 70, 108), 1.4)
 
-local liveScoreLbl = Instance.new("TextLabel")
-liveScoreLbl.Size = UDim2.fromOffset(330, 36)
-liveScoreLbl.Position = UDim2.fromOffset(12, 0)
-liveScoreLbl.BackgroundTransparency = 1
-liveScoreLbl.Text = "Điểm: 0   |   +0 Xu   |   +0 💎"
-liveScoreLbl.TextColor3 = Color3.fromRGB(250, 204, 21)
-liveScoreLbl.Font = Enum.Font.GothamBlack
-liveScoreLbl.TextSize = 13
-liveScoreLbl.TextXAlignment = Enum.TextXAlignment.Left
-liveScoreLbl.Parent = hudBar
+	local liveScoreLbl = Instance.new("TextLabel")
+	liveScoreLbl.Size = UDim2.fromOffset(374, 36)
+	liveScoreLbl.Position = UDim2.fromOffset(12, 0)
+	liveScoreLbl.BackgroundTransparency = 1
+	liveScoreLbl.Text = "Điểm: 0  |  +0 Xu  |  +0 💎"
+	liveScoreLbl.TextColor3 = THEME.TextGold
+	liveScoreLbl.Font = THEME.FontHead
+	liveScoreLbl.TextSize = 12
+	liveScoreLbl.TextXAlignment = Enum.TextXAlignment.Left
+	liveScoreLbl.Parent = hudBar
+	UI.liveScoreLbl = liveScoreLbl
 
-local pauseBtn   = makeGlossyBtn(hudBar, "II", UDim2.fromOffset(38, 28), UDim2.new(1, -206, 0, 4), Color3.fromRGB(56, 189, 248), Color3.fromRGB(37, 99, 235), 8)
-local restartBtn = makeGlossyBtn(hudBar, "🔄 Lại", UDim2.fromOffset(72, 28), UDim2.new(1, -162, 0, 4), Color3.fromRGB(74, 222, 128), Color3.fromRGB(22, 163, 74), 8)
-local lobbyBtn   = makeGlossyBtn(hudBar, "🏠 Sảnh", UDim2.fromOffset(78, 28), UDim2.new(1, -84, 0, 4), Color3.fromRGB(168, 85, 247), Color3.fromRGB(109, 40, 217), 8)
-restartBtn.TextSize = 12
-lobbyBtn.TextSize = 12
+	UI.pauseBtn   = makeGlossyBtn(hudBar, "II", UDim2.fromOffset(38, 28), UDim2.new(1, -206, 0, 4), Color3.fromRGB(48, 146, 198), Color3.fromRGB(30, 84, 168), 8)
+	UI.restartBtn = makeGlossyBtn(hudBar, "🔄 Lại", UDim2.fromOffset(72, 28), UDim2.new(1, -162, 0, 4), Color3.fromRGB(54, 174, 94), Color3.fromRGB(28, 126, 62), 8)
+	UI.lobbyBtn   = makeGlossyBtn(hudBar, "🏠 Sảnh", UDim2.fromOffset(78, 28), UDim2.new(1, -84, 0, 4), Color3.fromRGB(142, 78, 196), Color3.fromRGB(94, 38, 164), 8)
+	UI.restartBtn.TextSize = 11
+	UI.lobbyBtn.TextSize = 11
 
-local board = Instance.new("Frame")
-board.Size = UDim2.fromOffset(COLS * CELL, ROWS * CELL)
-board.Position = UDim2.fromOffset(0, 44)
-board.BackgroundColor3 = Color3.fromRGB(14, 18, 32)
-board.BorderSizePixel = 0
-board.ClipsDescendants = true
-board.Active = true
-board.Parent = gamePage
-addCorner(board, 10)
-addStroke(board, Color3.fromRGB(80, 92, 145), 2)
+	local board = Instance.new("Frame")
+	board.Size = UDim2.fromOffset(COLS * CELL, ROWS * CELL)
+	board.Position = UDim2.fromOffset(0, 44)
+	board.BackgroundColor3 = Color3.fromRGB(13, 17, 30)
+	board.BorderSizePixel = 0
+	board.ClipsDescendants = true
+	board.Active = true
+	board.Parent = gamePage
+	addCorner(board, 10)
+	addStroke(board, Color3.fromRGB(72, 82, 128), 1.8)
+	UI.board = board
 
-for x = 1, COLS do
-	for y = 1, ROWS do
-		if (x + y) % 2 == 0 then
-			local tile = Instance.new("Frame")
-			tile.Size = UDim2.fromOffset(CELL, CELL)
-			tile.Position = UDim2.fromOffset((x - 1) * CELL, (y - 1) * CELL)
-			tile.BackgroundColor3 = Color3.fromRGB(20, 26, 44)
-			tile.BorderSizePixel = 0
-			tile.ZIndex = 1
-			tile.Parent = board
+	for x = 1, COLS do
+		for y = 1, ROWS do
+			if (x + y) % 2 == 0 then
+				local tile = Instance.new("Frame")
+				tile.Size = UDim2.fromOffset(CELL, CELL)
+				tile.Position = UDim2.fromOffset((x - 1) * CELL, (y - 1) * CELL)
+				tile.BackgroundColor3 = Color3.fromRGB(19, 24, 40)
+				tile.BorderSizePixel = 0
+				tile.ZIndex = 1
+				tile.Parent = board
+			end
 		end
 	end
+
+	local itemLayer = Instance.new("Frame")
+	itemLayer.Size = UDim2.fromScale(1, 1)
+	itemLayer.BackgroundTransparency = 1
+	itemLayer.ZIndex = 2
+	itemLayer.Parent = board
+	UI.itemLayer = itemLayer
+
+	local snakeLayer = Instance.new("Frame")
+	snakeLayer.Size = UDim2.fromScale(1, 1)
+	snakeLayer.BackgroundTransparency = 1
+	snakeLayer.ZIndex = 4
+	snakeLayer.Parent = board
+	UI.snakeLayer = snakeLayer
+
+	local gameOverCard = Instance.new("Frame")
+	gameOverCard.Size = UDim2.fromOffset(296, 178)
+	gameOverCard.Position = UDim2.fromScale(0.5, 0.5)
+	gameOverCard.AnchorPoint = Vector2.new(0.5, 0.5)
+	gameOverCard.BackgroundColor3 = Color3.fromRGB(20, 22, 38)
+	gameOverCard.BorderSizePixel = 0
+	gameOverCard.Visible = false
+	gameOverCard.ZIndex = 20
+	gameOverCard.Parent = board
+	addCorner(gameOverCard, 14)
+	addStroke(gameOverCard, Color3.fromRGB(194, 78, 82), 2)
+	UI.gameOverCard = gameOverCard
+
+	local goTitle = Instance.new("TextLabel")
+	goTitle.Size = UDim2.new(1, 0, 0, 34)
+	goTitle.Position = UDim2.fromOffset(0, 10)
+	goTitle.BackgroundTransparency = 1
+	goTitle.Text = "💀 KẾT THÚC!"
+	goTitle.TextColor3 = THEME.TextRed
+	goTitle.Font = THEME.FontHead
+	goTitle.TextSize = 18
+	goTitle.ZIndex = 21
+	goTitle.Parent = gameOverCard
+	UI.goTitle = goTitle
+
+	local goStats = Instance.new("TextLabel")
+	goStats.Size = UDim2.new(1, -20, 0, 62)
+	goStats.Position = UDim2.fromOffset(10, 48)
+	goStats.BackgroundTransparency = 1
+	goStats.Text = ""
+	goStats.TextColor3 = THEME.TextMain
+	goStats.Font = THEME.FontBody
+	goStats.TextSize = 12
+	goStats.ZIndex = 21
+	goStats.Parent = gameOverCard
+	UI.goStats = goStats
+
+	UI.goReplayBtn = makeGlossyBtn(gameOverCard, "🔄 CHƠI LẠI", UDim2.fromOffset(124, 38), UDim2.fromOffset(18, 124), Color3.fromRGB(54, 174, 94), Color3.fromRGB(28, 126, 62), 10)
+	UI.goLobbyBtn  = makeGlossyBtn(gameOverCard, "🏠 VỀ SẢNH", UDim2.fromOffset(124, 38), UDim2.fromOffset(154, 124), Color3.fromRGB(142, 78, 196), Color3.fromRGB(94, 38, 164), 10)
+	UI.goReplayBtn.ZIndex = 22
+	UI.goLobbyBtn.ZIndex  = 22
+
+	local rightPanel = Instance.new("Frame")
+	rightPanel.Size = UDim2.fromOffset(204, 288)
+	rightPanel.Position = UDim2.fromOffset(396, 44)
+	rightPanel.BackgroundTransparency = 1
+	rightPanel.Parent = gamePage
+
+	local buffBox = Instance.new("Frame")
+	buffBox.Size = UDim2.fromOffset(204, 106)
+	buffBox.BackgroundColor3 = Color3.fromRGB(22, 26, 44)
+	buffBox.BorderSizePixel = 0
+	buffBox.Parent = rightPanel
+	addCorner(buffBox, 12)
+	addStroke(buffBox, Color3.fromRGB(62, 70, 104), 1.4)
+
+	local buffHeader = Instance.new("TextLabel")
+	buffHeader.Size = UDim2.new(1, 0, 0, 20)
+	buffHeader.Position = UDim2.fromOffset(0, 4)
+	buffHeader.BackgroundTransparency = 1
+	buffHeader.Text = "✨ KỸ NĂNG & COMBO"
+	buffHeader.TextColor3 = THEME.TextGem
+	buffHeader.Font = THEME.FontHead
+	buffHeader.TextSize = 11
+	buffHeader.Parent = buffBox
+
+	local comboBarBg = Instance.new("Frame")
+	comboBarBg.Size = UDim2.new(1, -16, 0, 6)
+	comboBarBg.Position = UDim2.fromOffset(8, 25)
+	comboBarBg.BackgroundColor3 = Color3.fromRGB(32, 36, 56)
+	comboBarBg.BorderSizePixel = 0
+	comboBarBg.Visible = false
+	comboBarBg.Parent = buffBox
+	addCorner(comboBarBg, 4)
+	UI.comboBarBg = comboBarBg
+
+	local comboBarFill = Instance.new("Frame")
+	comboBarFill.Size = UDim2.fromScale(1, 1)
+	comboBarFill.BackgroundColor3 = Color3.fromRGB(206, 162, 42)
+	comboBarFill.BorderSizePixel = 0
+	comboBarFill.Parent = comboBarBg
+	addCorner(comboBarFill, 4)
+	UI.comboBarFill = comboBarFill
+
+	local buffStatusLbl = Instance.new("TextLabel")
+	buffStatusLbl.Size = UDim2.new(1, -12, 1, -34)
+	buffStatusLbl.Position = UDim2.fromOffset(6, 33)
+	buffStatusLbl.BackgroundTransparency = 1
+	buffStatusLbl.Text = "Vuốt trên bàn cờ hoặc lướt\nD-Pad để cua chuẩn từng ô!"
+	buffStatusLbl.TextColor3 = THEME.TextMuted
+	buffStatusLbl.Font = THEME.FontBody
+	buffStatusLbl.TextSize = 11
+	buffStatusLbl.TextWrapped = true
+	buffStatusLbl.Parent = buffBox
+	UI.buffStatusLbl = buffStatusLbl
+
+	local dpadFrame = Instance.new("Frame")
+	dpadFrame.Size = UDim2.fromOffset(204, 174)
+	dpadFrame.Position = UDim2.fromOffset(0, 114)
+	dpadFrame.BackgroundColor3 = Color3.fromRGB(22, 26, 44)
+	dpadFrame.BorderSizePixel = 0
+	dpadFrame.Active = true
+	dpadFrame.Parent = rightPanel
+	addCorner(dpadFrame, 12)
+	addStroke(dpadFrame, Color3.fromRGB(62, 70, 104), 1.4)
+	UI.dpadFrame = dpadFrame
+
+	UI.dUp    = makeGlossyBtn(dpadFrame, "▲", UDim2.fromOffset(56, 54), UDim2.fromOffset(74, 4),   Color3.fromRGB(48, 146, 198), Color3.fromRGB(28, 76, 164), 16)
+	UI.dLeft  = makeGlossyBtn(dpadFrame, "◄", UDim2.fromOffset(56, 54), UDim2.fromOffset(16, 60),  Color3.fromRGB(48, 146, 198), Color3.fromRGB(28, 76, 164), 16)
+	UI.dRight = makeGlossyBtn(dpadFrame, "►", UDim2.fromOffset(56, 54), UDim2.fromOffset(132, 60), Color3.fromRGB(48, 146, 198), Color3.fromRGB(28, 76, 164), 16)
+	UI.dDown  = makeGlossyBtn(dpadFrame, "▼", UDim2.fromOffset(56, 54), UDim2.fromOffset(74, 116), Color3.fromRGB(48, 146, 198), Color3.fromRGB(28, 76, 164), 16)
+	UI.dUp.TextSize, UI.dLeft.TextSize, UI.dRight.TextSize, UI.dDown.TextSize = 18, 18, 18, 18
+
+	local dCenterDot = Instance.new("Frame")
+	dCenterDot.Size = UDim2.fromOffset(36, 36)
+	dCenterDot.Position = UDim2.fromOffset(84, 69)
+	dCenterDot.BackgroundColor3 = Color3.fromRGB(32, 38, 66)
+	dCenterDot.BorderSizePixel = 0
+	dCenterDot.Parent = dpadFrame
+	addCorner(dCenterDot, 18)
 end
-
-local itemLayer = Instance.new("Frame")
-itemLayer.Size = UDim2.fromScale(1, 1)
-itemLayer.BackgroundTransparency = 1
-itemLayer.ZIndex = 2
-itemLayer.Parent = board
-
-local snakeLayer = Instance.new("Frame")
-snakeLayer.Size = UDim2.fromScale(1, 1)
-snakeLayer.BackgroundTransparency = 1
-snakeLayer.ZIndex = 4
-snakeLayer.Parent = board
-
-local gameOverCard = Instance.new("Frame")
-gameOverCard.Size = UDim2.fromOffset(296, 178)
-gameOverCard.Position = UDim2.fromScale(0.5, 0.5)
-gameOverCard.AnchorPoint = Vector2.new(0.5, 0.5)
-gameOverCard.BackgroundColor3 = Color3.fromRGB(22, 24, 44)
-gameOverCard.BorderSizePixel = 0
-gameOverCard.Visible = false
-gameOverCard.ZIndex = 20
-gameOverCard.Parent = board
-addCorner(gameOverCard, 14)
-addStroke(gameOverCard, Color3.fromRGB(248, 113, 113), 2.5)
-
-local goTitle = Instance.new("TextLabel")
-goTitle.Size = UDim2.new(1, 0, 0, 34)
-goTitle.Position = UDim2.fromOffset(0, 10)
-goTitle.BackgroundTransparency = 1
-goTitle.Text = "💀 KẾT THÚC!"
-goTitle.TextColor3 = Color3.fromRGB(248, 113, 113)
-goTitle.Font = Enum.Font.GothamBlack
-goTitle.TextSize = 20
-goTitle.ZIndex = 21
-goTitle.Parent = gameOverCard
-
-local goStats = Instance.new("TextLabel")
-goStats.Size = UDim2.new(1, -20, 0, 62)
-goStats.Position = UDim2.fromOffset(10, 48)
-goStats.BackgroundTransparency = 1
-goStats.Text = ""
-goStats.TextColor3 = Color3.fromRGB(240, 244, 255)
-goStats.Font = Enum.Font.GothamBold
-goStats.TextSize = 13
-goStats.ZIndex = 21
-goStats.Parent = gameOverCard
-
-local goReplayBtn = makeGlossyBtn(gameOverCard, "🔄 CHƠI LẠI", UDim2.fromOffset(124, 38), UDim2.fromOffset(18, 124), Color3.fromRGB(74, 222, 128), Color3.fromRGB(22, 163, 74), 10)
-local goLobbyBtn  = makeGlossyBtn(gameOverCard, "🏠 VỀ SẢNH", UDim2.fromOffset(124, 38), UDim2.fromOffset(154, 124), Color3.fromRGB(168, 85, 247), Color3.fromRGB(109, 40, 217), 10)
-goReplayBtn.ZIndex = 22
-goLobbyBtn.ZIndex  = 22
-
-local rightPanel = Instance.new("Frame")
-rightPanel.Size = UDim2.fromOffset(204, 288)
-rightPanel.Position = UDim2.fromOffset(396, 44)
-rightPanel.BackgroundTransparency = 1
-rightPanel.Parent = gamePage
-
-local buffBox = Instance.new("Frame")
-buffBox.Size = UDim2.fromOffset(204, 104)
-buffBox.BackgroundColor3 = Color3.fromRGB(24, 28, 48)
-buffBox.BorderSizePixel = 0
-buffBox.Parent = rightPanel
-addCorner(buffBox, 12)
-addStroke(buffBox, Color3.fromRGB(68, 76, 115), 1.5)
-
-local buffHeader = Instance.new("TextLabel")
-buffHeader.Size = UDim2.new(1, 0, 0, 20)
-buffHeader.Position = UDim2.fromOffset(0, 4)
-buffHeader.BackgroundTransparency = 1
-buffHeader.Text = "✨ KỸ NĂNG (VUỐT / CHẠM)"
-buffHeader.TextColor3 = Color3.fromRGB(165, 243, 252)
-buffHeader.Font = Enum.Font.GothamBlack
-buffHeader.TextSize = 11
-buffHeader.Parent = buffBox
-
-local buffStatusLbl = Instance.new("TextLabel")
-buffStatusLbl.Size = UDim2.new(1, -12, 1, -24)
-buffStatusLbl.Position = UDim2.fromOffset(6, 22)
-buffStatusLbl.BackgroundTransparency = 1
-buffStatusLbl.Text = "Vuốt trên bàn cờ hoặc lướt\nD-Pad để cua chuẩn từng ô!"
-buffStatusLbl.TextColor3 = Color3.fromRGB(203, 213, 225)
-buffStatusLbl.Font = Enum.Font.GothamBold
-buffStatusLbl.TextSize = 11
-buffStatusLbl.TextWrapped = true
-buffStatusLbl.Parent = buffBox
-
-local dpadFrame = Instance.new("Frame")
-dpadFrame.Size = UDim2.fromOffset(204, 176)
-dpadFrame.Position = UDim2.fromOffset(0, 112)
-dpadFrame.BackgroundColor3 = Color3.fromRGB(24, 28, 48)
-dpadFrame.BorderSizePixel = 0
-dpadFrame.Active = true
-dpadFrame.Parent = rightPanel
-addCorner(dpadFrame, 12)
-addStroke(dpadFrame, Color3.fromRGB(68, 76, 115), 1.5)
-
-local dUp    = makeGlossyBtn(dpadFrame, "▲", UDim2.fromOffset(56, 54), UDim2.fromOffset(74, 5),   Color3.fromRGB(56, 189, 248), Color3.fromRGB(29, 78, 216), 16)
-local dLeft  = makeGlossyBtn(dpadFrame, "◄", UDim2.fromOffset(56, 54), UDim2.fromOffset(16, 61),  Color3.fromRGB(56, 189, 248), Color3.fromRGB(29, 78, 216), 16)
-local dRight = makeGlossyBtn(dpadFrame, "►", UDim2.fromOffset(56, 54), UDim2.fromOffset(132, 61), Color3.fromRGB(56, 189, 248), Color3.fromRGB(29, 78, 216), 16)
-local dDown  = makeGlossyBtn(dpadFrame, "▼", UDim2.fromOffset(56, 54), UDim2.fromOffset(74, 117), Color3.fromRGB(56, 189, 248), Color3.fromRGB(29, 78, 216), 16)
-dUp.TextSize, dLeft.TextSize, dRight.TextSize, dDown.TextSize = 20, 20, 20, 20
-
-local dCenterDot = Instance.new("Frame")
-dCenterDot.Size = UDim2.fromOffset(36, 36)
-dCenterDot.Position = UDim2.fromOffset(84, 70)
-dCenterDot.BackgroundColor3 = Color3.fromRGB(34, 42, 72)
-dCenterDot.BorderSizePixel = 0
-dCenterDot.Parent = dpadFrame
-addCorner(dCenterDot, 18)
 
 local function flashDpadBtn(btn)
 	if not btn then return end
 	local stroke = btn:FindFirstChildOfClass("UIStroke")
 	if not stroke then return end
-	stroke.Color = Color3.fromRGB(250, 204, 21)
-	stroke.Thickness = 3
+	stroke.Color = THEME.TextGold
+	stroke.Thickness = 2.6
 	task.delay(0.14, function()
 		if stroke and stroke.Parent then
-			stroke.Color = Color3.fromRGB(15, 18, 28)
-			stroke.Thickness = 2
+			stroke.Color = Color3.fromRGB(16, 20, 32)
+			stroke.Thickness = 1.6
 		end
 	end)
 end
 
 -- ============================================================
--- LOGIC GAME RẮN SĂN MỒI
+-- LOGIC GAME RẮN SĂN MỒI (CUA 1 Ô + COMBO + NỘI TẠI THẦN THOẠI)
 -- ============================================================
-local playing, paused = false, false
-local snake, prevSnake, turnQueue = {}, {}, {}
-local dir = { x = 1, y = 0 }
-local runScore, runCoins, runGems = 0, 0, 0
-local stepTimer, stepDuration = 0, 0.23
-local powerSpawnTimer, bombSpawnTimer = 0, 0
-local buffs = { Double = 0, Ghost = 0, Magnet = 0, Speed = 0, Shield = false, Invuln = 0 }
-local boardItems = {}
-local bodyFrames = {}
-local activeHeadNode, shieldRing = nil, nil
+local Game = {
+	playing = false,
+	paused = false,
+	snake = {},
+	prevSnake = {},
+	turnQueue = {},
+	dir = { x = 1, y = 0 },
+	runScore = 0,
+	runCoins = 0,
+	runGems = 0,
+	comboCount = 0,
+	comboTimer = 0,
+	mythicGemStep = 0,
+	stepTimer = 0,
+	stepDuration = 0.23,
+	powerSpawnTimer = 0,
+	bombSpawnTimer = 0,
+	buffs = { Double = 0, Ghost = 0, Magnet = 0, Speed = 0, Shield = false, Invuln = 0 },
+	boardItems = {},
+	bodyFrames = {},
+	activeHeadNode = nil,
+	shieldRing = nil,
+}
 
 local function cellToCenter(gx, gy)
 	return (gx - 0.5) * CELL, (gy - 0.5) * CELL
@@ -1822,30 +1989,30 @@ local function dirToAngle(d)
 end
 
 local function clearItems()
-	for _, it in ipairs(boardItems) do
+	for _, it in ipairs(Game.boardItems) do
 		if it.Node then it.Node:Destroy() end
 	end
-	boardItems = {}
+	Game.boardItems = {}
 end
 
 local function clearSnakeVisuals()
-	for _, ch in ipairs(snakeLayer:GetChildren()) do ch:Destroy() end
-	bodyFrames = {}
-	activeHeadNode = nil
-	shieldRing = nil
+	for _, ch in ipairs(UI.snakeLayer:GetChildren()) do ch:Destroy() end
+	Game.bodyFrames = {}
+	Game.activeHeadNode = nil
+	Game.shieldRing = nil
 end
 
 local function findFreeCell(avoidNearHead)
 	local free = {}
-	local head = snake[1]
+	local head = Game.snake[1]
 	for x = 1, COLS do
 		for y = 1, ROWS do
 			local busy = false
-			for _, seg in ipairs(snake) do
+			for _, seg in ipairs(Game.snake) do
 				if seg.x == x and seg.y == y then busy = true break end
 			end
 			if not busy then
-				for _, it in ipairs(boardItems) do
+				for _, it in ipairs(Game.boardItems) do
 					if it.X == x and it.Y == y then busy = true break end
 				end
 			end
@@ -1870,20 +2037,20 @@ local function spawnItem(itemType, customData, lifeTime)
 		node.Size = UDim2.fromOffset(CELL - 4, CELL - 4)
 		node.AnchorPoint = Vector2.new(0.5, 0.5)
 		node.Position = UDim2.fromOffset(cx, cy)
-		node.BackgroundColor3 = Color3.fromRGB(250, 204, 21)
+		node.BackgroundColor3 = Color3.fromRGB(208, 174, 46)
 		node.BorderSizePixel = 0
 		node.ZIndex = 3
-		node.Parent = itemLayer
+		node.Parent = UI.itemLayer
 		addCorner(node, 99)
-		addStroke(node, Color3.fromRGB(161, 98, 7), 1.8)
+		addStroke(node, Color3.fromRGB(132, 82, 16), 1.6)
 
 		local sym = Instance.new("TextLabel")
 		sym.Size = UDim2.fromScale(1, 1)
 		sym.BackgroundTransparency = 1
 		sym.Text = "$"
-		sym.TextColor3 = Color3.fromRGB(146, 64, 14)
-		sym.Font = Enum.Font.GothamBlack
-		sym.TextSize = 14
+		sym.TextColor3 = Color3.fromRGB(108, 52, 14)
+		sym.Font = THEME.FontHead
+		sym.TextSize = 13
 		sym.ZIndex = 4
 		sym.Parent = node
 	else
@@ -1892,8 +2059,8 @@ local function spawnItem(itemType, customData, lifeTime)
 		node.AnchorPoint = Vector2.new(0.5, 0.5)
 		node.Position = UDim2.fromOffset(cx, cy)
 		node.BackgroundTransparency = (itemType == "Power") and 0.72 or 1
-		node.BackgroundColor3 = (customData and customData.Color) or Color3.fromRGB(255, 255, 255)
-		node.Font = Enum.Font.GothamBold
+		node.BackgroundColor3 = (customData and customData.Color) or Color3.fromRGB(200, 204, 210)
+		node.Font = THEME.FontHead
 		node.TextScaled = true
 		node.ZIndex = 3
 		if itemType == "Food" then node.Text = customData.Icon
@@ -1901,12 +2068,12 @@ local function spawnItem(itemType, customData, lifeTime)
 		elseif itemType == "Power" then
 			node.Text = customData.Icon
 			addCorner(node, 99)
-			addStroke(node, customData.Color, 1.5)
+			addStroke(node, customData.Color, 1.4)
 		elseif itemType == "Bomb" then node.Text = "💣" end
-		node.Parent = itemLayer
+		node.Parent = UI.itemLayer
 	end
 
-	table.insert(boardItems, {
+	table.insert(Game.boardItems, {
 		Type = itemType, X = pos.x, Y = pos.y,
 		Data = customData, Node = node, Life = lifeTime
 	})
@@ -1914,7 +2081,7 @@ end
 
 local function ensureFoodExists()
 	local count = 0
-	for _, it in ipairs(boardItems) do
+	for _, it in ipairs(Game.boardItems) do
 		if it.Type == "Food" then count += 1 end
 	end
 	while count < 2 do
@@ -1924,75 +2091,89 @@ local function ensureFoodExists()
 end
 
 local function updateHUD()
-	liveScoreLbl.Text = string.format("Điểm: %s  |  +%s Xu  |  +%s 💎", formatNum(runScore), formatNum(runCoins), formatNum(runGems))
+	local comboTxt = (Game.comboCount >= 2) and ("  |  🔥x" .. Game.comboCount) or ""
+	UI.liveScoreLbl.Text = string.format(
+		"Điểm: %s  |  +%s Xu  |  +%s 💎%s",
+		formatNum(Game.runScore), formatNum(Game.runCoins), formatNum(Game.runGems), comboTxt
+	)
+
+	UI.comboBarBg.Visible = (Game.comboTimer > 0 and Game.comboCount >= 1)
+	if UI.comboBarBg.Visible then
+		UI.comboBarFill.Size = UDim2.fromScale(math.clamp(Game.comboTimer / 3.5, 0, 1), 1)
+	end
+
 	local lines = {}
-	if buffs.Double > 0 then table.insert(lines, string.format("⭐ 2x Điểm: %.1fs", buffs.Double)) end
-	if buffs.Ghost  > 0 then table.insert(lines, string.format("👻 Bóng Ma: %.1fs", buffs.Ghost)) end
-	if buffs.Magnet > 0 then table.insert(lines, string.format("🧲 Nam Châm: %.1fs", buffs.Magnet)) end
-	if buffs.Speed  > 0 then table.insert(lines, string.format("⚡ Tăng Tốc: %.1fs", buffs.Speed)) end
-	if buffs.Shield then table.insert(lines, "🛡️ Khiên: Sẵn sàng đỡ 1 đòn") end
+	if Game.comboCount >= 2 then
+		table.insert(lines, string.format("🔥 Combo x%d (+%d%% điểm)", Game.comboCount, (Game.comboCount - 1) * 20))
+	end
+	if Game.buffs.Double > 0 then table.insert(lines, string.format("⭐ 2x Điểm: %.1fs", Game.buffs.Double)) end
+	if Game.buffs.Ghost  > 0 then table.insert(lines, string.format("👻 Bóng Ma: %.1fs", Game.buffs.Ghost)) end
+	if Game.buffs.Magnet > 0 then table.insert(lines, string.format("🧲 Nam Châm: %.1fs", Game.buffs.Magnet)) end
+	if Game.buffs.Speed  > 0 then table.insert(lines, string.format("⚡ Tăng Tốc: %.1fs", Game.buffs.Speed)) end
+	if Game.buffs.Shield then table.insert(lines, "🛡️ Khiên: Đỡ 1 đòn") end
 
 	if #lines == 0 then
 		local skin = getSkinById(state.EquippedSkin)
 		local rar = RARITIES[skin.Rarity] or RARITIES.Common
 		local bonusInfo = (rar.BonusText ~= "") and ("\nSkin: " .. rar.BonusText) or ""
-		buffStatusLbl.Text = "Vuốt bàn cờ hoặc lướt D-Pad\nđể cua chuẩn từng ô!" .. bonusInfo
-		buffStatusLbl.TextColor3 = Color3.fromRGB(165, 175, 205)
+		UI.buffStatusLbl.Text = "Vuốt bàn cờ hoặc lướt D-Pad\nđể cua chuẩn từng ô!" .. bonusInfo
+		UI.buffStatusLbl.TextColor3 = THEME.TextMuted
 	else
-		buffStatusLbl.Text = table.concat(lines, "\n")
-		buffStatusLbl.TextColor3 = Color3.fromRGB(254, 240, 138)
+		UI.buffStatusLbl.Text = table.concat(lines, "\n")
+		UI.buffStatusLbl.TextColor3 = THEME.TextGold
 	end
 end
 
 local function syncSnakeNodes()
 	local skin = getSkinById(state.EquippedSkin)
-	if not activeHeadNode then
-		activeHeadNode = buildCartoonHead(snakeLayer, CELL + 4, skin)
-		shieldRing = Instance.new("Frame")
-		shieldRing.Size = UDim2.fromScale(1.38, 1.38)
-		shieldRing.Position = UDim2.fromScale(0.5, 0.5)
-		shieldRing.AnchorPoint = Vector2.new(0.5, 0.5)
-		shieldRing.BackgroundTransparency = 1
-		shieldRing.Visible = false
-		shieldRing.ZIndex = 12
-		shieldRing.Parent = activeHeadNode
-		addCorner(shieldRing, 99)
-		addStroke(shieldRing, Color3.fromRGB(56, 189, 248), 2.5)
+	if not Game.activeHeadNode then
+		Game.activeHeadNode = buildCartoonHead(UI.snakeLayer, CELL + 4, skin)
+		Game.shieldRing = Instance.new("Frame")
+		Game.shieldRing.Size = UDim2.fromScale(1.38, 1.38)
+		Game.shieldRing.Position = UDim2.fromScale(0.5, 0.5)
+		Game.shieldRing.AnchorPoint = Vector2.new(0.5, 0.5)
+		Game.shieldRing.BackgroundTransparency = 1
+		Game.shieldRing.Visible = false
+		Game.shieldRing.ZIndex = 12
+		Game.shieldRing.Parent = Game.activeHeadNode
+		addCorner(Game.shieldRing, 99)
+		addStroke(Game.shieldRing, Color3.fromRGB(82, 168, 210), 2.2)
 	end
 
-	local needBody = #snake - 1
-	while #bodyFrames < needBody do
-		local idx = #bodyFrames + 1
+	local needBody = #Game.snake - 1
+	while #Game.bodyFrames < needBody do
+		local idx = #Game.bodyFrames + 1
 		local seg = Instance.new("Frame")
 		seg.AnchorPoint = Vector2.new(0.5, 0.5)
 		seg.BackgroundColor3 = getSegmentColor(skin, idx)
 		seg.BackgroundTransparency = skin.BodyAlpha or 0
 		seg.BorderSizePixel = 0
 		seg.ZIndex = 5
-		seg.Parent = snakeLayer
+		seg.Parent = UI.snakeLayer
 		addCorner(seg, 99)
-		addStroke(seg, skin.GlowColor or Color3.fromRGB(12, 14, 22), 1.8)
-		table.insert(bodyFrames, seg)
+		addStroke(seg, skin.GlowColor or Color3.fromRGB(14, 16, 24), 1.6)
+		table.insert(Game.bodyFrames, seg)
 	end
-	for i = 1, #bodyFrames do
-		bodyFrames[i].Visible = (i <= needBody)
+	for i = 1, #Game.bodyFrames do
+		Game.bodyFrames[i].Visible = (i <= needBody)
 		if i <= needBody then
 			local taper = (i > needBody - 3) and (CELL - 1 - (3 - (needBody - i)) * 2) or CELL
 			taper = math.max(14, taper)
-			bodyFrames[i].Size = UDim2.fromOffset(taper, taper)
+			Game.bodyFrames[i].Size = UDim2.fromOffset(taper, taper)
 		end
 	end
 end
 
 local function renderSnakeSmooth(alpha)
-	if #snake == 0 or not activeHeadNode then return end
+	if #Game.snake == 0 or not Game.activeHeadNode then return end
 	local skin = getSkinById(state.EquippedSkin)
 	local baseAlpha = skin.BodyAlpha or 0
-	local ghostTrans = (buffs.Ghost > 0 or buffs.Invuln > 0) and math.max(baseAlpha, 0.45) or baseAlpha
+	local ghostTrans = (Game.buffs.Ghost > 0 or Game.buffs.Invuln > 0) and math.max(baseAlpha, 0.45) or baseAlpha
+	local glitchTick = skin.Glitch and math.floor(os.clock() * 10) or 0
 
-	for i = 1, #snake do
-		local curr = snake[i]
-		local prev = prevSnake[i] or curr
+	for i = 1, #Game.snake do
+		local curr = Game.snake[i]
+		local prev = Game.prevSnake[i] or curr
 		local gx, gy
 		if alpha >= 1 or math.abs(curr.x - prev.x) > 1 or math.abs(curr.y - prev.y) > 1 then
 			gx, gy = curr.x, curr.y
@@ -2003,20 +2184,23 @@ local function renderSnakeSmooth(alpha)
 		local px, py = cellToCenter(gx, gy)
 
 		if i == 1 then
-			activeHeadNode.Position = UDim2.fromOffset(px, py)
-			activeHeadNode.Rotation = dirToAngle(dir)
-			activeHeadNode.BackgroundTransparency = ghostTrans
-			if shieldRing then shieldRing.Visible = buffs.Shield end
+			Game.activeHeadNode.Position = UDim2.fromOffset(px, py)
+			Game.activeHeadNode.Rotation = dirToAngle(Game.dir)
+			Game.activeHeadNode.BackgroundTransparency = ghostTrans
+			if Game.shieldRing then Game.shieldRing.Visible = Game.buffs.Shield end
 			if skin.Rainbow then
-				activeHeadNode.BackgroundColor3 = Color3.fromHSV((os.clock() * 0.45) % 1, 0.85, 1)
+				Game.activeHeadNode.BackgroundColor3 = Color3.fromHSV((os.clock() * 0.45) % 1, 0.72, 0.85)
 			end
 		else
-			local node = bodyFrames[i - 1]
+			local node = Game.bodyFrames[i - 1]
 			if node then
 				node.Position = UDim2.fromOffset(px, py)
 				node.BackgroundTransparency = ghostTrans
 				if skin.Rainbow then
-					node.BackgroundColor3 = Color3.fromHSV((os.clock() * 0.45 + i * 0.06) % 1, 0.85, 1)
+					node.BackgroundColor3 = Color3.fromHSV((os.clock() * 0.45 + i * 0.06) % 1, 0.72, 0.85)
+				elseif skin.Glitch then
+					local m = (glitchTick + i) % 3
+					node.BackgroundColor3 = (m == 0) and skin.Body1 or ((m == 1) and skin.Body2 or skin.Body3)
 				end
 			end
 		end
@@ -2024,63 +2208,64 @@ local function renderSnakeSmooth(alpha)
 end
 
 local function queueTurn(dx, dy)
-	if not playing or paused then return end
-	local last = (#turnQueue > 0) and turnQueue[#turnQueue] or dir
+	if not Game.playing or Game.paused then return end
+	local last = (#Game.turnQueue > 0) and Game.turnQueue[#Game.turnQueue] or Game.dir
 	if dx == last.x and dy == last.y then return end
 
-	if #turnQueue == 1 and dx == -last.x and dy == -last.y then
-		if not (dx == -dir.x and dy == -dir.y) then
-			turnQueue[1] = { x = dx, y = dy }
+	if #Game.turnQueue == 1 and dx == -last.x and dy == -last.y then
+		if not (dx == -Game.dir.x and dy == -Game.dir.y) then
+			Game.turnQueue[1] = { x = dx, y = dy }
 		end
 		return
 	end
 
 	if dx == -last.x and dy == -last.y then return end
 
-	if #turnQueue < 3 then
-		table.insert(turnQueue, { x = dx, y = dy })
+	if #Game.turnQueue < 3 then
+		table.insert(Game.turnQueue, { x = dx, y = dy })
 	end
 end
 
 local function endRun(reasonText)
-	playing = false
+	Game.playing = false
 	local isRecord = false
-	if runScore > state.HighScore then
-		state.HighScore = runScore
+	if Game.runScore > state.HighScore then
+		state.HighScore = Game.runScore
 		isRecord = true
 	end
-	state.Coins += runCoins
-	state.Gems  += runGems
+	state.Coins += Game.runCoins
+	state.Gems  += Game.runGems
 	addQuestProgress("games", 1, false)
-	addQuestProgress("score", runScore, true)
-	addExp(math.floor(runScore * 0.4) + 10)
+	addQuestProgress("score", Game.runScore, true)
+	addExp(math.floor(Game.runScore * 0.4) + 10)
 
-	goTitle.Text = "💀 " .. reasonText
-	goStats.Text = string.format(
+	UI.goTitle.Text = "💀 " .. reasonText
+	UI.goStats.Text = string.format(
 		"Điểm ván này: %s %s\nNhận: +%s Xu  |  +%s 💎  (Đã tự lưu!)",
-		formatNum(runScore), isRecord and "🏆(KỶ LỤC!)" or "", formatNum(runCoins), formatNum(runGems)
+		formatNum(Game.runScore), isRecord and "🏆(KỶ LỤC!)" or "", formatNum(Game.runCoins), formatNum(Game.runGems)
 	)
-	gameOverCard.Visible = true
+	UI.gameOverCard.Visible = true
 end
 
 local function startNewRun()
 	clearItems()
 	clearSnakeVisuals()
-	gameOverCard.Visible = false
-	dpadFrame.Visible = state.Settings.ShowDpad
+	UI.gameOverCard.Visible = false
+	UI.dpadFrame.Visible = state.Settings.ShowDpad
 
-	snake = { { x = 6, y = 6 }, { x = 5, y = 6 }, { x = 4, y = 6 }, { x = 3, y = 6 } }
-	prevSnake = {}
-	for i, s in ipairs(snake) do prevSnake[i] = { x = s.x, y = s.y } end
+	Game.snake = { { x = 6, y = 6 }, { x = 5, y = 6 }, { x = 4, y = 6 }, { x = 3, y = 6 } }
+	Game.prevSnake = {}
+	for i, s in ipairs(Game.snake) do Game.prevSnake[i] = { x = s.x, y = s.y } end
 
-	dir = { x = 1, y = 0 }
-	turnQueue = {}
-	runScore, runCoins, runGems = 0, 0, 0
-	buffs = { Double = 0, Ghost = 0, Magnet = 0, Speed = 0, Shield = false, Invuln = 0 }
-	stepTimer, powerSpawnTimer, bombSpawnTimer = 0, 4, 6
-	paused = false
-	pauseBtn.Text = "II"
-	playing = true
+	Game.dir = { x = 1, y = 0 }
+	Game.turnQueue = {}
+	Game.runScore, Game.runCoins, Game.runGems = 0, 0, 0
+	Game.comboCount, Game.comboTimer, Game.mythicGemStep = 0, 0, 0
+	Game.buffs = { Double = 0, Ghost = 0, Magnet = 0, Speed = 0, Shield = false, Invuln = 0 }
+	Game.stepTimer, Game.powerSpawnTimer, Game.bombSpawnTimer = 0, 4, 6
+	Game.paused = false
+	UI.pauseBtn.Text = "II"
+	Game.playing = true
 
 	syncSnakeNodes()
 	ensureFoodExists()
@@ -2090,15 +2275,15 @@ local function startNewRun()
 end
 
 local function openLobby()
-	if playing and (runCoins > 0 or runGems > 0 or runScore > 0) then
-		state.Coins += runCoins
-		state.Gems  += runGems
-		if runScore > state.HighScore then state.HighScore = runScore end
-		runScore, runCoins, runGems = 0, 0, 0
+	if Game.playing and (Game.runCoins > 0 or Game.runGems > 0 or Game.runScore > 0) then
+		state.Coins += Game.runCoins
+		state.Gems  += Game.runGems
+		if Game.runScore > state.HighScore then state.HighScore = Game.runScore end
+		Game.runScore, Game.runCoins, Game.runGems = 0, 0, 0
 		saveData()
 	end
-	playing = false
-	paused = false
+	Game.playing = false
+	Game.paused = false
 	gamePage.Visible = false
 	lobbyPage.Visible = true
 	rebuildLobbyPreview()
@@ -2106,7 +2291,7 @@ local function openLobby()
 end
 
 local function openGame()
-	modalOverlay.Visible = false
+	UI.modalOverlay.Visible = false
 	activeModalTag = nil
 	liveGiftBtn = nil
 	lobbyPage.Visible = false
@@ -2115,21 +2300,22 @@ local function openGame()
 end
 
 local function stepSnakeLogic()
-	if #turnQueue > 0 then dir = table.remove(turnQueue, 1) end
-	prevSnake = {}
-	for i, s in ipairs(snake) do prevSnake[i] = { x = s.x, y = s.y } end
+	if #Game.snake == 0 then return end
+	if #Game.turnQueue > 0 then Game.dir = table.remove(Game.turnQueue, 1) end
+	Game.prevSnake = {}
+	for i, s in ipairs(Game.snake) do Game.prevSnake[i] = { x = s.x, y = s.y } end
 
-	local head = snake[1]
-	local nx, ny = head.x + dir.x, head.y + dir.y
+	local head = Game.snake[1]
+	local nx, ny = head.x + Game.dir.x, head.y + Game.dir.y
 
-	local canWrap = state.Settings.WallPass or buffs.Ghost > 0 or buffs.Invuln > 0
+	local canWrap = state.Settings.WallPass or Game.buffs.Ghost > 0 or Game.buffs.Invuln > 0
 	if nx < 1 or nx > COLS or ny < 1 or ny > ROWS then
 		if canWrap then
 			if nx < 1 then nx = COLS elseif nx > COLS then nx = 1 end
 			if ny < 1 then ny = ROWS elseif ny > ROWS then ny = 1 end
-		elseif buffs.Shield then
-			buffs.Shield = false
-			buffs.Invuln = 1.6
+		elseif Game.buffs.Shield then
+			Game.buffs.Shield = false
+			Game.buffs.Invuln = 1.6
 			if nx < 1 then nx = COLS elseif nx > COLS then nx = 1 end
 			if ny < 1 then ny = ROWS elseif ny > ROWS then ny = 1 end
 		else
@@ -2138,8 +2324,8 @@ local function stepSnakeLogic()
 		end
 	end
 
-	if buffs.Magnet > 0 then
-		for _, it in ipairs(boardItems) do
+	if Game.buffs.Magnet > 0 then
+		for _, it in ipairs(Game.boardItems) do
 			if it.Type == "Food" or it.Type == "Coin" or it.Type == "Gem" then
 				local dist = math.abs(it.X - nx) + math.abs(it.Y - ny)
 				if dist > 0 and dist <= 3 then
@@ -2156,45 +2342,48 @@ local function stepSnakeLogic()
 	local skinCoinMult = skin.CoinMult or 1.0
 	local grew = false
 
-	for i = #boardItems, 1, -1 do
-		local it = boardItems[i]
+	for i = #Game.boardItems, 1, -1 do
+		local it = Game.boardItems[i]
 		if it.X == nx and it.Y == ny then
-			local mult = (buffs.Double > 0 and 2 or 1) * (buffs.Speed > 0 and 1.5 or 1)
+			local mult = (Game.buffs.Double > 0 and 2 or 1) * (Game.buffs.Speed > 0 and 1.5 or 1)
 			if it.Type == "Food" then
 				grew = true
-				runScore += math.floor(it.Data.Score * mult)
-				runCoins += math.floor(it.Data.Coins * mult * skinCoinMult)
+				Game.comboCount = math.min(5, Game.comboCount + 1)
+				Game.comboTimer = 3.5
+				local comboMult = 1 + ((Game.comboCount - 1) * 0.2)
+				Game.runScore += math.floor(it.Data.Score * mult * comboMult)
+				Game.runCoins += math.floor(it.Data.Coins * mult * skinCoinMult * comboMult)
 				addQuestProgress("eat", 1, false)
-				addQuestProgress("score", runScore, true)
+				addQuestProgress("score", Game.runScore, true)
 				it.Node:Destroy()
-				table.remove(boardItems, i)
+				table.remove(Game.boardItems, i)
 			elseif it.Type == "Coin" then
-				runCoins += math.floor(25 * mult * skinCoinMult)
-				runScore += math.floor(15 * mult)
+				Game.runCoins += math.floor(25 * mult * skinCoinMult)
+				Game.runScore += math.floor(15 * mult)
 				it.Node:Destroy()
-				table.remove(boardItems, i)
+				table.remove(Game.boardItems, i)
 			elseif it.Type == "Gem" then
-				runGems += 2
-				runScore += math.floor(30 * mult)
+				Game.runGems += 2
+				Game.runScore += math.floor(30 * mult)
 				it.Node:Destroy()
-				table.remove(boardItems, i)
+				table.remove(Game.boardItems, i)
 			elseif it.Type == "Power" then
 				local pId = it.Data.Id
-				if pId == "Double" then buffs.Double = 10
-				elseif pId == "Ghost" then buffs.Ghost = 8
-				elseif pId == "Magnet" then buffs.Magnet = 10
-				elseif pId == "Speed" then buffs.Speed = 7
-				elseif pId == "Shield" then buffs.Shield = true end
+				if pId == "Double" then Game.buffs.Double = 10
+				elseif pId == "Ghost" then Game.buffs.Ghost = 8
+				elseif pId == "Magnet" then Game.buffs.Magnet = 10
+				elseif pId == "Speed" then Game.buffs.Speed = 7
+				elseif pId == "Shield" then Game.buffs.Shield = true end
 				addQuestProgress("power", 1, false)
 				it.Node:Destroy()
-				table.remove(boardItems, i)
+				table.remove(Game.boardItems, i)
 			elseif it.Type == "Bomb" then
 				it.Node:Destroy()
-				table.remove(boardItems, i)
-				if buffs.Ghost <= 0 and buffs.Invuln <= 0 then
-					if buffs.Shield then
-						buffs.Shield = false
-						buffs.Invuln = 1.6
+				table.remove(Game.boardItems, i)
+				if Game.buffs.Ghost <= 0 and Game.buffs.Invuln <= 0 then
+					if Game.buffs.Shield then
+						Game.buffs.Shield = false
+						Game.buffs.Invuln = 1.6
 					else
 						endRun("TRÚNG BOM!")
 						return
@@ -2204,18 +2393,27 @@ local function stepSnakeLogic()
 		end
 	end
 
-	if not grew then
-		table.remove(snake)
-	else
-		table.insert(prevSnake, prevSnake[#prevSnake])
+	-- Nội tại bậc Thần Thoại: thưởng thêm +1 💎 mỗi mốc 150 điểm
+	if skin.GemBonus then
+		local curStep = math.floor(Game.runScore / 150)
+		if curStep > Game.mythicGemStep then
+			Game.runGems += (curStep - Game.mythicGemStep)
+			Game.mythicGemStep = curStep
+		end
 	end
 
-	if buffs.Ghost <= 0 and buffs.Invuln <= 0 then
-		for _, seg in ipairs(snake) do
+	if not grew then
+		table.remove(Game.snake)
+	else
+		table.insert(Game.prevSnake, Game.prevSnake[#Game.prevSnake])
+	end
+
+	if Game.buffs.Ghost <= 0 and Game.buffs.Invuln <= 0 then
+		for _, seg in ipairs(Game.snake) do
 			if seg.x == nx and seg.y == ny then
-				if buffs.Shield then
-					buffs.Shield = false
-					buffs.Invuln = 1.6
+				if Game.buffs.Shield then
+					Game.buffs.Shield = false
+					Game.buffs.Invuln = 1.6
 					break
 				else
 					endRun("TỰ CẮN THÂN!")
@@ -2225,7 +2423,7 @@ local function stepSnakeLogic()
 		end
 	end
 
-	table.insert(snake, 1, { x = nx, y = ny })
+	table.insert(Game.snake, 1, { x = nx, y = ny })
 	syncSnakeNodes()
 	ensureFoodExists()
 
@@ -2240,93 +2438,94 @@ end
 -- ============================================================
 -- ĐIỀU KHIỂN CẢM ỨNG NHẠY (CHẠM TỨC THÌ + LƯỚT D-PAD + VUỐT)
 -- ============================================================
-local dpadSliding = false
-local lastSlideDir = nil
+do
+	local dpadSliding = false
+	local lastSlideDir = nil
+	local swipeActive = false
+	local swipeOrigin = nil
 
-local function triggerDpadDir(dx, dy, btn)
-	local key = dx .. "," .. dy
-	if lastSlideDir == key then return end
-	lastSlideDir = key
-	queueTurn(dx, dy)
-	flashDpadBtn(btn)
-end
-
-local function handleDpadPoint(pos)
-	if not playing or paused then return end
-	local center = dpadFrame.AbsolutePosition + (dpadFrame.AbsoluteSize * 0.5)
-	local diff = Vector2.new(pos.X - center.X, pos.Y - center.Y)
-	if diff.Magnitude < 14 then return end
-	if math.abs(diff.X) > math.abs(diff.Y) then
-		if diff.X > 0 then triggerDpadDir(1, 0, dRight) else triggerDpadDir(-1, 0, dLeft) end
-	else
-		if diff.Y > 0 then triggerDpadDir(0, 1, dDown) else triggerDpadDir(0, -1, dUp) end
+	local function triggerDpadDir(dx, dy, btn)
+		local key = dx .. "," .. dy
+		if lastSlideDir == key then return end
+		lastSlideDir = key
+		queueTurn(dx, dy)
+		flashDpadBtn(btn)
 	end
-end
 
-local function bindInstantDpad(btn, dx, dy)
-	btn.InputBegan:Connect(function(input)
+	local function handleDpadPoint(pos)
+		if not Game.playing or Game.paused then return end
+		local center = UI.dpadFrame.AbsolutePosition + (UI.dpadFrame.AbsoluteSize * 0.5)
+		local diff = Vector2.new(pos.X - center.X, pos.Y - center.Y)
+		if diff.Magnitude < 14 then return end
+		if math.abs(diff.X) > math.abs(diff.Y) then
+			if diff.X > 0 then triggerDpadDir(1, 0, UI.dRight) else triggerDpadDir(-1, 0, UI.dLeft) end
+		else
+			if diff.Y > 0 then triggerDpadDir(0, 1, UI.dDown) else triggerDpadDir(0, -1, UI.dUp) end
+		end
+	end
+
+	local function bindInstantDpad(btn, dx, dy)
+		btn.InputBegan:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+				dpadSliding = true
+				lastSlideDir = nil
+				triggerDpadDir(dx, dy, btn)
+			end
+		end)
+	end
+
+	bindInstantDpad(UI.dUp,    0, -1)
+	bindInstantDpad(UI.dDown,  0,  1)
+	bindInstantDpad(UI.dLeft, -1,  0)
+	bindInstantDpad(UI.dRight, 1,  0)
+
+	UI.dpadFrame.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
 			dpadSliding = true
 			lastSlideDir = nil
-			triggerDpadDir(dx, dy, btn)
+			handleDpadPoint(input.Position)
 		end
 	end)
-end
 
-bindInstantDpad(dUp,    0, -1)
-bindInstantDpad(dDown,  0,  1)
-bindInstantDpad(dLeft, -1,  0)
-bindInstantDpad(dRight, 1,  0)
-
-dpadFrame.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dpadSliding = true
-		lastSlideDir = nil
-		handleDpadPoint(input.Position)
-	end
-end)
-
-local swipeActive = false
-local swipeOrigin = nil
-
-board.InputBegan:Connect(function(input)
-	if not playing or paused then return end
-	if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-		swipeActive = true
-		swipeOrigin = input.Position
-	end
-end)
-
-track(UserInputService.InputChanged:Connect(function(input)
-	if input.UserInputType ~= Enum.UserInputType.Touch and input.UserInputType ~= Enum.UserInputType.MouseMovement then
-		return
-	end
-	if dpadSliding and mainFrame.Visible and gamePage.Visible then
-		handleDpadPoint(input.Position)
-	end
-	if swipeActive and swipeOrigin and playing and not paused then
-		local delta = input.Position - swipeOrigin
-		if delta.Magnitude >= 18 then
-			if math.abs(delta.X) > math.abs(delta.Y) then
-				if delta.X > 0 then queueTurn(1, 0) flashDpadBtn(dRight)
-				else queueTurn(-1, 0) flashDpadBtn(dLeft) end
-			else
-				if delta.Y > 0 then queueTurn(0, 1) flashDpadBtn(dDown)
-				else queueTurn(0, -1) flashDpadBtn(dUp) end
-			end
+	UI.board.InputBegan:Connect(function(input)
+		if not Game.playing or Game.paused then return end
+		if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+			swipeActive = true
 			swipeOrigin = input.Position
 		end
-	end
-end))
+	end)
 
-track(UserInputService.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dpadSliding = false
-		lastSlideDir = nil
-		swipeActive = false
-		swipeOrigin = nil
-	end
-end))
+	track(UserInputService.InputChanged:Connect(function(input)
+		if input.UserInputType ~= Enum.UserInputType.Touch and input.UserInputType ~= Enum.UserInputType.MouseMovement then
+			return
+		end
+		if dpadSliding and mainFrame.Visible and gamePage.Visible then
+			handleDpadPoint(input.Position)
+		end
+		if swipeActive and swipeOrigin and Game.playing and not Game.paused then
+			local delta = input.Position - swipeOrigin
+			if delta.Magnitude >= 18 then
+				if math.abs(delta.X) > math.abs(delta.Y) then
+					if delta.X > 0 then queueTurn(1, 0) flashDpadBtn(UI.dRight)
+					else queueTurn(-1, 0) flashDpadBtn(UI.dLeft) end
+				else
+					if delta.Y > 0 then queueTurn(0, 1) flashDpadBtn(UI.dDown)
+					else queueTurn(0, -1) flashDpadBtn(UI.dUp) end
+				end
+				swipeOrigin = input.Position
+			end
+		end
+	end))
+
+	track(UserInputService.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dpadSliding = false
+			lastSlideDir = nil
+			swipeActive = false
+			swipeOrigin = nil
+		end
+	end))
+end
 
 -- ============================================================
 -- VÒNG LẶP CHÍNH
@@ -2339,7 +2538,7 @@ track(RunService.RenderStepped:Connect(function(dt)
 	if nowSec ~= lastSecondCheck then
 		lastSecondCheck = nowSec
 		refreshNotifDots()
-		if modalOverlay.Visible and activeModalTag == "Gift" and liveGiftBtn and liveGiftBtn.Parent then
+		if UI.modalOverlay.Visible and activeModalTag == "Gift" and liveGiftBtn and liveGiftBtn.Parent then
 			local remain = math.max(0, state.NextGiftUnix - nowSec)
 			if remain <= 0 then
 				if liveGiftBtn.Text ~= "🎉 NHẬN QUÀ NGAY!" then openGift() end
@@ -2357,30 +2556,42 @@ track(RunService.RenderStepped:Connect(function(dt)
 		previewHead.Position = UDim2.fromOffset(hx, hy)
 		previewHead.Rotation = math.cos(t) * 14
 		if skin.Rainbow then
-			previewHead.BackgroundColor3 = Color3.fromHSV((os.clock() * 0.4) % 1, 0.85, 1)
+			previewHead.BackgroundColor3 = Color3.fromHSV((os.clock() * 0.4) % 1, 0.72, 0.85)
 		end
+		local gTick = skin.Glitch and math.floor(os.clock() * 10) or 0
 		for i, seg in ipairs(previewSegs) do
 			local sx = hx - (i * 16.5)
 			local sy = 48 + math.sin(t - i * 0.42) * 14
 			seg.Position = UDim2.fromOffset(sx, sy)
 			if skin.Rainbow then
-				seg.BackgroundColor3 = Color3.fromHSV((os.clock() * 0.4 + i * 0.07) % 1, 0.85, 1)
+				seg.BackgroundColor3 = Color3.fromHSV((os.clock() * 0.4 + i * 0.07) % 1, 0.72, 0.85)
+			elseif skin.Glitch then
+				local m = (gTick + i) % 3
+				seg.BackgroundColor3 = (m == 0) and skin.Body1 or ((m == 1) and skin.Body2 or skin.Body3)
 			end
 		end
 	end
 
-	if not mainFrame.Visible or not gamePage.Visible or not playing or paused then return end
+	if not mainFrame.Visible or not gamePage.Visible or not Game.playing or Game.paused then return end
 
-	local buffChanged = false
+	local hudChanged = false
 	for _, key in ipairs({ "Double", "Ghost", "Magnet", "Speed", "Invuln" }) do
-		if buffs[key] > 0 then
-			buffs[key] = math.max(0, buffs[key] - dt)
-			buffChanged = true
+		if Game.buffs[key] > 0 then
+			Game.buffs[key] = math.max(0, Game.buffs[key] - dt)
+			hudChanged = true
 		end
 	end
 
-	for i = #boardItems, 1, -1 do
-		local it = boardItems[i]
+	if Game.comboTimer > 0 then
+		Game.comboTimer = math.max(0, Game.comboTimer - dt)
+		if Game.comboTimer == 0 then
+			Game.comboCount = 0
+		end
+		hudChanged = true
+	end
+
+	for i = #Game.boardItems, 1, -1 do
+		local it = Game.boardItems[i]
 		if it.Life then
 			it.Life -= dt
 			if it.Life <= 2.5 then
@@ -2393,61 +2604,61 @@ track(RunService.RenderStepped:Connect(function(dt)
 			end
 			if it.Life <= 0 then
 				it.Node:Destroy()
-				table.remove(boardItems, i)
+				table.remove(Game.boardItems, i)
 			end
 		end
 	end
 
-	powerSpawnTimer -= dt
-	if powerSpawnTimer <= 0 then
-		powerSpawnTimer = math.random(8, 13)
+	Game.powerSpawnTimer -= dt
+	if Game.powerSpawnTimer <= 0 then
+		Game.powerSpawnTimer = math.random(8, 13)
 		spawnItem("Power", POWERUPS[math.random(1, #POWERUPS)], 10)
 	end
 
 	if state.Settings.BombsEnabled then
-		bombSpawnTimer -= dt
-		if bombSpawnTimer <= 0 then
-			bombSpawnTimer = math.random(9, 14)
+		Game.bombSpawnTimer -= dt
+		if Game.bombSpawnTimer <= 0 then
+			Game.bombSpawnTimer = math.random(9, 14)
 			spawnItem("Bomb", nil, 11)
 		end
 	end
 
 	local baseSpeeds = { 0.30, 0.23, 0.15 }
 	local speed = baseSpeeds[state.Settings.SpeedMode] or 0.23
-	speed = math.max(0.11, speed - math.min(0.035, runScore * 0.00008))
-	if buffs.Speed > 0 then speed *= 0.78 end
-	stepDuration = speed
+	speed = math.max(0.11, speed - math.min(0.035, Game.runScore * 0.00008))
+	if Game.buffs.Speed > 0 then speed *= 0.78 end
+	Game.stepDuration = speed
 
-	stepTimer += dt
-	while stepTimer >= stepDuration and playing do
-		stepTimer -= stepDuration
+	Game.stepTimer += dt
+	while Game.stepTimer >= Game.stepDuration and Game.playing do
+		Game.stepTimer -= Game.stepDuration
 		stepSnakeLogic()
 	end
 
-	if playing then
-		local alpha = state.Settings.SmoothMove and math.clamp(stepTimer / stepDuration, 0, 1) or 1
+	if Game.playing then
+		local alpha = state.Settings.SmoothMove and math.clamp(Game.stepTimer / Game.stepDuration, 0, 1) or 1
 		renderSnakeSmooth(alpha)
-		if buffChanged then updateHUD() end
+		if hudChanged then updateHUD() end
 	end
 end))
 
 -- ============================================================
 -- KẾT NỐI NÚT BẤM, PHÍM TẮT & LƯU KHI ĐÓNG
 -- ============================================================
-playBtn.MouseButton1Click:Connect(openGame)
-restartBtn.MouseButton1Click:Connect(startNewRun)
-goReplayBtn.MouseButton1Click:Connect(startNewRun)
-lobbyBtn.MouseButton1Click:Connect(openLobby)
-goLobbyBtn.MouseButton1Click:Connect(openLobby)
+UI.playBtn.MouseButton1Click:Connect(openGame)
+UI.restartBtn.MouseButton1Click:Connect(startNewRun)
+UI.goReplayBtn.MouseButton1Click:Connect(startNewRun)
+UI.lobbyBtn.MouseButton1Click:Connect(openLobby)
+UI.goLobbyBtn.MouseButton1Click:Connect(openLobby)
 
-pauseBtn.MouseButton1Click:Connect(function()
-	if not playing then return end
-	paused = not paused
-	pauseBtn.Text = paused and "▶" or "II"
+UI.pauseBtn.MouseButton1Click:Connect(function()
+	if not Game.playing then return end
+	Game.paused = not Game.paused
+	UI.pauseBtn.Text = Game.paused and "▶" or "II"
 end)
 
 local function minimizeMenu()
-	if playing then paused = true pauseBtn.Text = "▶" end
+	if Game.playing then Game.paused = true UI.pauseBtn.Text = "▶" end
 	local tw = TweenService:Create(uiScale, TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Scale = 0.05 })
 	tw:Play()
 	tw.Completed:Connect(function()
@@ -2465,22 +2676,22 @@ local function restoreMenu()
 	TweenService:Create(uiScale, TweenInfo.new(0.22, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = calcScale() }):Play()
 end
 
-minBtn.MouseButton1Click:Connect(minimizeMenu)
+UI.minBtn.MouseButton1Click:Connect(minimizeMenu)
 floatBtn.MouseButton1Click:Connect(function()
 	if not floatDragged then restoreMenu() end
 end)
 
 local function destroyMenu()
-	if playing and (runCoins > 0 or runGems > 0 or runScore > 0) then
-		state.Coins += runCoins
-		state.Gems  += runGems
-		if runScore > state.HighScore then state.HighScore = runScore end
+	if Game.playing and (Game.runCoins > 0 or Game.runGems > 0 or Game.runScore > 0) then
+		state.Coins += Game.runCoins
+		state.Gems  += Game.runGems
+		if Game.runScore > state.HighScore then state.HighScore = Game.runScore end
 	end
 	saveData()
 	screenGui:Destroy()
 end
-closeBtn.MouseButton1Click:Connect(destroyMenu)
-exitBtn.MouseButton1Click:Connect(destroyMenu)
+UI.closeBtn.MouseButton1Click:Connect(destroyMenu)
+UI.exitBtn.MouseButton1Click:Connect(destroyMenu)
 
 track(UserInputService.InputBegan:Connect(function(input, gp)
 	if gp then return end
@@ -2490,16 +2701,16 @@ track(UserInputService.InputBegan:Connect(function(input, gp)
 	end
 	if not mainFrame.Visible or not gamePage.Visible then return end
 	if input.KeyCode == Enum.KeyCode.Up or input.KeyCode == Enum.KeyCode.W then
-		queueTurn(0, -1) flashDpadBtn(dUp)
+		queueTurn(0, -1) flashDpadBtn(UI.dUp)
 	elseif input.KeyCode == Enum.KeyCode.Down or input.KeyCode == Enum.KeyCode.S then
-		queueTurn(0, 1) flashDpadBtn(dDown)
+		queueTurn(0, 1) flashDpadBtn(UI.dDown)
 	elseif input.KeyCode == Enum.KeyCode.Left or input.KeyCode == Enum.KeyCode.A then
-		queueTurn(-1, 0) flashDpadBtn(dLeft)
+		queueTurn(-1, 0) flashDpadBtn(UI.dLeft)
 	elseif input.KeyCode == Enum.KeyCode.Right or input.KeyCode == Enum.KeyCode.D then
-		queueTurn(1, 0) flashDpadBtn(dRight)
-	elseif input.KeyCode == Enum.KeyCode.Space and playing then
-		paused = not paused
-		pauseBtn.Text = paused and "▶" or "II"
+		queueTurn(1, 0) flashDpadBtn(UI.dRight)
+	elseif input.KeyCode == Enum.KeyCode.Space and Game.playing then
+		Game.paused = not Game.paused
+		UI.pauseBtn.Text = Game.paused and "▶" or "II"
 	end
 end))
 
@@ -2511,7 +2722,7 @@ if cam then
 end
 
 screenGui.Destroying:Connect(function()
-	playing = false
+	Game.playing = false
 	for _, c in ipairs(connections) do
 		if c.Connected then c:Disconnect() end
 	end
