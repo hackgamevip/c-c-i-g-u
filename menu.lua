@@ -1,5 +1,5 @@
 -- ============================================================
-- SNAKE ARCADE PRO v5.1 - GIAO DIỆN CARTOON ARCADE 3D + 27 SKIN
+-- SNAKE ARCADE PRO v5.1 - GIAO DIỆN CARTOON ARCADE 3D + 27 SKIN
 -- Nút 3D viền đậm + icon vẽ tay + Bảng Xếp Hạng vương miện + Tối ưu Mobile
 -- Giữ nguyên file lưu cũ (không mất tiến trình) | Phím tắt PC: RightShift
 -- ============================================================
