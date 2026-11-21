@@ -1,5 +1,5 @@
 -- ============================================================
--- SNAKE ARCADE v9.4 - THANG HANG SKIN HIEU UNG DOI MAU (RGB/GLITCH LEN BI MAT, SAMURAI LEN THAN THOAI)
+-- SNAKE ARCADE v9.5 - THEM BAC THAN BI + 8 SKIN MOI (56 SKIN) + NUT SAO CHEP CODE
 -- Tu dong luu ngam (giu nguyen tien trinh cu) | Phim tat PC: RightShift
 -- ============================================================
 local _ok, _err = pcall(function()
@@ -68,7 +68,7 @@ end
 -- ============================================================
 -- BAC HIEM & 27 SKIN RAN (HO TRO THEM SKIN BI MAT MUA BANG HONG NGOC SAU NAY)
 -- ============================================================
-local RARITY_ORDER = { "All", "Common", "Rare", "Epic", "Legendary", "Mythic", "Secret" }
+local RARITY_ORDER = { "All", "Common", "Rare", "Epic", "Legendary", "Mythic", "Mystic", "Secret" }
 
 local RARITIES = {
 	All       = { Label = "Tất cả",      Color = Color3.fromRGB(184, 192, 206), BonusText = "" },
@@ -77,6 +77,7 @@ local RARITIES = {
 	Epic      = { Label = "Sử Thi",      Color = Color3.fromRGB(180, 134, 212), BonusText = "+35% Xu" },
 	Legendary = { Label = "Huyền Thoại", Color = Color3.fromRGB(214, 180, 66),  BonusText = "+60% Xu" },
 	Mythic    = { Label = "Thần Thoại",  Color = Color3.fromRGB(212, 98, 122),  BonusText = "+100% Xu & +1 KC/150đ" },
+	Mystic    = { Label = "Thần Bí",     Color = Color3.fromRGB(72, 214, 206),  BonusText = "+350% Xu & +1 KC/120đ" },
 	Secret    = { Label = "Bí Mật",      Color = Color3.fromRGB(214, 92, 232),  BonusText = "+150% Xu & +1 KC/100đ" },
 }
 
@@ -84,6 +85,7 @@ local SKINS = {
 	-- BAC THUONG (THIET KE DON GIAN, KHONG PHU KIEN PHUC TAP)
 	{ Id = "classic_green",  Name = "Rắn Xanh Lá",       Rarity = "Common", CoinMult = 1.00, Price = 0,     Currency = "Coins", HeadColor = Color3.fromRGB(52, 198, 66),  Body1 = Color3.fromRGB(36, 178, 56),  Body2 = Color3.fromRGB(118, 210, 92) },
 	{ Id = "classic_gold",   Name = "Rắn Ong Vàng",      Rarity = "Common", CoinMult = 1.05, Price = 800,   Currency = "Coins", HeadColor = Color3.fromRGB(214, 178, 42), Body1 = Color3.fromRGB(205, 162, 28), Body2 = Color3.fromRGB(36, 32, 30) },
+	{ Id = "mint_slime",     Name = "Rắn Bạc Hà",        Rarity = "Common", CoinMult = 1.08, Price = 1200,  Currency = "Coins", HeadColor = Color3.fromRGB(92, 216, 178), Body1 = Color3.fromRGB(64, 196, 158), Body2 = Color3.fromRGB(162, 224, 204) },
 	{ Id = "watermelon",     Name = "Rắn Dưa Hấu",       Rarity = "Common", CoinMult = 1.10, Price = 1500,  Currency = "Coins", HeadColor = Color3.fromRGB(208, 68, 82),  Body1 = Color3.fromRGB(208, 68, 82),  Body2 = Color3.fromRGB(42, 178, 88), Body3 = Color3.fromRGB(26, 26, 32) },
 	{ Id = "classic_red",    Name = "Rắn Ác Quỷ Đỏ",     Rarity = "Common", CoinMult = 1.15, Price = 2500,  Currency = "Coins", HeadColor = Color3.fromRGB(210, 52, 58),  Body1 = Color3.fromRGB(192, 42, 46),  Body2 = Color3.fromRGB(216, 204, 204), Style = "Devil", EyeColor = Color3.fromRGB(22, 12, 16) },
 
@@ -91,6 +93,7 @@ local SKINS = {
 	{ Id = "classic_blue",   Name = "Rắn Băng Tuyết",    Rarity = "Rare",   CoinMult = 1.20, Price = 4500,  Currency = "Coins", HeadColor = Color3.fromRGB(48, 152, 215), Body1 = Color3.fromRGB(34, 124, 200), Body2 = Color3.fromRGB(122, 192, 218), Style = "Ice" },
 	{ Id = "koi_fish",       Name = "Rắn Cá Koi",        Rarity = "Rare",   CoinMult = 1.25, Price = 6500,  Currency = "Coins", HeadColor = Color3.fromRGB(216, 212, 206),Body1 = Color3.fromRGB(214, 108, 42), Body2 = Color3.fromRGB(214, 210, 205), Body3 = Color3.fromRGB(198, 52, 46), Style = "Koi" },
 	{ Id = "panda",          Name = "Rắn Gấu Trúc",      Rarity = "Rare",   CoinMult = 1.30, Price = 9000,  Currency = "Coins", HeadColor = Color3.fromRGB(214, 216, 222),Body1 = Color3.fromRGB(214, 216, 222),Body2 = Color3.fromRGB(32, 34, 44), Style = "Panda" },
+	{ Id = "bee_queen",      Name = "Rắn Ong Chúa",      Rarity = "Rare",   CoinMult = 1.32, Price = 10500, Currency = "Coins", HeadColor = Color3.fromRGB(222, 186, 44), Body1 = Color3.fromRGB(218, 176, 36), Body2 = Color3.fromRGB(34, 30, 32), GlowColor = Color3.fromRGB(216, 184, 52), Style = "Crown" },
 	{ Id = "classic_purple", Name = "Rắn Hắc Long Tím",  Rarity = "Rare",   CoinMult = 1.35, Price = 12000, Currency = "Coins", HeadColor = Color3.fromRGB(152, 74, 215), Body1 = Color3.fromRGB(132, 54, 198), Body2 = Color3.fromRGB(186, 128, 216), Style = "DarkHorn" },
 	{ Id = "zombie",         Name = "Rắn Zombie",        Rarity = "Rare",   CoinMult = 1.40, Price = 15000, Currency = "Coins", HeadColor = Color3.fromRGB(96, 168, 90),  Body1 = Color3.fromRGB(76, 152, 70),  Body2 = Color3.fromRGB(148, 198, 62), Body3 = Color3.fromRGB(112, 72, 66), Style = "Zombie" },
 	{ Id = "free_emerald",   Name = "Ngọc Lục Bảo",      Rarity = "Rare",   CoinMult = 1.45, GemAdd = 1, FreeOnly = true, UnlockText = "ĐIỂM DANH NGÀY 7", Price = 0, Currency = "Free", HeadColor = Color3.fromRGB(32, 192, 126), Body1 = Color3.fromRGB(22, 156, 102), Body2 = Color3.fromRGB(112, 218, 164), Body3 = Color3.fromRGB(212, 188, 72), GlowColor = Color3.fromRGB(64, 206, 144), Style = "Ice" },
@@ -100,6 +103,7 @@ local SKINS = {
 	{ Id = "kitty",          Name = "Rắn Mèo Nơ Hồng",   Rarity = "Epic",   CoinMult = 1.50, Price = 22000, Currency = "Coins", HeadColor = Color3.fromRGB(220, 202, 212),Body1 = Color3.fromRGB(208, 104, 158),Body2 = Color3.fromRGB(222, 194, 208), Style = "Kitty" },
 	{ Id = "pumpkin",        Name = "Rắn Bí Ngô",        Rarity = "Epic",   CoinMult = 1.60, Price = 32000, Currency = "Coins", HeadColor = Color3.fromRGB(212, 108, 32), Body1 = Color3.fromRGB(196, 86, 22),  Body2 = Color3.fromRGB(138, 52, 20), Style = "Pumpkin", EyeColor = Color3.fromRGB(214, 196, 110) },
 	{ Id = "deer_dragon",    Name = "Thanh Long Hươu",   Rarity = "Epic",   CoinMult = 1.65, GemAdd = 1, Price = 55,  Currency = "Gems",  HeadColor = Color3.fromRGB(30, 176, 192), Body1 = Color3.fromRGB(22, 148, 176), Body2 = Color3.fromRGB(20, 52, 76), Style = "Antlers", GlowColor = Color3.fromRGB(56, 182, 204) },
+	{ Id = "sakura_snake",   Name = "Rắn Hoa Anh Đào",   Rarity = "Epic",   CoinMult = 1.70, GemAdd = 1, Price = 70,  Currency = "Gems",  HeadColor = Color3.fromRGB(226, 168, 196),Body1 = Color3.fromRGB(218, 132, 176),Body2 = Color3.fromRGB(228, 196, 212), Body3 = Color3.fromRGB(196, 86, 142), GlowColor = Color3.fromRGB(222, 142, 184), Style = "Kitty" },
 	{ Id = "unicorn",        Name = "Rắn Kỳ Lân",        Rarity = "Epic",   CoinMult = 1.75, GemAdd = 1, Price = 85,  Currency = "Gems",  HeadColor = Color3.fromRGB(218, 204, 222),Body1 = Color3.fromRGB(206, 142, 214),Body2 = Color3.fromRGB(142, 206, 214), Body3 = Color3.fromRGB(216, 204, 126), Style = "Unicorn", GlowColor = Color3.fromRGB(196, 118, 212) },
 	{ Id = "skull",          Name = "Rắn Đầu Lâu",       Rarity = "Epic",   CoinMult = 1.85, GemAdd = 1, Price = 120, Currency = "Gems",  HeadColor = Color3.fromRGB(210, 210, 216),Body1 = Color3.fromRGB(28, 28, 38),   Body2 = Color3.fromRGB(206, 206, 214), Style = "Skull", EyeColor = Color3.fromRGB(206, 54, 54) },
 	{ Id = "free_sunset",    Name = "Hỏa Hoàng Hôn",     Rarity = "Epic",   CoinMult = 1.90, GemAdd = 2, RubyChance = 1, FreeOnly = true, UnlockText = "ONLINE 60 PHÚT", Price = 0, Currency = "Free", HeadColor = Color3.fromRGB(218, 92, 68), Body1 = Color3.fromRGB(204, 64, 96), Body2 = Color3.fromRGB(222, 152, 54), Body3 = Color3.fromRGB(132, 46, 124), GlowColor = Color3.fromRGB(216, 118, 66), Style = "Flame" },
@@ -109,6 +113,7 @@ local SKINS = {
 	{ Id = "king_snake",     Name = "Vua Rắn Hoàng Kim", Rarity = "Legendary", CoinMult = 1.90, GemAdd = 1, Price = 45000, Currency = "Coins", HeadColor = Color3.fromRGB(214, 174, 42), Body1 = Color3.fromRGB(202, 152, 26), Body2 = Color3.fromRGB(216, 200, 118), GlowColor = Color3.fromRGB(206, 172, 46), Style = "Crown" },
 	{ Id = "fire_dragon",    Name = "Rồng Dung Nham",    Rarity = "Legendary", CoinMult = 2.10, GemAdd = 2, RubyChance = 1, Price = 200, Currency = "Gems", HeadColor = Color3.fromRGB(48, 36, 44),   Body1 = Color3.fromRGB(36, 26, 30),   Body2 = Color3.fromRGB(212, 108, 32), Body3 = Color3.fromRGB(202, 68, 48), EyeColor = Color3.fromRGB(218, 122, 34), GlowColor = Color3.fromRGB(210, 132, 62), Style = "Flame" },
 	{ Id = "ghost_snake",    Name = "Rắn Bóng Ma",       Rarity = "Legendary", CoinMult = 2.25, GemAdd = 2, RubyChance = 1, Price = 260, Currency = "Gems", HeadColor = Color3.fromRGB(196, 212, 222),Body1 = Color3.fromRGB(162, 198, 216),Body2 = Color3.fromRGB(206, 216, 224), BodyAlpha = 0.34, GlowColor = Color3.fromRGB(126, 174, 212), EyeColor = Color3.fromRGB(62, 166, 210) },
+	{ Id = "storm_dragon",   Name = "Rồng Sấm Sét",      Rarity = "Legendary", CoinMult = 2.35, GemAdd = 3, RubyChance = 1, Price = 300, Currency = "Gems", HeadColor = Color3.fromRGB(36, 88, 196),  Body1 = Color3.fromRGB(30, 72, 172),  Body2 = Color3.fromRGB(224, 196, 56), Body3 = Color3.fromRGB(82, 186, 224), EyeColor = Color3.fromRGB(232, 214, 84), GlowColor = Color3.fromRGB(96, 192, 228), Style = "Flame" },
 	{ Id = "ice_dragon",     Name = "Rồng Pha Lê Băng",  Rarity = "Legendary", CoinMult = 2.40, GemAdd = 3, RubyChance = 2, Price = 340, Currency = "Gems", HeadColor = Color3.fromRGB(64, 182, 218), Body1 = Color3.fromRGB(26, 148, 204), Body2 = Color3.fromRGB(184, 214, 222), GlowColor = Color3.fromRGB(112, 188, 216), Style = "Ice" },
 	{ Id = "free_aurora",    Name = "Cực Quang Băng",    Rarity = "Legendary", CoinMult = 2.55, GemAdd = 3, RubyChance = 2, FreeOnly = true, UnlockText = "ĐẠT CẤP 30", Price = 0, Currency = "Free", HeadColor = Color3.fromRGB(42, 186, 212), Body1 = Color3.fromRGB(54, 196, 156), Body2 = Color3.fromRGB(122, 96, 218), Body3 = Color3.fromRGB(186, 220, 228), EyeColor = Color3.fromRGB(196, 226, 232), GlowColor = Color3.fromRGB(72, 204, 186), Style = "Star" },
 	{ Id = "code_shadow",    Name = "Rắn Bóng Tối",      Rarity = "Legendary", CoinMult = 2.00, GemAdd = 2, FreeOnly = true, UnlockText = "NHẬP GIFTCODE", Price = 0, Currency = "Free", HeadColor = Color3.fromRGB(34, 36, 52), Body1 = Color3.fromRGB(26, 28, 44), Body2 = Color3.fromRGB(118, 86, 206), Body3 = Color3.fromRGB(72, 56, 138), EyeColor = Color3.fromRGB(168, 118, 224), GlowColor = Color3.fromRGB(132, 92, 214), Style = "DarkHorn" },
@@ -122,6 +127,12 @@ local SKINS = {
 	{ Id = "free_celestial", Name = "Thần Long Cực Hạn", Rarity = "Mythic", CoinMult = 4.20, GemAdd = 6, GemBonus = true, RubyChance = 5, RubyAdd = 1, FreeOnly = true, UnlockText = "KỶ LỤC 1,500Đ", Price = 0, Currency = "Free", HeadColor = Color3.fromRGB(32, 42, 92), Body1 = Color3.fromRGB(48, 156, 212), Body2 = Color3.fromRGB(218, 184, 56), Body3 = Color3.fromRGB(214, 222, 232), EyeColor = Color3.fromRGB(224, 204, 92), GlowColor = Color3.fromRGB(92, 198, 224), Style = "Cosmic" },
 	{ Id = "cosmic_god",     Name = "Thần Vũ Trụ",       Rarity = "Mythic", CoinMult = 4.35, GemAdd = 7, GemBonus = true, RubyChance = 5, Price = 1850, Currency = "Gems", HeadColor = Color3.fromRGB(28, 16, 68),   Body1 = Color3.fromRGB(34, 18, 86),   Body2 = Color3.fromRGB(208, 176, 48), Body3 = Color3.fromRGB(154, 86, 206), EyeColor = Color3.fromRGB(214, 196, 110), GlowColor = Color3.fromRGB(206, 174, 52), Style = "Cosmic" },
 	{ Id = "void_emperor",   Name = "Đế Vương Hư Không", Rarity = "Mythic", CoinMult = 4.70, GemAdd = 8, GemBonus = true, RubyChance = 6, Price = 2400, Currency = "Gems", HeadColor = Color3.fromRGB(20, 14, 34),   Body1 = Color3.fromRGB(28, 18, 48),   Body2 = Color3.fromRGB(132, 54, 196), Body3 = Color3.fromRGB(76, 32, 132), Style = "Void", EyeColor = Color3.fromRGB(192, 116, 216), GlowColor = Color3.fromRGB(154, 78, 212) },
+
+	-- BAC THAN BI (HIEU UNG DOI MAU LANG KINH, NHAT THUC, THOI GIAN, TINH LINH)
+	{ Id = "mystic_prism",   Name = "Rắn Lăng Kính",     Rarity = "Mystic", CoinMult = 4.90, GemAdd = 8,  GemBonus = true, GemStep = 120, RubyChance = 6, RubyAdd = 1, Price = 2800, Currency = "Gems",   Rainbow = true, HeadColor = Color3.fromRGB(96, 214, 218), Body1 = Color3.fromRGB(96, 214, 218), Body2 = Color3.fromRGB(186, 92, 224), Body3 = Color3.fromRGB(224, 192, 72), GlowColor = Color3.fromRGB(118, 220, 216), Style = "Star" },
+	{ Id = "mystic_eclipse", Name = "Nhật Thực Hắc Kim", Rarity = "Mystic", CoinMult = 5.10, GemAdd = 8,  GemBonus = true, GemStep = 120, RubyChance = 7, RubyAdd = 1, Price = 10,   Currency = "Rubies", HeadColor = Color3.fromRGB(20, 18, 28),   Body1 = Color3.fromRGB(24, 20, 32),   Body2 = Color3.fromRGB(226, 176, 44), Body3 = Color3.fromRGB(168, 86, 26),  EyeColor = Color3.fromRGB(234, 192, 62),  GlowColor = Color3.fromRGB(228, 182, 52),  Style = "Cosmic" },
+	{ Id = "mystic_chrono",  Name = "Thần Thời Gian",    Rarity = "Mystic", CoinMult = 5.40, GemAdd = 9,  GemBonus = true, GemStep = 115, RubyChance = 8, RubyAdd = 1, Price = 15,   Currency = "Rubies", Glitch = true, HeadColor = Color3.fromRGB(24, 44, 62),   Body1 = Color3.fromRGB(56, 204, 198), Body2 = Color3.fromRGB(218, 184, 58), Body3 = Color3.fromRGB(28, 48, 76),   EyeColor = Color3.fromRGB(112, 226, 218), GlowColor = Color3.fromRGB(72, 214, 206),  Style = "Void" },
+	{ Id = "mystic_astral",  Name = "Tinh Linh Thần Bí", Rarity = "Mystic", CoinMult = 5.75, GemAdd = 10, GemBonus = true, GemStep = 110, RubyChance = 9, RubyAdd = 1, Price = 22,   Currency = "Rubies", BodyAlpha = 0.28, HeadColor = Color3.fromRGB(92, 214, 212), Body1 = Color3.fromRGB(68, 196, 206), Body2 = Color3.fromRGB(168, 126, 224),Body3 = Color3.fromRGB(212, 226, 232), EyeColor = Color3.fromRGB(216, 232, 236), GlowColor = Color3.fromRGB(96, 220, 216),  Style = "Angel" },
 
 	-- BAC BI MAT (PET HAC AM + CAC SKIN CO HIEU UNG DOI MAU RGB / GLITCH + FREE MAX CAP + ADMIN VIP)
 	{ Id = "secret_shades",  Name = "Hắc Xà Ngầu Lòi",    Rarity = "Secret", CoinMult = 3.40, GemAdd = 5, GemBonus = true, GemStep = 100, RubyChance = 5,  RubyAdd = 0, Price = 8,   Currency = "Rubies", HeadColor = Color3.fromRGB(24, 24, 30),  Body1 = Color3.fromRGB(26, 26, 34), Body2 = Color3.fromRGB(204, 208, 218), Body3 = Color3.fromRGB(68, 72, 86),   EyeColor = Color3.fromRGB(220, 224, 232), GlowColor = Color3.fromRGB(186, 192, 208), Style = "SecretShades" },
@@ -2626,11 +2637,11 @@ local function openShop()
 		local isSel = (shopFilter == key)
 		local fBtn = makeArcadeBtn(
 			UI.modalFilterBar, rInfo.Label,
-			UDim2.fromOffset(75, 28), nil,
+			UDim2.fromOffset(66, 28), nil,
 			isSel and Color3.fromRGB(134, 72, 214) or Color3.fromRGB(40, 46, 76),
 			isSel and Color3.fromRGB(86, 38, 162) or Color3.fromRGB(26, 30, 54),
 			8,
-			{ TextSize = 11, TextColor = isSel and THEME.TextMain or rInfo.Color, ZIndex = 34, Depth = 2, Stroke = 1.6 }
+			{ TextSize = 10, TextColor = isSel and THEME.TextMain or rInfo.Color, ZIndex = 34, Depth = 2, Stroke = 1.6 }
 		)
 		fBtn.MouseButton1Click:Connect(function()
 			shopFilter = key
@@ -3617,7 +3628,7 @@ local function openCodeList()
 	tipTxt.Size = UDim2.new(1, -156, 1, 0)
 	tipTxt.Position = UDim2.fromOffset(4, 0)
 	tipTxt.BackgroundTransparency = 1
-	tipTxt.Text = "Bấm NHẬN NGAY hoặc nhập mã trong Cài Đặt"
+	tipTxt.Text = "Bấm SAO CHÉP rồi dán vào ô nhập mã trong Cài Đặt"
 	tipTxt.TextColor3 = THEME.TextMuted
 	tipTxt.Font = THEME.FontBody
 	tipTxt.TextSize = 12
@@ -3684,29 +3695,23 @@ local function openCodeList()
 			dLbl.ZIndex = 34
 			dLbl.Parent = row
 
-			local useBtn = makeArcadeBtn(
-				row, used and "ĐÃ DÙNG" or "NHẬN NGAY",
+			local copyBtn, copyLbl = makeArcadeBtn(
+				row, "SAO CHÉP",
 				UDim2.fromOffset(110, 34), UDim2.new(1, -120, 0, 11),
-				used and Color3.fromRGB(76, 86, 116) or Color3.fromRGB(64, 194, 92),
-				used and Color3.fromRGB(52, 58, 82) or Color3.fromRGB(28, 134, 58),
+				Color3.fromRGB(48, 156, 218), Color3.fromRGB(26, 92, 182),
 				9, { TextSize = 11, ZIndex = 35, Depth = 3, Stroke = 1.8 }
 			)
-			useBtn.MouseButton1Click:Connect(function()
-				if state.UsedCodes[codeKey] then return end
-				state.UsedCodes[codeKey] = true
-				state.Coins  += (reward.Coins or 0)
-				state.Gems   += (reward.Gems or 0)
-				state.Rubies += (reward.Rubies or 0)
-				state.Spins  += (reward.Spins or 0)
-				if reward.SkinId then
-					state.OwnedSkins[reward.SkinId] = true
-					state.EquippedSkin = reward.SkinId
-					rebuildLobbyPreview()
+			copyBtn.MouseButton1Click:Connect(function()
+				if typeof(setclipboard) == "function" then
+					pcall(setclipboard, codeKey)
+				elseif typeof(toclipboard) == "function" then
+					pcall(toclipboard, codeKey)
 				end
-				updateTopStats()
-				saveData()
-				showToast("Đã nhận code " .. codeKey .. ": " .. reward.Desc, THEME.TextGreen, 3.5)
-				openCodeList()
+				copyLbl.Text = "ĐÃ CHÉP"
+				showToast("Đã sao chép mã: " .. codeKey, THEME.TextBlue, 2.5)
+				task.delay(1.1, function()
+					if copyLbl and copyLbl.Parent then copyLbl.Text = "SAO CHÉP" end
+				end)
 			end)
 		end
 	end
@@ -5157,5 +5162,5 @@ updateTopStats()
 if not hadSavedData then saveData() end
 end)
 if not _ok then
-	warn("[SnakeArcade v9.4 ERROR]: " .. tostring(_err))
+	warn("[SnakeArcade v9.5 ERROR]: " .. tostring(_err))
 end
