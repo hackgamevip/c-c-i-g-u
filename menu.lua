@@ -1,6 +1,6 @@
 --[[
     ========================================================================
-    DÒ MÌN - STANDALONE v2.2 (ĐỒ HỌA HOẠT HÌNH 3D ROYAL BLUE)
+    DÒ MÌN - STANDALONE v2.3 (ĐỒ HỌA HOẠT HÌNH 3D ROYAL BLUE)
     Game Dò Mìn 2D Toàn Màn Hình cho Roblox Mobile & PC
     - Nâng cấp đồ họa 3D Arcade Royal Blue: Logo Dò Mìn, Bom, Cờ, Cúp Vàng, Nổ Bom
     - Tích hợp sẵn ảnh sprite từ bộ đồ họa (writefile + getcustomasset) có dự phòng vector
@@ -1428,7 +1428,7 @@ do
     -- Hàng 1: 2 nút đồ họa lớn (Gộp Mở ô / Cắm cờ thành 1 ô + Nút Gợi ý bóng đèn 10 Xu)
     local GraphicRow = Instance.new("Frame")
     GraphicRow.LayoutOrder = 1
-    GraphicRow.Size = UDim2.new(1, 0, 0, 106)
+    GraphicRow.Size = UDim2.new(1, 0, 0, 66)
     GraphicRow.BackgroundTransparency = 1
     GraphicRow.Parent = SidePanel
 
@@ -1441,24 +1441,24 @@ do
         card.AutoButtonColor = false
         card.Text = ""
         card.Parent = GraphicRow
-        addCorner(card, 12)
-        local st = addStroke(card, UITheme.RimBlue, 1.8, 0.1)
+        addCorner(card, 10)
+        local st = addStroke(card, UITheme.RimBlue, 1.5, 0.1)
 
         local iconHolder = Instance.new("Frame")
-        iconHolder.Size = UDim2.new(0, 74, 0, 74)
+        iconHolder.Size = UDim2.new(0, 40, 0, 40)
         iconHolder.AnchorPoint = Vector2.new(0.5, 0)
-        iconHolder.Position = UDim2.new(0.5, 0, 0, 6)
+        iconHolder.Position = UDim2.new(0.5, 0, 0, 5)
         iconHolder.BackgroundTransparency = 1
         iconHolder.ZIndex = 4
         iconHolder.Parent = card
 
         local badge = Instance.new("TextLabel")
-        badge.Size = UDim2.new(1, -8, 0, 20)
-        badge.Position = UDim2.new(0, 4, 1, -23)
+        badge.Size = UDim2.new(1, -6, 0, 16)
+        badge.Position = UDim2.new(0, 3, 1, -18)
         badge.BackgroundTransparency = 1
         badge.Text = badgeText
         badge.Font = FONT_MAIN
-        badge.TextSize = 12
+        badge.TextSize = 11
         badge.TextColor3 = badgeColor or UITheme.TextPrimary
         badge.ZIndex = 5
         badge.Parent = card
