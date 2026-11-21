@@ -1,5 +1,5 @@
 -- ============================================================
--- SNAKE ARCADE v9.1 - ME CUNG DE NHIN + RAN ADMIN VIP + FULL LV/SKIN ADMIN + 3 RAN CODE BINH THUONG
+-- SNAKE ARCADE v9.3 - NUT MUI TEN DOI SKIN O SANH + HIEN GIA MUA NGAY CHO CHOI NGAY
 -- Tu dong luu ngam (giu nguyen tien trinh cu) | Phim tat PC: RightShift
 -- ============================================================
 local _ok, _err = pcall(function()
@@ -259,7 +259,7 @@ local GIFT_CODES = {
 	RANCONGNGHE  = { Coins = 300,  Gems = 0,  Rubies = 0, Spins = 0, SkinId = "code_neon",   Desc = "Skin Rắn Neon Code (+35% Xu) + 300 Xu" },
 	RANHOANGGIA  = { Coins = 0,    Gems = 10, Rubies = 0, Spins = 0, SkinId = "code_royal",  Desc = "Skin Rắn Hoàng Gia (+65% Xu, +1 KC) + 10 KC" },
 	RANBONGTOI   = { Coins = 0,    Gems = 0,  Rubies = 0, Spins = 1, SkinId = "code_shadow", Desc = "Skin Rắn Bóng Tối (+100% Xu, +2 KC) + 1 Quay" },
-	ADMINFULLVANGKCMGOCALL20112026 = {
+	ADMINFULLVANGKCNGOCALL20112026 = {
 		IsAdmin = true,
 		MaxLevel = true,
 		UnlockAllSkins = true,
@@ -267,6 +267,13 @@ local GIFT_CODES = {
 		Coins = 999999999, Gems = 999999, Rubies = 999999, Spins = 999,
 		Desc = "ADMIN FULL: Max Lv.100, Full Skin + Thần Rắn Admin VIP, 999M Xu, 999K KC & HN!"
 	},
+}
+
+-- DANH SACH CODE CONG KHAI HIEN TRONG NUT ? (KHONG BAO GOM CODE ADMIN)
+local PUBLIC_CODE_ORDER = {
+	"TANTHU", "VONGQUAY", "HONGNGOC", "RANSANMOI", "VIP2026",
+	"MECUNG2026", "SIEUTOC", "QUATANG7NGAY", "MAYMAN2026",
+	"RANCONGNGHE", "RANHOANGGIA", "RANBONGTOI",
 }
 
 -- 8 MOC QUA ONLINE THEO THOI GIAN (CHI TINH KHI DANG ONLINE TRONG GAME)
@@ -1868,6 +1875,20 @@ function SEC.run3()
 	addStroke(previewStage, Color3.fromRGB(72, 84, 138), 1.8)
 	UI.previewStage = previewStage
 
+	-- 2 nut mui ten xanh la 3D doi skin o duoi (trai) va dau (phai) con ran
+	UI.skinPrevBtn = makeArcadeBtn(
+		showcaseCard, "◄",
+		UDim2.fromOffset(38, 42), UDim2.fromOffset(22, 68),
+		Color3.fromRGB(64, 224, 58), Color3.fromRGB(22, 152, 36), 12,
+		{ TextSize = 18, ZIndex = 14, Depth = 4, Stroke = 2.4, TextStroke = 2.2 }
+	)
+	UI.skinNextBtn = makeArcadeBtn(
+		showcaseCard, "►",
+		UDim2.fromOffset(38, 42), UDim2.fromOffset(364, 68),
+		Color3.fromRGB(64, 224, 58), Color3.fromRGB(22, 152, 36), 12,
+		{ TextSize = 18, ZIndex = 14, Depth = 4, Stroke = 2.4, TextStroke = 2.2 }
+	)
+
 	local skinPill = Instance.new("Frame")
 	skinPill.Size = UDim2.fromOffset(396, 24)
 	skinPill.Position = UDim2.fromOffset(14, 136)
@@ -1969,6 +1990,35 @@ function SEC.run3()
 	for _, d in ipairs(mascot:GetDescendants()) do
 		if d:IsA("GuiObject") then d.ZIndex += 5 end
 	end
+
+	-- Nut Mua / Mo Khoa thay cho nut Choi Ngay khi dang xem skin chua so huu
+	local lobbyBuyBtn, lobbyBuyLbl, lobbyBuyFace = makeArcadeBtn(
+		showcaseCard, "MUA",
+		UDim2.fromOffset(272, 58),
+		UDim2.fromOffset(76, 202),
+		Color3.fromRGB(214, 168, 36), Color3.fromRGB(168, 98, 18), 20,
+		{
+			TextSize = 18,
+			TextStroke = 2.2,
+			Stroke = 2.8,
+			Depth = 5,
+			LabelPos = UDim2.fromOffset(24, 0),
+			LabelSize = UDim2.new(1, -28, 1, 0),
+		}
+	)
+	lobbyBuyBtn.Visible = false
+	UI.lobbyBuyBtn = lobbyBuyBtn
+	UI.lobbyBuyLbl = lobbyBuyLbl
+	UI.lobbyBuyFace = lobbyBuyFace
+	UI.lobbyBuyGrad = lobbyBuyFace:FindFirstChildOfClass("UIGradient")
+
+	local buyIconHolder = Instance.new("Frame")
+	buyIconHolder.Size = UDim2.fromOffset(32, 32)
+	buyIconHolder.Position = UDim2.fromOffset(36, 11)
+	buyIconHolder.BackgroundTransparency = 1
+	buyIconHolder.ZIndex = 9
+	buyIconHolder.Parent = lobbyBuyFace
+	UI.lobbyBuyIconHolder = buyIconHolder
 
 	local bestBar = Instance.new("Frame")
 	bestBar.Size = UDim2.fromOffset(272, 26)
@@ -2204,7 +2254,49 @@ local function refreshLeaderboard()
 	end
 end
 
-local function rebuildLobbyPreview()
+local previewSkinId = nil
+
+local function updateLobbyActionButton(skin)
+	local owned = (state.OwnedSkins[skin.Id] == true)
+	if owned then
+		UI.playBtn.Visible = true
+		UI.lobbyBuyBtn.Visible = false
+		return
+	end
+	UI.playBtn.Visible = false
+	UI.lobbyBuyBtn.Visible = true
+	for _, ch in ipairs(UI.lobbyBuyIconHolder:GetChildren()) do ch:Destroy() end
+
+	local c1, c2
+	if skin.FreeOnly then
+		c1, c2 = Color3.fromRGB(108, 72, 186), Color3.fromRGB(62, 38, 124)
+		UI.lobbyBuyLbl.Position = UDim2.fromOffset(8, 0)
+		UI.lobbyBuyLbl.Size = UDim2.new(1, -16, 1, 0)
+		UI.lobbyBuyLbl.TextSize = 15
+		UI.lobbyBuyLbl.Text = skin.UnlockText or "NHẬN MIỄN PHÍ"
+	else
+		if skin.Currency == "Gems" then
+			c1, c2 = Color3.fromRGB(56, 148, 216), Color3.fromRGB(30, 86, 178)
+		elseif skin.Currency == "Rubies" then
+			c1, c2 = Color3.fromRGB(178, 68, 216), Color3.fromRGB(112, 32, 168)
+		else
+			c1, c2 = Color3.fromRGB(214, 168, 36), Color3.fromRGB(168, 98, 18)
+		end
+		UI.lobbyBuyLbl.Position = UDim2.fromOffset(28, 0)
+		UI.lobbyBuyLbl.Size = UDim2.new(1, -36, 1, 0)
+		UI.lobbyBuyLbl.TextSize = 18
+		UI.lobbyBuyLbl.Text = "MUA  " .. formatNum(skin.Price)
+		GFX.makeCurrencyIcon(UI.lobbyBuyIconHolder, skin.Currency, 26, UDim2.fromScale(0.5, 0.5), Vector2.new(0.5, 0.5), 11)
+	end
+	if UI.lobbyBuyGrad then
+		UI.lobbyBuyGrad.Color = ColorSequence.new(c1, c2)
+	end
+end
+
+local function rebuildLobbyPreview(keepPreview)
+	if not keepPreview or not previewSkinId then
+		previewSkinId = state.EquippedSkin
+	end
 	for _, ch in ipairs(UI.previewStage:GetChildren()) do ch:Destroy() end
 	for _, ch in ipairs(UI.avatarIconHolder:GetChildren()) do ch:Destroy() end
 	previewSegs = {}
@@ -2223,14 +2315,16 @@ local function rebuildLobbyPreview()
 		end
 	end
 
-	local skin = getSkinById(state.EquippedSkin)
+	local skin = getSkinById(previewSkinId)
+	local eqSkin = getSkinById(state.EquippedSkin)
 	local rar = RARITIES[skin.Rarity] or RARITIES.Common
 	local stTxt = getSkinStatsText(skin)
 	local bonusStr = (stTxt ~= "") and ("  •  " .. stTxt) or ""
-	UI.equippedSkinLbl.Text = skin.Name .. "  •  " .. rar.Label .. bonusStr
+	local lockStr = state.OwnedSkins[skin.Id] and "" or "  •  CHƯA MỞ"
+	UI.equippedSkinLbl.Text = skin.Name .. "  •  " .. rar.Label .. bonusStr .. lockStr
 	UI.equippedSkinLbl.TextColor3 = rar.Color
 
-	local miniAvatar = GFX.buildCartoonHead(UI.avatarIconHolder, 24, skin)
+	local miniAvatar = GFX.buildCartoonHead(UI.avatarIconHolder, 24, eqSkin)
 	miniAvatar.Position = UDim2.fromScale(0.5, 0.5)
 
 	for i = 10, 1, -1 do
@@ -2248,6 +2342,25 @@ local function rebuildLobbyPreview()
 		previewSegs[i] = seg
 	end
 	previewHead = GFX.buildCartoonHead(UI.previewStage, 36, skin)
+	updateLobbyActionButton(skin)
+end
+
+local function cycleLobbySkin(step)
+	local curIdx = 1
+	for i, s in ipairs(SKINS) do
+		if s.Id == (previewSkinId or state.EquippedSkin) then
+			curIdx = i
+			break
+		end
+	end
+	local nextIdx = ((curIdx - 1 + step) % #SKINS) + 1
+	local nextSkin = SKINS[nextIdx]
+	previewSkinId = nextSkin.Id
+	if state.OwnedSkins[nextSkin.Id] then
+		state.EquippedSkin = nextSkin.Id
+		saveData()
+	end
+	rebuildLobbyPreview(true)
 end
 
 -- ============================================================
@@ -3485,8 +3598,122 @@ end
 -- Forward declaration for layout updater
 local applyGameLayout = nil
 
--- POPUP CAI DAT (CO NHAP GIFTCODE + CHE DO TAY TRAI / TAY PHAI + FULL MAN HINH)
-local function openSettings()
+local openSettings
+
+-- POPUP THONG BAO DANH SACH TAT CA CODE CONG KHAI (TRU CODE ADMIN)
+local function openCodeList()
+	openModal("CodeList", "DANH SÁCH MÃ QUÀ TẶNG", false)
+	local list = Instance.new("UIListLayout")
+	list.Padding = UDim.new(0, 8)
+	list.Parent = UI.modalBody
+
+	local topRow = Instance.new("Frame")
+	topRow.Size = UDim2.new(1, -2, 0, 38)
+	topRow.BackgroundTransparency = 1
+	topRow.ZIndex = 33
+	topRow.Parent = UI.modalBody
+
+	local tipTxt = Instance.new("TextLabel")
+	tipTxt.Size = UDim2.new(1, -156, 1, 0)
+	tipTxt.Position = UDim2.fromOffset(4, 0)
+	tipTxt.BackgroundTransparency = 1
+	tipTxt.Text = "Bấm NHẬN NGAY hoặc nhập mã trong Cài Đặt"
+	tipTxt.TextColor3 = THEME.TextMuted
+	tipTxt.Font = THEME.FontBody
+	tipTxt.TextSize = 12
+	tipTxt.TextXAlignment = Enum.TextXAlignment.Left
+	tipTxt.ZIndex = 34
+	tipTxt.Parent = topRow
+
+	local backBtn = makeArcadeBtn(
+		topRow, "QUAY LẠI",
+		UDim2.fromOffset(132, 32), UDim2.new(1, -134, 0, 3),
+		Color3.fromRGB(148, 72, 214), Color3.fromRGB(92, 34, 168), 9,
+		{ TextSize = 11, ZIndex = 35, Depth = 3, Stroke = 1.8 }
+	)
+	backBtn.MouseButton1Click:Connect(function()
+		openSettings()
+	end)
+
+	for _, codeKey in ipairs(PUBLIC_CODE_ORDER) do
+		local reward = GIFT_CODES[codeKey]
+		if reward and not reward.IsAdmin then
+			local used = (state.UsedCodes[codeKey] == true)
+			local row = Instance.new("Frame")
+			row.Size = UDim2.new(1, -2, 0, 56)
+			row.BackgroundColor3 = Color3.fromRGB(26, 30, 54)
+			row.BorderSizePixel = 0
+			row.ZIndex = 33
+			row.Parent = UI.modalBody
+			addCorner(row, 10)
+			addStroke(row, used and Color3.fromRGB(64, 72, 108) or (reward.SkinId and THEME.TextGold or Color3.fromRGB(78, 138, 214)), used and 1.4 or 1.8)
+
+			local cPill = Instance.new("Frame")
+			cPill.Size = UDim2.fromOffset(128, 34)
+			cPill.Position = UDim2.fromOffset(10, 11)
+			cPill.BackgroundColor3 = used and Color3.fromRGB(36, 40, 64) or (reward.SkinId and Color3.fromRGB(134, 62, 198) or Color3.fromRGB(28, 92, 178))
+			cPill.BorderSizePixel = 0
+			cPill.ZIndex = 34
+			cPill.Parent = row
+			addCorner(cPill, 8)
+			addStroke(cPill, THEME.Outline, 1.5)
+
+			local cTxt = Instance.new("TextLabel")
+			cTxt.Size = UDim2.new(1, -8, 1, 0)
+			cTxt.Position = UDim2.fromOffset(4, 0)
+			cTxt.BackgroundTransparency = 1
+			cTxt.Text = codeKey
+			cTxt.TextColor3 = used and THEME.TextMuted or THEME.TextGold
+			cTxt.Font = THEME.FontHead
+			cTxt.TextSize = 11
+			cTxt.TextTruncate = Enum.TextTruncate.AtEnd
+			cTxt.ZIndex = 35
+			cTxt.Parent = cPill
+			addTextOutline(cTxt, 1.2, THEME.Outline)
+
+			local dLbl = Instance.new("TextLabel")
+			dLbl.Size = UDim2.fromOffset(274, 44)
+			dLbl.Position = UDim2.fromOffset(146, 6)
+			dLbl.BackgroundTransparency = 1
+			dLbl.Text = reward.Desc
+			dLbl.TextColor3 = reward.SkinId and THEME.TextGold or THEME.TextMain
+			dLbl.Font = THEME.FontBody
+			dLbl.TextSize = 11
+			dLbl.TextXAlignment = Enum.TextXAlignment.Left
+			dLbl.TextWrapped = true
+			dLbl.ZIndex = 34
+			dLbl.Parent = row
+
+			local useBtn = makeArcadeBtn(
+				row, used and "ĐÃ DÙNG" or "NHẬN NGAY",
+				UDim2.fromOffset(110, 34), UDim2.new(1, -120, 0, 11),
+				used and Color3.fromRGB(76, 86, 116) or Color3.fromRGB(64, 194, 92),
+				used and Color3.fromRGB(52, 58, 82) or Color3.fromRGB(28, 134, 58),
+				9, { TextSize = 11, ZIndex = 35, Depth = 3, Stroke = 1.8 }
+			)
+			useBtn.MouseButton1Click:Connect(function()
+				if state.UsedCodes[codeKey] then return end
+				state.UsedCodes[codeKey] = true
+				state.Coins  += (reward.Coins or 0)
+				state.Gems   += (reward.Gems or 0)
+				state.Rubies += (reward.Rubies or 0)
+				state.Spins  += (reward.Spins or 0)
+				if reward.SkinId then
+					state.OwnedSkins[reward.SkinId] = true
+					state.EquippedSkin = reward.SkinId
+					rebuildLobbyPreview()
+				end
+				updateTopStats()
+				saveData()
+				showToast("Đã nhận code " .. codeKey .. ": " .. reward.Desc, THEME.TextGreen, 3.5)
+				openCodeList()
+			end)
+		end
+	end
+end
+
+-- POPUP CAI DAT (CO NHAP GIFTCODE + NUT ? XEM CODE + CHE DO TAY TRAI / TAY PHAI + FULL MAN HINH)
+openSettings = function()
 	openModal("Settings", "CÀI ĐẶT", false)
 	local list = Instance.new("UIListLayout")
 	list.Padding = UDim.new(0, 8)
@@ -3515,7 +3742,7 @@ local function openSettings()
 	codeTitle.Parent = codeCard
 
 	local codeBox = Instance.new("TextBox")
-	codeBox.Size = UDim2.new(1, -156, 0, 34)
+	codeBox.Size = UDim2.new(1, -198, 0, 34)
 	codeBox.Position = UDim2.fromOffset(12, 28)
 	codeBox.BackgroundColor3 = Color3.fromRGB(16, 18, 34)
 	codeBox.BorderSizePixel = 0
@@ -3535,7 +3762,7 @@ local function openSettings()
 	codeStatusLbl.Size = UDim2.new(1, -24, 0, 26)
 	codeStatusLbl.Position = UDim2.fromOffset(12, 66)
 	codeStatusLbl.BackgroundTransparency = 1
-	codeStatusLbl.Text = "Nhập code rồi bấm NHẬN CODE để xem phần thưởng"
+	codeStatusLbl.Text = "Bấm nút ? để xem danh sách mã quà tặng"
 	codeStatusLbl.TextColor3 = THEME.TextMuted
 	codeStatusLbl.Font = THEME.FontBody
 	codeStatusLbl.TextSize = 11
@@ -3543,6 +3770,17 @@ local function openSettings()
 	codeStatusLbl.TextWrapped = true
 	codeStatusLbl.ZIndex = 34
 	codeStatusLbl.Parent = codeCard
+
+	-- Nut ? mau xanh duong bong 3D mo bang thong bao danh sach code
+	local helpCodeBtn = makeArcadeBtn(
+		codeCard, "?",
+		UDim2.fromOffset(36, 36), UDim2.new(1, -178, 0, 27),
+		Color3.fromRGB(36, 182, 234), Color3.fromRGB(16, 86, 208), 11,
+		{ TextSize = 18, ZIndex = 35, Depth = 3, Stroke = 2.2, TextStroke = 2.0 }
+	)
+	helpCodeBtn.MouseButton1Click:Connect(function()
+		openCodeList()
+	end)
 
 	local redeemBtn = makeArcadeBtn(
 		codeCard, "NHẬN CODE",
@@ -4685,8 +4923,8 @@ track(RunService.RenderStepped:Connect(function(dt)
 		updateFreeSpinsTick()
 		refreshNotifDots()
 		if state.OnlineSeconds % 30 == 0 then saveData() end
-		if UI.modalOverlay.Visible and activeModalTag == "Gift" then
-			UI.modalTitle.Text = "QUÀ ONLINE THEO THỜI GIAN  •  " .. formatMMSS(state.OnlineSeconds)
+		if UI.modalOverlay.Visible and activeModalTag == "Gift" and activeGiftTab == "Online" then
+			UI.modalTitle.Text = "QUÀ ONLINE  •  " .. formatMMSS(state.OnlineSeconds)
 			if state.OnlineSeconds % 5 == 0 then openGift() end
 		elseif UI.modalOverlay.Visible and activeModalTag == "Wheel" then
 			if UI.liveWheelSpinsLbl and UI.liveWheelSpinsLbl.Parent then
@@ -4704,9 +4942,9 @@ track(RunService.RenderStepped:Connect(function(dt)
 
 	if mainFrame.Visible and lobbyPage.Visible and previewHead then
 		local t = os.clock() * 3.2
-		local skin = getSkinById(state.EquippedSkin)
-		local hx = 286
-		local hy = 52 + math.sin(t) * 16
+		local skin = getSkinById(previewSkinId or state.EquippedSkin)
+		local hx = 278
+		local hy = 43 + math.sin(t) * 12
 		previewHead.Position = UDim2.fromOffset(hx, hy)
 		previewHead.Rotation = math.cos(t) * 14
 		if skin.Rainbow then
@@ -4714,8 +4952,8 @@ track(RunService.RenderStepped:Connect(function(dt)
 		end
 		local gTick = skin.Glitch and math.floor(os.clock() * 10) or 0
 		for i, seg in ipairs(previewSegs) do
-			local sx = hx - (i * 18)
-			local sy = 52 + math.sin(t - i * 0.42) * 16
+			local sx = hx - (i * 17)
+			local sy = 43 + math.sin(t - i * 0.42) * 12
 			seg.Position = UDim2.fromOffset(sx, sy)
 			if skin.Rainbow then
 				seg.BackgroundColor3 = Color3.fromHSV((os.clock() * 0.4 + i * 0.07) % 1, 0.72, 0.85)
@@ -4789,6 +5027,49 @@ end))
 -- KET NOI NUT BAM, PHIM TAT & LUU KHI DONG
 -- ============================================================
 UI.playBtn.MouseButton1Click:Connect(openGame)
+UI.skinPrevBtn.MouseButton1Click:Connect(function() cycleLobbySkin(-1) end)
+UI.skinNextBtn.MouseButton1Click:Connect(function() cycleLobbySkin(1) end)
+UI.lobbyBuyBtn.MouseButton1Click:Connect(function()
+	local skin = getSkinById(previewSkinId or state.EquippedSkin)
+	if state.OwnedSkins[skin.Id] then
+		state.EquippedSkin = skin.Id
+		saveData()
+		rebuildLobbyPreview(false)
+		return
+	end
+	if skin.FreeOnly then
+		showToast("Skin miễn phí độc quyền! Cách mở: " .. (skin.UnlockText or "Sự kiện"), THEME.TextGold, 3.0)
+		return
+	end
+	local bought = false
+	if skin.Currency == "Coins" and state.Coins >= skin.Price then
+		state.Coins -= skin.Price
+		bought = true
+	elseif skin.Currency == "Gems" and state.Gems >= skin.Price then
+		state.Gems -= skin.Price
+		bought = true
+	elseif skin.Currency == "Rubies" and state.Rubies >= skin.Price then
+		state.Rubies -= skin.Price
+		bought = true
+	end
+	if bought then
+		state.OwnedSkins[skin.Id] = true
+		state.EquippedSkin = skin.Id
+		updateTopStats()
+		saveData()
+		rebuildLobbyPreview(false)
+		showToast("Đã mua và trang bị " .. skin.Name .. "!", THEME.TextGreen, 3.0)
+	else
+		showToast("Không đủ tiền để mua " .. skin.Name .. "!", THEME.TextRed, 2.4)
+		local oldTxt = UI.lobbyBuyLbl.Text
+		UI.lobbyBuyLbl.Text = "KHÔNG ĐỦ!"
+		task.delay(0.8, function()
+			if UI.lobbyBuyLbl and UI.lobbyBuyLbl.Parent and UI.lobbyBuyBtn.Visible then
+				UI.lobbyBuyLbl.Text = oldTxt
+			end
+		end)
+	end
+end)
 UI.restartBtn.MouseButton1Click:Connect(startNewRun)
 UI.goReplayBtn.MouseButton1Click:Connect(startNewRun)
 UI.revCoinBtn.MouseButton1Click:Connect(function() reviveRun(false) end)
@@ -4876,5 +5157,5 @@ updateTopStats()
 if not hadSavedData then saveData() end
 end)
 if not _ok then
-	warn("[SnakeArcade v9.1 ERROR]: " .. tostring(_err))
+	warn("[SnakeArcade v9.3 ERROR]: " .. tostring(_err))
 end
