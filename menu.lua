@@ -1,2099 +1,1849 @@
---[[
-    ========================================================================
-    THỦ THÀNH 2D - STANDALONE v1.0
-    Game Thủ Thành (Tower Defense) 2D Toàn Màn Hình cho Roblox Mobile & PC
-    - 3 Bản đồ: Thảo Nguyên (10 đợt), Sa Mạc Cổ (15 đợt), Vực Dung Nham (20 đợt)
-    - 4 Tháp phòng thủ: Tháp Cung, Tháp Băng (làm chậm), Tháp Pháo (nổ lan), Tháp Sấm
-    - Nâng cấp Tháp Lv1 -> Lv3, Bán tháp, Vòng tầm bắn, Tốc độ 1x / 2x, Tự gọi đợt
-    - 5 loại quái + Boss mỗi 5 đợt, Kỹ năng Sấm Sét Toàn Bản Đồ (25 Xu)
-    - Giao diện Royal Blue 3D matte an toàn cho mobile, lưu Xu tự động
-    ========================================================================
-]]
-
-if _G.ThuThanh2DCleanup then
-    pcall(_G.ThuThanh2DCleanup)
-end
-
+-- ============================================================
+-- THU THANH 2D (TOWER DEFENSE) v1.0 - HOAT ANH MUOT + 5 THAP + 6 QUAI + 3 BAN DO
+-- Full-Screen Mobile & PC | Tu dong luu ky luc | Phim tat PC: RightShift
+-- ============================================================
+local _ok, _err = pcall(function()
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
-local CoreGui = game:GetService("CoreGui")
 
-local LocalPlayer = Players.LocalPlayer
+local player = Players.LocalPlayer
+local GUI_NAME = "ThuThanh2D_Standalone"
+local SAVE_FILE = "ThuThanh2D_Save_" .. tostring(player.UserId) .. ".json"
 
--- ========================================================================
--- [PHẦN 01] CẤU HÌNH, BẢNG MÀU MATTE, 3 BẢN ĐỒ & 4 LOẠI THÁP
--- ========================================================================
-local SAVE_FILE = "ThuThanh2D_Stats_v1.json"
-
--- Bảng màu Royal Blue 3D matte (mọi kênh RGB của chữ đều <= 215)
-local UITheme = {
-    BgMain        = Color3.fromRGB(11, 22, 52),
-    BgMainLight   = Color3.fromRGB(18, 38, 86),
-    BgPanel       = Color3.fromRGB(16, 35, 78),
-    BgPanelDark   = Color3.fromRGB(12, 24, 58),
-    BgCard        = Color3.fromRGB(22, 48, 102),
-    BgButton      = Color3.fromRGB(26, 60, 124),
-    RimBlue       = Color3.fromRGB(58, 158, 212),
-    StrokeSubtle  = Color3.fromRGB(44, 108, 172),
-
-    BtnGreen      = Color3.fromRGB(42, 148, 56),
-    BtnGreenDark  = Color3.fromRGB(22, 92, 32),
-    BtnBlue       = Color3.fromRGB(32, 112, 198),
-    BtnBlueDark   = Color3.fromRGB(18, 66, 132),
-    BtnPurple     = Color3.fromRGB(118, 58, 194),
-    BtnPurpleDark = Color3.fromRGB(74, 30, 132),
-    BtnRed        = Color3.fromRGB(184, 46, 56),
-    BtnRedDark    = Color3.fromRGB(122, 24, 32),
-    BtnGold       = Color3.fromRGB(194, 140, 28),
-    BtnGoldDark   = Color3.fromRGB(132, 88, 14),
-
-    TextPrimary   = Color3.fromRGB(210, 214, 215),
-    TextSecondary = Color3.fromRGB(160, 186, 212),
-    TextMuted     = Color3.fromRGB(122, 154, 192),
-    ColorGold     = Color3.fromRGB(212, 182, 82),
-    ColorRed      = Color3.fromRGB(210, 96, 98),
-    ColorGreen    = Color3.fromRGB(112, 206, 132),
-    AccentCyan    = Color3.fromRGB(92, 198, 214),
+local THEME = {
+	Outline    = Color3.fromRGB(10, 12, 20),
+	TextMain   = Color3.fromRGB(214, 218, 224),
+	TextMuted  = Color3.fromRGB(154, 164, 184),
+	TextGold   = Color3.fromRGB(214, 180, 64),
+	TextCyan   = Color3.fromRGB(98, 192, 212),
+	TextGreen  = Color3.fromRGB(104, 198, 134),
+	TextRed    = Color3.fromRGB(212, 98, 104),
+	TextPurple = Color3.fromRGB(182, 132, 216),
+	FontHead   = Enum.Font.GothamSemibold,
+	FontBody   = Enum.Font.GothamMedium,
 }
-
-local FONT_MAIN = Enum.Font.GothamSemibold
-local FONT_BODY = Enum.Font.GothamMedium
-
-local GRID_COLS = 12
-local GRID_ROWS = 8
-
--- 3 Bản đồ với đường đi dạng lưới (col, row) từ 1..12, 1..8
-local MAPS = {
-    {
-        id       = 1,
-        name     = "Thảo Nguyên",
-        waves    = 10,
-        rewardXu = 150,
-        startGold = 160,
-        bgTile   = Color3.fromRGB(34, 72, 48),
-        bgTile2  = Color3.fromRGB(30, 65, 43),
-        pathCol  = Color3.fromRGB(146, 122, 88),
-        pathRim  = Color3.fromRGB(108, 86, 58),
-        waypoints = {
-            { 1, 2 }, { 4, 2 }, { 4, 6 }, { 8, 6 }, { 8, 2 }, { 12, 2 },
-        },
-    },
-    {
-        id       = 2,
-        name     = "Sa Mạc Cổ",
-        waves    = 15,
-        rewardXu = 350,
-        startGold = 180,
-        bgTile   = Color3.fromRGB(128, 102, 66),
-        bgTile2  = Color3.fromRGB(118, 93, 60),
-        pathCol  = Color3.fromRGB(76, 62, 48),
-        pathRim  = Color3.fromRGB(54, 44, 34),
-        waypoints = {
-            { 1, 1 }, { 10, 1 }, { 10, 4 }, { 3, 4 }, { 3, 7 }, { 12, 7 },
-        },
-    },
-    {
-        id       = 3,
-        name     = "Vực Dung Nham",
-        waves    = 20,
-        rewardXu = 800,
-        startGold = 210,
-        bgTile   = Color3.fromRGB(48, 28, 34),
-        bgTile2  = Color3.fromRGB(42, 24, 30),
-        pathCol  = Color3.fromRGB(96, 46, 42),
-        pathRim  = Color3.fromRGB(146, 68, 44),
-        waypoints = {
-            { 1, 7 }, { 3, 7 }, { 3, 2 }, { 6, 2 }, { 6, 7 }, { 9, 7 }, { 9, 2 }, { 12, 2 },
-        },
-    },
-}
-
-local DIFFS = {
-    { key = "Easy",   label = "Dễ",  hpMult = 0.85, xuMult = 1.0 },
-    { key = "Medium", label = "Vừa", hpMult = 1.15, xuMult = 1.5 },
-    { key = "Hard",   label = "Khó", hpMult = 1.55, xuMult = 2.2 },
-}
-
--- 4 Loại Tháp phòng thủ
-local TOWERS = {
-    {
-        key      = "Arrow",
-        name     = "Tháp Cung",
-        desc     = "Bắn nhanh",
-        cost     = 50,
-        dmg      = 16,
-        range    = 2.6,     -- Đơn vị theo số ô
-        cooldown = 0.45,
-        color    = Color3.fromRGB(74, 178, 96),
-        projCol  = Color3.fromRGB(204, 188, 92),
-        splash   = 0,
-        slow     = 0,
-        chain    = 0,
-    },
-    {
-        key      = "Ice",
-        name     = "Tháp Băng",
-        desc     = "Làm chậm",
-        cost     = 80,
-        dmg      = 12,
-        range    = 2.5,
-        cooldown = 0.72,
-        color    = Color3.fromRGB(76, 186, 208),
-        projCol  = Color3.fromRGB(132, 204, 214),
-        splash   = 0.85,
-        slow     = 0.42,    -- Giảm 42% tốc độ trong 2.2s
-        chain    = 0,
-    },
-    {
-        key      = "Cannon",
-        name     = "Tháp Pháo",
-        desc     = "Nổ lan",
-        cost     = 110,
-        dmg      = 42,
-        range    = 2.8,
-        cooldown = 1.35,
-        color    = Color3.fromRGB(198, 122, 46),
-        projCol  = Color3.fromRGB(208, 134, 62),
-        splash   = 1.35,
-        slow     = 0,
-        chain    = 0,
-    },
-    {
-        key      = "Tesla",
-        name     = "Tháp Sấm",
-        desc     = "Sét lan",
-        cost     = 150,
-        dmg      = 34,
-        range    = 3.1,
-        cooldown = 0.80,
-        color    = Color3.fromRGB(142, 82, 206),
-        projCol  = Color3.fromRGB(178, 136, 214),
-        splash   = 0,
-        slow     = 0,
-        chain    = 3,       -- Giật lan tối đa 3 mục tiêu
-    },
-}
-
-local Config = {
-    MapIndex     = 1,
-    DiffIndex    = 1,
-    AutoWave     = false,
-    SoundEnabled = true,
-}
-
-local State = {
-    Screen          = "HOME",   -- "HOME" | "GAME"
-    SelectedTool    = 1,        -- Index 1..4 của TOWERS
-    SelectedTower   = nil,      -- Tháp đang chọn để Nâng cấp / Bán
-    Gold            = 160,
-    Lives           = 20,
-    Wave            = 0,
-    MaxWaves        = 10,
-    WaveActive      = false,
-    SpawnQueue      = {},
-    SpawnTimer      = 0,
-    AutoWaveTimer   = 0,
-    GameSpeed       = 1,        -- 1 hoặc 2
-    Paused          = false,
-    GameOver        = false,
-    Won             = false,
-    Minimized       = false,
-    Destroyed       = false,
-    PathCells       = {},       -- PathCells[r][c] = true
-    PathPoints      = {},       -- Danh sách điểm {x, y} theo tọa độ ô
-    PlacedTowers    = {},       -- Danh sách object tháp
-    TowerGrid       = {},       -- TowerGrid[r][c] = tower
-    Enemies         = {},
-    Projectiles     = {},
-    Effects         = {},
-    TileSize        = 40,
-    NextId          = 1,
-    TempAlertToken  = 0,
-}
-
-local Stats = {
-    Wins = 0,
-    Xu   = 0,
-}
-
-local UI = {
-    Connections = {},
-}
-
--- ========================================================================
--- [PHẦN 02] TIỆN ÍCH LƯU XU, ÂM THANH & NÚT 3D MATTE
--- ========================================================================
-local function getMap() return MAPS[Config.MapIndex] or MAPS[1] end
-local function getDiff() return DIFFS[Config.DiffIndex] or DIFFS[1] end
-
-local function loadStats()
-    if type(isfile) == "function" and type(readfile) == "function" then
-        local ok, exists = pcall(isfile, SAVE_FILE)
-        if ok and exists then
-            local okR, raw = pcall(readfile, SAVE_FILE)
-            if okR and type(raw) == "string" and #raw > 0 then
-                local okD, data = pcall(function() return HttpService:JSONDecode(raw) end)
-                if okD and type(data) == "table" then
-                    Stats.Wins = tonumber(data.Wins) or 0
-                    Stats.Xu   = tonumber(data.Xu) or 0
-                end
-            end
-        end
-    end
-end
-
-local function saveStats()
-    if type(writefile) == "function" then
-        pcall(function()
-            writefile(SAVE_FILE, HttpService:JSONEncode(Stats))
-        end)
-    end
-end
 
 local function getGuiParent()
-    if type(gethui) == "function" then
-        local ok, hui = pcall(gethui)
-        if ok and hui then return hui end
-    end
-    local okCore = pcall(function() return CoreGui.Name end)
-    if okCore then return CoreGui end
-    if LocalPlayer then return LocalPlayer:WaitForChild("PlayerGui") end
-    return CoreGui
+	if typeof(gethui) == "function" then
+		local ok, hui = pcall(gethui)
+		if ok and hui then return hui end
+	end
+	local ok, coreGui = pcall(function() return game:GetService("CoreGui") end)
+	if ok and coreGui then
+		local canWrite = pcall(function()
+			local f = Instance.new("Folder")
+			f.Parent = coreGui
+			f:Destroy()
+		end)
+		if canWrite then return coreGui end
+	end
+	return player:WaitForChild("PlayerGui")
 end
-
-local function trackConn(conn)
-    if conn then table.insert(UI.Connections, conn) end
-    return conn
-end
-
-local function addCorner(parent, radius)
-    local c = Instance.new("UICorner")
-    c.CornerRadius = UDim.new(0, radius or 8)
-    c.Parent = parent
-    return c
-end
-
-local function addStroke(parent, color, thickness, transparency)
-    local s = Instance.new("UIStroke")
-    s.Color = color or UITheme.RimBlue
-    s.Thickness = thickness or 1.5
-    s.Transparency = transparency or 0
-    s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    s.Parent = parent
-    return s
-end
-
-local function addGradient(parent, topColor, bottomColor, rot)
-    local g = Instance.new("UIGradient")
-    g.Color = ColorSequence.new(topColor, bottomColor)
-    g.Rotation = rot or 90
-    g.Parent = parent
-    return g
-end
-
-local function bindInstantTap(button, callback)
-    local pressPos, lastFire = nil, 0
-    trackConn(button.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-            pressPos = input.Position
-        end
-    end))
-    trackConn(button.InputEnded:Connect(function(input)
-        if not pressPos then return end
-        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-            local delta = (input.Position - pressPos).Magnitude
-            pressPos = nil
-            local now = os.clock()
-            if delta <= 14 and (now - lastFire) >= 0.07 then
-                lastFire = now
-                callback(input.Position)
-            end
-        end
-    end))
-end
-
-local function make3DButton(parent, text, size, pos, mainColor, darkColor, textColor, textSize, onTap)
-    local btn = Instance.new("TextButton")
-    btn.Size = size
-    btn.Position = pos
-    btn.BackgroundColor3 = darkColor
-    btn.BorderSizePixel = 0
-    btn.AutoButtonColor = false
-    btn.Text = ""
-    btn.Parent = parent
-    addCorner(btn, 9)
-    addStroke(btn, Color3.fromRGB(10, 18, 38), 1.6, 0.1)
-
-    local face = Instance.new("Frame")
-    face.Size = UDim2.new(1, 0, 1, -4)
-    face.BackgroundColor3 = mainColor
-    face.BorderSizePixel = 0
-    face.ZIndex = btn.ZIndex + 1
-    face.Parent = btn
-    addCorner(face, 8)
-
-    local gloss = Instance.new("Frame")
-    gloss.Size = UDim2.new(1, -6, 0.40, 0)
-    gloss.Position = UDim2.new(0, 3, 0, 2)
-    gloss.BackgroundColor3 = Color3.fromRGB(205, 212, 215)
-    gloss.BackgroundTransparency = 0.82
-    gloss.BorderSizePixel = 0
-    gloss.ZIndex = face.ZIndex + 1
-    gloss.Parent = face
-    addCorner(gloss, 6)
-
-    local lbl = Instance.new("TextLabel")
-    lbl.Size = UDim2.new(1, -8, 1, 0)
-    lbl.Position = UDim2.new(0, 4, 0, 0)
-    lbl.BackgroundTransparency = 1
-    lbl.Text = text
-    lbl.Font = FONT_MAIN
-    lbl.TextSize = textSize or 13
-    lbl.TextColor3 = textColor or UITheme.TextPrimary
-    lbl.ZIndex = gloss.ZIndex + 1
-    lbl.Parent = face
-
-    bindInstantTap(btn, onTap)
-    return btn, face, lbl
-end
-
-local Icons = {}
-
-function Icons.drawMinus(parent, color)
-    local bar = Instance.new("Frame")
-    bar.Size = UDim2.new(0, 14, 0, 2.8)
-    bar.AnchorPoint = Vector2.new(0.5, 0.5)
-    bar.Position = UDim2.new(0.5, 0, 0.5, 0)
-    bar.BackgroundColor3 = color or UITheme.TextPrimary
-    bar.BorderSizePixel = 0
-    bar.ZIndex = parent.ZIndex + 2
-    bar.Parent = parent
-    addCorner(bar, 2)
-end
-
-function Icons.drawCloseX(parent, color)
-    local col = color or UITheme.TextPrimary
-    for _, rot in ipairs({ 45, -45 }) do
-        local bar = Instance.new("Frame")
-        bar.Size = UDim2.new(0, 15, 0, 2.8)
-        bar.AnchorPoint = Vector2.new(0.5, 0.5)
-        bar.Position = UDim2.new(0.5, 0, 0.5, 0)
-        bar.Rotation = rot
-        bar.BackgroundColor3 = col
-        bar.BorderSizePixel = 0
-        bar.ZIndex = parent.ZIndex + 2
-        bar.Parent = parent
-        addCorner(bar, 2)
-    end
-end
-
-function Icons.drawHome(parent, color)
-    local col = color or UITheme.TextPrimary
-    local wrap = Instance.new("Frame")
-    wrap.Size = UDim2.new(0, 18, 0, 18)
-    wrap.AnchorPoint = Vector2.new(0.5, 0.5)
-    wrap.Position = UDim2.new(0.5, 0, 0.5, 0)
-    wrap.BackgroundTransparency = 1
-    wrap.ZIndex = parent.ZIndex + 2
-    wrap.Parent = parent
-    for _, cfg in ipairs({ { -4, -38 }, { 4, 38 } }) do
-        local roof = Instance.new("Frame")
-        roof.Size = UDim2.new(0, 11, 0, 2.5)
-        roof.AnchorPoint = Vector2.new(0.5, 0.5)
-        roof.Position = UDim2.new(0.5, cfg[1], 0, 5)
-        roof.Rotation = cfg[2]
-        roof.BackgroundColor3 = col
-        roof.BorderSizePixel = 0
-        roof.ZIndex = wrap.ZIndex
-        roof.Parent = wrap
-        addCorner(roof, 2)
-    end
-    local body = Instance.new("Frame")
-    body.Size = UDim2.new(0, 12, 0, 9)
-    body.AnchorPoint = Vector2.new(0.5, 1)
-    body.Position = UDim2.new(0.5, 0, 1, -1)
-    body.BackgroundTransparency = 1
-    body.ZIndex = wrap.ZIndex
-    body.Parent = wrap
-    addStroke(body, col, 2, 0)
-    addCorner(body, 2)
-end
-
-function Icons.drawCastle(parent)
-    local wrap = Instance.new("Frame")
-    wrap.Size = UDim2.new(0, 56, 0, 52)
-    wrap.AnchorPoint = Vector2.new(0.5, 0.5)
-    wrap.Position = UDim2.new(0.5, 0, 0.5, 0)
-    wrap.BackgroundTransparency = 1
-    wrap.Parent = parent
-
-    -- Thân thành
-    local base = Instance.new("Frame")
-    base.Size = UDim2.new(0, 44, 0, 32)
-    base.Position = UDim2.new(0.5, -22, 1, -32)
-    base.BackgroundColor3 = Color3.fromRGB(132, 152, 184)
-    base.BorderSizePixel = 0
-    base.Parent = wrap
-    addCorner(base, 4)
-    addStroke(base, Color3.fromRGB(32, 44, 68), 2, 0)
-
-    -- 3 Tháp nhỏ trên đỉnh thành
-    for _, xOff in ipairs({ -22, -6, 10 }) do
-        local merlon = Instance.new("Frame")
-        merlon.Size = UDim2.new(0, 12, 0, 14)
-        merlon.Position = UDim2.new(0.5, xOff, 0, 6)
-        merlon.BackgroundColor3 = Color3.fromRGB(154, 174, 202)
-        merlon.BorderSizePixel = 0
-        merlon.Parent = wrap
-        addCorner(merlon, 3)
-        addStroke(merlon, Color3.fromRGB(32, 44, 68), 1.6, 0)
-    end
-
-    -- Cổng vòm
-    local gate = Instance.new("Frame")
-    gate.Size = UDim2.new(0, 14, 0, 18)
-    gate.AnchorPoint = Vector2.new(0.5, 1)
-    gate.Position = UDim2.new(0.5, 0, 1, 0)
-    gate.BackgroundColor3 = Color3.fromRGB(64, 44, 34)
-    gate.BorderSizePixel = 0
-    gate.Parent = base
-    addCorner(gate, 6)
-end
-
-function Icons.drawCoin(parent)
-    local coin = Instance.new("Frame")
-    coin.Size = UDim2.new(0, 20, 0, 20)
-    coin.AnchorPoint = Vector2.new(0, 0.5)
-    coin.Position = UDim2.new(0, 8, 0.5, 0)
-    coin.BackgroundColor3 = Color3.fromRGB(204, 158, 44)
-    coin.BorderSizePixel = 0
-    coin.Parent = parent
-    addCorner(coin, 12)
-    addStroke(coin, Color3.fromRGB(28, 22, 14), 1.6, 0)
-    local inner = Instance.new("Frame")
-    inner.Size = UDim2.new(0, 12, 0, 12)
-    inner.AnchorPoint = Vector2.new(0.5, 0.5)
-    inner.Position = UDim2.new(0.5, 0, 0.5, 0)
-    inner.BackgroundColor3 = Color3.fromRGB(212, 178, 64)
-    inner.BorderSizePixel = 0
-    inner.Parent = coin
-    addCorner(inner, 10)
-end
-
-local function createXuPill(parent)
-    local pill = Instance.new("Frame")
-    pill.Size = UDim2.new(0, 118, 0, 34)
-    pill.Position = UDim2.new(1, -212, 0.5, -17)
-    pill.BackgroundColor3 = UITheme.BgPanelDark
-    pill.BorderSizePixel = 0
-    pill.Parent = parent
-    addCorner(pill, 9)
-    addStroke(pill, UITheme.ColorGold, 1.6, 0.1)
-    Icons.drawCoin(pill)
-
-    local lbl = Instance.new("TextLabel")
-    lbl.Size = UDim2.new(1, -36, 1, 0)
-    lbl.Position = UDim2.new(0, 32, 0, 0)
-    lbl.BackgroundTransparency = 1
-    lbl.Text = "0 Xu"
-    lbl.Font = FONT_MAIN
-    lbl.TextSize = 13
-    lbl.TextColor3 = UITheme.ColorGold
-    lbl.TextXAlignment = Enum.TextXAlignment.Left
-    lbl.Parent = pill
-    return lbl
-end
-
-local function makeArcadeIconBtn(parent, sizePx, pos, mainCol, darkCol, drawFn, onTap)
-    local b, face = make3DButton(parent, "", UDim2.new(0, sizePx, 0, sizePx), pos, mainCol, darkCol, UITheme.TextPrimary, 12, onTap)
-    if drawFn then drawFn(face, UITheme.TextPrimary) end
-    return b
-end
-
-local SoundFolder = nil
-local function playSfx(soundId, volume, pitch)
-    if not Config.SoundEnabled or State.Destroyed or not SoundFolder then return end
-    pcall(function()
-        local snd = Instance.new("Sound")
-        snd.SoundId = soundId
-        snd.Volume = volume or 0.25
-        snd.PlaybackSpeed = pitch or 1.0
-        snd.Parent = SoundFolder
-        snd:Play()
-        task.delay(1.0, function() if snd and snd.Parent then snd:Destroy() end end)
-    end)
-end
-
-local function sfxShoot(pitch) playSfx("rbxassetid://421058925", 0.18, pitch or 1.3) end
-local function sfxBuild()      playSfx("rbxassetid://421058925", 0.30, 1.05) end
-local function sfxWin()        playSfx("rbxassetid://4590662766", 0.45, 1.0) end
-local function sfxClick()      playSfx("rbxassetid://421058925", 0.22, 1.35) end
-
--- ========================================================================
--- [PHẦN 03] KHỞI TẠO SCREEN GUI & NÚT THU GỌN NỔI
--- ========================================================================
-loadStats()
 
 local guiParent = getGuiParent()
-do
-    local old = guiParent:FindFirstChild("ThuThanh2D_Standalone")
-    if old then pcall(function() old:Destroy() end) end
+local oldGui = guiParent:FindFirstChild(GUI_NAME)
+if oldGui then oldGui:Destroy() end
+
+local connections = {}
+local function track(conn)
+	table.insert(connections, conn)
+	return conn
 end
 
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "ThuThanh2D_Standalone"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.IgnoreGuiInset = true
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.DisplayOrder = 10000
-ScreenGui.Parent = guiParent
-
-SoundFolder = Instance.new("Folder")
-SoundFolder.Name = "TdAudio"
-SoundFolder.Parent = ScreenGui
-
-local Root = Instance.new("Frame")
-Root.Size = UDim2.new(1, 0, 1, 0)
-Root.BackgroundColor3 = UITheme.BgMain
-Root.BorderSizePixel = 0
-Root.Active = true
-Root.Parent = ScreenGui
-
-local FloatBtn = Instance.new("TextButton")
-FloatBtn.Size = UDim2.new(0, 114, 0, 38)
-FloatBtn.Position = UDim2.new(0, 16, 0, 74)
-FloatBtn.BackgroundColor3 = UITheme.BtnBlue
-FloatBtn.BorderSizePixel = 0
-FloatBtn.AutoButtonColor = false
-FloatBtn.Text = "THỦ THÀNH"
-FloatBtn.Font = FONT_MAIN
-FloatBtn.TextSize = 13
-FloatBtn.TextColor3 = UITheme.TextPrimary
-FloatBtn.Visible = false
-FloatBtn.ZIndex = 50
-FloatBtn.Parent = ScreenGui
-addCorner(FloatBtn, 10)
-addStroke(FloatBtn, UITheme.RimBlue, 2, 0.05)
-
-do
-    local dragging, dragStart, startPos, moved = false, nil, nil, false
-    trackConn(FloatBtn.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true; moved = false; dragStart = input.Position; startPos = FloatBtn.Position
-        end
-    end))
-    trackConn(UserInputService.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
-            local delta = input.Position - dragStart
-            if delta.Magnitude > 8 then moved = true end
-            FloatBtn.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        end
-    end))
-    trackConn(UserInputService.InputEnded:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1) then
-            dragging = false
-            if not moved then
-                State.Minimized = false
-                Root.Visible = true
-                FloatBtn.Visible = false
-                sfxClick()
-            end
-        end
-    end))
+local function formatNum(n)
+	local s = tostring(math.floor(n or 0))
+	local k
+	while true do
+		s, k = string.gsub(s, "^(-?%d+)(%d%d%d)", "%1,%2")
+		if k == 0 then break end
+	end
+	return s
 end
 
-local openHomeScreen, enterGameScreen, startNewMatch, startNextWave, buildMapVisuals
-local updateHomeUI, updateHud, updateSelectionUI, selectTower, clearSelection
-local placeTowerAt, upgradeSelectedTower, sellSelectedTower, castLightningSkill, showBanner, hideBanner, showTempAlert
+-- ============================================================
+-- CAU HINH BAN DO, THAP THU & QUAI VAT
+-- ============================================================
+local COLS, ROWS, CELL = 14, 9, 40
+local BASE_W, BASE_H = 740, 464
 
--- ========================================================================
--- [PHẦN 04] SẢNH CHÍNH (HOME SCREEN)
--- ========================================================================
-local HomeScreen = Instance.new("Frame")
-HomeScreen.Size = UDim2.new(1, 0, 1, 0)
-HomeScreen.BackgroundColor3 = UITheme.BgMain
-HomeScreen.BorderSizePixel = 0
-HomeScreen.Visible = true
-HomeScreen.Parent = Root
-addGradient(HomeScreen, UITheme.BgMainLight, UITheme.BgMain, 135)
+local MAPS = {
+	{
+		Id = "meadow", Name = "Thảo Nguyên Xanh", Diff = "Dễ", Waves = 12, StartGold = 240, StartLives = 20,
+		Grass1 = Color3.fromRGB(36, 98, 56), Grass2 = Color3.fromRGB(32, 88, 50),
+		PathCol = Color3.fromRGB(164, 134, 88), PathBorder = Color3.fromRGB(118, 92, 58),
+		Waypoints = {
+			{1, 2}, {4, 2}, {4, 7}, {8, 7}, {8, 2}, {12, 2}, {12, 6}, {14, 6}
+		},
+	},
+	{
+		Id = "desert", Name = "Sa Mạc Lửa", Diff = "Trung Bình", Waves = 15, StartGold = 260, StartLives = 18,
+		Grass1 = Color3.fromRGB(132, 98, 56), Grass2 = Color3.fromRGB(120, 88, 48),
+		PathCol = Color3.fromRGB(88, 66, 48), PathBorder = Color3.fromRGB(62, 44, 34),
+		Waypoints = {
+			{1, 5}, {3, 5}, {3, 2}, {7, 2}, {7, 8}, {11, 8}, {11, 3}, {14, 3}
+		},
+	},
+	{
+		Id = "citadel", Name = "Thành Trì Hắc Ám", Diff = "Khó", Waves = 18, StartGold = 300, StartLives = 15,
+		Grass1 = Color3.fromRGB(34, 32, 56), Grass2 = Color3.fromRGB(28, 26, 48),
+		PathCol = Color3.fromRGB(64, 52, 88), PathBorder = Color3.fromRGB(44, 34, 66),
+		Waypoints = {
+			{1, 1}, {13, 1}, {13, 4}, {3, 4}, {3, 8}, {11, 8}, {11, 6}, {14, 6}
+		},
+	},
+}
 
-do
-    local HomeTop = Instance.new("Frame")
-    HomeTop.Size = UDim2.new(1, 0, 0, 52)
-    HomeTop.BackgroundColor3 = UITheme.BgPanel
-    HomeTop.BorderSizePixel = 0
-    HomeTop.Parent = HomeScreen
-    addStroke(HomeTop, UITheme.RimBlue, 1.5, 0.2)
+local TOWERS = {
+	{
+		Id = "archer", Name = "Cung Thủ", Cost = 60, UpgradeCost = 55,
+		Damage = 22, Range = 128, FireRate = 0.55, ProjSpeed = 420,
+		Kind = "Arrow", BaseCol = Color3.fromRGB(64, 176, 92), TopCol = Color3.fromRGB(168, 118, 56),
+		Accent = Color3.fromRGB(214, 186, 86), Desc = "Bắn nhanh, tầm trung"
+	},
+	{
+		Id = "cannon", Name = "Đại Bác", Cost = 110, UpgradeCost = 95,
+		Damage = 58, Range = 118, FireRate = 1.35, ProjSpeed = 280, Splash = 62,
+		Kind = "Bomb", BaseCol = Color3.fromRGB(196, 82, 54), TopCol = Color3.fromRGB(58, 62, 76),
+		Accent = Color3.fromRGB(218, 128, 48), Desc = "Nổ diện rộng sát thương lớn"
+	},
+	{
+		Id = "frost", Name = "Băng Giá", Cost = 100, UpgradeCost = 85,
+		Damage = 18, Range = 124, FireRate = 0.85, ProjSpeed = 340, Slow = 0.45, SlowDur = 2.4,
+		Kind = "Frost", BaseCol = Color3.fromRGB(54, 152, 212), TopCol = Color3.fromRGB(132, 206, 224),
+		Accent = Color3.fromRGB(182, 222, 232), Desc = "Làm chậm quái 45%"
+	},
+	{
+		Id = "tesla", Name = "Lôi Điện", Cost = 160, UpgradeCost = 140,
+		Damage = 36, Range = 136, FireRate = 0.95, Chain = 3,
+		Kind = "Lightning", BaseCol = Color3.fromRGB(142, 72, 212), TopCol = Color3.fromRGB(214, 192, 62),
+		Accent = Color3.fromRGB(112, 204, 228), Desc = "Sét lan 3 mục tiêu"
+	},
+	{
+		Id = "laser", Name = "Laze Thần", Cost = 240, UpgradeCost = 210,
+		Damage = 95, Range = 185, FireRate = 1.05,
+		Kind = "Laser", BaseCol = Color3.fromRGB(204, 58, 118), TopCol = Color3.fromRGB(224, 184, 54),
+		Accent = Color3.fromRGB(228, 92, 168), Desc = "Tia laze tầm xa cực mạnh"
+	},
+}
 
-    local Brand = Instance.new("TextLabel")
-    Brand.Size = UDim2.new(0, 200, 1, 0)
-    Brand.Position = UDim2.new(0, 18, 0, 0)
-    Brand.BackgroundTransparency = 1
-    Brand.Text = "THỦ THÀNH 2D"
-    Brand.Font = FONT_MAIN
-    Brand.TextSize = 18
-    Brand.TextColor3 = UITheme.ColorGold
-    Brand.TextXAlignment = Enum.TextXAlignment.Left
-    Brand.Parent = HomeTop
+local ENEMIES = {
+	slime  = { Name = "Slime Xanh",    HP = 65,   Speed = 54, Reward = 12, Size = 22, Color = Color3.fromRGB(72, 198, 96),  Eye = Color3.fromRGB(20, 26, 22), Damage = 1 },
+	goblin = { Name = "Yêu Tinh Nhanh",HP = 48,   Speed = 88, Reward = 14, Size = 20, Color = Color3.fromRGB(214, 156, 48), Eye = Color3.fromRGB(196, 46, 46), Damage = 1 },
+	knight = { Name = "Hiệp Sĩ Giáp",  HP = 185,  Speed = 40, Reward = 24, Size = 26, Color = Color3.fromRGB(122, 136, 162),Eye = Color3.fromRGB(76, 188, 216), Damage = 2 },
+	wraith = { Name = "Ma Bóng Đêm",   HP = 120,  Speed = 72, Reward = 22, Size = 24, Color = Color3.fromRGB(148, 86, 212), Eye = Color3.fromRGB(220, 212, 228), Alpha = 0.25, Damage = 2 },
+	golem  = { Name = "Khổng Lồ Đá",   HP = 420,  Speed = 30, Reward = 45, Size = 30, Color = Color3.fromRGB(156, 88, 62),  Eye = Color3.fromRGB(224, 182, 52), Damage = 3 },
+	boss   = { Name = "Rồng Hắc Ám",   HP = 1250, Speed = 34, Reward = 150,Size = 36, Color = Color3.fromRGB(198, 42, 66),  Eye = Color3.fromRGB(232, 196, 56), Boss = true, Damage = 5 },
+}
 
-    UI.HomeXuLabel = createXuPill(HomeTop)
+-- ============================================================
+-- LUU & TAI KY LUC TU DONG
+-- ============================================================
+local canWriteFile = (typeof(writefile) == "function") and (typeof(readfile) == "function")
+local saveState = {
+	BestWave = { meadow = 0, desert = 0, citadel = 0 },
+	Wins = { meadow = 0, desert = 0, citadel = 0 },
+	TotalKills = 0,
+	SelectedMap = 1,
+}
 
-    makeArcadeIconBtn(HomeTop, 36, UDim2.new(1, -88, 0.5, -18), UITheme.BtnBlue, UITheme.BtnBlueDark, Icons.drawMinus, function()
-        State.Minimized = true
-        Root.Visible = false
-        FloatBtn.Visible = true
-        sfxClick()
-    end)
-
-    makeArcadeIconBtn(HomeTop, 36, UDim2.new(1, -44, 0.5, -18), UITheme.BtnRed, UITheme.BtnRedDark, Icons.drawCloseX, function()
-        if _G.ThuThanh2DCleanup then _G.ThuThanh2DCleanup() end
-    end)
-
-    local HomeBody = Instance.new("Frame")
-    HomeBody.Size = UDim2.new(1, -24, 1, -68)
-    HomeBody.Position = UDim2.new(0, 12, 0, 60)
-    HomeBody.BackgroundTransparency = 1
-    HomeBody.Parent = HomeScreen
-
-    -- CỘT TRÁI
-    local LeftCard = Instance.new("Frame")
-    LeftCard.Size = UDim2.new(0.40, -8, 1, 0)
-    LeftCard.BackgroundColor3 = UITheme.BgPanel
-    LeftCard.BorderSizePixel = 0
-    LeftCard.Parent = HomeBody
-    addCorner(LeftCard, 14)
-    addStroke(LeftCard, UITheme.RimBlue, 2.2, 0.1)
-    addGradient(LeftCard, UITheme.BgCard, UITheme.BgPanelDark, 135)
-
-    local Crest = Instance.new("Frame")
-    Crest.Size = UDim2.new(0, 94, 0, 84)
-    Crest.AnchorPoint = Vector2.new(0.5, 0)
-    Crest.Position = UDim2.new(0.5, 0, 0, 26)
-    Crest.BackgroundColor3 = UITheme.BgPanelDark
-    Crest.BorderSizePixel = 0
-    Crest.Parent = LeftCard
-    addCorner(Crest, 14)
-    addStroke(Crest, UITheme.ColorGold, 2, 0.15)
-    Icons.drawCastle(Crest)
-
-    local HeroTitle = Instance.new("TextLabel")
-    HeroTitle.Size = UDim2.new(1, -20, 0, 34)
-    HeroTitle.Position = UDim2.new(0, 10, 0, 122)
-    HeroTitle.BackgroundTransparency = 1
-    HeroTitle.Text = "THỦ THÀNH 2D"
-    HeroTitle.Font = FONT_MAIN
-    HeroTitle.TextSize = 24
-    HeroTitle.TextColor3 = UITheme.TextPrimary
-    HeroTitle.Parent = LeftCard
-
-    make3DButton(LeftCard, "CHƠI NGAY", UDim2.new(1, -32, 0, 48), UDim2.new(0, 16, 1, -68), UITheme.BtnGreen, UITheme.BtnGreenDark, UITheme.TextPrimary, 16, function()
-        sfxClick()
-        enterGameScreen()
-    end)
-
-    -- CỘT PHẢI: Chọn Bản đồ + Độ khó + Giới thiệu 4 Tháp
-    local RightCard = Instance.new("ScrollingFrame")
-    RightCard.Size = UDim2.new(0.60, -4, 1, 0)
-    RightCard.Position = UDim2.new(0.40, 4, 0, 0)
-    RightCard.BackgroundColor3 = UITheme.BgPanel
-    RightCard.BorderSizePixel = 0
-    RightCard.ScrollBarThickness = 4
-    RightCard.ScrollBarImageColor3 = UITheme.RimBlue
-    RightCard.AutomaticCanvasSize = Enum.AutomaticSize.Y
-    RightCard.CanvasSize = UDim2.new(0, 0, 0, 0)
-    RightCard.Parent = HomeBody
-    addCorner(RightCard, 14)
-    addStroke(RightCard, UITheme.RimBlue, 2.2, 0.1)
-    addGradient(RightCard, UITheme.BgCard, UITheme.BgPanelDark, 135)
-
-    local rPad = Instance.new("UIPadding")
-    rPad.PaddingTop = UDim.new(0, 12)
-    rPad.PaddingBottom = UDim.new(0, 12)
-    rPad.PaddingLeft = UDim.new(0, 14)
-    rPad.PaddingRight = UDim.new(0, 14)
-    rPad.Parent = RightCard
-
-    local rList = Instance.new("UIListLayout")
-    rList.SortOrder = Enum.SortOrder.LayoutOrder
-    rList.Padding = UDim.new(0, 9)
-    rList.Parent = RightCard
-
-    local function makeHeader(text, order)
-        local lbl = Instance.new("TextLabel")
-        lbl.LayoutOrder = order
-        lbl.Size = UDim2.new(1, 0, 0, 18)
-        lbl.BackgroundTransparency = 1
-        lbl.Text = text
-        lbl.Font = FONT_MAIN
-        lbl.TextSize = 11
-        lbl.TextColor3 = UITheme.TextSecondary
-        lbl.TextXAlignment = Enum.TextXAlignment.Left
-        lbl.Parent = RightCard
-        return lbl
-    end
-
-    makeHeader("CHỌN BẢN ĐỒ", 1)
-
-    local MapRow = Instance.new("Frame")
-    MapRow.LayoutOrder = 2
-    MapRow.Size = UDim2.new(1, 0, 0, 74)
-    MapRow.BackgroundTransparency = 1
-    MapRow.Parent = RightCard
-
-    UI.HomeMapBtns = {}
-    for idx, m in ipairs(MAPS) do
-        local card = Instance.new("TextButton")
-        card.Size = UDim2.new(0.32, 0, 1, 0)
-        card.Position = UDim2.new((idx - 1) * 0.34, 0, 0, 0)
-        card.BackgroundColor3 = UITheme.BgButton
-        card.BorderSizePixel = 0
-        card.AutoButtonColor = false
-        card.Text = ""
-        card.Parent = MapRow
-        addCorner(card, 9)
-        local st = addStroke(card, UITheme.StrokeSubtle, 1.5, 0.15)
-
-        local t1 = Instance.new("TextLabel")
-        t1.Size = UDim2.new(1, -6, 0, 22)
-        t1.Position = UDim2.new(0, 3, 0, 8)
-        t1.BackgroundTransparency = 1
-        t1.Text = m.name
-        t1.Font = FONT_MAIN
-        t1.TextSize = 12
-        t1.TextColor3 = UITheme.TextPrimary
-        t1.Parent = card
-
-        local t2 = Instance.new("TextLabel")
-        t2.Size = UDim2.new(1, -6, 0, 16)
-        t2.Position = UDim2.new(0, 3, 0, 32)
-        t2.BackgroundTransparency = 1
-        t2.Text = m.waves .. " đợt quái"
-        t2.Font = FONT_BODY
-        t2.TextSize = 10
-        t2.TextColor3 = UITheme.TextSecondary
-        t2.Parent = card
-
-        local t3 = Instance.new("TextLabel")
-        t3.Size = UDim2.new(1, -6, 0, 16)
-        t3.Position = UDim2.new(0, 3, 0, 50)
-        t3.BackgroundTransparency = 1
-        t3.Text = "+" .. m.rewardXu .. " Xu"
-        t3.Font = FONT_MAIN
-        t3.TextSize = 11
-        t3.TextColor3 = UITheme.ColorGold
-        t3.Parent = card
-
-        local mIdx = idx
-        bindInstantTap(card, function()
-            Config.MapIndex = mIdx
-            sfxClick()
-            updateHomeUI()
-        end)
-        UI.HomeMapBtns[mIdx] = { card = card, stroke = st, t1 = t1, t3 = t3 }
-    end
-
-    makeHeader("ĐỘ KHÓ", 3)
-
-    local DiffRow = Instance.new("Frame")
-    DiffRow.LayoutOrder = 4
-    DiffRow.Size = UDim2.new(1, 0, 0, 36)
-    DiffRow.BackgroundTransparency = 1
-    DiffRow.Parent = RightCard
-
-    UI.HomeDiffBtns = {}
-    for idx, d in ipairs(DIFFS) do
-        local b = Instance.new("TextButton")
-        b.Size = UDim2.new(0.32, 0, 1, 0)
-        b.Position = UDim2.new((idx - 1) * 0.34, 0, 0, 0)
-        b.BackgroundColor3 = UITheme.BgButton
-        b.BorderSizePixel = 0
-        b.AutoButtonColor = false
-        b.Text = d.label
-        b.Font = FONT_MAIN
-        b.TextSize = 12
-        b.TextColor3 = UITheme.TextSecondary
-        b.Parent = DiffRow
-        addCorner(b, 8)
-        local st = addStroke(b, UITheme.StrokeSubtle, 1.4, 0.2)
-        local dIdx = idx
-        bindInstantTap(b, function()
-            Config.DiffIndex = dIdx
-            sfxClick()
-            updateHomeUI()
-        end)
-        UI.HomeDiffBtns[dIdx] = { btn = b, stroke = st }
-    end
-
-    makeHeader("KHO THÁP PHÒNG THỦ", 5)
-
-    local InfoRow = Instance.new("Frame")
-    InfoRow.LayoutOrder = 6
-    InfoRow.Size = UDim2.new(1, 0, 0, 58)
-    InfoRow.BackgroundTransparency = 1
-    InfoRow.Parent = RightCard
-
-    for idx, tw in ipairs(TOWERS) do
-        local box = Instance.new("Frame")
-        box.Size = UDim2.new(0.238, 0, 1, 0)
-        box.Position = UDim2.new((idx - 1) * 0.254, 0, 0, 0)
-        box.BackgroundColor3 = UITheme.BgPanelDark
-        box.BorderSizePixel = 0
-        box.Parent = InfoRow
-        addCorner(box, 8)
-        addStroke(box, tw.color, 1.4, 0.25)
-
-        local nLbl = Instance.new("TextLabel")
-        nLbl.Size = UDim2.new(1, -4, 0, 20)
-        nLbl.Position = UDim2.new(0, 2, 0, 6)
-        nLbl.BackgroundTransparency = 1
-        nLbl.Text = tw.name
-        nLbl.Font = FONT_MAIN
-        nLbl.TextSize = 11
-        nLbl.TextColor3 = tw.color
-        nLbl.Parent = box
-
-        local dLbl = Instance.new("TextLabel")
-        dLbl.Size = UDim2.new(1, -4, 0, 16)
-        dLbl.Position = UDim2.new(0, 2, 0, 26)
-        dLbl.BackgroundTransparency = 1
-        dLbl.Text = tw.desc
-        dLbl.Font = FONT_BODY
-        dLbl.TextSize = 10
-        dLbl.TextColor3 = UITheme.TextSecondary
-        dLbl.Parent = box
-
-        local cLbl = Instance.new("TextLabel")
-        cLbl.Size = UDim2.new(1, -4, 0, 14)
-        cLbl.Position = UDim2.new(0, 2, 0, 42)
-        cLbl.BackgroundTransparency = 1
-        cLbl.Text = tw.cost .. " Vàng"
-        cLbl.Font = FONT_MAIN
-        cLbl.TextSize = 10
-        cLbl.TextColor3 = UITheme.ColorGold
-        cLbl.Parent = box
-    end
+local function getCacheRoot()
+	if typeof(getgenv) == "function" then
+		local ok, env = pcall(getgenv)
+		if ok and type(env) == "table" then return env end
+	end
+	return _G
 end
 
--- ========================================================================
--- [PHẦN 05] MÀN HÌNH TRONG TRẬN (BẢN ĐỒ + BẢNG THÁP BÊN PHẢI)
--- ========================================================================
-local GameScreen = Instance.new("Frame")
-GameScreen.Size = UDim2.new(1, 0, 1, 0)
-GameScreen.BackgroundColor3 = UITheme.BgMain
-GameScreen.BorderSizePixel = 0
-GameScreen.Visible = false
-GameScreen.Parent = Root
-addGradient(GameScreen, UITheme.BgMainLight, UITheme.BgMain, 135)
-
-do
-    local TopBar = Instance.new("Frame")
-    TopBar.Size = UDim2.new(1, 0, 0, 52)
-    TopBar.BackgroundColor3 = UITheme.BgPanel
-    TopBar.BorderSizePixel = 0
-    TopBar.Parent = GameScreen
-    addStroke(TopBar, UITheme.RimBlue, 1.5, 0.2)
-
-    makeArcadeIconBtn(TopBar, 36, UDim2.new(0, 12, 0.5, -18), UITheme.BtnBlue, UITheme.BtnBlueDark, Icons.drawHome, function()
-        sfxClick()
-        openHomeScreen()
-    end)
-
-    local MapLbl = Instance.new("TextLabel")
-    MapLbl.Size = UDim2.new(0, 150, 0, 18)
-    MapLbl.Position = UDim2.new(0, 58, 0, 8)
-    MapLbl.BackgroundTransparency = 1
-    MapLbl.Text = "Thảo Nguyên"
-    MapLbl.Font = FONT_MAIN
-    MapLbl.TextSize = 13
-    MapLbl.TextColor3 = UITheme.TextPrimary
-    MapLbl.TextXAlignment = Enum.TextXAlignment.Left
-    MapLbl.Parent = TopBar
-    UI.MapLbl = MapLbl
-
-    local WaveLbl = Instance.new("TextLabel")
-    WaveLbl.Size = UDim2.new(0, 150, 0, 16)
-    WaveLbl.Position = UDim2.new(0, 58, 0, 28)
-    WaveLbl.BackgroundTransparency = 1
-    WaveLbl.Text = "Đợt: 0/10"
-    WaveLbl.Font = FONT_BODY
-    WaveLbl.TextSize = 11
-    WaveLbl.TextColor3 = UITheme.AccentCyan
-    WaveLbl.TextXAlignment = Enum.TextXAlignment.Left
-    WaveLbl.Parent = TopBar
-    UI.WaveLbl = WaveLbl
-
-    local StatusPill = Instance.new("Frame")
-    StatusPill.Size = UDim2.new(0, 240, 0, 36)
-    StatusPill.AnchorPoint = Vector2.new(0.5, 0.5)
-    StatusPill.Position = UDim2.new(0.5, 0, 0.5, 0)
-    StatusPill.BackgroundColor3 = UITheme.BgPanelDark
-    StatusPill.BorderSizePixel = 0
-    StatusPill.Parent = TopBar
-    addCorner(StatusPill, 9)
-    addStroke(StatusPill, UITheme.RimBlue, 1.6, 0.1)
-
-    local StatusText = Instance.new("TextLabel")
-    StatusText.Size = UDim2.new(1, -12, 1, 0)
-    StatusText.Position = UDim2.new(0, 6, 0, 0)
-    StatusText.BackgroundTransparency = 1
-    StatusText.Text = "Thành: 20  |  Vàng: 160"
-    StatusText.Font = FONT_MAIN
-    StatusText.TextSize = 13
-    StatusText.TextColor3 = UITheme.TextPrimary
-    StatusText.Parent = StatusPill
-    UI.StatusText = StatusText
-
-    UI.GameXuLabel = createXuPill(TopBar)
-
-    makeArcadeIconBtn(TopBar, 36, UDim2.new(1, -88, 0.5, -18), UITheme.BtnBlue, UITheme.BtnBlueDark, Icons.drawMinus, function()
-        State.Minimized = true
-        Root.Visible = false
-        FloatBtn.Visible = true
-        sfxClick()
-    end)
-
-    makeArcadeIconBtn(TopBar, 36, UDim2.new(1, -44, 0.5, -18), UITheme.BtnRed, UITheme.BtnRedDark, Icons.drawCloseX, function()
-        if _G.ThuThanh2DCleanup then _G.ThuThanh2DCleanup() end
-    end)
+local function saveData()
+	local okEnc, encoded = pcall(function() return HttpService:JSONEncode(saveState) end)
+	if not okEnc then return end
+	getCacheRoot()["ThuThanh2D_JSON_" .. tostring(player.UserId)] = encoded
+	if canWriteFile then pcall(writefile, SAVE_FILE, encoded) end
 end
 
-local MainArea = Instance.new("Frame")
-MainArea.Size = UDim2.new(1, -16, 1, -60)
-MainArea.Position = UDim2.new(0, 8, 0, 56)
-MainArea.BackgroundTransparency = 1
-MainArea.Parent = GameScreen
+local function loadData()
+	local rawJson = nil
+	if canWriteFile then
+		local okRead, content = pcall(readfile, SAVE_FILE)
+		if okRead and type(content) == "string" and #content > 2 then rawJson = content end
+	end
+	if not rawJson then
+		local mem = getCacheRoot()["ThuThanh2D_JSON_" .. tostring(player.UserId)]
+		if type(mem) == "string" and #mem > 2 then rawJson = mem end
+	end
+	if rawJson then
+		local okDec, tbl = pcall(function() return HttpService:JSONDecode(rawJson) end)
+		if okDec and type(tbl) == "table" then
+			if type(tbl.BestWave) == "table" then
+				for k, v in pairs(tbl.BestWave) do
+					if type(v) == "number" then saveState.BestWave[k] = v end
+				end
+			end
+			if type(tbl.Wins) == "table" then
+				for k, v in pairs(tbl.Wins) do
+					if type(v) == "number" then saveState.Wins[k] = v end
+				end
+			end
+			if type(tbl.TotalKills) == "number" then saveState.TotalKills = tbl.TotalKills end
+			if type(tbl.SelectedMap) == "number" then saveState.SelectedMap = math.clamp(tbl.SelectedMap, 1, #MAPS) end
+		end
+	end
+end
+loadData()
 
--- Khung Bản Đồ (trái)
-local MapContainer = Instance.new("Frame")
-MapContainer.Size = UDim2.new(1, -248, 1, 0)
-MapContainer.BackgroundColor3 = UITheme.BgPanelDark
-MapContainer.BorderSizePixel = 0
-MapContainer.ClipsDescendants = true
-MapContainer.Parent = MainArea
-addCorner(MapContainer, 14)
-addStroke(MapContainer, UITheme.RimBlue, 2.2, 0.1)
+-- ============================================================
+-- TIEN ICH GIAO DIEN 2D CARTOON ARCADE
+-- ============================================================
+local UI = {}
+local SEC = {}
+local GFX = {}
 
-local AlertStrip = Instance.new("TextLabel")
-AlertStrip.Size = UDim2.new(0, 270, 0, 24)
-AlertStrip.AnchorPoint = Vector2.new(0.5, 0)
-AlertStrip.Position = UDim2.new(0.5, 0, 0, 8)
-AlertStrip.BackgroundColor3 = UITheme.BgPanelDark
-AlertStrip.BackgroundTransparency = 0.05
-AlertStrip.BorderSizePixel = 0
-AlertStrip.Text = ""
-AlertStrip.Font = FONT_MAIN
-AlertStrip.TextSize = 11
-AlertStrip.TextColor3 = UITheme.ColorGold
-AlertStrip.Visible = false
-AlertStrip.ZIndex = 30
-AlertStrip.Parent = MapContainer
-addCorner(AlertStrip, 7)
-addStroke(AlertStrip, UITheme.ColorGold, 1.4, 0.15)
-UI.AlertStrip = AlertStrip
+local function addCorner(obj, r)
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0, r or 10)
+	c.Parent = obj
+	return c
+end
 
-local MapFrame = Instance.new("Frame")
-MapFrame.Name = "MapFrame"
-MapFrame.Size = UDim2.new(0, 480, 0, 320)
-MapFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-MapFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-MapFrame.BackgroundColor3 = UITheme.BgMain
-MapFrame.BorderSizePixel = 0
-MapFrame.ClipsDescendants = true
-MapFrame.Parent = MapContainer
-addCorner(MapFrame, 8)
-addStroke(MapFrame, Color3.fromRGB(16, 36, 76), 2, 0.1)
+local function addStroke(obj, col, thick)
+	local s = Instance.new("UIStroke")
+	s.Color = col or THEME.Outline
+	s.Thickness = thick or 2
+	s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	s.Parent = obj
+	return s
+end
 
-local TilesLayer = Instance.new("Frame")
-TilesLayer.Size = UDim2.new(1, 0, 1, 0)
-TilesLayer.BackgroundTransparency = 1
-TilesLayer.ZIndex = 2
-TilesLayer.Parent = MapFrame
+local function addTextOutline(lbl, thick, col)
+	local s = Instance.new("UIStroke")
+	s.Color = col or THEME.Outline
+	s.Thickness = thick or 1.6
+	s.Parent = lbl
+	return s
+end
 
-local RangeLayer = Instance.new("Frame")
-RangeLayer.Size = UDim2.new(1, 0, 1, 0)
-RangeLayer.BackgroundTransparency = 1
-RangeLayer.ZIndex = 4
-RangeLayer.Parent = MapFrame
+local function addGradient(obj, c1, c2, rot)
+	local g = Instance.new("UIGradient")
+	g.Color = ColorSequence.new(c1, c2)
+	g.Rotation = rot or 90
+	g.Parent = obj
+	return g
+end
 
-local TowersLayer = Instance.new("Frame")
-TowersLayer.Size = UDim2.new(1, 0, 1, 0)
-TowersLayer.BackgroundTransparency = 1
-TowersLayer.ZIndex = 6
-TowersLayer.Parent = MapFrame
+local function makeArcadeBtn(parent, text, size, pos, c1, c2, radius, opts)
+	opts = opts or {}
+	local depth = opts.Depth or 4
+	local z = opts.ZIndex or 4
 
-local EnemiesLayer = Instance.new("Frame")
-EnemiesLayer.Size = UDim2.new(1, 0, 1, 0)
-EnemiesLayer.BackgroundTransparency = 1
-EnemiesLayer.ZIndex = 9
-EnemiesLayer.Parent = MapFrame
+	local btn = Instance.new("TextButton")
+	btn.Size = size
+	if pos then btn.Position = pos end
+	btn.BackgroundColor3 = THEME.Outline
+	btn.BackgroundTransparency = 0.22
+	btn.Text = ""
+	btn.AutoButtonColor = false
+	btn.BorderSizePixel = 0
+	btn.ZIndex = z
+	btn.Parent = parent
+	addCorner(btn, radius or 10)
+	local outerStroke = addStroke(btn, THEME.Outline, opts.Stroke or 2.2)
 
-local FxLayer = Instance.new("Frame")
-FxLayer.Size = UDim2.new(1, 0, 1, 0)
-FxLayer.BackgroundTransparency = 1
-FxLayer.ZIndex = 12
-FxLayer.Parent = MapFrame
+	local face = Instance.new("Frame")
+	face.Size = UDim2.new(1, 0, 1, -depth)
+	face.Position = UDim2.fromOffset(0, 0)
+	face.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	face.BorderSizePixel = 0
+	face.ZIndex = z + 1
+	face.Parent = btn
+	addCorner(face, radius or 10)
+	addGradient(face, c1, c2, 90)
 
--- Vòng tầm bắn dùng lại khi chọn tháp
-local RangeCircle = Instance.new("Frame")
-RangeCircle.BackgroundColor3 = UITheme.AccentCyan
-RangeCircle.BackgroundTransparency = 0.86
-RangeCircle.BorderSizePixel = 0
-RangeCircle.AnchorPoint = Vector2.new(0.5, 0.5)
-RangeCircle.Visible = false
-RangeCircle.ZIndex = 4
-RangeCircle.Parent = RangeLayer
-addCorner(RangeCircle, 400)
-addStroke(RangeCircle, UITheme.AccentCyan, 1.5, 0.25)
+	local shine = Instance.new("Frame")
+	shine.Size = UDim2.new(1, -10, 0.36, 0)
+	shine.Position = UDim2.fromOffset(5, 3)
+	shine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	shine.BackgroundTransparency = 0.80
+	shine.BorderSizePixel = 0
+	shine.ZIndex = z + 2
+	shine.Parent = face
+	addCorner(shine, math.max(4, (radius or 10) - 3))
 
-local MapInput = Instance.new("TextButton")
-MapInput.Size = UDim2.new(1, 0, 1, 0)
-MapInput.BackgroundTransparency = 1
-MapInput.Text = ""
-MapInput.AutoButtonColor = false
-MapInput.ZIndex = 16
-MapInput.Parent = MapFrame
+	local lbl = Instance.new("TextLabel")
+	lbl.Size = opts.LabelSize or UDim2.fromScale(1, 1)
+	lbl.Position = opts.LabelPos or UDim2.fromOffset(0, 0)
+	lbl.BackgroundTransparency = 1
+	lbl.Text = text
+	lbl.TextColor3 = opts.TextColor or THEME.TextMain
+	lbl.Font = THEME.FontHead
+	lbl.TextSize = opts.TextSize or 13
+	lbl.ZIndex = z + 3
+	lbl.Parent = face
+	addTextOutline(lbl, opts.TextStroke or 1.6, THEME.Outline)
 
-bindInstantTap(MapInput, function(screenPos)
-    if State.GameOver then return end
-    local absPos = MapFrame.AbsolutePosition
-    local ts = State.TileSize
-    local col = math.floor((screenPos.X - absPos.X) / ts) + 1
-    local row = math.floor((screenPos.Y - absPos.Y) / ts) + 1
-    if col < 1 or col > GRID_COLS or row < 1 or row > GRID_ROWS then return end
+	btn.MouseButton1Down:Connect(function()
+		face.Position = UDim2.fromOffset(0, math.max(1, depth - 1))
+	end)
+	local function resetPress()
+		face.Position = UDim2.fromOffset(0, 0)
+	end
+	btn.MouseButton1Up:Connect(resetPress)
+	btn.MouseLeave:Connect(resetPress)
 
-    local existing = State.TowerGrid[row] and State.TowerGrid[row][col]
-    if existing then
-        selectTower(existing)
-        sfxClick()
-        return
-    end
+	return btn, lbl, face, outerStroke
+end
 
-    if State.PathCells[row] and State.PathCells[row][col] then
-        clearSelection()
-        return
-    end
+local function makeDraggable(handle, target, onDragFlag)
+	local dragging, dragStart, startPos, moved = false, nil, nil, false
+	handle.InputBegan:Connect(function(inp)
+		if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			moved = false
+			dragStart = inp.Position
+			startPos = target.Position
+			if onDragFlag then onDragFlag(false) end
+		end
+	end)
+	track(UserInputService.InputChanged:Connect(function(inp)
+		if dragging and (inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch) then
+			local delta = inp.Position - dragStart
+			if delta.Magnitude > 6 then
+				moved = true
+				if onDragFlag then onDragFlag(true) end
+			end
+			if moved then
+				target.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+			end
+		end
+	end))
+	track(UserInputService.InputEnded:Connect(function(inp)
+		if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
+			dragging = false
+		end
+	end))
+end
 
-    placeTowerAt(row, col)
+-- ============================================================
+-- DO HOA VECTOR 2D CHO THAP, QUAI & HIEU UNG
+-- ============================================================
+function GFX.buildTowerSprite(parent, towerDef, size, zBase)
+	local root = Instance.new("Frame")
+	root.Size = UDim2.fromOffset(size, size)
+	root.AnchorPoint = Vector2.new(0.5, 0.5)
+	root.Position = UDim2.fromScale(0.5, 0.5)
+	root.BackgroundTransparency = 1
+	root.ZIndex = zBase
+	root.Parent = parent
+
+	-- De thap 3D
+	local base = Instance.new("Frame")
+	base.Size = UDim2.fromScale(0.84, 0.84)
+	base.Position = UDim2.fromScale(0.5, 0.5)
+	base.AnchorPoint = Vector2.new(0.5, 0.5)
+	base.BackgroundColor3 = towerDef.BaseCol
+	base.BorderSizePixel = 0
+	base.ZIndex = zBase
+	base.Parent = root
+	addCorner(base, 8)
+	addStroke(base, THEME.Outline, 2)
+
+	-- Khop xoay nong sung (Turret pivot)
+	local turret = Instance.new("Frame")
+	turret.Size = UDim2.fromScale(0.68, 0.68)
+	turret.Position = UDim2.fromScale(0.5, 0.5)
+	turret.AnchorPoint = Vector2.new(0.5, 0.5)
+	turret.BackgroundColor3 = towerDef.TopCol
+	turret.BorderSizePixel = 0
+	turret.ZIndex = zBase + 2
+	turret.Parent = root
+	addCorner(turret, 99)
+	addStroke(turret, THEME.Outline, 1.8)
+
+	-- Nong sung (chi ve ben phai 0 do de xoay theo atan2)
+	local barrel = Instance.new("Frame")
+	if towerDef.Kind == "Cannon" or towerDef.Kind == "Bomb" then
+		barrel.Size = UDim2.fromScale(0.75, 0.42)
+	elseif towerDef.Kind == "Laser" then
+		barrel.Size = UDim2.fromScale(0.82, 0.28)
+	else
+		barrel.Size = UDim2.fromScale(0.72, 0.30)
+	end
+	barrel.Position = UDim2.fromScale(0.55, 0.5)
+	barrel.AnchorPoint = Vector2.new(0.1, 0.5)
+	barrel.BackgroundColor3 = towerDef.Accent
+	barrel.BorderSizePixel = 0
+	barrel.ZIndex = zBase + 1
+	barrel.Parent = turret
+	addCorner(barrel, 4)
+	addStroke(barrel, THEME.Outline, 1.5)
+
+	-- Loi phat sang o giua
+	local core = Instance.new("Frame")
+	core.Size = UDim2.fromScale(0.36, 0.36)
+	core.Position = UDim2.fromScale(0.5, 0.5)
+	core.AnchorPoint = Vector2.new(0.5, 0.5)
+	core.BackgroundColor3 = towerDef.Accent
+	core.BorderSizePixel = 0
+	core.ZIndex = zBase + 3
+	core.Parent = turret
+	addCorner(core, 99)
+
+	return root, turret, barrel, base
+end
+
+function GFX.buildEnemySprite(parent, def, zBase)
+	local sz = def.Size
+	local holder = Instance.new("Frame")
+	holder.Size = UDim2.fromOffset(sz, sz)
+	holder.AnchorPoint = Vector2.new(0.5, 0.5)
+	holder.BackgroundTransparency = 1
+	holder.ZIndex = zBase
+	holder.Parent = parent
+
+	-- Bong duoi chan
+	local shadow = Instance.new("Frame")
+	shadow.Size = UDim2.fromOffset(sz * 0.85, sz * 0.35)
+	shadow.Position = UDim2.new(0.5, 0, 1, -2)
+	shadow.AnchorPoint = Vector2.new(0.5, 0.5)
+	shadow.BackgroundColor3 = Color3.fromRGB(8, 10, 16)
+	shadow.BackgroundTransparency = 0.45
+	shadow.BorderSizePixel = 0
+	shadow.ZIndex = zBase
+	shadow.Parent = holder
+	addCorner(shadow, 99)
+
+	-- Than quai (se nhun nhay khi buoc)
+	local body = Instance.new("Frame")
+	body.Size = UDim2.fromScale(1, 1)
+	body.Position = UDim2.fromScale(0.5, 0.5)
+	body.AnchorPoint = Vector2.new(0.5, 0.5)
+	body.BackgroundColor3 = def.Color
+	body.BackgroundTransparency = def.Alpha or 0
+	body.BorderSizePixel = 0
+	body.ZIndex = zBase + 1
+	body.Parent = holder
+	addCorner(body, def.Boss and 10 or 99)
+	addStroke(body, def.Boss and THEME.TextGold or THEME.Outline, def.Boss and 2.4 or 1.8)
+
+	-- 2 mat gian du
+	for _, ox in ipairs({0.32, 0.68}) do
+		local eye = Instance.new("Frame")
+		eye.Size = UDim2.fromScale(0.22, 0.22)
+		eye.Position = UDim2.fromScale(ox, 0.42)
+		eye.AnchorPoint = Vector2.new(0.5, 0.5)
+		eye.BackgroundColor3 = def.Eye
+		eye.BorderSizePixel = 0
+		eye.ZIndex = zBase + 2
+		eye.Parent = body
+		addCorner(eye, 99)
+	end
+
+	-- Vuong mien cho Boss
+	if def.Boss then
+		local crown = Instance.new("Frame")
+		crown.Size = UDim2.fromScale(0.56, 0.24)
+		crown.Position = UDim2.fromScale(0.5, -0.06)
+		crown.AnchorPoint = Vector2.new(0.5, 0.5)
+		crown.BackgroundColor3 = THEME.TextGold
+		crown.BorderSizePixel = 0
+		crown.ZIndex = zBase + 3
+		crown.Parent = body
+		addCorner(crown, 4)
+		addStroke(crown, THEME.Outline, 1.4)
+	end
+
+	-- Thanh mau tren dau
+	local hpBg = Instance.new("Frame")
+	hpBg.Size = UDim2.fromOffset(math.max(24, sz + 6), 5)
+	hpBg.Position = UDim2.new(0.5, 0, 0, -9)
+	hpBg.AnchorPoint = Vector2.new(0.5, 0.5)
+	hpBg.BackgroundColor3 = Color3.fromRGB(16, 18, 28)
+	hpBg.BorderSizePixel = 0
+	hpBg.ZIndex = zBase + 4
+	hpBg.Parent = holder
+	addCorner(hpBg, 3)
+	addStroke(hpBg, THEME.Outline, 1)
+
+	local hpFill = Instance.new("Frame")
+	hpFill.Size = UDim2.fromScale(1, 1)
+	hpFill.BackgroundColor3 = def.Boss and Color3.fromRGB(216, 62, 82) or Color3.fromRGB(76, 206, 98)
+	hpFill.BorderSizePixel = 0
+	hpFill.ZIndex = zBase + 5
+	hpFill.Parent = hpBg
+	addCorner(hpFill, 3)
+
+	return holder, body, hpFill
+end
+
+-- ============================================================
+-- KHOI TAO SCREENGUI NOI DE LEN ROBLOX TOPBAR
+-- ============================================================
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = GUI_NAME
+screenGui.ResetOnSpawn = false
+screenGui.IgnoreGuiInset = true
+screenGui.DisplayOrder = 2147483647
+pcall(function() screenGui.ScreenInsets = Enum.ScreenInsets.None end)
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.Parent = guiParent
+
+local backdrop = Instance.new("Frame")
+backdrop.Size = UDim2.fromScale(1, 1)
+backdrop.BackgroundColor3 = Color3.fromRGB(12, 14, 26)
+backdrop.BorderSizePixel = 0
+backdrop.ZIndex = 1
+backdrop.Parent = screenGui
+addGradient(backdrop, Color3.fromRGB(22, 24, 48), Color3.fromRGB(10, 12, 22), 90)
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.fromOffset(BASE_W, BASE_H)
+mainFrame.Position = UDim2.fromScale(0.5, 0.5)
+mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+mainFrame.BackgroundColor3 = Color3.fromRGB(16, 19, 34)
+mainFrame.BorderSizePixel = 0
+mainFrame.ClipsDescendants = true
+mainFrame.ZIndex = 2
+mainFrame.Parent = screenGui
+addCorner(mainFrame, 14)
+addStroke(mainFrame, Color3.fromRGB(106, 72, 198), 2.4)
+
+local uiScale = Instance.new("UIScale")
+uiScale.Parent = mainFrame
+
+local function applyScale()
+	local cam = workspace.CurrentCamera
+	if not cam then return end
+	local vp = cam.ViewportSize
+	local sx = vp.X / BASE_W
+	local sy = vp.Y / BASE_H
+	uiScale.Scale = math.clamp(math.min(sx, sy), 0.45, 2.2)
+end
+applyScale()
+
+local floatBtn = makeArcadeBtn(
+	screenGui, "TD",
+	UDim2.fromOffset(50, 50), UDim2.new(0, 16, 0.5, -25),
+	Color3.fromRGB(132, 68, 214), Color3.fromRGB(78, 34, 158), 25,
+	{ TextSize = 15, ZIndex = 40, Depth = 4 }
+)
+floatBtn.Visible = false
+local floatDragged = false
+makeDraggable(floatBtn, floatBtn, function(v) floatDragged = v end)
+
+-- Toast thong bao noi
+local toastToken = 0
+local function showToast(msg, col, dur)
+	toastToken += 1
+	local myT = toastToken
+	if not UI.toast then
+		local tf = Instance.new("Frame")
+		tf.Size = UDim2.fromOffset(390, 38)
+		tf.Position = UDim2.new(0.5, 0, 0, -48)
+		tf.AnchorPoint = Vector2.new(0.5, 0)
+		tf.BackgroundColor3 = Color3.fromRGB(22, 26, 48)
+		tf.BorderSizePixel = 0
+		tf.ZIndex = 80
+		tf.Visible = false
+		tf.Parent = mainFrame
+		addCorner(tf, 10)
+		UI.toastStroke = addStroke(tf, THEME.TextGold, 2)
+		local tl = Instance.new("TextLabel")
+		tl.Size = UDim2.new(1, -16, 1, 0)
+		tl.Position = UDim2.fromOffset(8, 0)
+		tl.BackgroundTransparency = 1
+		tl.Text = ""
+		tl.TextColor3 = THEME.TextMain
+		tl.Font = THEME.FontHead
+		tl.TextSize = 12
+		tl.ZIndex = 81
+		tl.Parent = tf
+		addTextOutline(tl, 1.4, THEME.Outline)
+		UI.toast = tf
+		UI.toastLbl = tl
+	end
+	UI.toastLbl.Text = msg
+	UI.toastLbl.TextColor3 = col or THEME.TextGold
+	UI.toastStroke.Color = col or THEME.TextGold
+	UI.toast.Visible = true
+	UI.toast.Position = UDim2.new(0.5, 0, 0, -42)
+	TweenService:Create(UI.toast, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+		Position = UDim2.new(0.5, 0, 0, 56)
+	}):Play()
+	task.delay(dur or 2.6, function()
+		if toastToken == myT and UI.toast and UI.toast.Parent then
+			local tw = TweenService:Create(UI.toast, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+				Position = UDim2.new(0.5, 0, 0, -48)
+			})
+			tw:Play()
+			tw.Completed:Connect(function()
+				if toastToken == myT and UI.toast and UI.toast.Parent then UI.toast.Visible = false end
+			end)
+		end
+	end)
+end
+
+-- ============================================================
+-- THANH TOP BAR & CAC TRANG (SANH CHON BAN DO / MAN CHOI)
+-- ============================================================
+function SEC.buildTopBar()
+	local top = Instance.new("Frame")
+	top.Size = UDim2.new(1, 0, 0, 48)
+	top.BackgroundColor3 = Color3.fromRGB(26, 28, 54)
+	top.BorderSizePixel = 0
+	top.ZIndex = 10
+	top.Parent = mainFrame
+	addGradient(top, Color3.fromRGB(50, 38, 96), Color3.fromRGB(22, 24, 48), 90)
+
+	local div = Instance.new("Frame")
+	div.Size = UDim2.new(1, 0, 0, 2)
+	div.Position = UDim2.new(0, 0, 1, -2)
+	div.BackgroundColor3 = Color3.fromRGB(112, 74, 204)
+	div.BorderSizePixel = 0
+	div.ZIndex = 11
+	div.Parent = top
+
+	local title = Instance.new("TextLabel")
+	title.Size = UDim2.fromOffset(172, 46)
+	title.Position = UDim2.fromOffset(12, 0)
+	title.BackgroundTransparency = 1
+	title.Text = "THỦ THÀNH 2D"
+	title.TextColor3 = THEME.TextGold
+	title.Font = THEME.FontHead
+	title.TextSize = 16
+	title.TextXAlignment = Enum.TextXAlignment.Left
+	title.ZIndex = 12
+	title.Parent = top
+	addTextOutline(title, 1.8, THEME.Outline)
+	UI.topTitle = title
+
+	-- Cac chi so trong tran (an khi o sanh)
+	local hudGroup = Instance.new("Frame")
+	hudGroup.Size = UDim2.fromOffset(424, 40)
+	hudGroup.Position = UDim2.fromOffset(178, 4)
+	hudGroup.BackgroundTransparency = 1
+	hudGroup.Visible = false
+	hudGroup.ZIndex = 11
+	hudGroup.Parent = top
+	UI.hudGroup = hudGroup
+
+	local function makeStatPill(x, w, strokeCol, txtCol, initTxt)
+		local p = Instance.new("Frame")
+		p.Size = UDim2.fromOffset(w, 32)
+		p.Position = UDim2.fromOffset(x, 4)
+		p.BackgroundColor3 = Color3.fromRGB(16, 18, 36)
+		p.BorderSizePixel = 0
+		p.ZIndex = 12
+		p.Parent = hudGroup
+		addCorner(p, 10)
+		addStroke(p, strokeCol, 1.6)
+		local l = Instance.new("TextLabel")
+		l.Size = UDim2.fromScale(1, 1)
+		l.BackgroundTransparency = 1
+		l.Text = initTxt
+		l.TextColor3 = txtCol
+		l.Font = THEME.FontHead
+		l.TextSize = 12
+		l.ZIndex = 13
+		l.Parent = p
+		addTextOutline(l, 1.3, THEME.Outline)
+		return l
+	end
+
+	UI.livesLbl = makeStatPill(0,   88,  Color3.fromRGB(196, 68, 76),  THEME.TextRed,  "Máu: 20")
+	UI.goldLbl  = makeStatPill(94,  112, Color3.fromRGB(186, 146, 42), THEME.TextGold, "Vàng: 240")
+	UI.waveLbl  = makeStatPill(212, 106, Color3.fromRGB(72, 158, 206), THEME.TextCyan, "Đợt: 0/12")
+
+	local spdBtn, spdLbl = makeArcadeBtn(
+		hudGroup, "1x",
+		UDim2.fromOffset(46, 32), UDim2.fromOffset(324, 4),
+		Color3.fromRGB(56, 148, 212), Color3.fromRGB(32, 86, 174), 9,
+		{ TextSize = 12, ZIndex = 12, Depth = 3, Stroke = 1.6 }
+	)
+	UI.spdBtn = spdBtn
+	UI.spdLbl = spdLbl
+
+	local pauseBtn, pauseLbl = makeArcadeBtn(
+		hudGroup, "II",
+		UDim2.fromOffset(46, 32), UDim2.fromOffset(376, 4),
+		Color3.fromRGB(204, 144, 44), Color3.fromRGB(152, 86, 22), 9,
+		{ TextSize = 12, ZIndex = 12, Depth = 3, Stroke = 1.6 }
+	)
+	UI.pauseBtn = pauseBtn
+	UI.pauseLbl = pauseLbl
+
+	UI.homeBtn = makeArcadeBtn(top, "Sảnh", UDim2.fromOffset(54, 32), UDim2.new(1, -140, 0, 8), Color3.fromRGB(142, 72, 208), Color3.fromRGB(88, 36, 162), 9, { TextSize = 11, ZIndex = 12, Depth = 3, Stroke = 1.6 })
+	UI.homeBtn.Visible = false
+	UI.minBtn   = makeArcadeBtn(top, "-", UDim2.fromOffset(36, 32), UDim2.new(1, -80, 0, 8), Color3.fromRGB(82, 94, 128), Color3.fromRGB(48, 56, 82), 9, { TextSize = 18, ZIndex = 12, Depth = 3, Stroke = 1.6 })
+	UI.closeBtn = makeArcadeBtn(top, "X", UDim2.fromOffset(36, 32), UDim2.new(1, -40, 0, 8), Color3.fromRGB(212, 62, 68), Color3.fromRGB(152, 28, 36), 9, { TextSize = 13, ZIndex = 12, Depth = 3, Stroke = 1.6 })
+end
+SEC.buildTopBar()
+
+local contentArea = Instance.new("Frame")
+contentArea.Size = UDim2.new(1, -16, 1, -56)
+contentArea.Position = UDim2.fromOffset(8, 52)
+contentArea.BackgroundTransparency = 1
+contentArea.ZIndex = 3
+contentArea.Parent = mainFrame
+
+-- TRANG SANH CHON BAN DO
+local lobbyPage = Instance.new("Frame")
+lobbyPage.Size = UDim2.fromScale(1, 1)
+lobbyPage.BackgroundTransparency = 1
+lobbyPage.ZIndex = 3
+lobbyPage.Parent = contentArea
+
+-- TRANG CHOI GAME
+local gamePage = Instance.new("Frame")
+gamePage.Size = UDim2.fromScale(1, 1)
+gamePage.BackgroundTransparency = 1
+gamePage.Visible = false
+gamePage.ZIndex = 3
+gamePage.Parent = contentArea
+
+-- ============================================================
+-- XAY DUNG SANH CHON 3 BAN DO
+-- ============================================================
+local mapCards = {}
+function SEC.buildLobby()
+	local header = Instance.new("TextLabel")
+	header.Size = UDim2.new(1, 0, 0, 30)
+	header.Position = UDim2.fromOffset(0, 6)
+	header.BackgroundTransparency = 1
+	header.Text = "CHỌN CHIẾN TRƯỜNG ĐỂ BẮT ĐẦU PHÒNG THỦ"
+	header.TextColor3 = THEME.TextMain
+	header.Font = THEME.FontHead
+	header.TextSize = 15
+	header.ZIndex = 5
+	header.Parent = lobbyPage
+	addTextOutline(header, 1.6, THEME.Outline)
+
+	local statsLbl = Instance.new("TextLabel")
+	statsLbl.Size = UDim2.new(1, 0, 0, 20)
+	statsLbl.Position = UDim2.fromOffset(0, 34)
+	statsLbl.BackgroundTransparency = 1
+	statsLbl.Text = "Tổng quái đã tiêu diệt: " .. formatNum(saveState.TotalKills)
+	statsLbl.TextColor3 = THEME.TextGold
+	statsLbl.Font = THEME.FontBody
+	statsLbl.TextSize = 12
+	statsLbl.ZIndex = 5
+	statsLbl.Parent = lobbyPage
+	UI.lobbyStatsLbl = statsLbl
+
+	local row = Instance.new("Frame")
+	row.Size = UDim2.new(1, -16, 0, 244)
+	row.Position = UDim2.fromOffset(8, 64)
+	row.BackgroundTransparency = 1
+	row.ZIndex = 4
+	row.Parent = lobbyPage
+
+	local lay = Instance.new("UIListLayout")
+	lay.FillDirection = Enum.FillDirection.Horizontal
+	lay.Padding = UDim.new(0, 12)
+	lay.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	lay.Parent = row
+
+	for idx, mp in ipairs(MAPS) do
+		local card = Instance.new("TextButton")
+		card.Size = UDim2.fromOffset(224, 240)
+		card.BackgroundColor3 = Color3.fromRGB(24, 28, 52)
+		card.Text = ""
+		card.AutoButtonColor = false
+		card.BorderSizePixel = 0
+		card.ZIndex = 5
+		card.Parent = row
+		addCorner(card, 14)
+		local st = addStroke(card, Color3.fromRGB(76, 86, 134), 2.2)
+
+		-- Mini preview ban do
+		local prev = Instance.new("Frame")
+		prev.Size = UDim2.fromOffset(200, 108)
+		prev.Position = UDim2.fromOffset(12, 12)
+		prev.BackgroundColor3 = mp.Grass1
+		prev.BorderSizePixel = 0
+		prev.ClipsDescendants = true
+		prev.ZIndex = 6
+		prev.Parent = card
+		addCorner(prev, 10)
+		addStroke(prev, THEME.Outline, 1.8)
+
+		-- Ve duong di mini
+		for w = 1, #mp.Waypoints - 1 do
+			local a, b = mp.Waypoints[w], mp.Waypoints[w + 1]
+			local x1, y1 = (a[1] - 0.5) * (200 / COLS), (a[2] - 0.5) * (108 / ROWS)
+			local x2, y2 = (b[1] - 0.5) * (200 / COLS), (b[2] - 0.5) * (108 / ROWS)
+			local seg = Instance.new("Frame")
+			local minX, minY = math.min(x1, x2), math.min(y1, y2)
+			local wPx = math.abs(x2 - x1) + 12
+			local hPx = math.abs(y2 - y1) + 12
+			seg.Size = UDim2.fromOffset(wPx, hPx)
+			seg.Position = UDim2.fromOffset(minX - 6, minY - 6)
+			seg.BackgroundColor3 = mp.PathCol
+			seg.BorderSizePixel = 0
+			seg.ZIndex = 7
+			seg.Parent = prev
+			addCorner(seg, 4)
+		end
+
+		local nLbl = Instance.new("TextLabel")
+		nLbl.Size = UDim2.new(1, -16, 0, 22)
+		nLbl.Position = UDim2.fromOffset(8, 128)
+		nLbl.BackgroundTransparency = 1
+		nLbl.Text = mp.Name
+		nLbl.TextColor3 = THEME.TextMain
+		nLbl.Font = THEME.FontHead
+		nLbl.TextSize = 14
+		nLbl.ZIndex = 6
+		nLbl.Parent = card
+
+		local dLbl = Instance.new("TextLabel")
+		dLbl.Size = UDim2.new(1, -16, 0, 18)
+		dLbl.Position = UDim2.fromOffset(8, 152)
+		dLbl.BackgroundTransparency = 1
+		dLbl.Text = "Độ khó: " .. mp.Diff .. "  •  " .. mp.Waves .. " Đợt"
+		dLbl.TextColor3 = THEME.TextCyan
+		dLbl.Font = THEME.FontBody
+		dLbl.TextSize = 11
+		dLbl.ZIndex = 6
+		dLbl.Parent = card
+
+		local recLbl = Instance.new("TextLabel")
+		recLbl.Size = UDim2.new(1, -16, 0, 38)
+		recLbl.Position = UDim2.fromOffset(8, 174)
+		recLbl.BackgroundTransparency = 1
+		recLbl.Text = "Kỷ lục: Đợt 0/" .. mp.Waves .. "\nChiến thắng: 0 lần"
+		recLbl.TextColor3 = THEME.TextGold
+		recLbl.Font = THEME.FontBody
+		recLbl.TextSize = 11
+		recLbl.ZIndex = 6
+		recLbl.Parent = card
+
+		mapCards[idx] = { Card = card, Stroke = st, RecLbl = recLbl, Map = mp }
+		card.MouseButton1Click:Connect(function()
+			saveState.SelectedMap = idx
+			saveData()
+			for j, mc in ipairs(mapCards) do
+				mc.Stroke.Color = (j == idx) and THEME.TextGold or Color3.fromRGB(76, 86, 134)
+				mc.Stroke.Thickness = (j == idx) and 3.0 or 2.2
+			end
+		end)
+	end
+
+	UI.playBtn = makeArcadeBtn(
+		lobbyPage, "▶  BẮT ĐẦU PHÒNG THỦ",
+		UDim2.fromOffset(276, 54), UDim2.new(0.5, -138, 1, -72),
+		Color3.fromRGB(68, 206, 74), Color3.fromRGB(28, 144, 48), 16,
+		{ TextSize = 17, ZIndex = 6, Depth = 5, Stroke = 2.6 }
+	)
+end
+SEC.buildLobby()
+
+local function refreshLobbyStats()
+	UI.lobbyStatsLbl.Text = "Tổng quái đã tiêu diệt: " .. formatNum(saveState.TotalKills)
+	for j, mc in ipairs(mapCards) do
+		local id = mc.Map.Id
+		mc.RecLbl.Text = string.format("Kỷ lục: Đợt %d/%d\nChiến thắng: %d lần", saveState.BestWave[id] or 0, mc.Map.Waves, saveState.Wins[id] or 0)
+		mc.Stroke.Color = (j == saveState.SelectedMap) and THEME.TextGold or Color3.fromRGB(76, 86, 134)
+		mc.Stroke.Thickness = (j == saveState.SelectedMap) and 3.0 or 2.2
+	end
+end
+refreshLobbyStats()
+
+-- ============================================================
+-- XAY DUNG MAN CHOI (BAN CO 14x9 + BANG CHON 5 THAP + NANG CAP)
+-- ============================================================
+local towerShopBtns = {}
+function SEC.buildGameUI()
+	-- Ban co 560x360 ben trai
+	local board = Instance.new("Frame")
+	board.Size = UDim2.fromOffset(COLS * CELL, ROWS * CELL)
+	board.Position = UDim2.fromOffset(0, 4)
+	board.BackgroundColor3 = Color3.fromRGB(24, 32, 48)
+	board.BorderSizePixel = 0
+	board.ClipsDescendants = true
+	board.ZIndex = 4
+	board.Parent = gamePage
+	addCorner(board, 10)
+	addStroke(board, Color3.fromRGB(92, 74, 168), 2.2)
+	UI.board = board
+
+	local tileLayer = Instance.new("Frame")
+	tileLayer.Size = UDim2.fromScale(1, 1)
+	tileLayer.BackgroundTransparency = 1
+	tileLayer.ZIndex = 5
+	tileLayer.Parent = board
+	UI.tileLayer = tileLayer
+
+	local rangeRing = Instance.new("Frame")
+	rangeRing.AnchorPoint = Vector2.new(0.5, 0.5)
+	rangeRing.BackgroundColor3 = Color3.fromRGB(96, 192, 224)
+	rangeRing.BackgroundTransparency = 0.84
+	rangeRing.BorderSizePixel = 0
+	rangeRing.Visible = false
+	rangeRing.ZIndex = 8
+	rangeRing.Parent = board
+	addCorner(rangeRing, 999)
+	addStroke(rangeRing, Color3.fromRGB(118, 212, 232), 1.6)
+	UI.rangeRing = rangeRing
+
+	local towerLayer = Instance.new("Frame")
+	towerLayer.Size = UDim2.fromScale(1, 1)
+	towerLayer.BackgroundTransparency = 1
+	towerLayer.ZIndex = 10
+	towerLayer.Parent = board
+	UI.towerLayer = towerLayer
+
+	local enemyLayer = Instance.new("Frame")
+	enemyLayer.Size = UDim2.fromScale(1, 1)
+	enemyLayer.BackgroundTransparency = 1
+	enemyLayer.ZIndex = 14
+	enemyLayer.Parent = board
+	UI.enemyLayer = enemyLayer
+
+	local fxLayer = Instance.new("Frame")
+	fxLayer.Size = UDim2.fromScale(1, 1)
+	fxLayer.BackgroundTransparency = 1
+	fxLayer.ZIndex = 22
+	fxLayer.Parent = board
+	UI.fxLayer = fxLayer
+
+	-- Bang dieu khien ben phai (156x360)
+	local side = Instance.new("Frame")
+	side.Size = UDim2.fromOffset(156, 360)
+	side.Position = UDim2.fromOffset(568, 4)
+	side.BackgroundColor3 = Color3.fromRGB(22, 26, 48)
+	side.BorderSizePixel = 0
+	side.ZIndex = 6
+	side.Parent = gamePage
+	addCorner(side, 10)
+	addStroke(side, Color3.fromRGB(82, 72, 148), 1.8)
+	UI.sidePanel = side
+
+	local sideTitle = Instance.new("TextLabel")
+	sideTitle.Size = UDim2.new(1, 0, 0, 22)
+	sideTitle.Position = UDim2.fromOffset(0, 4)
+	sideTitle.BackgroundTransparency = 1
+	sideTitle.Text = "XÂY THÁP THỦ"
+	sideTitle.TextColor3 = THEME.TextGold
+	sideTitle.Font = THEME.FontHead
+	sideTitle.TextSize = 12
+	sideTitle.ZIndex = 7
+	sideTitle.Parent = side
+
+	for i, td in ipairs(TOWERS) do
+		local btn = Instance.new("TextButton")
+		btn.Size = UDim2.fromOffset(142, 46)
+		btn.Position = UDim2.fromOffset(7, 28 + (i - 1) * 50)
+		btn.BackgroundColor3 = Color3.fromRGB(30, 36, 64)
+		btn.Text = ""
+		btn.AutoButtonColor = false
+		btn.BorderSizePixel = 0
+		btn.ZIndex = 7
+		btn.Parent = side
+		addCorner(btn, 9)
+		local st = addStroke(btn, Color3.fromRGB(68, 78, 122), 1.6)
+
+		local iconBox = Instance.new("Frame")
+		iconBox.Size = UDim2.fromOffset(34, 34)
+		iconBox.Position = UDim2.fromOffset(6, 6)
+		iconBox.BackgroundTransparency = 1
+		iconBox.ZIndex = 8
+		iconBox.Parent = btn
+		GFX.buildTowerSprite(iconBox, td, 30, 8)
+
+		local nm = Instance.new("TextLabel")
+		nm.Size = UDim2.fromOffset(96, 18)
+		nm.Position = UDim2.fromOffset(44, 5)
+		nm.BackgroundTransparency = 1
+		nm.Text = td.Name
+		nm.TextColor3 = THEME.TextMain
+		nm.Font = THEME.FontHead
+		nm.TextSize = 11
+		nm.TextXAlignment = Enum.TextXAlignment.Left
+		nm.ZIndex = 8
+		nm.Parent = btn
+
+		local pr = Instance.new("TextLabel")
+		pr.Size = UDim2.fromOffset(96, 16)
+		pr.Position = UDim2.fromOffset(44, 23)
+		pr.BackgroundTransparency = 1
+		pr.Text = tostring(td.Cost) .. " Vàng"
+		pr.TextColor3 = THEME.TextGold
+		pr.Font = THEME.FontBody
+		pr.TextSize = 11
+		pr.TextXAlignment = Enum.TextXAlignment.Left
+		pr.ZIndex = 8
+		pr.Parent = btn
+
+		towerShopBtns[i] = { Btn = btn, Stroke = st, Def = td }
+	end
+
+	-- Nut Ky nang Mua Thien Thach
+	local skillBtn, skillLbl = makeArcadeBtn(
+		side, "THIÊN THẠCH",
+		UDim2.fromOffset(142, 34), UDim2.fromOffset(7, 282),
+		Color3.fromRGB(214, 86, 48), Color3.fromRGB(156, 36, 32), 9,
+		{ TextSize = 11, ZIndex = 8, Depth = 3, Stroke = 1.6 }
+	)
+	UI.skillBtn = skillBtn
+	UI.skillLbl = skillLbl
+
+	-- Nut Goi Dot Quai
+	local waveBtn, waveBtnLbl = makeArcadeBtn(
+		side, "GỌI ĐỢT 1",
+		UDim2.fromOffset(142, 34), UDim2.fromOffset(7, 320),
+		Color3.fromRGB(64, 194, 88), Color3.fromRGB(28, 134, 54), 9,
+		{ TextSize = 12, ZIndex = 8, Depth = 3, Stroke = 1.6 }
+	)
+	UI.waveBtn = waveBtn
+	UI.waveBtnLbl = waveBtnLbl
+
+	-- Thanh duoi (724x36): Thong tin thap dang chon hoac Nang Cap / Ban Thap
+	local botBar = Instance.new("Frame")
+	botBar.Size = UDim2.fromOffset(724, 38)
+	botBar.Position = UDim2.fromOffset(0, 368)
+	botBar.BackgroundColor3 = Color3.fromRGB(22, 26, 48)
+	botBar.BorderSizePixel = 0
+	botBar.ZIndex = 6
+	botBar.Parent = gamePage
+	addCorner(botBar, 10)
+	addStroke(botBar, Color3.fromRGB(82, 72, 148), 1.6)
+
+	local infoLbl = Instance.new("TextLabel")
+	infoLbl.Size = UDim2.fromOffset(420, 36)
+	infoLbl.Position = UDim2.fromOffset(12, 1)
+	infoLbl.BackgroundTransparency = 1
+	infoLbl.Text = "Chọn tháp bên phải rồi chạm vào ô cỏ để xây phòng thủ"
+	infoLbl.TextColor3 = THEME.TextMain
+	infoLbl.Font = THEME.FontBody
+	infoLbl.TextSize = 12
+	infoLbl.TextXAlignment = Enum.TextXAlignment.Left
+	infoLbl.ZIndex = 7
+	infoLbl.Parent = botBar
+	UI.botInfoLbl = infoLbl
+
+	local upgBtn, upgLbl = makeArcadeBtn(
+		botBar, "NÂNG CẤP",
+		UDim2.fromOffset(146, 30), UDim2.new(1, -280, 0, 4),
+		Color3.fromRGB(64, 188, 96), Color3.fromRGB(28, 132, 58), 8,
+		{ TextSize = 11, ZIndex = 8, Depth = 3, Stroke = 1.6 }
+	)
+	upgBtn.Visible = false
+	UI.upgBtn = upgBtn
+	UI.upgLbl = upgLbl
+
+	local sellBtn, sellLbl = makeArcadeBtn(
+		botBar, "BÁN THÁP",
+		UDim2.fromOffset(120, 30), UDim2.new(1, -126, 0, 4),
+		Color3.fromRGB(206, 72, 76), Color3.fromRGB(146, 34, 42), 8,
+		{ TextSize = 11, ZIndex = 8, Depth = 3, Stroke = 1.6 }
+	)
+	sellBtn.Visible = false
+	UI.sellBtn = sellBtn
+	UI.sellLbl = sellLbl
+
+	-- Bang Ket Thuc (Thang / Thua)
+	local endCard = Instance.new("Frame")
+	endCard.Size = UDim2.fromOffset(330, 194)
+	endCard.Position = UDim2.fromScale(0.5, 0.5)
+	endCard.AnchorPoint = Vector2.new(0.5, 0.5)
+	endCard.BackgroundColor3 = Color3.fromRGB(20, 24, 44)
+	endCard.BorderSizePixel = 0
+	endCard.Visible = false
+	endCard.ZIndex = 45
+	endCard.Parent = board
+	addCorner(endCard, 14)
+	UI.endStroke = addStroke(endCard, THEME.TextGold, 2.6)
+	UI.endCard = endCard
+
+	local endTitle = Instance.new("TextLabel")
+	endTitle.Size = UDim2.new(1, 0, 0, 34)
+	endTitle.Position = UDim2.fromOffset(0, 14)
+	endTitle.BackgroundTransparency = 1
+	endTitle.Text = "CHIẾN THẮNG!"
+	endTitle.TextColor3 = THEME.TextGold
+	endTitle.Font = THEME.FontHead
+	endTitle.TextSize = 20
+	endTitle.ZIndex = 46
+	endTitle.Parent = endCard
+	addTextOutline(endTitle, 2, THEME.Outline)
+	UI.endTitle = endTitle
+
+	local endDesc = Instance.new("TextLabel")
+	endDesc.Size = UDim2.new(1, -24, 0, 56)
+	endDesc.Position = UDim2.fromOffset(12, 54)
+	endDesc.BackgroundTransparency = 1
+	endDesc.Text = ""
+	endDesc.TextColor3 = THEME.TextMain
+	endDesc.Font = THEME.FontBody
+	endDesc.TextSize = 13
+	endDesc.TextWrapped = true
+	endDesc.ZIndex = 46
+	endDesc.Parent = endCard
+	UI.endDesc = endDesc
+
+	UI.endReplayBtn = makeArcadeBtn(endCard, "CHƠI LẠI", UDim2.fromOffset(136, 40), UDim2.fromOffset(22, 134), Color3.fromRGB(64, 198, 86), Color3.fromRGB(28, 136, 52), 10, { TextSize = 13, ZIndex = 47, Depth = 4 })
+	UI.endHomeBtn   = makeArcadeBtn(endCard, "VỀ SẢNH",  UDim2.fromOffset(136, 40), UDim2.fromOffset(172, 134), Color3.fromRGB(142, 72, 208), Color3.fromRGB(88, 36, 162), 10, { TextSize = 13, ZIndex = 47, Depth = 4 })
+end
+SEC.buildGameUI()
+
+-- ============================================================
+-- LOGIC GAME THU THANH 2D + HOAT ANH CHIEN DAU
+-- ============================================================
+local TD = {
+	active = false,
+	paused = false,
+	over = false,
+	speedMult = 1,
+	map = MAPS[1],
+	gold = 240,
+	lives = 20,
+	wave = 0,
+	kills = 0,
+	waveSpawning = false,
+	spawnQueue = {},
+	spawnTimer = 0,
+	skillCd = 0,
+	selectedBuildIdx = 1,
+	selectedTower = nil,
+	pathCells = {},
+	pathPoints = {},
+	towers = {},
+	enemies = {},
+	projectiles = {},
+	shakeTime = 0,
+}
+
+local function cellCenter(gx, gy)
+	return (gx - 0.5) * CELL, (gy - 0.5) * CELL
+end
+
+local function spawnFloatingText(x, y, text, col)
+	local lbl = Instance.new("TextLabel")
+	lbl.Size = UDim2.fromOffset(80, 18)
+	lbl.Position = UDim2.fromOffset(x, y - 10)
+	lbl.AnchorPoint = Vector2.new(0.5, 0.5)
+	lbl.BackgroundTransparency = 1
+	lbl.Text = text
+	lbl.TextColor3 = col or THEME.TextGold
+	lbl.Font = THEME.FontHead
+	lbl.TextSize = 11
+	lbl.ZIndex = 28
+	lbl.Parent = UI.fxLayer
+	addTextOutline(lbl, 1.3, THEME.Outline)
+	local tw = TweenService:Create(lbl, TweenInfo.new(0.65, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Position = UDim2.fromOffset(x, y - 34),
+		TextTransparency = 1
+	})
+	tw:Play()
+	tw.Completed:Connect(function() if lbl.Parent then lbl:Destroy() end end)
+end
+
+local function spawnExplosionRing(x, y, radius, col)
+	local ring = Instance.new("Frame")
+	ring.Size = UDim2.fromOffset(10, 10)
+	ring.Position = UDim2.fromOffset(x, y)
+	ring.AnchorPoint = Vector2.new(0.5, 0.5)
+	ring.BackgroundColor3 = col
+	ring.BackgroundTransparency = 0.45
+	ring.BorderSizePixel = 0
+	ring.ZIndex = 24
+	ring.Parent = UI.fxLayer
+	addCorner(ring, 999)
+	addStroke(ring, col, 2)
+	local tw = TweenService:Create(ring, TweenInfo.new(0.28, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Size = UDim2.fromOffset(radius * 2, radius * 2),
+		BackgroundTransparency = 1
+	})
+	tw:Play()
+	tw.Completed:Connect(function() if ring.Parent then ring:Destroy() end end)
+end
+
+local function spawnBeamLine(x1, y1, x2, y2, col, thick, dur)
+	local dx, dy = x2 - x1, y2 - y1
+	local len = math.sqrt(dx * dx + dy * dy)
+	if len < 2 then return end
+	local beam = Instance.new("Frame")
+	beam.Size = UDim2.fromOffset(len, thick or 4)
+	beam.Position = UDim2.fromOffset((x1 + x2) * 0.5, (y1 + y2) * 0.5)
+	beam.AnchorPoint = Vector2.new(0.5, 0.5)
+	beam.Rotation = math.deg(math.atan2(dy, dx))
+	beam.BackgroundColor3 = col
+	beam.BorderSizePixel = 0
+	beam.ZIndex = 25
+	beam.Parent = UI.fxLayer
+	addCorner(beam, 99)
+	local tw = TweenService:Create(beam, TweenInfo.new(dur or 0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		BackgroundTransparency = 1,
+		Size = UDim2.fromOffset(len, 1)
+	})
+	tw:Play()
+	tw.Completed:Connect(function() if beam.Parent then beam:Destroy() end end)
+end
+
+local function spawnDeathParticles(x, y, col)
+	for _ = 1, 5 do
+		local p = Instance.new("Frame")
+		p.Size = UDim2.fromOffset(6, 6)
+		p.Position = UDim2.fromOffset(x, y)
+		p.AnchorPoint = Vector2.new(0.5, 0.5)
+		p.BackgroundColor3 = col
+		p.BorderSizePixel = 0
+		p.ZIndex = 26
+		p.Parent = UI.fxLayer
+		addCorner(p, 99)
+		local ang = math.rad(math.random(0, 359))
+		local dist = math.random(14, 28)
+		local tw = TweenService:Create(p, TweenInfo.new(0.32, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			Position = UDim2.fromOffset(x + math.cos(ang) * dist, y + math.sin(ang) * dist),
+			BackgroundTransparency = 1,
+			Size = UDim2.fromOffset(2, 2)
+		})
+		tw:Play()
+		tw.Completed:Connect(function() if p.Parent then p:Destroy() end end)
+	end
+end
+
+local function updateHUD()
+	UI.livesLbl.Text = "Máu: " .. tostring(math.max(0, TD.lives))
+	UI.goldLbl.Text  = "Vàng: " .. formatNum(TD.gold)
+	UI.waveLbl.Text  = "Đợt: " .. tostring(TD.wave) .. "/" .. tostring(TD.map.Waves)
+	UI.spdLbl.Text   = tostring(TD.speedMult) .. "x"
+
+	for i, sb in ipairs(towerShopBtns) do
+		local isSel = (TD.selectedBuildIdx == i) and (TD.selectedTower == nil)
+		sb.Stroke.Color = isSel and THEME.TextGold or ((TD.gold >= sb.Def.Cost) and Color3.fromRGB(78, 96, 148) or Color3.fromRGB(118, 52, 58))
+		sb.Stroke.Thickness = isSel and 2.4 or 1.5
+	end
+
+	if TD.selectedTower then
+		local t = TD.selectedTower
+		local upCost = math.floor(t.Def.UpgradeCost * t.Level)
+		local sellVal = math.floor(t.Invested * 0.7)
+		UI.botInfoLbl.Text = string.format("%s Cấp %d  •  Sát thương: %d  •  Tầm: %d", t.Def.Name, t.Level, math.floor(t.Damage), math.floor(t.Range))
+		UI.upgBtn.Visible = (t.Level < 3)
+		UI.upgLbl.Text = (t.Level < 3) and ("NÂNG CẤP (" .. upCost .. ")") or "MAX CẤP"
+		UI.sellBtn.Visible = true
+		UI.sellLbl.Text = "BÁN (+" .. sellVal .. ")"
+		UI.rangeRing.Visible = true
+		UI.rangeRing.Position = UDim2.fromOffset(t.X, t.Y)
+		UI.rangeRing.Size = UDim2.fromOffset(t.Range * 2, t.Range * 2)
+	else
+		local bd = TOWERS[TD.selectedBuildIdx]
+		UI.botInfoLbl.Text = "Đang chọn: " .. bd.Name .. " (" .. bd.Cost .. " Vàng)  •  " .. bd.Desc
+		UI.upgBtn.Visible = false
+		UI.sellBtn.Visible = false
+		UI.rangeRing.Visible = false
+	end
+
+	if TD.skillCd > 0 then
+		UI.skillLbl.Text = string.format("HỒI %.0fs", math.ceil(TD.skillCd))
+	else
+		UI.skillLbl.Text = "THIÊN THẠCH"
+	end
+
+	if TD.waveSpawning or #TD.enemies > 0 then
+		UI.waveBtnLbl.Text = "ĐANG CHIẾN..."
+	elseif TD.wave >= TD.map.Waves then
+		UI.waveBtnLbl.Text = "HOÀN THÀNH"
+	else
+		UI.waveBtnLbl.Text = "GỌI ĐỢT " .. tostring(TD.wave + 1)
+	end
+end
+
+local function clearMatchLayers()
+	for _, ch in ipairs(UI.tileLayer:GetChildren()) do ch:Destroy() end
+	for _, ch in ipairs(UI.towerLayer:GetChildren()) do ch:Destroy() end
+	for _, ch in ipairs(UI.enemyLayer:GetChildren()) do ch:Destroy() end
+	for _, ch in ipairs(UI.fxLayer:GetChildren()) do ch:Destroy() end
+	TD.towers = {}
+	TD.enemies = {}
+	TD.projectiles = {}
+	TD.selectedTower = nil
+end
+
+local function finishMatch(won)
+	TD.over = true
+	TD.active = false
+	local mid = TD.map.Id
+	if TD.wave > (saveState.BestWave[mid] or 0) then
+		saveState.BestWave[mid] = TD.wave
+	end
+	if won then
+		saveState.Wins[mid] = (saveState.Wins[mid] or 0) + 1
+	end
+	saveData()
+	UI.endTitle.Text = won and "CHIẾN THẮNG!" or "THẤT THỦ!"
+	UI.endTitle.TextColor3 = won and THEME.TextGold or THEME.TextRed
+	UI.endStroke.Color = won and THEME.TextGold or THEME.TextRed
+	UI.endDesc.Text = string.format("Bản đồ: %s\nĐạt Đợt %d/%d  •  Tiêu diệt: %d quái", TD.map.Name, TD.wave, TD.map.Waves, TD.kills)
+	UI.endCard.Visible = true
+	updateHUD()
+end
+
+local function getTowerAt(gx, gy)
+	for _, t in ipairs(TD.towers) do
+		if t.GX == gx and t.GY == gy then return t end
+	end
+	return nil
+end
+
+local function buildTowerAt(gx, gy)
+	if TD.over or TD.paused then return end
+	if TD.pathCells[gx .. "_" .. gy] then return end
+	local existing = getTowerAt(gx, gy)
+	if existing then
+		TD.selectedTower = existing
+		updateHUD()
+		return
+	end
+	local def = TOWERS[TD.selectedBuildIdx]
+	if TD.gold < def.Cost then
+		showToast("Không đủ vàng để xây " .. def.Name .. "!", THEME.TextRed, 2.0)
+		return
+	end
+	TD.gold -= def.Cost
+	local cx, cy = cellCenter(gx, gy)
+	local holder = Instance.new("TextButton")
+	holder.Size = UDim2.fromOffset(CELL, CELL)
+	holder.Position = UDim2.fromOffset(cx, cy)
+	holder.AnchorPoint = Vector2.new(0.5, 0.5)
+	holder.BackgroundTransparency = 1
+	holder.Text = ""
+	holder.ZIndex = 11
+	holder.Parent = UI.towerLayer
+
+	local sprite, turret, barrel = GFX.buildTowerSprite(holder, def, CELL - 4, 11)
+	local lvTag = Instance.new("TextLabel")
+	lvTag.Size = UDim2.fromOffset(22, 12)
+	lvTag.Position = UDim2.new(1, -22, 1, -12)
+	lvTag.BackgroundColor3 = Color3.fromRGB(16, 18, 34)
+	lvTag.BorderSizePixel = 0
+	lvTag.Text = "C1"
+	lvTag.TextColor3 = THEME.TextGold
+	lvTag.Font = THEME.FontHead
+	lvTag.TextSize = 9
+	lvTag.ZIndex = 16
+	lvTag.Parent = holder
+	addCorner(lvTag, 4)
+
+	-- Hoat anh dat thap nay len
+	sprite.Size = UDim2.fromOffset(10, 10)
+	TweenService:Create(sprite, TweenInfo.new(0.22, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+		Size = UDim2.fromOffset(CELL - 4, CELL - 4)
+	}):Play()
+
+	local tObj = {
+		GX = gx, GY = gy, X = cx, Y = cy,
+		Def = def, Level = 1, Invested = def.Cost,
+		Damage = def.Damage, Range = def.Range, FireRate = def.FireRate,
+		Cooldown = 0, Node = holder, Turret = turret, Barrel = barrel, LvTag = lvTag,
+	}
+	table.insert(TD.towers, tObj)
+	holder.MouseButton1Click:Connect(function()
+		TD.selectedTower = tObj
+		updateHUD()
+	end)
+	TD.selectedTower = nil
+	updateHUD()
+end
+
+local function buildMapBoard(mp)
+	clearMatchLayers()
+	TD.pathCells = {}
+	TD.pathPoints = {}
+	for _, wp in ipairs(mp.Waypoints) do
+		local cx, cy = cellCenter(wp[1], wp[2])
+		table.insert(TD.pathPoints, { x = cx, y = cy })
+	end
+	for w = 1, #mp.Waypoints - 1 do
+		local a, b = mp.Waypoints[w], mp.Waypoints[w + 1]
+		local dx = (b[1] > a[1]) and 1 or ((b[1] < a[1]) and -1 or 0)
+		local dy = (b[2] > a[2]) and 1 or ((b[2] < a[2]) and -1 or 0)
+		local cx, cy = a[1], a[2]
+		while true do
+			TD.pathCells[cx .. "_" .. cy] = true
+			if cx == b[1] and cy == b[2] then break end
+			cx += dx
+			cy += dy
+		end
+	end
+
+	for x = 1, COLS do
+		for y = 1, ROWS do
+			local isPath = (TD.pathCells[x .. "_" .. y] == true)
+			local tile = Instance.new("TextButton")
+			tile.Size = UDim2.fromOffset(CELL, CELL)
+			tile.Position = UDim2.fromOffset((x - 1) * CELL, (y - 1) * CELL)
+			tile.Text = ""
+			tile.AutoButtonColor = false
+			tile.BorderSizePixel = 0
+			tile.ZIndex = 5
+			if isPath then
+				tile.BackgroundColor3 = mp.PathCol
+				addStroke(tile, mp.PathBorder, 1)
+			else
+				tile.BackgroundColor3 = ((x + y) % 2 == 0) and mp.Grass1 or mp.Grass2
+				tile.MouseButton1Click:Connect(function()
+					buildTowerAt(x, y)
+				end)
+			end
+			tile.Parent = UI.tileLayer
+		end
+	end
+
+	-- Cong xuat phat & Thanh tri muc tieu
+	local pStart = TD.pathPoints[1]
+	local pEnd = TD.pathPoints[#TD.pathPoints]
+	local gate = Instance.new("Frame")
+	gate.Size = UDim2.fromOffset(30, 30)
+	gate.Position = UDim2.fromOffset(pStart.x, pStart.y)
+	gate.AnchorPoint = Vector2.new(0.5, 0.5)
+	gate.BackgroundColor3 = Color3.fromRGB(168, 46, 56)
+	gate.BorderSizePixel = 0
+	gate.ZIndex = 7
+	gate.Parent = UI.tileLayer
+	addCorner(gate, 99)
+	addStroke(gate, THEME.Outline, 2)
+
+	local castle = Instance.new("Frame")
+	castle.Size = UDim2.fromOffset(34, 34)
+	castle.Position = UDim2.fromOffset(pEnd.x, pEnd.y)
+	castle.AnchorPoint = Vector2.new(0.5, 0.5)
+	castle.BackgroundColor3 = Color3.fromRGB(64, 152, 218)
+	castle.BorderSizePixel = 0
+	castle.ZIndex = 7
+	castle.Parent = UI.tileLayer
+	addCorner(castle, 8)
+	addStroke(castle, THEME.TextGold, 2.2)
+end
+
+local function buildWaveQueue(waveNum)
+	local q = {}
+	local count = 6 + waveNum * 2
+	for i = 1, count do
+		local kind = "slime"
+		if waveNum >= 2 and i % 3 == 0 then kind = "goblin" end
+		if waveNum >= 4 and i % 4 == 0 then kind = "knight" end
+		if waveNum >= 6 and i % 5 == 0 then kind = "wraith" end
+		if waveNum >= 8 and i % 6 == 0 then kind = "golem" end
+		table.insert(q, kind)
+	end
+	if waveNum % 5 == 0 or waveNum == TD.map.Waves then
+		table.insert(q, "boss")
+	end
+	return q
+end
+
+local function startNextWave()
+	if TD.over or TD.paused or TD.waveSpawning or #TD.enemies > 0 then return end
+	if TD.wave >= TD.map.Waves then return end
+	TD.wave += 1
+	TD.spawnQueue = buildWaveQueue(TD.wave)
+	TD.waveSpawning = true
+	TD.spawnTimer = 0.2
+	local isBoss = (TD.wave % 5 == 0 or TD.wave == TD.map.Waves)
+	showToast(isBoss and ("CẢNH BÁO BOSS ĐỢT " .. TD.wave .. "!") or ("Đợt quái " .. TD.wave .. " đang tiến vào!"), isBoss and THEME.TextRed or THEME.TextCyan, 2.2)
+	updateHUD()
+end
+
+local function spawnEnemy(kind)
+	local def = ENEMIES[kind] or ENEMIES.slime
+	local scaleHP = 1 + (TD.wave - 1) * 0.24
+	local maxHp = math.floor(def.HP * scaleHP)
+	local p0 = TD.pathPoints[1]
+	local node, body, hpFill = GFX.buildEnemySprite(UI.enemyLayer, def, 15)
+	node.Position = UDim2.fromOffset(p0.x, p0.y)
+	table.insert(TD.enemies, {
+		Def = def, HP = maxHp, MaxHP = maxHp,
+		X = p0.x, Y = p0.y, WpIdx = 2, Progress = 0,
+		SlowTimer = 0, SlowFactor = 1, HitFlash = 0, BobPhase = math.random() * 6,
+		Node = node, Body = body, HpFill = hpFill, Dead = false
+	})
+end
+
+local function damageEnemy(e, dmg, slowFrac, slowDur)
+	if e.Dead then return end
+	e.HP -= dmg
+	e.HitFlash = 0.12
+	if slowFrac and slowDur then
+		e.SlowFactor = math.min(e.SlowFactor, 1 - slowFrac)
+		e.SlowTimer = math.max(e.SlowTimer, slowDur)
+	end
+	if e.HP <= 0 then
+		e.Dead = true
+		TD.gold += e.Def.Reward
+		TD.kills += 1
+		saveState.TotalKills += 1
+		spawnDeathParticles(e.X, e.Y, e.Def.Color)
+		spawnFloatingText(e.X, e.Y, "+" .. tostring(e.Def.Reward) .. "V", THEME.TextGold)
+		if e.Node and e.Node.Parent then e.Node:Destroy() end
+		updateHUD()
+	else
+		e.HpFill.Size = UDim2.fromScale(math.clamp(e.HP / e.MaxHP, 0, 1), 1)
+	end
+end
+
+local function fireTower(t, target)
+	local ang = math.deg(math.atan2(target.Y - t.Y, target.X - t.X))
+	t.Turret.Rotation = ang
+	-- Hoat anh giat nong sung (Recoil)
+	t.Barrel.Position = UDim2.fromScale(0.38, 0.5)
+	TweenService:Create(t.Barrel, TweenInfo.new(0.14, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Position = UDim2.fromScale(0.55, 0.5)
+	}):Play()
+
+	if t.Def.Kind == "Lightning" then
+		local hitSet = {}
+		local curX, curY = t.X, t.Y
+		local curTarget = target
+		for _ = 1, (t.Def.Chain or 3) do
+			if not curTarget or curTarget.Dead then break end
+			hitSet[curTarget] = true
+			spawnBeamLine(curX, curY, curTarget.X, curTarget.Y, THEME.TextCyan, 3.5, 0.16)
+			damageEnemy(curTarget, t.Damage)
+			curX, curY = curTarget.X, curTarget.Y
+			local nextBest, bestD = nil, 110
+			for _, other in ipairs(TD.enemies) do
+				if not other.Dead and not hitSet[other] then
+					local d = math.sqrt((other.X - curX)^2 + (other.Y - curY)^2)
+					if d < bestD then bestD = d nextBest = other end
+				end
+			end
+			curTarget = nextBest
+		end
+	elseif t.Def.Kind == "Laser" then
+		spawnBeamLine(t.X, t.Y, target.X, target.Y, t.Def.Accent, 5, 0.22)
+		spawnExplosionRing(target.X, target.Y, 16, t.Def.Accent)
+		damageEnemy(target, t.Damage)
+	else
+		local pNode = Instance.new("Frame")
+		local pSz = (t.Def.Kind == "Bomb") and 11 or 8
+		pNode.Size = UDim2.fromOffset(pSz, pSz)
+		pNode.Position = UDim2.fromOffset(t.X, t.Y)
+		pNode.AnchorPoint = Vector2.new(0.5, 0.5)
+		pNode.BackgroundColor3 = t.Def.Accent
+		pNode.BorderSizePixel = 0
+		pNode.ZIndex = 20
+		pNode.Parent = UI.fxLayer
+		addCorner(pNode, 99)
+		addStroke(pNode, THEME.Outline, 1.4)
+		table.insert(TD.projectiles, {
+			X = t.X, Y = t.Y, Target = target, TX = target.X, TY = target.Y,
+			Speed = t.Def.ProjSpeed or 320, Damage = t.Damage,
+			Splash = t.Def.Splash, Slow = t.Def.Slow, SlowDur = t.Def.SlowDur,
+			Color = t.Def.Accent, Node = pNode
+		})
+	end
+end
+
+local function startNewMatch()
+	TD.map = MAPS[saveState.SelectedMap] or MAPS[1]
+	TD.gold = TD.map.StartGold
+	TD.lives = TD.map.StartLives
+	TD.wave = 0
+	TD.kills = 0
+	TD.waveSpawning = false
+	TD.spawnQueue = {}
+	TD.skillCd = 0
+	TD.over = false
+	TD.paused = false
+	TD.active = true
+	TD.selectedBuildIdx = 1
+	UI.pauseLbl.Text = "II"
+	UI.endCard.Visible = false
+	UI.hudGroup.Visible = true
+	UI.homeBtn.Visible = true
+	lobbyPage.Visible = false
+	gamePage.Visible = true
+	buildMapBoard(TD.map)
+	updateHUD()
+end
+
+local function goLobby()
+	TD.active = false
+	TD.paused = false
+	clearMatchLayers()
+	UI.hudGroup.Visible = false
+	UI.homeBtn.Visible = false
+	gamePage.Visible = false
+	lobbyPage.Visible = true
+	refreshLobbyStats()
+end
+
+-- ============================================================
+-- KET NOI NUT BAM & VONG LAP CHINH (RENDERSTEPPED)
+-- ============================================================
+for i, sb in ipairs(towerShopBtns) do
+	sb.Btn.MouseButton1Click:Connect(function()
+		TD.selectedBuildIdx = i
+		TD.selectedTower = nil
+		updateHUD()
+	end)
+end
+
+UI.upgBtn.MouseButton1Click:Connect(function()
+	local t = TD.selectedTower
+	if not t or t.Level >= 3 then return end
+	local cost = math.floor(t.Def.UpgradeCost * t.Level)
+	if TD.gold < cost then
+		showToast("Cần " .. cost .. " Vàng để nâng cấp!", THEME.TextRed, 2.0)
+		return
+	end
+	TD.gold -= cost
+	t.Invested += cost
+	t.Level += 1
+	t.Damage = t.Damage * 1.52
+	t.Range = t.Range * 1.12
+	t.FireRate = math.max(0.25, t.FireRate * 0.88)
+	t.LvTag.Text = "C" .. tostring(t.Level)
+	spawnExplosionRing(t.X, t.Y, 26, THEME.TextGold)
+	showToast("Đã nâng " .. t.Def.Name .. " lên Cấp " .. t.Level .. "!", THEME.TextGreen, 2.0)
+	updateHUD()
 end)
 
--- Banner kết thúc trận
-do
-    local Banner = Instance.new("Frame")
-    Banner.Size = UDim2.new(0, 320, 0, 168)
-    Banner.AnchorPoint = Vector2.new(0.5, 0.5)
-    Banner.Position = UDim2.new(0.5, 0, 0.5, 0)
-    Banner.BackgroundColor3 = UITheme.BgCard
-    Banner.BorderSizePixel = 0
-    Banner.Visible = false
-    Banner.ZIndex = 35
-    Banner.Parent = MapContainer
-    addCorner(Banner, 14)
-    UI.BannerStroke = addStroke(Banner, UITheme.RimBlue, 2.5, 0.05)
-    UI.EndBanner = Banner
+UI.sellBtn.MouseButton1Click:Connect(function()
+	local t = TD.selectedTower
+	if not t then return end
+	local refund = math.floor(t.Invested * 0.7)
+	TD.gold += refund
+	spawnFloatingText(t.X, t.Y, "+" .. refund .. "V", THEME.TextGold)
+	if t.Node and t.Node.Parent then t.Node:Destroy() end
+	for i = #TD.towers, 1, -1 do
+		if TD.towers[i] == t then table.remove(TD.towers, i) break end
+	end
+	TD.selectedTower = nil
+	updateHUD()
+end)
 
-    local BTitle = Instance.new("TextLabel")
-    BTitle.Size = UDim2.new(1, -20, 0, 34)
-    BTitle.Position = UDim2.new(0, 10, 0, 18)
-    BTitle.BackgroundTransparency = 1
-    BTitle.Text = "CHIẾN THẮNG!"
-    BTitle.Font = FONT_MAIN
-    BTitle.TextSize = 22
-    BTitle.TextColor3 = UITheme.ColorGold
-    BTitle.ZIndex = 36
-    BTitle.Parent = Banner
-    UI.BTitle = BTitle
+UI.skillBtn.MouseButton1Click:Connect(function()
+	if not TD.active or TD.paused or TD.over then return end
+	if TD.skillCd > 0 then return end
+	if #TD.enemies == 0 then
+		showToast("Chưa có quái trên đường để thả Thiên Thạch!", THEME.TextGold, 2.0)
+		return
+	end
+	TD.skillCd = 25
+	TD.shakeTime = 0.25
+	local dmg = 95 + TD.wave * 24
+	for _, e in ipairs(TD.enemies) do
+		if not e.Dead then
+			spawnExplosionRing(e.X, e.Y, 34, Color3.fromRGB(224, 96, 48))
+			damageEnemy(e, dmg)
+		end
+	end
+	showToast("Mưa Thiên Thạch giáng xuống toàn bản đồ!", THEME.TextGold, 2.2)
+	updateHUD()
+end)
 
-    local BSub = Instance.new("TextLabel")
-    BSub.Size = UDim2.new(1, -20, 0, 36)
-    BSub.Position = UDim2.new(0, 10, 0, 58)
-    BSub.BackgroundTransparency = 1
-    BSub.Text = ""
-    BSub.Font = FONT_BODY
-    BSub.TextSize = 13
-    BSub.TextColor3 = UITheme.TextPrimary
-    BSub.TextWrapped = true
-    BSub.ZIndex = 36
-    BSub.Parent = Banner
-    UI.BSub = BSub
+UI.waveBtn.MouseButton1Click:Connect(startNextWave)
+UI.playBtn.MouseButton1Click:Connect(startNewMatch)
+UI.endReplayBtn.MouseButton1Click:Connect(startNewMatch)
+UI.homeBtn.MouseButton1Click:Connect(goLobby)
+UI.endHomeBtn.MouseButton1Click:Connect(goLobby)
 
-    local rBtn = make3DButton(Banner, "Chơi lại", UDim2.new(0, 138, 0, 38), UDim2.new(0, 16, 1, -50), UITheme.BtnGreen, UITheme.BtnGreenDark, UITheme.TextPrimary, 13, function()
-        sfxClick()
-        startNewMatch()
-    end)
-    rBtn.ZIndex = 36
+UI.spdBtn.MouseButton1Click:Connect(function()
+	TD.speedMult = (TD.speedMult == 1) and 2 or 1
+	updateHUD()
+end)
 
-    local hBtn = make3DButton(Banner, "Trang chủ", UDim2.new(0, 138, 0, 38), UDim2.new(1, -154, 1, -50), UITheme.BtnBlue, UITheme.BtnBlueDark, UITheme.TextPrimary, 13, function()
-        sfxClick()
-        hideBanner()
-        openHomeScreen()
-    end)
-    hBtn.ZIndex = 36
+UI.pauseBtn.MouseButton1Click:Connect(function()
+	if not TD.active or TD.over then return end
+	TD.paused = not TD.paused
+	UI.pauseLbl.Text = TD.paused and "▶" or "II"
+end)
+
+local function minimizeMenu()
+	if TD.active then TD.paused = true UI.pauseLbl.Text = "▶" end
+	mainFrame.Visible = false
+	backdrop.Visible = false
+	floatBtn.Visible = true
 end
 
--- ========================================================================
--- [PHẦN 06] BẢNG ĐIỀU KHIỂN PHẢI (CHỌN THÁP, NÂNG CẤP, KỸ NĂNG & ĐỢT QUÁI)
--- ========================================================================
-do
-    local SidePanel = Instance.new("ScrollingFrame")
-    SidePanel.Size = UDim2.new(0, 240, 1, 0)
-    SidePanel.Position = UDim2.new(1, -240, 0, 0)
-    SidePanel.BackgroundColor3 = UITheme.BgPanel
-    SidePanel.BorderSizePixel = 0
-    SidePanel.ScrollBarThickness = 4
-    SidePanel.ScrollBarImageColor3 = UITheme.RimBlue
-    SidePanel.AutomaticCanvasSize = Enum.AutomaticSize.Y
-    SidePanel.CanvasSize = UDim2.new(0, 0, 0, 0)
-    SidePanel.Parent = MainArea
-    addCorner(SidePanel, 14)
-    addStroke(SidePanel, UITheme.RimBlue, 2.2, 0.1)
-    addGradient(SidePanel, UITheme.BgCard, UITheme.BgPanelDark, 135)
-
-    local pad = Instance.new("UIPadding")
-    pad.PaddingTop = UDim.new(0, 10)
-    pad.PaddingBottom = UDim.new(0, 10)
-    pad.PaddingLeft = UDim.new(0, 10)
-    pad.PaddingRight = UDim.new(0, 10)
-    pad.Parent = SidePanel
-
-    local layout = Instance.new("UIListLayout")
-    layout.SortOrder = Enum.SortOrder.LayoutOrder
-    layout.Padding = UDim.new(0, 7)
-    layout.Parent = SidePanel
-
-    -- 4 Thẻ chọn Tháp (2x2)
-    local TowerGrid = Instance.new("Frame")
-    TowerGrid.LayoutOrder = 1
-    TowerGrid.Size = UDim2.new(1, 0, 0, 108)
-    TowerGrid.BackgroundTransparency = 1
-    TowerGrid.Parent = SidePanel
-
-    UI.TowerBtns = {}
-    for idx, tw in ipairs(TOWERS) do
-        local col = (idx - 1) % 2
-        local row = math.floor((idx - 1) / 2)
-        local card = Instance.new("TextButton")
-        card.Size = UDim2.new(0.485, 0, 0, 50)
-        card.Position = UDim2.new(col * 0.515, 0, 0, row * 56)
-        card.BackgroundColor3 = UITheme.BgPanelDark
-        card.BorderSizePixel = 0
-        card.AutoButtonColor = false
-        card.Text = ""
-        card.Parent = TowerGrid
-        addCorner(card, 9)
-        local st = addStroke(card, tw.color, 1.5, 0.25)
-
-        local nLbl = Instance.new("TextLabel")
-        nLbl.Size = UDim2.new(1, -6, 0, 20)
-        nLbl.Position = UDim2.new(0, 3, 0, 5)
-        nLbl.BackgroundTransparency = 1
-        nLbl.Text = tw.name
-        nLbl.Font = FONT_MAIN
-        nLbl.TextSize = 12
-        nLbl.TextColor3 = tw.color
-        nLbl.Parent = card
-
-        local cLbl = Instance.new("TextLabel")
-        cLbl.Size = UDim2.new(1, -6, 0, 18)
-        cLbl.Position = UDim2.new(0, 3, 0, 27)
-        cLbl.BackgroundTransparency = 1
-        cLbl.Text = tw.cost .. " Vàng"
-        cLbl.Font = FONT_BODY
-        cLbl.TextSize = 11
-        cLbl.TextColor3 = UITheme.ColorGold
-        cLbl.Parent = card
-
-        local tIdx = idx
-        bindInstantTap(card, function()
-            State.SelectedTool = tIdx
-            clearSelection()
-            sfxClick()
-            updateSelectionUI()
-        end)
-        UI.TowerBtns[tIdx] = { card = card, stroke = st }
-    end
-
-    -- Khung Nâng cấp / Bán khi bấm vào 1 tháp trên bản đồ
-    local SelBox = Instance.new("Frame")
-    SelBox.LayoutOrder = 2
-    SelBox.Size = UDim2.new(1, 0, 0, 66)
-    SelBox.BackgroundColor3 = UITheme.BgPanelDark
-    SelBox.BorderSizePixel = 0
-    SelBox.Visible = false
-    SelBox.Parent = SidePanel
-    addCorner(SelBox, 9)
-    addStroke(SelBox, UITheme.ColorGold, 1.5, 0.15)
-    UI.SelBox = SelBox
-
-    local SelTitle = Instance.new("TextLabel")
-    SelTitle.Size = UDim2.new(1, -10, 0, 20)
-    SelTitle.Position = UDim2.new(0, 5, 0, 4)
-    SelTitle.BackgroundTransparency = 1
-    SelTitle.Text = "Tháp Cung Lv1"
-    SelTitle.Font = FONT_MAIN
-    SelTitle.TextSize = 12
-    SelTitle.TextColor3 = UITheme.ColorGold
-    SelTitle.Parent = SelBox
-    UI.SelTitle = SelTitle
-
-    UI.UpBtn, UI.UpFace, UI.UpLbl = make3DButton(SelBox, "Nâng 60V", UDim2.new(0.47, 0, 0, 32), UDim2.new(0, 5, 1, -37), UITheme.BtnGreen, UITheme.BtnGreenDark, UITheme.TextPrimary, 11, function()
-        upgradeSelectedTower()
-    end)
-
-    UI.SellBtn, UI.SellFace, UI.SellLbl = make3DButton(SelBox, "Bán +35V", UDim2.new(0.47, 0, 0, 32), UDim2.new(0.51, 0, 1, -37), UITheme.BtnRed, UITheme.BtnRedDark, UITheme.TextPrimary, 11, function()
-        sellSelectedTower()
-    end)
-
-    -- Nút Gọi Đợt Quái
-    UI.WaveBtn, UI.WaveFace, UI.WaveBtnLbl = make3DButton(SidePanel, "GỌI ĐỢT QUÁI", UDim2.new(1, 0, 0, 38), UDim2.new(0, 0, 0, 0), UITheme.BtnGreen, UITheme.BtnGreenDark, UITheme.TextPrimary, 13, function()
-        sfxClick()
-        startNextWave()
-    end)
-    UI.WaveBtn.LayoutOrder = 3
-
-    -- Kỹ năng Sấm Sét Toàn Bản Đồ dùng Xu
-    local skillBtn = make3DButton(SidePanel, "Sấm Sét Toàn Đồ 25 Xu", UDim2.new(1, 0, 0, 36), UDim2.new(0, 0, 0, 0), UITheme.BtnPurple, UITheme.BtnPurpleDark, UITheme.ColorGold, 12, function()
-        castLightningSkill()
-    end)
-    skillBtn.LayoutOrder = 4
-
-    -- Hàng Tốc độ 1x/2x & Tự động gọi đợt
-    local CtrlRow = Instance.new("Frame")
-    CtrlRow.LayoutOrder = 5
-    CtrlRow.Size = UDim2.new(1, 0, 0, 34)
-    CtrlRow.BackgroundTransparency = 1
-    CtrlRow.Parent = SidePanel
-
-    UI.SpdBtn, UI.SpdFace, UI.SpdLbl = make3DButton(CtrlRow, "Tốc độ: 1x", UDim2.new(0.48, 0, 1, 0), UDim2.new(0, 0, 0, 0), UITheme.BtnBlue, UITheme.BtnBlueDark, UITheme.TextPrimary, 11, function()
-        State.GameSpeed = (State.GameSpeed == 1) and 2 or 1
-        sfxClick()
-        updateSelectionUI()
-    end)
-
-    UI.AutoBtn, UI.AutoFace, UI.AutoLbl = make3DButton(CtrlRow, "Tự gọi: Tắt", UDim2.new(0.48, 0, 1, 0), UDim2.new(0.52, 0, 0, 0), UITheme.BgButton, UITheme.BgPanelDark, UITheme.TextSecondary, 11, function()
-        Config.AutoWave = not Config.AutoWave
-        sfxClick()
-        updateSelectionUI()
-    end)
-
-    -- Hàng Tạm dừng & Chơi lại
-    local CtrlRow2 = Instance.new("Frame")
-    CtrlRow2.LayoutOrder = 6
-    CtrlRow2.Size = UDim2.new(1, 0, 0, 34)
-    CtrlRow2.BackgroundTransparency = 1
-    CtrlRow2.Parent = SidePanel
-
-    UI.PauseBtn, UI.PauseFace, UI.PauseLbl = make3DButton(CtrlRow2, "Tạm dừng", UDim2.new(0.48, 0, 1, 0), UDim2.new(0, 0, 0, 0), UITheme.BgButton, UITheme.BgPanelDark, UITheme.TextPrimary, 11, function()
-        State.Paused = not State.Paused
-        sfxClick()
-        updateSelectionUI()
-    end)
-
-    make3DButton(CtrlRow2, "Chơi lại", UDim2.new(0.48, 0, 1, 0), UDim2.new(0.52, 0, 0, 0), UITheme.BtnRed, UITheme.BtnRedDark, UITheme.TextPrimary, 11, function()
-        sfxClick()
-        startNewMatch()
-    end)
+local function restoreMenu()
+	floatBtn.Visible = false
+	mainFrame.Visible = true
+	backdrop.Visible = true
 end
 
--- ========================================================================
--- [PHẦN 07] XÂY DỰNG BẢN ĐỒ, THÁP, QUÁI & HIỆU ỨNG CHIẾN ĐẤU
--- ========================================================================
-showTempAlert = function(msg)
-    UI.AlertStrip.Text = msg
-    UI.AlertStrip.Visible = true
-    local token = os.clock()
-    State.TempAlertToken = token
-    task.delay(2.2, function()
-        if not State.Destroyed and State.TempAlertToken == token then
-            UI.AlertStrip.Visible = false
-        end
-    end)
-end
+UI.minBtn.MouseButton1Click:Connect(minimizeMenu)
+floatBtn.MouseButton1Click:Connect(function() if not floatDragged then restoreMenu() end end)
+UI.closeBtn.MouseButton1Click:Connect(function()
+	saveData()
+	screenGui:Destroy()
+end)
 
-showBanner = function(isWin, titleText, subText)
-    UI.EndBanner.BackgroundColor3 = isWin and Color3.fromRGB(20, 62, 146) or Color3.fromRGB(134, 24, 34)
-    UI.BannerStroke.Color = isWin and UITheme.RimBlue or Color3.fromRGB(206, 86, 86)
-    UI.BTitle.Text = titleText
-    UI.BTitle.TextColor3 = isWin and UITheme.ColorGold or UITheme.TextPrimary
-    UI.BSub.Text = subText
-    UI.EndBanner.Visible = true
-end
-
-hideBanner = function()
-    UI.EndBanner.Visible = false
-end
-
-local function computePathCells(waypoints)
-    State.PathCells = {}
-    State.PathPoints = {}
-    for r = 1, GRID_ROWS do State.PathCells[r] = {} end
-
-    for i = 1, #waypoints do
-        table.insert(State.PathPoints, { x = waypoints[i][1] - 0.5, y = waypoints[i][2] - 0.5 })
-        if i < #waypoints then
-            local c1, r1 = waypoints[i][1], waypoints[i][2]
-            local c2, r2 = waypoints[i + 1][1], waypoints[i + 1][2]
-            local dc = (c2 > c1) and 1 or ((c2 < c1) and -1 or 0)
-            local dr = (r2 > r1) and 1 or ((r2 < r1) and -1 or 0)
-            local cc, rr = c1, r1
-            while true do
-                State.PathCells[rr][cc] = true
-                if cc == c2 and rr == r2 then break end
-                cc = cc + dc
-                rr = rr + dr
-            end
-        end
-    end
-end
-
-buildMapVisuals = function()
-    for _, ch in ipairs(TilesLayer:GetChildren()) do ch:Destroy() end
-    for _, ch in ipairs(TowersLayer:GetChildren()) do ch:Destroy() end
-    for _, ch in ipairs(EnemiesLayer:GetChildren()) do ch:Destroy() end
-    for _, ch in ipairs(FxLayer:GetChildren()) do ch:Destroy() end
-
-    local m = getMap()
-    computePathCells(m.waypoints)
-
-    local availW = math.max(240, MapContainer.AbsoluteSize.X - 20)
-    local availH = math.max(180, MapContainer.AbsoluteSize.Y - 20)
-    local ts = math.clamp(math.floor(math.min(availW / GRID_COLS, availH / GRID_ROWS)), 24, 56)
-    State.TileSize = ts
-    MapFrame.Size = UDim2.new(0, GRID_COLS * ts, 0, GRID_ROWS * ts)
-
-    for r = 1, GRID_ROWS do
-        for c = 1, GRID_COLS do
-            local isPath = State.PathCells[r][c] == true
-            local tile = Instance.new("Frame")
-            tile.Size = UDim2.new(0, ts, 0, ts)
-            tile.Position = UDim2.new(0, (c - 1) * ts, 0, (r - 1) * ts)
-            if isPath then
-                tile.BackgroundColor3 = m.pathCol
-                tile.BorderColor3 = m.pathRim
-                tile.BorderSizePixel = 1
-            else
-                tile.BackgroundColor3 = ((r + c) % 2 == 0) and m.bgTile or m.bgTile2
-                tile.BorderColor3 = Color3.fromRGB(22, 34, 46)
-                tile.BorderSizePixel = 1
-            end
-            tile.ZIndex = 2
-            tile.Parent = TilesLayer
-        end
-    end
-
-    -- Đánh dấu Cổng Quái (đầu đường) & Thành Chính (cuối đường)
-    local firstWp = m.waypoints[1]
-    local startMark = Instance.new("TextLabel")
-    startMark.Size = UDim2.new(0, ts, 0, ts)
-    startMark.Position = UDim2.new(0, (firstWp[1] - 1) * ts, 0, (firstWp[2] - 1) * ts)
-    startMark.BackgroundColor3 = Color3.fromRGB(132, 34, 46)
-    startMark.BorderSizePixel = 0
-    startMark.Text = "QUÁI"
-    startMark.Font = FONT_MAIN
-    startMark.TextSize = math.clamp(math.floor(ts * 0.28), 9, 13)
-    startMark.TextColor3 = UITheme.TextPrimary
-    startMark.ZIndex = 3
-    startMark.Parent = TilesLayer
-    addCorner(startMark, 6)
-
-    local lastWp = m.waypoints[#m.waypoints]
-    local endMark = Instance.new("TextLabel")
-    endMark.Size = UDim2.new(0, ts, 0, ts)
-    endMark.Position = UDim2.new(0, (lastWp[1] - 1) * ts, 0, (lastWp[2] - 1) * ts)
-    endMark.BackgroundColor3 = UITheme.BtnBlue
-    endMark.BorderSizePixel = 0
-    endMark.Text = "THÀNH"
-    endMark.Font = FONT_MAIN
-    endMark.TextSize = math.clamp(math.floor(ts * 0.25), 8, 12)
-    endMark.TextColor3 = UITheme.ColorGold
-    endMark.ZIndex = 3
-    endMark.Parent = TilesLayer
-    addCorner(endMark, 6)
-end
-
-local function spawnFxRing(gx, gy, radiusTiles, color, duration)
-    local ts = State.TileSize
-    local f = Instance.new("Frame")
-    f.Size = UDim2.new(0, ts * 0.4, 0, ts * 0.4)
-    f.AnchorPoint = Vector2.new(0.5, 0.5)
-    f.Position = UDim2.new(0, gx * ts, 0, gy * ts)
-    f.BackgroundColor3 = color
-    f.BackgroundTransparency = 0.55
-    f.BorderSizePixel = 0
-    f.ZIndex = 12
-    f.Parent = FxLayer
-    addCorner(f, 200)
-    addStroke(f, color, 2, 0.1)
-
-    table.insert(State.Effects, {
-        node = f,
-        life = 0,
-        maxLife = duration or 0.26,
-        startPx = ts * 0.4,
-        endPx = radiusTiles * 2 * ts,
-        kind = "RING",
-    })
-end
-
-local function spawnBeam(x1, y1, x2, y2, color)
-    local ts = State.TileSize
-    local px1, py1, px2, py2 = x1 * ts, y1 * ts, x2 * ts, y2 * ts
-    local dx, dy = px2 - px1, py2 - py1
-    local len = math.sqrt(dx * dx + dy * dy)
-    local line = Instance.new("Frame")
-    line.Size = UDim2.new(0, len, 0, 3)
-    line.AnchorPoint = Vector2.new(0.5, 0.5)
-    line.Position = UDim2.new(0, (px1 + px2) / 2, 0, (py1 + py2) / 2)
-    line.Rotation = math.deg(math.atan2(dy, dx))
-    line.BackgroundColor3 = color
-    line.BorderSizePixel = 0
-    line.ZIndex = 13
-    line.Parent = FxLayer
-
-    table.insert(State.Effects, {
-        node = line,
-        life = 0,
-        maxLife = 0.16,
-        kind = "BEAM",
-    })
-end
-
--- ========================================================================
--- [PHẦN 08] ĐẶT THÁP, NÂNG CẤP, BÁN THÁP & KỸ NĂNG SẤM SÉT
--- ========================================================================
-clearSelection = function()
-    State.SelectedTower = nil
-    RangeCircle.Visible = false
-    updateSelectionUI()
-end
-
-selectTower = function(tw)
-    State.SelectedTower = tw
-    local ts = State.TileSize
-    local diam = tw.range * 2 * ts
-    RangeCircle.Size = UDim2.new(0, diam, 0, diam)
-    RangeCircle.Position = UDim2.new(0, (tw.c - 0.5) * ts, 0, (tw.r - 0.5) * ts)
-    RangeCircle.Visible = true
-    updateSelectionUI()
-end
-
-placeTowerAt = function(r, c)
-    local spec = TOWERS[State.SelectedTool]
-    if not spec then return end
-    if State.Gold < spec.cost then
-        showTempAlert("Không đủ Vàng! Cần " .. spec.cost .. " Vàng")
-        return
-    end
-
-    State.Gold = State.Gold - spec.cost
-    sfxBuild()
-
-    local ts = State.TileSize
-    local base = Instance.new("Frame")
-    base.Size = UDim2.new(0, ts - 6, 0, ts - 6)
-    base.AnchorPoint = Vector2.new(0.5, 0.5)
-    base.Position = UDim2.new(0, (c - 0.5) * ts, 0, (r - 0.5) * ts)
-    base.BackgroundColor3 = Color3.fromRGB(28, 38, 56)
-    base.BorderSizePixel = 0
-    base.ZIndex = 6
-    base.Parent = TowersLayer
-    addCorner(base, 8)
-    addStroke(base, spec.color, 2, 0.05)
-
-    -- Tháp xoay hướng bắn
-    local turret = Instance.new("Frame")
-    turret.Size = UDim2.new(0.68, 0, 0.68, 0)
-    turret.AnchorPoint = Vector2.new(0.5, 0.5)
-    turret.Position = UDim2.new(0.5, 0, 0.5, 0)
-    turret.BackgroundColor3 = spec.color
-    turret.BorderSizePixel = 0
-    turret.ZIndex = 7
-    turret.Parent = base
-    addCorner(turret, 20)
-
-    local barrel = Instance.new("Frame")
-    barrel.Size = UDim2.new(0.65, 0, 0.28, 0)
-    barrel.AnchorPoint = Vector2.new(0, 0.5)
-    barrel.Position = UDim2.new(0.45, 0, 0.5, 0)
-    barrel.BackgroundColor3 = UITheme.TextPrimary
-    barrel.BorderSizePixel = 0
-    barrel.ZIndex = 8
-    barrel.Parent = turret
-    addCorner(barrel, 3)
-
-    local lvLbl = Instance.new("TextLabel")
-    lvLbl.Size = UDim2.new(1, 0, 0, 12)
-    lvLbl.Position = UDim2.new(0, 0, 1, -12)
-    lvLbl.BackgroundTransparency = 1
-    lvLbl.Text = "1"
-    lvLbl.Font = FONT_MAIN
-    lvLbl.TextSize = 10
-    lvLbl.TextColor3 = UITheme.ColorGold
-    lvLbl.ZIndex = 9
-    lvLbl.Parent = base
-
-    local tw = {
-        id       = State.NextId,
-        r        = r,
-        c        = c,
-        spec     = spec,
-        level    = 1,
-        spent    = spec.cost,
-        dmg      = spec.dmg,
-        range    = spec.range,
-        cooldown = spec.cooldown,
-        cdLeft   = 0,
-        node     = base,
-        turret   = turret,
-        lvLbl    = lvLbl,
-    }
-    State.NextId = State.NextId + 1
-    State.TowerGrid[r][c] = tw
-    table.insert(State.PlacedTowers, tw)
-
-    selectTower(tw)
-    updateHud()
-end
-
-upgradeSelectedTower = function()
-    local tw = State.SelectedTower
-    if not tw or tw.level >= 3 then return end
-    local upCost = math.floor(tw.spec.cost * (tw.level == 1 and 0.9 or 1.4))
-    if State.Gold < upCost then
-        showTempAlert("Không đủ Vàng! Cần " .. upCost .. " Vàng")
-        return
-    end
-    State.Gold = State.Gold - upCost
-    tw.spent = tw.spent + upCost
-    tw.level = tw.level + 1
-    tw.dmg = math.floor(tw.dmg * 1.55)
-    tw.range = tw.range + 0.35
-    tw.cooldown = math.max(0.22, tw.cooldown * 0.88)
-    tw.lvLbl.Text = tostring(tw.level)
-    sfxBuild()
-    spawnFxRing(tw.c - 0.5, tw.r - 0.5, 0.7, UITheme.ColorGold, 0.25)
-    selectTower(tw)
-    updateHud()
-end
-
-sellSelectedTower = function()
-    local tw = State.SelectedTower
-    if not tw then return end
-    local refund = math.floor(tw.spent * 0.7)
-    State.Gold = State.Gold + refund
-    State.TowerGrid[tw.r][tw.c] = nil
-    for i, item in ipairs(State.PlacedTowers) do
-        if item.id == tw.id then
-            table.remove(State.PlacedTowers, i)
-            break
-        end
-    end
-    if tw.node then tw.node:Destroy() end
-    sfxClick()
-    clearSelection()
-    updateHud()
-end
-
-local function damageEnemy(en, dmg, slowAmt)
-    if en.dead then return end
-    en.hp = en.hp - dmg
-    if slowAmt and slowAmt > 0 then
-        en.slowTimer = math.max(en.slowTimer, 2.2)
-        en.slowFactor = math.min(en.slowFactor, 1 - slowAmt)
-    end
-    if en.hp <= 0 then
-        en.dead = true
-        State.Gold = State.Gold + en.goldDrop
-        if en.isBoss then
-            Stats.Xu = Stats.Xu + 35
-            saveStats()
-            showTempAlert("Hạ gục BOSS! +35 Xu")
-        end
-        if en.node then en.node:Destroy() end
-        updateHud()
-    else
-        local ratio = math.clamp(en.hp / en.maxHp, 0, 1)
-        en.hpFill.Size = UDim2.new(ratio, 0, 1, 0)
-    end
-end
-
-castLightningSkill = function()
-    if State.GameOver then return end
-    if #State.Enemies == 0 then
-        showTempAlert("Chưa có quái trên bản đồ!")
-        return
-    end
-    if Stats.Xu < 25 then
-        showTempAlert("Không đủ Xu! Cần 25 Xu cho Sấm Sét")
-        return
-    end
-    Stats.Xu = Stats.Xu - 25
-    saveStats()
-    sfxWin()
-
-    local strikeDmg = 85 + State.Wave * 28
-    for _, en in ipairs(State.Enemies) do
-        if not en.dead then
-            spawnFxRing(en.x, en.y, 0.9, UITheme.AccentCyan, 0.30)
-            damageEnemy(en, strikeDmg, 0.35)
-        end
-    end
-    updateHud()
-    showTempAlert("Sấm Sét toàn bản đồ! Gây " .. strikeDmg .. " sát thương")
-end
-
--- ========================================================================
--- [PHẦN 09] SINH ĐỢT QUÁI & VÒNG LẶP CHIẾN ĐẤU 60 FPS
--- ========================================================================
-local function spawnEnemy(kind)
-    local d = getDiff()
-    local w = State.Wave
-    local scale = (1 + (w - 1) * 0.24) * d.hpMult
-    local ts = State.TileSize
-
-    local hp, spd, goldDrop, szScale, col, isBoss
-    if kind == "Fast" then
-        hp = math.floor(38 * scale); spd = 2.55; goldDrop = 10; szScale = 0.50; col = Color3.fromRGB(204, 174, 72)
-    elseif kind == "Tank" then
-        hp = math.floor(125 * scale); spd = 1.15; goldDrop = 16; szScale = 0.68; col = Color3.fromRGB(118, 134, 166)
-    elseif kind == "Boss" then
-        hp = math.floor(420 * scale); spd = 0.95; goldDrop = 55; szScale = 0.84; col = Color3.fromRGB(198, 52, 62); isBoss = true
-    else
-        hp = math.floor(58 * scale); spd = 1.65; goldDrop = 9; szScale = 0.56; col = Color3.fromRGB(194, 88, 92)
-    end
-
-    local startPt = State.PathPoints[1]
-    local px = math.floor(ts * szScale)
-
-    local node = Instance.new("Frame")
-    node.Size = UDim2.new(0, px, 0, px)
-    node.AnchorPoint = Vector2.new(0.5, 0.5)
-    node.Position = UDim2.new(0, startPt.x * ts, 0, startPt.y * ts)
-    node.BackgroundColor3 = col
-    node.BorderSizePixel = 0
-    node.ZIndex = isBoss and 11 or 9
-    node.Parent = EnemiesLayer
-    addCorner(node, isBoss and 8 or 20)
-    addStroke(node, isBoss and UITheme.ColorGold or Color3.fromRGB(24, 24, 34), isBoss and 2 or 1.4, 0)
-
-    local hpBg = Instance.new("Frame")
-    hpBg.Size = UDim2.new(1, 4, 0, 4)
-    hpBg.Position = UDim2.new(0, -2, 0, -7)
-    hpBg.BackgroundColor3 = Color3.fromRGB(24, 28, 38)
-    hpBg.BorderSizePixel = 0
-    hpBg.ZIndex = node.ZIndex + 1
-    hpBg.Parent = node
-
-    local hpFill = Instance.new("Frame")
-    hpFill.Size = UDim2.new(1, 0, 1, 0)
-    hpFill.BackgroundColor3 = isBoss and UITheme.ColorGold or UITheme.ColorGreen
-    hpFill.BorderSizePixel = 0
-    hpFill.ZIndex = hpBg.ZIndex + 1
-    hpFill.Parent = hpBg
-
-    table.insert(State.Enemies, {
-        id         = State.NextId,
-        x          = startPt.x,
-        y          = startPt.y,
-        wpIdx      = 2,
-        progress   = 0,
-        hp         = hp,
-        maxHp      = hp,
-        speed      = spd,
-        goldDrop   = goldDrop,
-        isBoss     = isBoss == true,
-        slowTimer  = 0,
-        slowFactor = 1,
-        dead       = false,
-        node       = node,
-        hpFill     = hpFill,
-    })
-    State.NextId = State.NextId + 1
-end
-
-startNextWave = function()
-    if State.GameOver or State.WaveActive or State.Wave >= State.MaxWaves then return end
-    State.Wave = State.Wave + 1
-    State.WaveActive = true
-    State.SpawnQueue = {}
-    State.SpawnTimer = 0.1
-
-    local count = 6 + State.Wave * 2
-    for i = 1, count do
-        if State.Wave >= 3 and i % 4 == 0 then
-            table.insert(State.SpawnQueue, "Fast")
-        elseif State.Wave >= 4 and i % 5 == 0 then
-            table.insert(State.SpawnQueue, "Tank")
-        else
-            table.insert(State.SpawnQueue, "Normal")
-        end
-    end
-    if State.Wave % 5 == 0 then
-        table.insert(State.SpawnQueue, "Boss")
-        showTempAlert("CẢNH BÁO: BOSS ĐỢT " .. State.Wave .. " XUẤT HIỆN!")
-    end
-    updateHud()
-    updateSelectionUI()
-end
-
-local function fireTowerAt(tw, target)
-    local spec = tw.spec
-    local tx, ty = tw.c - 0.5, tw.r - 0.5
-    tw.turret.Rotation = math.deg(math.atan2(target.y - ty, target.x - tx))
-
-    if spec.chain > 0 then
-        -- Tháp Sấm đánh sét trực tiếp + giật lan
-        sfxShoot(1.55)
-        local hitSet = { [target.id] = true }
-        local curTarget = target
-        local prevX, prevY = tx, ty
-        for step = 1, spec.chain do
-            spawnBeam(prevX, prevY, curTarget.x, curTarget.y, spec.projCol)
-            damageEnemy(curTarget, math.floor(tw.dmg * (step == 1 and 1.0 or 0.72)), 0)
-            prevX, prevY = curTarget.x, curTarget.y
-            local nextTarget, bestD = nil, 2.2
-            for _, en in ipairs(State.Enemies) do
-                if not en.dead and not hitSet[en.id] then
-                    local d = math.sqrt((en.x - prevX)^2 + (en.y - prevY)^2)
-                    if d < bestD then bestD = d; nextTarget = en end
-                end
-            end
-            if not nextTarget then break end
-            hitSet[nextTarget.id] = true
-            curTarget = nextTarget
-        end
-        return
-    end
-
-    sfxShoot(spec.key == "Cannon" and 0.65 or 1.25)
-    local ts = State.TileSize
-    local dot = Instance.new("Frame")
-    local sz = (spec.key == "Cannon") and 9 or 6
-    dot.Size = UDim2.new(0, sz, 0, sz)
-    dot.AnchorPoint = Vector2.new(0.5, 0.5)
-    dot.Position = UDim2.new(0, tx * ts, 0, ty * ts)
-    dot.BackgroundColor3 = spec.projCol
-    dot.BorderSizePixel = 0
-    dot.ZIndex = 12
-    dot.Parent = FxLayer
-    addCorner(dot, 10)
-
-    table.insert(State.Projectiles, {
-        x      = tx,
-        y      = ty,
-        target = target,
-        speed  = (spec.key == "Cannon") and 7.5 or 11.5,
-        dmg    = tw.dmg,
-        splash = spec.splash,
-        slow   = spec.slow,
-        color  = spec.projCol,
-        node   = dot,
-    })
-end
-
--- Vòng lặp Heartbeat 60 FPS
-trackConn(RunService.Heartbeat:Connect(function(rawDt)
-    if State.Destroyed or State.Screen ~= "GAME" or State.Paused or State.GameOver or State.Minimized then
-        return
-    end
-
-    local dt = math.min(rawDt, 0.05) * State.GameSpeed
-    local ts = State.TileSize
-
-    -- 1. Sinh quái từ hàng đợi
-    if State.WaveActive then
-        if #State.SpawnQueue > 0 then
-            State.SpawnTimer = State.SpawnTimer - dt
-            if State.SpawnTimer <= 0 then
-                local kind = table.remove(State.SpawnQueue, 1)
-                spawnEnemy(kind)
-                State.SpawnTimer = math.max(0.32, 0.85 - State.Wave * 0.025)
-            end
-        elseif #State.Enemies == 0 then
-            State.WaveActive = false
-            local bonusGold = 25 + State.Wave * 5
-            State.Gold = State.Gold + bonusGold
-            if State.Wave >= State.MaxWaves then
-                State.GameOver = true
-                State.Won = true
-                local winXu = math.floor(getMap().rewardXu * getDiff().xuMult)
-                Stats.Wins = Stats.Wins + 1
-                Stats.Xu = Stats.Xu + winXu
-                saveStats()
-                sfxWin()
-                updateHud()
-                showBanner(true, "CHIẾN THẮNG!", string.format("Hoàn thành %s  |  +%d Xu", getMap().name, winXu))
-                return
-            else
-                State.AutoWaveTimer = 2.2
-                updateHud()
-                updateSelectionUI()
-            end
-        end
-    elseif Config.AutoWave and State.Wave > 0 and State.Wave < State.MaxWaves then
-        State.AutoWaveTimer = State.AutoWaveTimer - dt
-        if State.AutoWaveTimer <= 0 then
-            startNextWave()
-        end
-    end
-
-    -- 2. Di chuyển quái theo đường đi
-    for i = #State.Enemies, 1, -1 do
-        local en = State.Enemies[i]
-        if en.dead then
-            table.remove(State.Enemies, i)
-        else
-            if en.slowTimer > 0 then
-                en.slowTimer = en.slowTimer - dt
-                if en.slowTimer <= 0 then en.slowFactor = 1 end
-            end
-            local targetWp = State.PathPoints[en.wpIdx]
-            if not targetWp then
-                -- Quái lọt vào thành
-                en.dead = true
-                if en.node then en.node:Destroy() end
-                table.remove(State.Enemies, i)
-                State.Lives = math.max(0, State.Lives - (en.isBoss and 5 or 1))
-                updateHud()
-                if State.Lives <= 0 then
-                    State.GameOver = true
-                    State.Won = false
-                    showBanner(false, "THẤT THỦ!", "Thành chính đã sụp đổ ở đợt " .. State.Wave)
-                    return
-                end
-            else
-                local dx, dy = targetWp.x - en.x, targetWp.y - en.y
-                local dist = math.sqrt(dx * dx + dy * dy)
-                local step = en.speed * en.slowFactor * dt
-                if dist <= step then
-                    en.x, en.y = targetWp.x, targetWp.y
-                    en.wpIdx = en.wpIdx + 1
-                else
-                    en.x = en.x + (dx / dist) * step
-                    en.y = en.y + (dy / dist) * step
-                end
-                en.progress = en.progress + step
-                en.node.Position = UDim2.new(0, en.x * ts, 0, en.y * ts)
-            end
-        end
-    end
-
-    -- 3. Tháp tìm mục tiêu đi xa nhất trong tầm và bắn
-    for _, tw in ipairs(State.PlacedTowers) do
-        tw.cdLeft = math.max(0, tw.cdLeft - dt)
-        if tw.cdLeft <= 0 then
-            local tx, ty = tw.c - 0.5, tw.r - 0.5
-            local bestEn, bestProg = nil, -1
-            for _, en in ipairs(State.Enemies) do
-                if not en.dead then
-                    local d = math.sqrt((en.x - tx)^2 + (en.y - ty)^2)
-                    if d <= tw.range and en.progress > bestProg then
-                        bestProg = en.progress
-                        bestEn = en
-                    end
-                end
-            end
-            if bestEn then
-                tw.cdLeft = tw.cooldown
-                fireTowerAt(tw, bestEn)
-            end
-        end
-    end
-
-    -- 4. Cập nhật đạn bay
-    for i = #State.Projectiles, 1, -1 do
-        local pr = State.Projectiles[i]
-        local tgt = pr.target
-        if not tgt or tgt.dead then
-            if pr.node then pr.node:Destroy() end
-            table.remove(State.Projectiles, i)
-        else
-            local dx, dy = tgt.x - pr.x, tgt.y - pr.y
-            local dist = math.sqrt(dx * dx + dy * dy)
-            local step = pr.speed * dt
-            if dist <= step + 0.15 then
-                if pr.splash > 0 then
-                    spawnFxRing(tgt.x, tgt.y, pr.splash, pr.color, 0.24)
-                    for _, en in ipairs(State.Enemies) do
-                        if not en.dead then
-                            local ed = math.sqrt((en.x - tgt.x)^2 + (en.y - tgt.y)^2)
-                            if ed <= pr.splash then
-                                damageEnemy(en, pr.dmg, pr.slow)
-                            end
-                        end
-                    end
-                else
-                    damageEnemy(tgt, pr.dmg, pr.slow)
-                end
-                if pr.node then pr.node:Destroy() end
-                table.remove(State.Projectiles, i)
-            else
-                pr.x = pr.x + (dx / dist) * step
-                pr.y = pr.y + (dy / dist) * step
-                pr.node.Position = UDim2.new(0, pr.x * ts, 0, pr.y * ts)
-            end
-        end
-    end
-
-    -- 5. Cập nhật hiệu ứng nổ / tia sét
-    for i = #State.Effects, 1, -1 do
-        local fx = State.Effects[i]
-        fx.life = fx.life + dt
-        if fx.life >= fx.maxLife then
-            if fx.node then fx.node:Destroy() end
-            table.remove(State.Effects, i)
-        else
-            local alpha = fx.life / fx.maxLife
-            if fx.kind == "RING" then
-                local cur = fx.startPx + (fx.endPx - fx.startPx) * alpha
-                fx.node.Size = UDim2.new(0, cur, 0, cur)
-                fx.node.BackgroundTransparency = 0.55 + alpha * 0.45
-            else
-                fx.node.BackgroundTransparency = alpha
-            end
-        end
-    end
+track(UserInputService.InputBegan:Connect(function(inp, gp)
+	if gp then return end
+	if inp.KeyCode == Enum.KeyCode.RightShift then
+		if mainFrame.Visible then minimizeMenu() else restoreMenu() end
+	end
 end))
 
--- ========================================================================
--- [PHẦN 10] CẬP NHẬT UI, CHUYỂN MÀN HÌNH & DỌN DẸP SCRIPT
--- ========================================================================
-updateHomeUI = function()
-    if UI.HomeXuLabel then UI.HomeXuLabel.Text = tostring(Stats.Xu) .. " Xu" end
-    local d = getDiff()
-    for idx, pack in pairs(UI.HomeMapBtns) do
-        local active = (Config.MapIndex == idx)
-        pack.card.BackgroundColor3 = active and UITheme.BtnBlue or UITheme.BgButton
-        pack.stroke.Color = active and UITheme.ColorGold or UITheme.StrokeSubtle
-        pack.t1.TextColor3 = active and UITheme.ColorGold or UITheme.TextPrimary
-        pack.t3.Text = "+" .. math.floor(MAPS[idx].rewardXu * d.xuMult) .. " Xu"
-    end
-    for idx, pack in pairs(UI.HomeDiffBtns) do
-        local active = (Config.DiffIndex == idx)
-        pack.btn.BackgroundColor3 = active and UITheme.BtnBlue or UITheme.BgButton
-        pack.btn.TextColor3 = active and UITheme.TextPrimary or UITheme.TextSecondary
-        pack.stroke.Color = active and UITheme.RimBlue or UITheme.StrokeSubtle
-    end
+local cam = workspace.CurrentCamera
+if cam then
+	track(cam:GetPropertyChangedSignal("ViewportSize"):Connect(applyScale))
 end
 
-updateHud = function()
-    UI.MapLbl.Text = getMap().name .. "  " .. getDiff().label
-    UI.WaveLbl.Text = string.format("Đợt: %d/%d", State.Wave, State.MaxWaves)
-    UI.StatusText.Text = string.format("Thành: %d  |  Vàng: %d", State.Lives, State.Gold)
-    if UI.GameXuLabel then UI.GameXuLabel.Text = tostring(Stats.Xu) .. " Xu" end
-    if UI.HomeXuLabel then UI.HomeXuLabel.Text = tostring(Stats.Xu) .. " Xu" end
-end
+track(RunService.RenderStepped:Connect(function(rawDt)
+	if not mainFrame.Visible or not TD.active or TD.paused or TD.over then return end
+	local dt = math.min(0.05, rawDt) * TD.speedMult
 
-updateSelectionUI = function()
-    for idx, pack in pairs(UI.TowerBtns) do
-        local active = (State.SelectedTool == idx and not State.SelectedTower)
-        pack.card.BackgroundColor3 = active and UITheme.BgCard or UITheme.BgPanelDark
-        pack.stroke.Thickness = active and 2.2 or 1.4
-    end
+	-- Rung nhe ban co khi tha Thien Thach
+	if TD.shakeTime > 0 then
+		TD.shakeTime = math.max(0, TD.shakeTime - rawDt)
+		UI.board.Position = UDim2.fromOffset(math.random(-3, 3), 4 + math.random(-3, 3))
+	else
+		UI.board.Position = UDim2.fromOffset(0, 4)
+	end
 
-    local tw = State.SelectedTower
-    if tw then
-        UI.SelBox.Visible = true
-        UI.SelTitle.Text = string.format("%s Lv%d  |  Sát thương: %d", tw.spec.name, tw.level, tw.dmg)
-        if tw.level >= 3 then
-            UI.UpLbl.Text = "Tối đa"
-            UI.UpFace.BackgroundColor3 = UITheme.BgButton
-        else
-            local upCost = math.floor(tw.spec.cost * (tw.level == 1 and 0.9 or 1.4))
-            UI.UpLbl.Text = "Nâng " .. upCost .. "V"
-            UI.UpFace.BackgroundColor3 = UITheme.BtnGreen
-        end
-        UI.SellLbl.Text = "Bán +" .. math.floor(tw.spent * 0.7) .. "V"
-    else
-        UI.SelBox.Visible = false
-    end
+	-- Hoi chieu Thien Thach
+	if TD.skillCd > 0 then
+		local prevCeil = math.ceil(TD.skillCd)
+		TD.skillCd = math.max(0, TD.skillCd - dt)
+		if math.ceil(TD.skillCd) ~= prevCeil then updateHUD() end
+	end
 
-    UI.WaveBtnLbl.Text = State.WaveActive and "ĐANG CHIẾN ĐẤU..." or ("GỌI ĐỢT " .. math.min(State.MaxWaves, State.Wave + 1))
-    UI.WaveFace.BackgroundColor3 = State.WaveActive and UITheme.BgButton or UITheme.BtnGreen
-    UI.SpdLbl.Text = "Tốc độ: " .. State.GameSpeed .. "x"
-    UI.AutoLbl.Text = Config.AutoWave and "Tự gọi: Bật" or "Tự gọi: Tắt"
-    UI.AutoLbl.TextColor3 = Config.AutoWave and UITheme.ColorGreen or UITheme.TextSecondary
-    UI.PauseLbl.Text = State.Paused and "Tiếp tục" or "Tạm dừng"
-end
+	-- Sinh quai theo dot
+	if TD.waveSpawning then
+		TD.spawnTimer -= dt
+		if TD.spawnTimer <= 0 then
+			if #TD.spawnQueue > 0 then
+				local kind = table.remove(TD.spawnQueue, 1)
+				spawnEnemy(kind)
+				TD.spawnTimer = 0.68
+			else
+				TD.waveSpawning = false
+			end
+		end
+	end
 
-startNewMatch = function()
-    local m = getMap()
-    State.Gold = m.startGold
-    State.Lives = 20
-    State.Wave = 0
-    State.MaxWaves = m.waves
-    State.WaveActive = false
-    State.SpawnQueue = {}
-    State.SpawnTimer = 0
-    State.AutoWaveTimer = 0
-    State.Paused = false
-    State.GameOver = false
-    State.Won = false
-    State.SelectedTower = nil
-    State.PlacedTowers = {}
-    State.Enemies = {}
-    State.Projectiles = {}
-    State.Effects = {}
-    State.TowerGrid = {}
-    for r = 1, GRID_ROWS do State.TowerGrid[r] = {} end
+	-- Di chuyen & hoat anh nhun nhay cua quai
+	for i = #TD.enemies, 1, -1 do
+		local e = TD.enemies[i]
+		if e.Dead then
+			table.remove(TD.enemies, i)
+		else
+			if e.SlowTimer > 0 then
+				e.SlowTimer = math.max(0, e.SlowTimer - dt)
+				if e.SlowTimer == 0 then e.SlowFactor = 1 end
+			end
+			if e.HitFlash > 0 then
+				e.HitFlash = math.max(0, e.HitFlash - rawDt)
+				e.Body.BackgroundColor3 = Color3.fromRGB(224, 224, 232)
+			elseif e.SlowTimer > 0 then
+				e.Body.BackgroundColor3 = Color3.fromRGB(96, 186, 224)
+			else
+				e.Body.BackgroundColor3 = e.Def.Color
+			end
 
-    RangeCircle.Visible = false
-    hideBanner()
-    buildMapVisuals()
-    updateHud()
-    updateSelectionUI()
-end
+			local wp = TD.pathPoints[e.WpIdx]
+			if wp then
+				local dx, dy = wp.x - e.X, wp.y - e.Y
+				local dist = math.sqrt(dx * dx + dy * dy)
+				local step = e.Def.Speed * e.SlowFactor * dt
+				if dist <= step then
+					e.X, e.Y = wp.x, wp.y
+					e.WpIdx += 1
+				else
+					e.X += (dx / dist) * step
+					e.Y += (dy / dist) * step
+				end
+				e.Progress += step
+				e.BobPhase += dt * 11
+				local bobY = -math.abs(math.sin(e.BobPhase)) * 4
+				e.Node.Position = UDim2.fromOffset(e.X, e.Y)
+				e.Body.Position = UDim2.new(0.5, 0, 0.5, bobY)
+			else
+				-- Quai lot vao thanh
+				TD.lives -= (e.Def.Damage or 1)
+				if e.Node and e.Node.Parent then e.Node:Destroy() end
+				table.remove(TD.enemies, i)
+				updateHUD()
+				if TD.lives <= 0 then
+					finishMatch(false)
+					return
+				end
+			end
+		end
+	end
 
-openHomeScreen = function()
-    State.Screen = "HOME"
-    State.Paused = true
-    HomeScreen.Visible = true
-    GameScreen.Visible = false
-    updateHomeUI()
-end
+	-- Thap tim muc tieu di xa nhat trong tam & ban
+	for _, t in ipairs(TD.towers) do
+		t.Cooldown = math.max(0, t.Cooldown - dt)
+		local bestE, bestProg = nil, -1
+		for _, e in ipairs(TD.enemies) do
+			if not e.Dead then
+				local d = math.sqrt((e.X - t.X)^2 + (e.Y - t.Y)^2)
+				if d <= t.Range and e.Progress > bestProg then
+					bestProg = e.Progress
+					bestE = e
+				end
+			end
+		end
+		if bestE then
+			t.Turret.Rotation = math.deg(math.atan2(bestE.Y - t.Y, bestE.X - t.X))
+			if t.Cooldown <= 0 then
+				t.Cooldown = t.FireRate
+				fireTower(t, bestE)
+			end
+		end
+	end
 
-enterGameScreen = function()
-    State.Screen = "GAME"
-    HomeScreen.Visible = false
-    GameScreen.Visible = true
-    task.defer(function()
-        if not State.Destroyed then startNewMatch() end
-    end)
-end
+	-- Cap nhat dan bay & va cham
+	for i = #TD.projectiles, 1, -1 do
+		local p = TD.projectiles[i]
+		if p.Target and not p.Target.Dead then
+			p.TX, p.TY = p.Target.X, p.Target.Y
+		end
+		local dx, dy = p.TX - p.X, p.TY - p.Y
+		local dist = math.sqrt(dx * dx + dy * dy)
+		local step = p.Speed * dt
+		if dist <= step + 4 then
+			if p.Splash then
+				spawnExplosionRing(p.TX, p.TY, p.Splash, p.Color)
+				for _, e in ipairs(TD.enemies) do
+					if not e.Dead then
+						local ed = math.sqrt((e.X - p.TX)^2 + (e.Y - p.TY)^2)
+						if ed <= p.Splash then
+							damageEnemy(e, p.Damage, p.Slow, p.SlowDur)
+						end
+					end
+				end
+			elseif p.Target and not p.Target.Dead then
+				if p.Slow then spawnExplosionRing(p.TX, p.TY, 18, THEME.TextCyan) end
+				damageEnemy(p.Target, p.Damage, p.Slow, p.SlowDur)
+			end
+			if p.Node and p.Node.Parent then p.Node:Destroy() end
+			table.remove(TD.projectiles, i)
+		else
+			p.X += (dx / dist) * step
+			p.Y += (dy / dist) * step
+			p.Node.Position = UDim2.fromOffset(p.X, p.Y)
+		end
+	end
 
-trackConn(UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed or State.Destroyed then return end
-    if State.Screen == "GAME" and Root.Visible then
-        if input.KeyCode == Enum.KeyCode.Space then
-            startNextWave()
-        elseif input.KeyCode == Enum.KeyCode.One then
-            State.SelectedTool = 1; clearSelection()
-        elseif input.KeyCode == Enum.KeyCode.Two then
-            State.SelectedTool = 2; clearSelection()
-        elseif input.KeyCode == Enum.KeyCode.Three then
-            State.SelectedTool = 3; clearSelection()
-        elseif input.KeyCode == Enum.KeyCode.Four then
-            State.SelectedTool = 4; clearSelection()
-        end
-    end
-    if input.KeyCode == Enum.KeyCode.M then
-        State.Minimized = not State.Minimized
-        Root.Visible = not State.Minimized
-        FloatBtn.Visible = State.Minimized
-    end
+	-- Kiem tra hoan thanh dot quai
+	if not TD.waveSpawning and #TD.enemies == 0 and TD.wave > 0 then
+		if TD.wave >= TD.map.Waves then
+			finishMatch(true)
+		elseif UI.waveBtnLbl.Text == "ĐANG CHIẾN..." then
+			local bonus = 30 + TD.wave * 8
+			TD.gold += bonus
+			showToast("Xong Đợt " .. TD.wave .. "! Thưởng +" .. bonus .. " Vàng", THEME.TextGreen, 2.2)
+			updateHUD()
+		end
+	end
 end))
 
-_G.ThuThanh2DCleanup = function()
-    State.Destroyed = true
-    for _, conn in ipairs(UI.Connections) do
-        pcall(function() conn:Disconnect() end)
-    end
-    UI.Connections = {}
-    if ScreenGui and ScreenGui.Parent then
-        pcall(function() ScreenGui:Destroy() end)
-    end
-    _G.ThuThanh2DCleanup = nil
+screenGui.Destroying:Connect(function()
+	TD.active = false
+	for _, c in ipairs(connections) do
+		if c.Connected then c:Disconnect() end
+	end
+end)
+end)
+if not _ok then
+	warn("[ThuThanh2D v1.0 ERROR]: " .. tostring(_err))
 end
-
-openHomeScreen()
