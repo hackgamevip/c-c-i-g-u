@@ -1,6 +1,6 @@
 --[[
     ========================================================================
-    DÒ MÌN - STANDALONE v2.0 (ĐỒ HỌA HOẠT HÌNH 3D ROYAL BLUE)
+    DÒ MÌN - STANDALONE v2.1 (ĐỒ HỌA HOẠT HÌNH 3D ROYAL BLUE)
     Game Dò Mìn 2D Toàn Màn Hình cho Roblox Mobile & PC
     - Nâng cấp đồ họa 3D Arcade Royal Blue: Logo Dò Mìn, Bom, Cờ, Cúp Vàng, Nổ Bom
     - Tích hợp sẵn ảnh sprite từ bộ đồ họa (writefile + getcustomasset) có dự phòng vector
@@ -71,6 +71,7 @@ do
         if type(makefolder) == "function" then
             pcall(makefolder, "DoMin_Assets_v2")
         end
+        local BOOM_WAV_B64 = "UklGRkkeAABXQVZFZm10IBAAAAABAAEAESsAABErAAABAAgAZGF0YSUeAABBP8Scco8Xj3pl/4/8ef////X///nTfFGVdNLLrVLq9P92eLajvvuRkO9o3TRIaRaO+3FzTwBMNiC8XyN3jAAKVQCLAAAAGiYALwBmQgAGAAAAACMAaIBsPkWTm5K5iWqXmVL////nrPq9mf//mP//sd6+PahWvvXe/7+Ap8Bp/3Go9I/+/7z3/4VvYG6LwqGRZ1icT1uJtjlklos9q29Lkaw7OG1faMhyMVAAGj5SmZa30WhtdVQxABBEADdFQysbAGuiagYrTjp1ckdetZ1SVH2XcGBz1nd7VnyMx9r9/////9/77p+JlJ2mvaHN1v+/1v/z6qCSrIqPpbh6USoofc95V7Le5/iMcnG2dYfkXmyqqM6CrXmEcGq0bX2BsnJhX0JSiH07cVI9QRYAACs3ABcxM1BeHwAlAA5YFwAAAFhWjax9JnqRQgATX46ShXyhpL5YaS0AJCFMhJ+2iqiqbp9lnM+mZE9Dg9zIiIq7zauYyaWWwa2tluzaodbl+Nqpq4uV/9P//+f///////Hnsdy9ytbFpa3T/////9bo//P/9/bI3//P8f22+/is2/ObdlZ+R6KETzwhe0xOcGA4SGuu6KS1YG9SYH2ToKSXg4tvLlRcep+3cqTY0OWjPz9YiC4CIgBKIgYAAAAHTmFFRHRVkj1JJgBCWE1vMAAALQwAAAAAAAAADj5kJF+KcJd+hqBUEDkxNkVwe4JrUUFHM3WXWYOEW1N/mY+KlF5TaZ+4rOCXqoC4kpu1nIqtY0tyk4epmrK4p15JRScfZalyO6Cqw4KCodL07cmshWKv1e2sxc7u/+nh6eOij2dqUkCWo7jr/9mfgYGQgpBzcXi2fKrT/9ig68//4f7////dqOq1iGevc6id1u3W38vk1/T///nU///R863T5v/lqpBiW1mtvIC2gXxSlbJ2ZG9vsGlRX0xxs6zds7qDqLvMmZxqbIJKUCMLMEZyZZNZk7XZuaKmpJNTQUQ3c6rSeGF4QWgzLUVkUFpNLVhJLTcmLWWOSXJRWoCjqlstAAYhAFFScZ99WnRBOwMAAABEJTEhKWVwb2gfPVJCQSovSBEbBAIzbFE2HAADAAANPkEoZ5FlXmZiUWhLUFJSNkyEk7FrXS00SDUXQTRALShsh4h3jIJ6fpaVtF40NXKCSjxHKiVYanBjV0tBO1lMWnaLeYJ7d3p/hHR1XGl3fHaHd22AhI+dq7ysvcmkjYCAmJB6eW1+ip2pkH12bIB2YW5gYnxzjJJ/j4uLk4iamINwdWhvaFpyeGd/fo55a4Sdm6quxNPFyMq1taONmZ6Ri5iquJyKlYKCfGxsfouGe3RohY+Vrbu1sK+ltrm4q7XDzL/Csby7spuzzL2usaymqZmbsq+hm6GTlJikuL2tn6Knk6q0sKSPj5yfi3p5a36XiYGXl5eyvMPLw6uen6WUgpydjqWSjpekkoyMiX+QqamjucS4tsnOt8Sst8Cro5mOlYJ1dHJohIuKhnZ6bGp2a4iSjZ+1rJyzp6aZqZecpbm/sr61t7zE1cnW0MK+pquvw7jIq6mqpa+rkpB/cXR3eXSFl56xnp+QgoCHjJWgiJmQhYaLjp2omoRzaGxgV2aAf3hlU2hrdodygHZodnhoeYePoaublJ6um5meiXlmXlpUaHGGlqCpq66lk4yYk6Gtj5SMgYB5bmZpY09fUVBocHWFiH5rYldhYFVCVVJCUEs/TmVmbHRhaVViXVRMUVdgZmVuWWxZXXKAin6EiXBZZWljT1VNQkZPV19sWFVNWGFRUltLQ1BdSk5NTkk6RkhZV0hYaGJcUEtdaHdxe3dlWldWSVQ/NkhcYWhlYnRebXGAaHJwfm52emtbXU1KXVRDTVViT0lRZV5mYlBeTUhPRjNIO0s5L0EwJyA3QDo/OTE2R1xVVFRHPkxhanp7gmpcZ3JhbHl8eWh1aVZLOTE/UD5TYXKBa1psfGpweHdsW21md3iGg3BjVUZPT0dBMUFVUURWX09JXlJdbnBtfYl0Zm9kWl9SUltRRzw6QDYxNDIvJzY4UVdmaWhoeHeBg4qan5aOj4GPhn16hIJ9f46NgXp1eXB1ZGBtfYl+hZGgp56Nl52kko+ahJCEk4eGd3Npb2VybGN5gHdndYeKgHmAfHR9e32LkId3f3eIfI2YnKKxqZOVnJuppa+ejpqMhoJ9eXV4f3F2dWlhZXp3hYySioCCdn+Tg4F9dn+JfoWTjZKhmpWmoaivoKWxr7+/wrizt6ywsbu/rJ+WjYiLnoydpJSelqmmmpOPg3eCgot/eY+OnKeuvLa+r6iuvsnBtLnAv8G+rKKptMTEzdTN2ci/uraysKCjlZydpaCXnJylr6i4tqSYoqa1srizvcPFtLPAvMjGtLa0w8jUy8PIyszMy8DN2NfDvsDFucGtsbiuua+dkJulnKesp7e2q7O8wMTDz72vramblJ2RhIyPjImBhoqEgnyCkYKEjJ6YqKe0rKi0saOjk56bnKyutK+ep6edoY+SlpmLf3yIh4h+i5yhqaKhk5alqqKklqGUn6ynnI2NgXaGhoGEgHFsbmZ4dnuBjo+bioqNj5CfpZidmZOWnpCMmqahlIN0hIJ0cHOAgoaLipaOi41/cWloXm1uZ3VnX1RLR1FHVEtiWmJvdn17cWVzcWVrdWlebHZ2Z2BscHhqa3eCdn5wdW5jXV1YY25qYl9obmxhX2NqeWp4aFtZX2d2eG12ZWZcVU1ZWFpOS1xsbnpwYlxncnJ/hI2Gc2NyaHVjW2JUVWNxfG94bG5gZWhoZ2VxbnltXV1dY3FuXF9jZGJdVVJNRD89PzkzL0VJVVhVSUtMS1pMWlFXYWZsZmldWFtPSEVNTkxcU1tpW09dT1lSWVRPRjtLTVFRWV1hYlxdXFVIVlZkY2FZVllQUEtGVl5lYlleWFBGQD9KRERRU1BgaWhyen+DhoF+enF0f3RqdGdiXWdaW1pSWWpdZVtrc3B1aWlkXFpWZlpXV15YZV9mZGZrcHF7hIKChIiBc2t3gIB8gXlse25xcnd+cm91bGtkZWNhbXV4gHl4f4KPh5CXjY2BfXpzaXmAd36KhIZ5dnaCh3l3bGZjbnBzcGlwcHRscnp/eYSQlI+Ri46MgHmDeomUhnxxdnt9dmx2cH1zamlzanR1bn13enB2d3d/j5iiqaicn5udlIuYmY+Yk5Sil6Kjl6Gno6CqoZWdlo+Wm5uhqZ2QhYWVipqamZadmJ+fpqSWl56ekpCbmY2Gh4CQiImOiISSmpCOjY+Ol5mQiYqTmI+UlJahop+hoqKVmqOrtK6wsraxubCppZ6joqaanZynn5qmm5uanaiaj5iWl4qGhIKJkYWDipOTnZiVnaKhpKu0o6Sjo6efm5Oel52ml5agnpOanaGjlJeLgIaIk4qFfHl+eHZ+eX5+f3Z3e4aJkJOemZ6anJiOj4uOloiDe351foKDgIF+hoySiHx+gYJ5bnh2e4OMfXRya2l2gYx/in56b3iBeXZzdHRxeoZ6bW57fXt8c3Rwc3x6eoWHg3iDh3ludGlxZW5udH53gIN1a3h5bXVrdGlsamRlbmRvbnRxaWVsZF9nZGRud3l7g4qPhnhzd3dxaGxfV1JOR09dZG1vcHhveYB7fnN3cXp2fnNpYWxiZGNbZ2Fra2pyd2lwcGtoc3JmbWRiZ2pgZ19jWVdhbWJYYmJrbWFmcHRrZmVoX2hvdniBdnt7cG1ueG1vZFpTX2hucW5xaXR6bWRdZWBmYWdobXFwd2x2fHJ3c3d9cnt0dGxsZWplbGVnZWpvaXN8h42PhoaHh5CMf36FfnN+enFueW93dnR5cG9vfIN5gIqSjIiJjJaLlJyel5mMi4KGgomQhYSNl5CPjomKhoqAfIF/fYODfHd6goB7go6SioB6dm9wdXR2cnJ7e32JjI6Nk4uHkIeMh4OGjI2KlZGZlpKanqegqa6so6mcoZ2anpWSiZGTiYaPk5KWjpqenqCjoaebopmXlJSVjpWdn6KYnp2cpJqTlZaXjoaRjpWXk4qFgHt1f4iAiYF+hY2HgnyIhoiEfnZzgIyHjY+ZlY6GgHqBenV6h4mRiIiChIR8fXeEj5CIjZGLjo2Lhn+AenN5eXRvd4CEf4iRjouHfYaKgoKGiYiHh4mShoyQlouGiYuRi4B/gHt+e311c3p8e4KIgouEenJrbHRxcWxwd212cXd/gX5/fHRwbWZma29oZGZnX1tkYGxjXWdnbHVuc3N8dW92d3t4cG9xbmtvdnN4gISKjImOj5KLhHyAeH+EfoOJg4SHh4CEf3R1bW9maG51eXdxdm9ocWtzdXx+eXNvZ2ZmYFtjZGx1d3RvcW1sZWpucmpnb3d4bXBtdnZ1e3ZuZW1ybW9rc3tzdWxnZGRua2xza3NsaWt1dm1xaG1vdm5xenBzcHV2bWtkZGFqcnh8dHNwanJzc3J5d29wdHV2dXZvd3RtaGNoZmlva2ZlaG14c3mBgXp6goOFgoWBeHB5fX2Df395f3+Bg3t+iIyMi4yOjYyIj42UlpCMh4SLhIiOkpaXmZCRj4uDi4WNhYiDgnt5f4SNjIWIkYiLk4+Ph4WNjIiGgIaKkIuKipCIgIqIg4mNhYuMi4yRiIqPipCTmJKJjoiFiI6GiY+Yj5GJhIqTm6Gfmp6fnZmdlJmQkI6Pjo6NjZOMho6JjoyOiIGAf4aJkIuLiYiKj5OWlJKOkYyMk5SXmpmYmI6JkJaMh46TkJWSl5GIgnx8f3h5eXl0e3x7dXZ2f4eDiIWHj5WTmIyQlpuZk5OQkoyEhIOKi4WEi4h/gYCCiIuOhIiKjYiLgIeAfHl7fn55fXd1d3h5enNwbHJ2eXV0d29vbG1ybm5mYVxnYl9kZmloY2NibG5xamRrZmdqbmtlY2dnbmxxbmhiX2RkZWtpcW5zb21vaG5taW5xeHR7eHZuZmNgam5paGFgZF5bZGNgaGFhXVxkbXV6c3d0dXFyc3B0eX52eHd4d3R2dnR1cHZyc3FsbG5xcXZ0b250dn11cG50cXl9gn2Bfn9+eHNzeHyAen17eXNsc3NydG12fX+Ah4N+foR9dnZxb3Nua2xpbHVxcnN8fHl1dXd+gH19gIJ9hIN+fXp4dnt4gYmCgH1+goCGf4aKg397gnt6eoB8eX6CiIuJgoeOiYiGiY+TjYeIhIuHg4GCiIaDhoGJhYeLko+UmJSUlZWQlpiYlY6Hio6Kj5WRlpGWkZSRkJWPioSKh4uPioeKj5WPj5OWk5aWmJaTjIyHiIiPjY+Nk5ORlpWWl5mQkZOPkZGVmJybmZWQlpOQkpOPko+VjI+Qio2Hh4J+fHyAfHx7fHh9gHt1foWDgYmOi4iChYqKhoqLiYSKgnt6fH5+hIiLhYSJgn9/e3ZzeHN4foJ+g32AgoeHhIaGioR9gIJ/hXx8g3+Dg4B+g4KCg4SAeXyAgYaJiYmMiIyOi4uLiIiLgoKFgnt3c3Z5e3V0eX93eX58d3l6fH2Ae3hydG1vc25xcmxxdXZ5eXt0enVwdG9rcXd1c2xzd3V4fXx2cm92cW1oaGhma2Zua25wbGxvamxvbnNtdG9ramtvcXd8eX9/fXZxcGtzcHR6enl9en98dnx1d3x6fX2Bf4OFhoiKiIeIhn9/fXuBgHt4fHh/goGAgX+EgYGAe3d1dHFudXV0cm50cXNydXl+foN+eXp4d3x6f3t5f316f4CHiIOJiIKChIKDgX9/enZ1fXp6d3p6enyAf3x5gH2EhomFgIKIjZGTjJGKjIaLjY+UlpiTjpCSlJCSjYmFi4+Li4mIi46PiY2Sl5ucnZybnZiak5WYkpaUlY+Nh4WLi4+NkJGNiIOJjI6NjIqEhouIjJGPkJOWkIqPj5OXkZCLiIaLkJGKhYOGhoeEioiHhYOFhIWJiYmLh4yMkIyPi46Rk4yNhoSGiYJ9fnt+gYCDgIWHgIKCh4iDgn1/e3yAfYGEf3p+fHd6e3Z8fXd9e3p9gnx/goKBfn14fH55eXt5d3t/fX15eHR1eXR5dnJ2dXp1dnp+eHx6eX19f4GEfnh3dnt1enx5fn97dnhycXBwdXd4c3F1d3t+gHx7dnRzdnFzeXt4d3t/fnx3fHh2cnF3cWxucXFwcW1ucG9ycHZ7dnd3fHp1dHRxbnR4enh2c3d1dHF1d3x5dXl6e3h4dHV4ent3d3h7dnp5eH19gIJ/gIB/en9/goF8eHd8eXZ5f35/gX55dnNzd3Z8fYCAfYB9f32Dh4iJh4WAe32Bh4F/foGEgoGEhYaBg4eLjYqMkIuIiYqOi4mNjoiKjIyNjpGLjIaChYKHi4+Mh4OEg399gYeGh4mHhIOEhoSJhIiEhYqIhImIjI6LiYqOioeJhoKAgYCDg4KEhIaDf3x7f3yCgH+BfoKAf3yBfX18f4KDgYWKioaEhImJhIaJjYiKjo6Nj4yIiYyPko6RjouKiomLj4+KioeKhIWDhIF/gX58end4fHx5eHp5fHl4ent/fHp9fXx9fX58eHp9fH9/enx4eXV4dHJzdnV7e3d5dXZ2c3l8f4KAfX6Af4B/fXl4eHN1d3t7eHd3eXV0c3d5eHl5eXx4fH13dHFxd3l9gH5+gIGDgH19end0d3h5fHp6dnp6enh4dHNvbm1tcnBtc3R4d3l4dnRzcHN1c3h5dXl6endzdXN4dHd7fXh5eHh8eXV2eHt/gHt4d3V2c3FycnB2dHV4dHd1cnFwdHl7d3R0cXN4dHJvcm90eXp5eXx4d3p+f39+gn2Bfn1+gIJ+fXp6f4J+fHt5eHZ0cm91c3FxdXV4dXd3fH57f35/gH2BgoODgYWHi4aDhIOGgoOBf35+gX+DgoaHhomJh4SCf4SGiYSDh4ODiIuOjI2Qj5KTkY+MiIqNkI6Mi46Mi4yKiIWHhYaCgIB/hYmFiISJi42KioqHiYiGioeDhYaHiYeGiYyOjoqNioyJjI6JiYaDhISCgICAgX6BhoeGg4WEhIKChYeFhIiJi4mFhoaHiISHh4aDg4GEgYWBfX58f36AfXx5fHh6fXt6e3l4eXZ4fHt7enh9ent6f3x8eXl6fXt5enZ5ent9gHx+f4GAe3h5eXh3eXp7e3x8e3+BgHt4fHl6dnR1d3V5d3d3dHd1eHp8en18fnp3en18fXx8e3l5fH9/f4CAfXt8eX17fXx3dHJ0c3BvdHd7e31/end6eXZydHJvc3V2d3Z4e3x7eHZ5d3Z4eHVzd3p5e32AgXx5eHZ0dnd2dnl8fH6AfXx/gH98eXp5dnh0dHJycXV3d3Z1dXl9fIB8f4OAgYCDhIN/gn58en19fX+Bgn6Bg4WDgIJ/gYCBhIF/fn59ent9fX+Cf4CAhIWDhIODg4WFhoWFh4aEhIeFg4OCgYJ/fnx+fX+DhYSDh4qNj42Pj5CMiYiGhYeJhoeIh4aEiIaEg4aHhoKBgoCCf4SEgoKBfn19e318e39+f36AgIGAfoKBgYKEiIaEgoKGhoSHiYeHhIaHiYaIi4mLioqLioqMi4aHioaEgYJ/gYGDhIWCgIOAf4J/fH18fH6AfXx8f4GAgn9/e3t6fHx6eXh8enl2dnV5e3t+gYF+fnx9f4KCgIF+fn98foF9fn1/gH17eXp9f319ent5eXh3eHh7enp3dnd3enh3dXZ1d3p4e317e3l4enp5eHh7eHZ1dHRzdHJxdHh5fHp5enl2eXp4d3R1dHN2eHd6fXx6fH16eXZ5dnN2dnh4enx5ent7enx4eHl5eXx5eHl5e3p8fnt8fYB+fHt+fH+Af4B/fX58fX9+f31/fXx+gIOBf3x7fn98fXp9f39+fH+Bg4B+gX9+e359fnp4d3t8fXx/gIGAgoCDgH98e3p8fX9/gH19e3p8fHx+f31+fYGDhYWFhYSGhIGAf4OFhIeJhYOBgYGEg4GChIaIi4iLiYuJh4eEgYOGiIeIi4yNiYqGhIWGg4OGhYiKiYuMiYyLjY6MjY2KiYyIhoaEhYeHhoaJhoWHhoWHh4iKhoOAg4WHiYiHhYOEg4WHh4mKi4mGhIOFiIWHh4eHhIaEhIeJioqMiIiHiYeEgoOCg4WFh4iJh4mHhIaGiIeFhYaFhIGBg4OAgoOEhoaHiYeHhoiHhYSDhYSFhYKCf4KEgoB9fn59gH9/f3x6e3p9f317en19fnx+e35/fnx+foCCgX58e3l4e35/f319fHp6fXx5enl7fHl4e3t7en1+f319e316eHZ1eHd5fHt4d3p6e317e3l7fHt6eXd3dnZ5eXp4enp4eHd2eHl3dXd2d3d6eHh3dnd6eXl8fX17enh4enh5d3p7fH1+gIKBf3x/foB/f359fH59fH18ent+f4B9foCAfnx9fXx7fHx6e3l5en1/fHp6eXh4enp6e3p7eXp8f31/f31/gX+CgoWCgH+Bg4SBg4WDgYGBf35+gICAg4SDg4OChIOGhoSGhoaHhIOFh4OFg4WHhIWGhIGAfn9+f3+BgH99gYKBhISFg4WFh4iFhoiIhYOFhoOFhoaEg4CBg4aIhYSChYSGhIKCgYGDgoOGiIqIhoiHhYaFg4SGiIeFg4KEhIOBgoF/gH58fX6BgIGAgoGAgH+CgoODhIKBgH58fnx/gIB+fX18e3x7fH19e3x+gH18f4B/gICBf4B+fX58e3p5eXt5enx5eXd4e3p9fHx7enl5enp5e31+f4GAgIGBf31+fn9+gIF/fHl3eXd5enl5d3h7eXt9e31+fX1+fXp6eHl7fHt9foCAf4CBfn9+fn18e319foB+gH9/foB+f3+AfoB/f39/gH9+fXx7eXl7eXl4e3p7fHp4d3p5e3p6enh2dXh4enl6eHp7fH5/gX+BgH1/fn59fn5+fXx6fHx+gH18fn6AfoB/gICAgIB+gH+Bf39/fnx7fHt8enl6fX+BgH5/gX+BgIGCgYB/gYGBgoCCgoB/f32AgYCCgYCCgYKEhISDg4KBgYODgoKBgoSFhYWGhIWDhYWDgoKDhYeFhoiGhISEg4KDhYWGhoeEhYSFg4WFg4WFg4WFhoWDgoGCgH9/f39/f4CAgoKCgoCAgIF/fn5/f4B/foF/gYKEhYeHhISFh4WDgYOEhIaHh4SCgoOFgoOBf318fn59fH5+fn+AgIKCg4ODhISCgoF/f35/gH9+fn5+fH9+fn9/f4GBf358fHt5e3x7enp5e3l8fX58e3t6enp5eHd6enp9e31/gYGBgoKBgoCAgYKAgYGCg4GBgYB+f35+fHp5e318e3p6eHp6eXt9e35+fXt6e3x6enl5e3l5ent5ent7fH5/fnx6eXl4eXp5e3x6eXh2dnd3d3d3ent8fH5/f4B/f4B+f31+fX9/fn+Af319fn+Af39+fH18e3t7fH59f39/gYF/gYB+fH59fH1+fX9/fX98foB+fH58fH19f4CChIKDhIOCgIF/gH59f4CBf31/gIGCg4OBg4KAf4CCgX9/fn18fH5/gYOBgH+Af4CBgoKChIGBgH9/f39/f35/gX+AgoKAf4GBgH9/gH+BgYGBgH9+fYCBgIKChIKAgoGCgoKCg4ODgoOEg4KBgX9/foB/gIGBgYCAfn9/gYOCg4SFhoiHh4WEg4ODg4OEhYaFhYOCgIKDg4OBg4WGhISCg4KBgoOFhoWFhYWDhYWFg4SDgoCBgoODgYB/f35+f4CBgoSDg4ODg4KDhIOCgoCBgoGCgIGAgX99fH17fX59fX1+f358fX9+f31/gH+AgH+Af358fX18e3p4d3Z2d3h4eHh4eHp4enl7e3p7fXt6enl5enx+f35+fXt8e3x7e3x8e31+fXx9fn5+f4B+fXx8fH19fX6AgICBgYKCgoGAfnx8fX5+fXx7fX5+f35+fn9+f318fHx8e31+fHt8e3p6enl6enp8fHt7ent6enx9fX17enx7fXx9f319fHt7e3x9fn5/gYCBgYCBgYCAfn+AgoCAgH9/f3+AgIGBgoB/f4CAgYGCg4SCg4OBf35+gH9/fn6AgYKAf3+AgYGCgYGCgoGCgoGCg4KBgoCBgYKBf3+Bg4SDgYOBgIGCgoKCgoKDgoKBgoCCgoKDhIWFg4GCg4OCgYCAgoGCgYCAgoKDgoOCg4OEgoKAgYGCg4OBgoOEgoSEg4ODhIWDgoGDg4SEg4OCgoOBgH9/gYGBgoGAgYKBgYGBgYGAfn1+f39/fn5+f39/gIB/f35/f4B/gIB/gIGCgoKCgICAgYKBgH9+fX59fXx9fH1/gIGCgH+AgYKDhISEg4GCgoCAgX9/gH59fX9+fX59fn19"
         for name, b64 in pairs(RAW_B64) do
             pcall(function()
                 local fpath = "DoMin_Assets_v2/" .. name .. ".png"
@@ -83,6 +84,16 @@ do
                 end
             end)
         end
+        pcall(function()
+            local wpath = "DoMin_Assets_v2/boom_sfx.wav"
+            if type(isfile) ~= "function" or not isfile(wpath) then
+                writefile(wpath, decodeBase64(BOOM_WAV_B64))
+            end
+            local wid = getcustomasset(wpath)
+            if type(wid) == "string" and #wid > 0 then
+                Assets.boomSfx = wid
+            end
+        end)
     end
 end
 
@@ -213,9 +224,93 @@ local BoardThemes = {
             Color3.fromRGB(82, 88, 98),
         },
     },
+    Wood = {
+        Name        = "Gỗ",
+        BoardOuter  = Color3.fromRGB(46, 33, 22),
+        CellHidden  = Color3.fromRGB(148, 114, 78),
+        CellOpen    = Color3.fromRGB(112, 84, 56),
+        GridLine    = Color3.fromRGB(82, 58, 36),
+        CellMineHit = Color3.fromRGB(154, 54, 54),
+        CellHint    = Color3.fromRGB(92, 140, 82),
+        FlagColor   = Color3.fromRGB(186, 42, 46),
+        MineColor   = Color3.fromRGB(42, 30, 22),
+        NumColors   = {
+            Color3.fromRGB(34, 96, 168),
+            Color3.fromRGB(34, 128, 58),
+            Color3.fromRGB(178, 42, 46),
+            Color3.fromRGB(96, 52, 152),
+            Color3.fromRGB(156, 78, 22),
+            Color3.fromRGB(26, 122, 124),
+            Color3.fromRGB(42, 34, 28),
+            Color3.fromRGB(76, 66, 56),
+        },
+    },
+    Lava = {
+        Name        = "Dung Nham",
+        BoardOuter  = Color3.fromRGB(34, 16, 18),
+        CellHidden  = Color3.fromRGB(64, 34, 38),
+        CellOpen    = Color3.fromRGB(32, 18, 22),
+        GridLine    = Color3.fromRGB(108, 52, 44),
+        CellMineHit = Color3.fromRGB(148, 40, 38),
+        CellHint    = Color3.fromRGB(58, 108, 66),
+        FlagColor   = Color3.fromRGB(210, 122, 56),
+        MineColor   = Color3.fromRGB(206, 92, 62),
+        NumColors   = {
+            Color3.fromRGB(108, 188, 212),
+            Color3.fromRGB(112, 198, 128),
+            Color3.fromRGB(210, 108, 92),
+            Color3.fromRGB(178, 138, 210),
+            Color3.fromRGB(212, 164, 72),
+            Color3.fromRGB(96, 198, 186),
+            Color3.fromRGB(194, 184, 182),
+            Color3.fromRGB(152, 138, 138),
+        },
+    },
+    Ice = {
+        Name        = "Băng Giá",
+        BoardOuter  = Color3.fromRGB(22, 46, 68),
+        CellHidden  = Color3.fromRGB(128, 178, 206),
+        CellOpen    = Color3.fromRGB(178, 202, 214),
+        GridLine    = Color3.fromRGB(68, 118, 152),
+        CellMineHit = Color3.fromRGB(196, 108, 118),
+        CellHint    = Color3.fromRGB(102, 188, 146),
+        FlagColor   = Color3.fromRGB(194, 48, 62),
+        MineColor   = Color3.fromRGB(32, 48, 68),
+        NumColors   = {
+            Color3.fromRGB(24, 82, 182),
+            Color3.fromRGB(24, 126, 68),
+            Color3.fromRGB(186, 40, 52),
+            Color3.fromRGB(114, 46, 168),
+            Color3.fromRGB(176, 98, 24),
+            Color3.fromRGB(22, 122, 136),
+            Color3.fromRGB(46, 56, 72),
+            Color3.fromRGB(82, 98, 114),
+        },
+    },
+    Sunset = {
+        Name        = "Hoàng Hôn",
+        BoardOuter  = Color3.fromRGB(34, 22, 54),
+        CellHidden  = Color3.fromRGB(68, 48, 102),
+        CellOpen    = Color3.fromRGB(38, 26, 60),
+        GridLine    = Color3.fromRGB(102, 74, 142),
+        CellMineHit = Color3.fromRGB(142, 46, 68),
+        CellHint    = Color3.fromRGB(64, 118, 86),
+        FlagColor   = Color3.fromRGB(210, 104, 116),
+        MineColor   = Color3.fromRGB(206, 96, 114),
+        NumColors   = {
+            Color3.fromRGB(108, 192, 214),
+            Color3.fromRGB(114, 202, 142),
+            Color3.fromRGB(210, 112, 118),
+            Color3.fromRGB(186, 146, 214),
+            Color3.fromRGB(212, 168, 88),
+            Color3.fromRGB(98, 202, 192),
+            Color3.fromRGB(196, 188, 208),
+            Color3.fromRGB(154, 144, 174),
+        },
+    },
 }
 
-local THEME_ORDER = { "Cartoon", "Dark", "Emerald", "Paper" }
+local THEME_ORDER = { "Cartoon", "Dark", "Emerald", "Paper", "Wood", "Lava", "Ice", "Sunset" }
 
 local STAGES = {
     { key = "Easy",   title = "Dễ",       size = 9,  mines = 10,  reward = 100 },
@@ -287,6 +382,7 @@ local function loadStats()
                     Stats.Wins   = tonumber(data.Wins) or 0
                     Stats.Losses = tonumber(data.Losses) or 0
                     Stats.Xu     = tonumber(data.Xu) or 0
+                    if data.ThemeKey and BoardThemes[data.ThemeKey] then Config.ThemeKey = data.ThemeKey end
                 end
             end
         end
@@ -650,7 +746,13 @@ end
 
 local function sfxDig()   playSfx("rbxassetid://421058925", 0.30, 1.2) end
 local function sfxFlag()  playSfx("rbxassetid://421058925", 0.28, 0.88) end
-local function sfxBoom()  playSfx("rbxassetid://421058925", 0.48, 0.45) end
+local function sfxBoom()
+    if Assets.boomSfx then
+        playSfx(Assets.boomSfx, 0.85, 1.0)
+    else
+        playSfx("rbxassetid://142070127", 0.70, 1.0)
+    end
+end
 local function sfxWin()   playSfx("rbxassetid://4590662766", 0.45, 1.0) end
 local function sfxClick() playSfx("rbxassetid://421058925", 0.22, 1.35) end
 
@@ -975,17 +1077,19 @@ do
 
     makeHeader("GIAO DIỆN BÀN CỜ", 3)
 
-    local HomeThemeRow = Instance.new("Frame")
-    HomeThemeRow.LayoutOrder = 4
-    HomeThemeRow.Size = UDim2.new(1, 0, 0, 34)
-    HomeThemeRow.BackgroundTransparency = 1
-    HomeThemeRow.Parent = RightCard
+    local HomeThemeGrid = Instance.new("Frame")
+    HomeThemeGrid.LayoutOrder = 4
+    HomeThemeGrid.Size = UDim2.new(1, 0, 0, 76)
+    HomeThemeGrid.BackgroundTransparency = 1
+    HomeThemeGrid.Parent = RightCard
 
     UI.HomeThemeBtns = {}
     for idx, key in ipairs(THEME_ORDER) do
+        local col = (idx - 1) % 4
+        local row = math.floor((idx - 1) / 4)
         local b = Instance.new("TextButton")
-        b.Size = UDim2.new(0.238, 0, 1, 0)
-        b.Position = UDim2.new((idx - 1) * 0.254, 0, 0, 0)
+        b.Size = UDim2.new(0.238, 0, 0, 34)
+        b.Position = UDim2.new(col * 0.254, 0, 0, row * 40)
         b.BackgroundColor3 = UITheme.BgButton
         b.BorderSizePixel = 0
         b.AutoButtonColor = false
@@ -993,7 +1097,7 @@ do
         b.Font = FONT_MAIN
         b.TextSize = 11
         b.TextColor3 = UITheme.TextSecondary
-        b.Parent = HomeThemeRow
+        b.Parent = HomeThemeGrid
         addCorner(b, 8)
         local st = addStroke(b, UITheme.StrokeSubtle, 1.4, 0.2)
         bindInstantTap(b, function()
@@ -1004,44 +1108,6 @@ do
         end)
         UI.HomeThemeBtns[key] = { btn = b, stroke = st }
     end
-
-    makeHeader("CHẾ ĐỘ CHƠI", 5)
-
-    local OptRow = Instance.new("Frame")
-    OptRow.LayoutOrder = 6
-    OptRow.Size = UDim2.new(1, 0, 0, 34)
-    OptRow.BackgroundTransparency = 1
-    OptRow.Parent = RightCard
-
-    local function makeOpt(xScale, wScale, text, onTap)
-        local b = Instance.new("TextButton")
-        b.Size = UDim2.new(wScale, 0, 1, 0)
-        b.Position = UDim2.new(xScale, 0, 0, 0)
-        b.BackgroundColor3 = UITheme.BgButton
-        b.BorderSizePixel = 0
-        b.AutoButtonColor = false
-        b.Text = text
-        b.Font = FONT_MAIN
-        b.TextSize = 11
-        b.TextColor3 = UITheme.TextPrimary
-        b.Parent = OptRow
-        addCorner(b, 8)
-        local st = addStroke(b, UITheme.StrokeSubtle, 1.4, 0.2)
-        bindInstantTap(b, onTap)
-        return b, st
-    end
-
-    UI.HomeChordBtn, UI.HomeChordStroke = makeOpt(0, 0.49, "Mở nhanh ô số: Bật", function()
-        Config.QuickChord = not Config.QuickChord
-        sfxClick()
-        updateHomeUI()
-    end)
-
-    UI.HomeSoundBtn, UI.HomeSoundStroke = makeOpt(0.51, 0.49, "Âm thanh: Bật", function()
-        Config.SoundEnabled = not Config.SoundEnabled
-        if Config.SoundEnabled then sfxClick() end
-        updateHomeUI()
-    end)
 end
 
 -- ========================================================================
@@ -1409,12 +1475,6 @@ do
         return b, face, lbl
     end
 
-    UI.ChordBtn, UI.ChordFace, UI.ChordLbl = makeToggle(6, "Mở nhanh ô số: Bật", UITheme.BgButton, UITheme.BgPanelDark, function()
-        Config.QuickChord = not Config.QuickChord
-        sfxClick()
-        updateControlsUI()
-    end)
-
     UI.SoundBtn, UI.SoundFace, UI.SoundLbl = makeToggle(7, "Âm thanh: Bật", UITheme.BgButton, UITheme.BgPanelDark, function()
         Config.SoundEnabled = not Config.SoundEnabled
         if Config.SoundEnabled then sfxClick() end
@@ -1646,13 +1706,7 @@ updateHomeUI = function()
         pack.stroke.Color = active and UITheme.RimBlue or UITheme.StrokeSubtle
     end
 
-    UI.HomeChordBtn.Text = Config.QuickChord and "Mở nhanh ô số: Bật" or "Mở nhanh ô số: Tắt"
-    UI.HomeChordBtn.TextColor3 = Config.QuickChord and UITheme.AccentCyan or UITheme.TextSecondary
-    UI.HomeChordStroke.Color = Config.QuickChord and UITheme.RimBlue or UITheme.StrokeSubtle
 
-    UI.HomeSoundBtn.Text = Config.SoundEnabled and "Âm thanh: Bật" or "Âm thanh: Tắt"
-    UI.HomeSoundBtn.TextColor3 = Config.SoundEnabled and UITheme.ColorGreen or UITheme.TextSecondary
-    UI.HomeSoundStroke.Color = Config.SoundEnabled and UITheme.ColorGreen or UITheme.StrokeSubtle
 end
 
 updateTopStatus = function()
@@ -1677,9 +1731,6 @@ updateControlsUI = function()
     UI.FlagFace.BackgroundColor3 = (not isDig) and UITheme.BtnRed or UITheme.BgButton
     UI.FlagBtn.BackgroundColor3 = (not isDig) and UITheme.BtnRedDark or UITheme.BgPanelDark
     UI.FlagLbl.TextColor3 = (not isDig) and UITheme.TextPrimary or UITheme.TextSecondary
-
-    UI.ChordLbl.Text = Config.QuickChord and "Mở nhanh ô số: Bật" or "Mở nhanh ô số: Tắt"
-    UI.ChordLbl.TextColor3 = Config.QuickChord and UITheme.AccentCyan or UITheme.TextSecondary
 
     UI.SoundLbl.Text = Config.SoundEnabled and "Âm thanh: Bật" or "Âm thanh: Tắt"
     UI.SoundLbl.TextColor3 = Config.SoundEnabled and UITheme.ColorGreen or UITheme.TextSecondary
