@@ -1,5 +1,5 @@
 -- ============================================================================
--- DAU TRUONG CHIEN DAU PRO (v2.5) - Full-Screen Action RPG Combat Game
+-- DAU TRUONG CHIEN DAU PRO (v2.6) - Full-Screen Action RPG Combat Game
 -- Menu Full Man Hinh 100% | 8 Tuong | 5 Boss | 6 Loai Quai | Minimap Radar
 -- Chon Nang Cap Trong Tran | Nhiem Vu | Len Cap | Trang Thai | Cai Dat
 -- Code doc lap 100%, toi uu cho Mobile (cam ung tuc thi, chu matte) & PC.
@@ -80,7 +80,7 @@ local FONT_BODY  = Enum.Font.GothamMedium
 -- 2. DU LIEU GAME (8 TUONG, 5 MAN CHOI, 3 DO KHO, 5 BOSS, 6 QUAI, NHIEM VU)
 -- ============================================================================
 local CFG = {
-    VERSION = "v2.5",
+    VERSION = "v2.6",
     GUI_NAME = "ArenaChienDau_Standalone",
     SAVE_PREFIX = "arena_chien_dau_v2_",
     ARENA_W = 1100,
@@ -469,6 +469,237 @@ function GEAR.AddRandom(minRarity)
     local newItem = { uid = DATA.nextUid, id = pick.id, lv = 0 }
     table.insert(DATA.inventory, newItem)
     return newItem, pick
+end
+
+
+-- Ve bieu tuong do hoa cho tung loai trang bi (Vu Khi, Ao Giap, Mu, Giay, Phu Kien, Canh)
+local function buildGearIcon(parent, d, zBase)
+    for _, ch in ipairs(parent:GetChildren()) do
+        if ch.Name == "GearIcon" then ch:Destroy() end
+    end
+    local box = Instance.new("Frame")
+    box.Name = "GearIcon"
+    box.AnchorPoint = Vector2.new(0.5, 0.5)
+    box.Position = UDim2.new(0.5, 0, 0.5, 0)
+    box.Size = UDim2.new(1, 0, 1, 0)
+    box.BackgroundTransparency = 1
+    box.ZIndex = zBase
+    box.Parent = parent
+
+    local col = (d and d.col) or C.METAL
+    local slot = d and d.slot or "weapon"
+
+    if slot == "weapon" then
+        -- Kiem cheo co luoi sac, song kiem sang, chan kiem vang va chuoi kiem
+        local pivot = Instance.new("Frame")
+        pivot.AnchorPoint = Vector2.new(0.5, 0.5)
+        pivot.Position = UDim2.new(0.5, 0, 0.5, 0)
+        pivot.Size = UDim2.new(1, 0, 1, 0)
+        pivot.Rotation = -42
+        pivot.BackgroundTransparency = 1
+        pivot.ZIndex = zBase
+        pivot.Parent = box
+
+        local blade = Instance.new("Frame")
+        blade.AnchorPoint = Vector2.new(0.5, 1)
+        blade.Position = UDim2.new(0.5, 0, 0.66, 0)
+        blade.Size = UDim2.new(0.24, 0, 0.62, 0)
+        blade.BackgroundColor3 = col
+        blade.BorderSizePixel = 0
+        blade.ZIndex = zBase + 1
+        blade.Parent = pivot
+        addCorner(blade, 4)
+        addStroke(blade, C.TXT_DARK, 1.2)
+
+        local edge = Instance.new("Frame")
+        edge.AnchorPoint = Vector2.new(0.5, 0.5)
+        edge.Position = UDim2.new(0.5, 0, 0.48, 0)
+        edge.Size = UDim2.new(0.38, 0, 0.78, 0)
+        edge.BackgroundColor3 = C.TXT_MAIN
+        edge.BackgroundTransparency = 0.45
+        edge.BorderSizePixel = 0
+        edge.ZIndex = zBase + 2
+        edge.Parent = blade
+        addCorner(edge, 2)
+
+        local guard = Instance.new("Frame")
+        guard.AnchorPoint = Vector2.new(0.5, 0.5)
+        guard.Position = UDim2.new(0.5, 0, 0.68, 0)
+        guard.Size = UDim2.new(0.58, 0, 0.13, 0)
+        guard.BackgroundColor3 = C.BORDER_GOLD
+        guard.BorderSizePixel = 0
+        guard.ZIndex = zBase + 2
+        guard.Parent = pivot
+        addCorner(guard, 3)
+        addStroke(guard, C.TXT_DARK, 1)
+
+        local hilt = Instance.new("Frame")
+        hilt.AnchorPoint = Vector2.new(0.5, 0)
+        hilt.Position = UDim2.new(0.5, 0, 0.72, 0)
+        hilt.Size = UDim2.new(0.16, 0, 0.24, 0)
+        hilt.BackgroundColor3 = Color3.fromRGB(92, 62, 46)
+        hilt.BorderSizePixel = 0
+        hilt.ZIndex = zBase + 1
+        hilt.Parent = pivot
+        addCorner(hilt, 3)
+    elseif slot == "armor" then
+        -- Ao giap: vai giap + than giap + vien ngoc giua nguc + that lung
+        local sh = Instance.new("Frame")
+        sh.AnchorPoint = Vector2.new(0.5, 0)
+        sh.Position = UDim2.new(0.5, 0, 0.14, 0)
+        sh.Size = UDim2.new(0.84, 0, 0.34, 0)
+        sh.BackgroundColor3 = col
+        sh.BorderSizePixel = 0
+        sh.ZIndex = zBase + 1
+        sh.Parent = box
+        addCorner(sh, 6)
+        addStroke(sh, C.TXT_DARK, 1.2)
+
+        local torso = Instance.new("Frame")
+        torso.AnchorPoint = Vector2.new(0.5, 0)
+        torso.Position = UDim2.new(0.5, 0, 0.28, 0)
+        torso.Size = UDim2.new(0.58, 0, 0.56, 0)
+        torso.BackgroundColor3 = col
+        torso.BorderSizePixel = 0
+        torso.ZIndex = zBase + 2
+        torso.Parent = box
+        addCorner(torso, 5)
+        addStroke(torso, C.TXT_DARK, 1.2)
+
+        local belt = Instance.new("Frame")
+        belt.AnchorPoint = Vector2.new(0.5, 0.5)
+        belt.Position = UDim2.new(0.5, 0, 0.70, 0)
+        belt.Size = UDim2.new(0.60, 0, 0.14, 0)
+        belt.BackgroundColor3 = C.BORDER_GOLD
+        belt.BorderSizePixel = 0
+        belt.ZIndex = zBase + 3
+        belt.Parent = box
+        addCorner(belt, 2)
+
+        local gem = Instance.new("Frame")
+        gem.AnchorPoint = Vector2.new(0.5, 0.5)
+        gem.Position = UDim2.new(0.5, 0, 0.44, 0)
+        gem.Size = UDim2.new(0.20, 0, 0.20, 0)
+        gem.Rotation = 45
+        gem.BackgroundColor3 = C.TXT_MAIN
+        gem.BorderSizePixel = 0
+        gem.ZIndex = zBase + 3
+        gem.Parent = box
+        addCorner(gem, 2)
+    elseif slot == "helm" then
+        -- Mu giap / Vuong mien
+        local dome = Instance.new("Frame")
+        dome.AnchorPoint = Vector2.new(0.5, 0.5)
+        dome.Position = UDim2.new(0.5, 0, 0.54, 0)
+        dome.Size = UDim2.new(0.68, 0, 0.62, 0)
+        dome.BackgroundColor3 = col
+        dome.BorderSizePixel = 0
+        dome.ZIndex = zBase + 1
+        dome.Parent = box
+        addCorner(dome, 9)
+        addStroke(dome, C.TXT_DARK, 1.2)
+
+        local visor = Instance.new("Frame")
+        visor.AnchorPoint = Vector2.new(0.5, 0.5)
+        visor.Position = UDim2.new(0.5, 0, 0.60, 0)
+        visor.Size = UDim2.new(0.46, 0, 0.18, 0)
+        visor.BackgroundColor3 = C.TXT_DARK
+        visor.BorderSizePixel = 0
+        visor.ZIndex = zBase + 2
+        visor.Parent = box
+        addCorner(visor, 2)
+
+        if d and (d.id == "h_horn" or d.id == "h_crown") then
+            for _, sx in ipairs({ 0.22, 0.78 }) do
+                local horn = Instance.new("Frame")
+                horn.AnchorPoint = Vector2.new(0.5, 1)
+                horn.Position = UDim2.new(sx, 0, 0.30, 0)
+                horn.Size = UDim2.new(0.18, 0, 0.28, 0)
+                horn.Rotation = (sx < 0.5) and -20 or 20
+                horn.BackgroundColor3 = C.TXT_GOLD
+                horn.BorderSizePixel = 0
+                horn.ZIndex = zBase + 2
+                horn.Parent = box
+                addCorner(horn, 2)
+            end
+        end
+    elseif slot == "boots" then
+        -- Doi giay chien
+        for _, bx in ipairs({ 0.34, 0.68 }) do
+            local leg = Instance.new("Frame")
+            leg.AnchorPoint = Vector2.new(0.5, 0.5)
+            leg.Position = UDim2.new(bx, 0, 0.50, 0)
+            leg.Size = UDim2.new(0.28, 0, 0.56, 0)
+            leg.BackgroundColor3 = col
+            leg.BorderSizePixel = 0
+            leg.ZIndex = zBase + 1
+            leg.Parent = box
+            addCorner(leg, 4)
+            addStroke(leg, C.TXT_DARK, 1.1)
+
+            local foot = Instance.new("Frame")
+            foot.AnchorPoint = Vector2.new(0.5, 1)
+            foot.Position = UDim2.new(bx + 0.05, 0, 0.84, 0)
+            foot.Size = UDim2.new(0.36, 0, 0.24, 0)
+            foot.BackgroundColor3 = col
+            foot.BorderSizePixel = 0
+            foot.ZIndex = zBase + 2
+            foot.Parent = box
+            addCorner(foot, 4)
+            addStroke(foot, C.TXT_DARK, 1.1)
+        end
+    elseif slot == "neck" then
+        -- Day chuyen / Nhan co vien ngoc
+        local ring = Instance.new("Frame")
+        ring.AnchorPoint = Vector2.new(0.5, 0.5)
+        ring.Position = UDim2.new(0.5, 0, 0.44, 0)
+        ring.Size = UDim2.new(0.58, 0, 0.58, 0)
+        ring.BackgroundTransparency = 1
+        ring.ZIndex = zBase + 1
+        ring.Parent = box
+        addCorner(ring, 99)
+        addStroke(ring, C.BORDER_GOLD, 2.2)
+
+        local gem = Instance.new("Frame")
+        gem.AnchorPoint = Vector2.new(0.5, 0.5)
+        gem.Position = UDim2.new(0.5, 0, 0.72, 0)
+        gem.Size = UDim2.new(0.30, 0, 0.30, 0)
+        gem.Rotation = 45
+        gem.BackgroundColor3 = col
+        gem.BorderSizePixel = 0
+        gem.ZIndex = zBase + 2
+        gem.Parent = box
+        addCorner(gem, 3)
+        addStroke(gem, C.TXT_MAIN, 1.1)
+    else
+        -- Canh / Ao choang 2 ben doi xung
+        for _, side in ipairs({ -1, 1 }) do
+            local w1 = Instance.new("Frame")
+            w1.AnchorPoint = Vector2.new(0.5, 0.5)
+            w1.Position = UDim2.new(0.5 + side * 0.24, 0, 0.48, 0)
+            w1.Size = UDim2.new(0.40, 0, 0.64, 0)
+            w1.Rotation = side * 24
+            w1.BackgroundColor3 = col
+            w1.BorderSizePixel = 0
+            w1.ZIndex = zBase + 1
+            w1.Parent = box
+            addCorner(w1, 7)
+            addStroke(w1, C.TXT_DARK, 1.1)
+
+            local w2 = Instance.new("Frame")
+            w2.AnchorPoint = Vector2.new(0.5, 0.5)
+            w2.Position = UDim2.new(0.5 + side * 0.16, 0, 0.62, 0)
+            w2.Size = UDim2.new(0.28, 0, 0.38, 0)
+            w2.Rotation = side * 14
+            w2.BackgroundColor3 = C.TXT_MAIN
+            w2.BackgroundTransparency = 0.55
+            w2.BorderSizePixel = 0
+            w2.ZIndex = zBase + 2
+            w2.Parent = box
+            addCorner(w2, 5)
+        end
+    end
+    return box
 end
 
 local function computeStats()
@@ -1620,11 +1851,23 @@ do
         }
         for _, sc in ipairs(slotCoords) do
             local sb = makeBtn(left, {
-                text = "", bg = C.BG_CARD, color = C.TXT_SUB, size = 10,
+                text = "", bg = C.BG_CARD, color = C.TXT_SUB, size = 9,
                 dim = UDim2.new(0.24, 0, 0.19, 0), pos = UDim2.new(sc.x, 0, sc.y, 0), radius = 8, z = 6,
             })
-            sb.TextWrapped = true
-            UI.GearSlotBtns[sc.id] = { btn = sb, stroke = sb:FindFirstChildOfClass("UIStroke") }
+            local icHolder = Instance.new("Frame")
+            icHolder.AnchorPoint = Vector2.new(0.5, 0)
+            icHolder.Position = UDim2.new(0.5, 0, 0, 4)
+            icHolder.Size = UDim2.new(0, 30, 0, 30)
+            icHolder.BackgroundTransparency = 1
+            icHolder.ZIndex = 7
+            icHolder.Parent = sb
+
+            local slLbl = makeLabel(sb, {
+                text = "", font = FONT_TITLE, color = C.TXT_SUB, size = 9, wrap = true,
+                xAlign = Enum.TextXAlignment.Center, yAlign = Enum.TextYAlignment.Bottom,
+                dim = UDim2.new(1, -4, 0, 22), pos = UDim2.new(0, 2, 1, -23), z = 8,
+            })
+            UI.GearSlotBtns[sc.id] = { btn = sb, icon = icHolder, lbl = slLbl, stroke = sb:FindFirstChildOfClass("UIStroke") }
             bindTap(sb, function()
                 local eqUid = DATA.equipped[sc.id]
                 if eqUid then
@@ -1714,7 +1957,7 @@ do
         bPad.Parent = bagScroll
 
         local bGrid = Instance.new("UIGridLayout")
-        bGrid.CellSize = UDim2.new(0.32, -4, 0, 60)
+        bGrid.CellSize = UDim2.new(0.32, -4, 0, 74)
         bGrid.CellPadding = UDim2.new(0, 6, 0, 6)
         bGrid.Parent = bagScroll
 
@@ -2311,13 +2554,15 @@ refreshAllUI = function()
             if eqIt then
                 local d = GEAR.GetDef(eqIt.id)
                 local rar = CFG.RARITIES[d.rarity] or CFG.RARITIES.common
-                pack.btn.Text = d.name .. ((eqIt.lv or 0) > 0 and (" +" .. eqIt.lv) or "")
-                pack.btn.TextColor3 = C.TXT_MAIN
+                buildGearIcon(pack.icon, d, 7)
+                pack.lbl.Text = d.name .. ((eqIt.lv or 0) > 0 and (" +" .. eqIt.lv) or "")
+                pack.lbl.TextColor3 = C.TXT_MAIN
                 pack.stroke.Color = rar.color
                 pack.stroke.Thickness = 2
             else
-                pack.btn.Text = sl.label .. "\n(Trống)"
-                pack.btn.TextColor3 = C.TXT_SUB
+                buildGearIcon(pack.icon, { slot = sl.id, col = C.STONE_LIGHT }, 7)
+                pack.lbl.Text = sl.label
+                pack.lbl.TextColor3 = C.TXT_SUB
                 pack.stroke.Color = C.BORDER
                 pack.stroke.Thickness = 1
             end
@@ -2341,17 +2586,43 @@ refreshAllUI = function()
                 local isSel = (UI.SelectedGearUid == it.uid)
                 local isEq = GEAR.IsEquipped(it.uid)
                 local ib = makeBtn(UI.BagScroll, {
-                    text = d.name .. ((it.lv or 0) > 0 and (" +" .. it.lv) or "") .. (isEq and "\n[Đang dùng]" or ("\n[" .. rar.name .. "]")),
+                    text = "",
                     bg = isSel and C.BG_CARD_ALT or C.BG_CARD,
                     color = C.TXT_MAIN,
                     size = 10,
-                    dim = UDim2.new(0, 100, 0, 60),
-                    radius = 7,
+                    dim = UDim2.new(0, 100, 0, 74),
+                    radius = 8,
                     strokeColor = isSel and C.TXT_GOLD or rar.color,
-                    strokeWidth = isSel and 2.2 or 1.4,
+                    strokeWidth = isSel and 2.2 or 1.5,
                     z = 6,
                 })
-                ib.TextWrapped = true
+                local icBox = Instance.new("Frame")
+                icBox.AnchorPoint = Vector2.new(0.5, 0)
+                icBox.Position = UDim2.new(0.5, 0, 0, 5)
+                icBox.Size = UDim2.new(0, 32, 0, 32)
+                icBox.BackgroundTransparency = 1
+                icBox.ZIndex = 7
+                icBox.Parent = ib
+                buildGearIcon(icBox, d, 7)
+
+                if (it.lv or 0) > 0 then
+                    makeLabel(ib, {
+                        text = "+" .. tostring(it.lv), font = FONT_TITLE, color = C.TXT_GOLD, size = 10,
+                        xAlign = Enum.TextXAlignment.Right, dim = UDim2.new(0, 28, 0, 14),
+                        pos = UDim2.new(1, -32, 0, 3), z = 8,
+                    })
+                end
+                if isEq then
+                    makeLabel(ib, {
+                        text = "DÙNG", font = FONT_TITLE, color = C.TXT_GREEN, size = 9,
+                        dim = UDim2.new(0, 36, 0, 14), pos = UDim2.new(0, 4, 0, 3), z = 8,
+                    })
+                end
+                makeLabel(ib, {
+                    text = d.name, font = FONT_TITLE, color = C.TXT_MAIN, size = 10, wrap = true,
+                    xAlign = Enum.TextXAlignment.Center, yAlign = Enum.TextYAlignment.Bottom,
+                    dim = UDim2.new(1, -6, 0, 28), pos = UDim2.new(0, 3, 1, -30), z = 8,
+                })
                 bindTap(ib, function()
                     UI.SelectedGearUid = it.uid
                     refreshAllUI()
@@ -2929,20 +3200,95 @@ do
         table.insert(S.effects, { ui = f, kind = "ring", maxR = rad, life = dur or 0.24, maxLife = dur or 0.24 })
     end
 
-    local function spawnSlash(x, y, deg, lenPx, col, dur)
-        local s = Instance.new("Frame")
-        s.AnchorPoint = Vector2.new(0.5, 0.5)
-        s.Position = toPos(x, y)
-        s.Size = UDim2.new(0, 14, 0, lenPx)
-        s.Rotation = deg
-        s.BackgroundColor3 = col
-        s.BackgroundTransparency = 0.14
-        s.BorderSizePixel = 0
-        s.ZIndex = 13
-        s.Parent = UI.EntityLayer
-        addCorner(s, 7)
-        addStroke(s, C.TXT_MAIN, 1)
-        table.insert(S.effects, { ui = s, kind = "slash", life = dur or 0.14, maxLife = dur or 0.14 })
+    -- Hieu ung vong cung chem sac ben da lop (luoi liem cong quet theo huong vung kiem)
+    local function spawnSlash(cx, cy, deg, arcRadius, col, dur)
+        local radCenter = math.rad(deg)
+        local sweepDir = S.swingSign or 1
+        local segCount = 9
+        local halfSpan = math.rad(68)
+        local totalDur = dur or 0.22
+        local r = math.max(46, arcRadius * 0.72)
+
+        for i = 1, segCount do
+            local t = (i - 1) / (segCount - 1)
+            local a = radCenter + sweepDir * (-halfSpan + t * halfSpan * 2)
+            -- Do day thon nhon o 2 dau luoi liem, day nhat o giua
+            local taper = math.sin(t * math.pi)
+            local thick = math.max(3, math.floor(4 + taper * 12))
+            local segLen = math.max(14, math.floor(14 + taper * 18))
+
+            local sx = cx + math.cos(a) * r
+            local sy = cy + math.sin(a) * r
+            local tangentDeg = math.deg(a) + 90
+
+            local seg = Instance.new("Frame")
+            seg.AnchorPoint = Vector2.new(0.5, 0.5)
+            seg.Position = toPos(sx, sy)
+            seg.Size = UDim2.new(0, segLen, 0, thick)
+            seg.Rotation = tangentDeg
+            seg.BackgroundColor3 = col
+            seg.BackgroundTransparency = 0.10
+            seg.BorderSizePixel = 0
+            seg.ZIndex = 13
+            seg.Parent = UI.EntityLayer
+            addCorner(seg, thick)
+
+            -- Loi sang sac net ben trong luoi kiem
+            if taper > 0.35 then
+                local core = Instance.new("Frame")
+                core.AnchorPoint = Vector2.new(0.5, 0.5)
+                core.Position = UDim2.new(0.5, 0, 0.5, 0)
+                core.Size = UDim2.new(0.78, 0, 0.42, 0)
+                core.BackgroundColor3 = C.TXT_MAIN
+                core.BackgroundTransparency = 0.18
+                core.BorderSizePixel = 0
+                core.ZIndex = 14
+                core.Parent = seg
+                addCorner(core, 4)
+            end
+
+            -- Do tre quet tuan tu tao cam giac chem xet gio
+            local segLife = totalDur * (0.55 + t * 0.45)
+            table.insert(S.effects, {
+                ui = seg, kind = "crescent",
+                x = sx, y = sy,
+                vx = math.cos(a) * (45 + taper * 55),
+                vy = math.sin(a) * (45 + taper * 55),
+                life = segLife, maxLife = segLife,
+            })
+        end
+
+        -- Them 4 tia kiem khi ban ra doc theo mep vong cung
+        if DATA.settings.particles then
+            for k = 1, 4 do
+                local a = radCenter + RNG:NextNumber(-halfSpan * 0.85, halfSpan * 0.85)
+                local sx = cx + math.cos(a) * (r * 0.95)
+                local sy = cy + math.sin(a) * (r * 0.95)
+                local sp = Instance.new("Frame")
+                sp.AnchorPoint = Vector2.new(0.5, 0.5)
+                sp.Position = toPos(sx, sy)
+                sp.Size = UDim2.new(0, 12, 0, 3)
+                sp.Rotation = math.deg(a)
+                sp.BackgroundColor3 = C.TXT_MAIN
+                sp.BorderSizePixel = 0
+                sp.ZIndex = 14
+                sp.Parent = UI.EntityLayer
+                addCorner(sp, 2)
+                table.insert(S.sparks, {
+                    ui = sp, x = sx, y = sy,
+                    vx = math.cos(a) * RNG:NextNumber(140, 240),
+                    vy = math.sin(a) * RNG:NextNumber(140, 240),
+                    life = 0.18, maxLife = 0.18,
+                })
+            end
+        end
+    end
+
+    -- Vong xoay kiem khi 360 do cho Chieu 1 / Chieu 2 / Tuyet Chieu
+    local function spawnWhirlSlash(cx, cy, radius, col, dur)
+        for k = 1, 4 do
+            spawnSlash(cx, cy, k * 90 + RNG:NextNumber(-15, 15), radius, col, dur or 0.28)
+        end
     end
 
     local function spawnGhost(x, y, col)
@@ -3289,17 +3635,17 @@ do
             local hr = h.range * ((S.comboStep == 3) and 0.76 or 0.60)
             if h.id == "chienbinh" then
                 -- Warrior: Wide crimson double-crescent slash
-                spawnSlash(hx, hy, deg, math.floor(hr * 1.35), h.fx, 0.16)
+                spawnSlash(S.px, S.py, deg, math.floor(hr * 1.30), h.fx, 0.22)
                 if S.comboStep == 3 then
-                    spawnSlash(hx + ax * 12, hy + ay * 12, deg + 18, math.floor(hr * 1.45), C.TXT_GOLD, 0.18)
+                    spawnSlash(S.px, S.py, deg + 12, math.floor(hr * 1.55), C.TXT_GOLD, 0.26)
                 end
             elseif h.id == "satthu" then
                 -- Assassin: Twin rapid purple X-slashes
-                spawnSlash(hx, hy, deg - 28, math.floor(hr * 1.05), h.fx, 0.12)
-                spawnSlash(hx, hy, deg + 28, math.floor(hr * 1.05), C.TXT_GEM, 0.12)
+                spawnSlash(S.px, S.py, deg - 20, math.floor(hr * 1.15), h.fx, 0.18)
+                spawnSlash(S.px, S.py, deg + 20, math.floor(hr * 1.32), C.TXT_GEM, 0.20)
             elseif h.id == "kiemsu" or h.id == "thankiem" then
                 -- Swordsman: Fast cyan sword-energy slash + launches energy wave on 3rd hit
-                spawnSlash(hx, hy, deg, math.floor(hr * 1.25), h.fx, 0.14)
+                spawnSlash(S.px, S.py, deg, math.floor(hr * 1.32), h.fx, 0.20)
                 if S.comboStep == 3 then
                     spawnProj("player", hx, hy, ax * 520, ay * 520, math.floor(dmg * 0.85), 11, h.fx, 2, h.status)
                 end
@@ -3308,10 +3654,10 @@ do
                 spawnRing(hx, hy, hr * 0.90, h.fx, 0.16)
                 spawnSparks(hx, hy, C.TXT_GOLD, S.comboStep == 3 and 8 or 5)
                 if S.comboStep == 3 then
-                    spawnSlash(hx, hy, deg, math.floor(hr * 1.28), C.TXT_ORANGE, 0.16)
+                    spawnSlash(S.px, S.py, deg, math.floor(hr * 1.35), C.TXT_ORANGE, 0.22)
                 end
             else
-                spawnSlash(hx, hy, deg, math.floor(hr * 1.18), S.comboStep == 3 and C.TXT_GOLD or h.fx, 0.14)
+                spawnSlash(S.px, S.py, deg, math.floor(hr * 1.25), S.comboStep == 3 and C.TXT_GOLD or h.fx, 0.20)
             end
             spawnRing(hx, hy, hr * 0.80, h.fx, 0.14)
             for _, e in ipairs(S.enemies) do
@@ -3355,6 +3701,7 @@ do
             end
         else
             spawnRing(S.px, S.py, 155, h.fx, 0.28)
+            spawnWhirlSlash(S.px, S.py, 155, h.fx, 0.28)
             for _, e in ipairs(S.enemies) do
                 if e.hp > 0 then
                     local dx, dy = e.x - S.px, e.y - S.py
@@ -3378,6 +3725,7 @@ do
         addShake(7.5, 0.18)
         spawnFloat(S.px, S.py - 32, h.s2Name, C.TXT_GOLD, 14)
         spawnRing(S.px, S.py, 200, h.fx, 0.34)
+        spawnWhirlSlash(S.px, S.py, 195, C.TXT_GOLD, 0.32)
         spawnRing(S.px, S.py, 135, C.TXT_GOLD, 0.24)
         for _, e in ipairs(S.enemies) do
             if e.hp > 0 then
@@ -3398,6 +3746,8 @@ do
         S.invulnTime = math.max(S.invulnTime, 0.80)
         addShake(13, 0.36)
         spawnRing(S.px, S.py, 290, S.hero.fx, 0.46)
+        spawnWhirlSlash(S.px, S.py, 250, S.hero.fx, 0.38)
+        spawnWhirlSlash(S.px, S.py, 175, C.TXT_GOLD, 0.34)
         spawnRing(S.px, S.py, 195, C.TXT_GOLD, 0.34)
         spawnFloat(S.px, S.py - 36, S.hero.ultName, C.TXT_GOLD, 16)
         for _, e in ipairs(S.enemies) do
@@ -3739,6 +4089,11 @@ do
                     local cr = fx.maxR * (0.35 + prog * 0.65)
                     fx.ui.Size = UDim2.new((cr * 2) / CFG.ARENA_W, 0, (cr * 2) / CFG.ARENA_H, 0)
                     fx.ui.BackgroundTransparency = 0.65 + prog * 0.35
+                elseif fx.kind == "crescent" then
+                    fx.x = fx.x + fx.vx * dt
+                    fx.y = fx.y + fx.vy * dt
+                    fx.ui.Position = toPos(fx.x, fx.y)
+                    fx.ui.BackgroundTransparency = 0.10 + prog * 0.90
                 else
                     fx.ui.BackgroundTransparency = 0.25 + prog * 0.75
                 end
@@ -3782,7 +4137,7 @@ do
         UI.MiniPlayerDot.Position = UDim2.new(S.px / CFG.ARENA_W, 0, S.py / CFG.ARENA_H, 0)
         if UI.WeaponPivot then
             local baseDeg = math.deg(math.atan2(S.dirY, S.dirX))
-            local swing = (S.swingT > 0) and ((S.swingT / 0.16) * 75 * S.swingSign) or 0
+            local swing = (S.swingT > 0) and (((0.5 - (S.swingT / 0.16)) * 150) * S.swingSign) or 0
             UI.WeaponPivot.Rotation = baseDeg + swing
         end
 
