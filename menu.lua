@@ -1,6 +1,6 @@
 --[[
     ========================================================================
-    CỜ CARO - STANDALONE v3.3
+    CỜ CARO - STANDALONE v3.4
     Game Cờ Caro 2D Toàn Màn Hình cho Roblox Mobile & PC
     - Đồ họa Cyber-Navy & Cyan-Teal matte đồng bộ theo bộ icon vector
     - Sảnh Chính tinh gọn: xóa thanh cấp bậc trên đỉnh, 5 ô thắng cho mọi màn >=12x12
@@ -415,6 +415,67 @@ function Icons.drawSpeaker(parent, muted, color)
         end
     end
     return wrap
+end
+
+function Icons.drawCoin(parent)
+    local coin = Instance.new("Frame")
+    coin.Name = "CoinIcon"
+    coin.Size = UDim2.new(0, 20, 0, 20)
+    coin.AnchorPoint = Vector2.new(0, 0.5)
+    coin.Position = UDim2.new(0, 8, 0.5, 0)
+    coin.BackgroundColor3 = Color3.fromRGB(204, 158, 44)
+    coin.BorderSizePixel = 0
+    coin.Parent = parent
+    addCorner(coin, 12)
+    addStroke(coin, Color3.fromRGB(28, 22, 14), 1.6, 0)
+
+    local inner = Instance.new("Frame")
+    inner.Size = UDim2.new(0, 13, 0, 13)
+    inner.AnchorPoint = Vector2.new(0.5, 0.5)
+    inner.Position = UDim2.new(0.5, 0, 0.5, 0)
+    inner.BackgroundColor3 = Color3.fromRGB(212, 178, 64)
+    inner.BorderSizePixel = 0
+    inner.Parent = coin
+    addCorner(inner, 10)
+
+    -- Ngoi sao 4 canh don gian ben trong dong xu (khong dung emoji)
+    for _, rot in ipairs({ 0, 45 }) do
+        local star = Instance.new("Frame")
+        star.Size = UDim2.new(0, 6, 0, 6)
+        star.AnchorPoint = Vector2.new(0.5, 0.5)
+        star.Position = UDim2.new(0.5, 0, 0.5, 0)
+        star.Rotation = rot
+        star.BackgroundColor3 = Color3.fromRGB(168, 114, 24)
+        star.BorderSizePixel = 0
+        star.Parent = inner
+        addCorner(star, 1)
+    end
+    return coin
+end
+
+local function createXuPill(parent)
+    local pill = Instance.new("Frame")
+    pill.Name = "XuPill"
+    pill.Size = UDim2.new(0, 116, 0, 34)
+    pill.Position = UDim2.new(1, -210, 0.5, -17)
+    pill.BackgroundColor3 = UITheme.BgCard
+    pill.BorderSizePixel = 0
+    pill.Parent = parent
+    addCorner(pill, 7)
+    addStroke(pill, UITheme.ColorGold, 1.4, 0.2)
+    Icons.drawCoin(pill)
+
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(1, -36, 1, 0)
+    lbl.Position = UDim2.new(0, 32, 0, 0)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = "0 Xu"
+    lbl.Font = FONT_MAIN
+    lbl.TextSize = 13
+    lbl.TextColor3 = UITheme.ColorGold
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Parent = pill
+    return lbl
 end
 
 -- Cảm ứng tức thì cho mobile & PC (lọc cử chỉ vuốt/cuộn > 14px)
@@ -872,13 +933,13 @@ FloatBtn.AutoButtonColor = false
 FloatBtn.Text = "CỜ CARO"
 FloatBtn.Font = FONT_MAIN
 FloatBtn.TextSize = 14
-FloatBtn.TextColor3 = UITheme.AccentCyan
+FloatBtn.BackgroundColor3 = Color3.fromRGB(18, 34, 58)
+FloatBtn.TextColor3 = Color3.fromRGB(166, 212, 215)
 FloatBtn.Visible = false
 FloatBtn.ZIndex = 50
 FloatBtn.Parent = ScreenGui
 addCorner(FloatBtn, 8)
-addStroke(FloatBtn, UITheme.AccentCyan, 1.5, 0.15)
-addGradient(FloatBtn, UITheme.BgButton, UITheme.BgPanel, 90)
+addStroke(FloatBtn, UITheme.AccentCyan, 1.8, 0.1)
 
 do
     local dragging, dragStart, startPos, moved = false, nil, nil, false
@@ -953,6 +1014,8 @@ do
     HomeBrand.TextColor3 = UITheme.AccentCyan
     HomeBrand.TextXAlignment = Enum.TextXAlignment.Left
     HomeBrand.Parent = HomeTop
+
+    UI.HomeXuLabel = createXuPill(HomeTop)
 
     -- 2 nút icon cyber-teal: Thu gọn (-) & Đóng (X)
     makeCyberIconBtn(HomeTop, 34, UDim2.new(1, -86, 0.5, -17), UITheme.AccentCyan, Icons.drawMinus, function()
@@ -1043,17 +1106,16 @@ do
     local PlayAIBtn = Instance.new("TextButton")
     PlayAIBtn.Size = UDim2.new(1, -28, 0, 46)
     PlayAIBtn.Position = UDim2.new(0, 14, 1, -114)
-    PlayAIBtn.BackgroundColor3 = Color3.fromRGB(24, 68, 58)
+    PlayAIBtn.BackgroundColor3 = Color3.fromRGB(24, 72, 58)
     PlayAIBtn.BorderSizePixel = 0
     PlayAIBtn.AutoButtonColor = false
     PlayAIBtn.Text = "VÀO TRẬN ĐẤU MÁY"
     PlayAIBtn.Font = FONT_MAIN
-    PlayAIBtn.TextSize = 14
-    PlayAIBtn.TextColor3 = UITheme.ColorGreen
+    PlayAIBtn.TextSize = 15
+    PlayAIBtn.TextColor3 = Color3.fromRGB(186, 214, 198)
     PlayAIBtn.Parent = LeftCard
     addCorner(PlayAIBtn, 9)
-    addStroke(PlayAIBtn, UITheme.ColorGreen, 1.5, 0.2)
-    addGradient(PlayAIBtn, Color3.fromRGB(30, 82, 68), Color3.fromRGB(18, 52, 46), 90)
+    addStroke(PlayAIBtn, UITheme.ColorGreen, 1.6, 0.15)
     bindInstantTap(PlayAIBtn, function()
         Config.Mode = "AI"
         sfxClick()
@@ -1063,17 +1125,16 @@ do
     local PlayPVPBtn = Instance.new("TextButton")
     PlayPVPBtn.Size = UDim2.new(1, -28, 0, 42)
     PlayPVPBtn.Position = UDim2.new(0, 14, 1, -58)
-    PlayPVPBtn.BackgroundColor3 = UITheme.BgActive
+    PlayPVPBtn.BackgroundColor3 = Color3.fromRGB(22, 56, 82)
     PlayPVPBtn.BorderSizePixel = 0
     PlayPVPBtn.AutoButtonColor = false
     PlayPVPBtn.Text = "ĐẤU 2 NGƯỜI"
     PlayPVPBtn.Font = FONT_MAIN
-    PlayPVPBtn.TextSize = 14
-    PlayPVPBtn.TextColor3 = UITheme.AccentCyan
+    PlayPVPBtn.TextSize = 15
+    PlayPVPBtn.TextColor3 = Color3.fromRGB(182, 212, 215)
     PlayPVPBtn.Parent = LeftCard
     addCorner(PlayPVPBtn, 9)
-    addStroke(PlayPVPBtn, UITheme.AccentCyan, 1.4, 0.2)
-    addGradient(PlayPVPBtn, Color3.fromRGB(28, 66, 94), Color3.fromRGB(18, 44, 66), 90)
+    addStroke(PlayPVPBtn, UITheme.AccentCyan, 1.5, 0.15)
     bindInstantTap(PlayPVPBtn, function()
         Config.Mode = "PVP"
         sfxClick()
@@ -1379,6 +1440,8 @@ do
     TimerBarFill.Parent = TimerBarBg
     UI.TimerBarFill = TimerBarFill
 
+    UI.GameXuLabel = createXuPill(TopBar)
+
     -- 2 nút icon cyber-teal bên phải: Thu gọn (-) & Đóng (X)
     makeCyberIconBtn(TopBar, 34, UDim2.new(1, -86, 0.5, -17), UITheme.AccentCyan, Icons.drawMinus, function()
         State.Minimized = true
@@ -1660,7 +1723,7 @@ do
         startNewGame()
     end)
 
-    makeBtn(QuickRow1, "Đi lại", UDim2.new(0.48, 0, 1, 0), UDim2.new(0.52, 0, 0, 0), UITheme.BgButton, UITheme.AccentCyan, UITheme.StrokeStrong, function()
+    makeBtn(QuickRow1, "Đi lại 20 Xu", UDim2.new(0.48, 0, 1, 0), UDim2.new(0.52, 0, 0, 0), UITheme.BgButton, UITheme.AccentCyan, UITheme.StrokeStrong, function()
         sfxClick()
         undoMove()
     end)
@@ -1671,7 +1734,7 @@ do
     QuickRow2.BackgroundTransparency = 1
     QuickRow2.Parent = SidePanel
 
-    makeBtn(QuickRow2, "Gợi ý", UDim2.new(0.48, 0, 1, 0), UDim2.new(0, 0, 0, 0), Color3.fromRGB(54, 48, 28), UITheme.ColorGold, UITheme.ColorGold, function()
+    makeBtn(QuickRow2, "Gợi ý 10 Xu", UDim2.new(0.48, 0, 1, 0), UDim2.new(0, 0, 0, 0), Color3.fromRGB(54, 48, 28), UITheme.ColorGold, UITheme.ColorGold, function()
         sfxClick()
         showHint()
     end)
@@ -1992,6 +2055,7 @@ end
 -- [PHẦN 10] CẬP NHẬT SẢNH CHÍNH, TRẠNG THÁI TRONG TRẬN & CHUYỂN MÀN HÌNH
 -- ========================================================================
 updateHomeUI = function()
+    if UI.HomeXuLabel then UI.HomeXuLabel.Text = tostring(Stats.Xu) .. " Xu" end
     for sz, pack in pairs(UI.HomeStageBtns) do
         local active = (Config.BoardSize == sz)
         pack.card.BackgroundColor3 = active and UITheme.BgActive or UITheme.BgCard
@@ -2058,6 +2122,8 @@ enterGameScreen = function()
 end
 
 updateTopStatus = function()
+    if UI.GameXuLabel then UI.GameXuLabel.Text = tostring(Stats.Xu) .. " Xu" end
+    if UI.HomeXuLabel then UI.HomeXuLabel.Text = tostring(Stats.Xu) .. " Xu" end
     local moves = #State.History
     UI.StageInfoLabel.Text = string.format("Màn %dx%d", Config.BoardSize, Config.BoardSize)
 
@@ -2140,10 +2206,10 @@ local function finishMatch(winnerSide, reasonText)
     local titleText, subText, accent
     if Config.Mode == "AI" then
         if winnerSide == Config.PlayerSide then
-            local reward = (Config.Difficulty == "Master" and 180)
-                or (Config.Difficulty == "Hard" and 100)
-                or (Config.Difficulty == "Medium" and 50)
-                or 20
+            local reward = (Config.Difficulty == "Master" and 1999)
+                or (Config.Difficulty == "Hard" and 500)
+                or (Config.Difficulty == "Medium" and 200)
+                or 100
             Stats.Wins = Stats.Wins + 1
             Stats.Streak = Stats.Streak + 1
             if Stats.Streak > Stats.BestStreak then Stats.BestStreak = Stats.Streak end
@@ -2251,8 +2317,29 @@ surrenderGame = function()
     finishMatch(winner, "Đối thủ đã đầu hàng")
 end
 
+local function showTempAlert(msg)
+    State.ThreatAlert = msg
+    UI.AlertStrip.Text = msg
+    UI.AlertStrip.Visible = true
+    local token = os.clock()
+    State.TempAlertToken = token
+    task.delay(2.4, function()
+        if not State.Destroyed and State.TempAlertToken == token and State.ThreatAlert == msg then
+            State.ThreatAlert = ""
+            UI.AlertStrip.Visible = false
+        end
+    end)
+end
+
 undoMove = function()
     if State.AIThinking or #State.History == 0 then return end
+    if Stats.Xu < 20 then
+        sfxWarn()
+        showTempAlert("Không đủ Xu! Cần 20 Xu để Đi lại")
+        return
+    end
+    Stats.Xu = Stats.Xu - 20
+    saveStats()
 
     local steps = 1
     if Config.Mode == "AI" then
@@ -2295,10 +2382,19 @@ end
 
 showHint = function()
     if State.GameOver or State.AIThinking then return end
+    if State.HintCell then return end
+    if Stats.Xu < 10 then
+        sfxWarn()
+        showTempAlert("Không đủ Xu! Cần 10 Xu để Gợi ý")
+        return
+    end
     local r, c = AI.chooseMove(State.CurrentTurn, "Master")
     if r and c then
+        Stats.Xu = Stats.Xu - 10
+        saveStats()
         State.HintCell = { r = r, c = c }
         refreshBoardVisuals()
+        updateTopStatus()
     end
 end
 
