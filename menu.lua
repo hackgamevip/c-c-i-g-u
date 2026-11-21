@@ -1,8 +1,8 @@
 -- ============================================================================
--- DAU TRUONG CHIEN DAU PRO (v1.1) - Standalone Combat Mini-Game (Mobile & PC)
--- Ban cap nhat Do Hoa: Nhan vat co vu khi xoay/vung, Quai & Boss da lop,
--- San dau co dai, Tan anh luot, Tia lua va cham, VFX don danh & HUD nang cap.
--- Code doc lap 100%, khong dung chung bat ky script nao khac.
+-- DAU TRUONG CHIEN DAU PRO (v2.0) - Full-Screen Action RPG Combat Game
+-- Menu Full Man Hinh 100% | 8 Tuong | 5 Boss | 6 Loai Quai | Minimap Radar
+-- Chon Nang Cap Trong Tran | Nhiem Vu | Len Cap | Trang Thai | Cai Dat
+-- Code doc lap 100%, toi uu cho Mobile (cam ung tuc thi, chu matte) & PC.
 -- Tuong thich: Executor (gethui / CoreGui) & Roblox Studio (PlayerGui)
 -- ============================================================================
 
@@ -22,208 +22,250 @@ if _G.ArenaChienDau_Cleanup then
 end
 
 -- ============================================================================
--- 1. BANG MAU MATTE (KHONG CHOI / KHONG NEON TREN DIEN THOAI) & FONT AN TOAN
+-- 1. BANG MAU MATTE (KHONG CHOI TREN DIEN THOAI) & FONT AN TOAN
 -- ============================================================================
 local C = {
-    BG_MAIN      = Color3.fromRGB(16, 19, 25),
-    BG_PANEL     = Color3.fromRGB(24, 28, 36),
-    BG_PANEL_TOP = Color3.fromRGB(32, 37, 48),
-    BG_CARD      = Color3.fromRGB(31, 36, 46),
-    BG_CARD_ALT  = Color3.fromRGB(40, 47, 60),
-    BG_ARENA     = Color3.fromRGB(23, 27, 35),
-    BG_ARENA_IN  = Color3.fromRGB(29, 34, 44),
-    BG_ARENA_G   = Color3.fromRGB(36, 42, 54),
-    STONE_DARK   = Color3.fromRGB(44, 50, 62),
-    STONE_LIGHT  = Color3.fromRGB(64, 72, 86),
-    BORDER       = Color3.fromRGB(58, 66, 80),
-    BORDER_ACT   = Color3.fromRGB(112, 154, 188),
-    SHADOW       = Color3.fromRGB(8, 10, 14),
+    -- Nen toi phong cach RPG huyen ao (xanh tim than + da ham nguc)
+    BG_FULL      = Color3.fromRGB(15, 17, 26),
+    BG_TOPBAR    = Color3.fromRGB(22, 25, 38),
+    BG_PANEL     = Color3.fromRGB(24, 28, 42),
+    BG_PANEL_HI  = Color3.fromRGB(34, 39, 58),
+    BG_CARD      = Color3.fromRGB(30, 35, 52),
+    BG_CARD_ALT  = Color3.fromRGB(40, 46, 68),
+    BG_ARENA     = Color3.fromRGB(24, 29, 40),
+    BG_ARENA_MID = Color3.fromRGB(31, 37, 52),
+    BG_ARENA_G   = Color3.fromRGB(40, 47, 64),
+    GRASS_DARK   = Color3.fromRGB(32, 68, 46),
+    GRASS_LIGHT  = Color3.fromRGB(44, 92, 58),
+    STONE_DARK   = Color3.fromRGB(46, 52, 68),
+    STONE_LIGHT  = Color3.fromRGB(68, 76, 98),
+    BORDER       = Color3.fromRGB(66, 74, 102),
+    BORDER_ACT   = Color3.fromRGB(128, 108, 186),
+    BORDER_GOLD  = Color3.fromRGB(178, 144, 72),
+    SHADOW       = Color3.fromRGB(8, 9, 14),
 
-    -- Mau chu matte (tat ca kenh RGB <= 210 de tranh loe sang tren mobile)
-    TXT_MAIN     = Color3.fromRGB(204, 209, 214),
-    TXT_SUB      = Color3.fromRGB(148, 156, 168),
-    TXT_GOLD     = Color3.fromRGB(204, 174, 98),
-    TXT_GEM      = Color3.fromRGB(112, 178, 198),
-    TXT_RED      = Color3.fromRGB(202, 108, 108),
-    TXT_GREEN    = Color3.fromRGB(112, 186, 134),
-    TXT_PURPLE   = Color3.fromRGB(168, 136, 202),
-    TXT_DARK     = Color3.fromRGB(20, 24, 30),
+    -- Mau chu MATTE tuyet doi (tat ca RGB <= 210 de khong bi loe tren mobile)
+    TXT_MAIN     = Color3.fromRGB(205, 208, 212),
+    TXT_SUB      = Color3.fromRGB(148, 156, 174),
+    TXT_GOLD     = Color3.fromRGB(206, 174, 94),
+    TXT_GEM      = Color3.fromRGB(158, 128, 206),
+    TXT_CYAN     = Color3.fromRGB(108, 176, 198),
+    TXT_RED      = Color3.fromRGB(204, 104, 104),
+    TXT_GREEN    = Color3.fromRGB(108, 188, 128),
+    TXT_ORANGE   = Color3.fromRGB(202, 142, 78),
+    TXT_DARK     = Color3.fromRGB(20, 22, 30),
 
     -- Mau nut & thanh trang thai
-    BTN_PRIMARY  = Color3.fromRGB(52, 106, 148),
-    BTN_SUCCESS  = Color3.fromRGB(46, 120, 80),
-    BTN_DANGER   = Color3.fromRGB(148, 54, 54),
-    BTN_WARN     = Color3.fromRGB(152, 114, 46),
-    BTN_PURPLE   = Color3.fromRGB(104, 70, 146),
-    BTN_NEUTRAL  = Color3.fromRGB(44, 50, 62),
+    BTN_PURPLE   = Color3.fromRGB(98, 66, 156),
+    BTN_BLUE     = Color3.fromRGB(48, 104, 158),
+    BTN_GREEN    = Color3.fromRGB(46, 128, 82),
+    BTN_GOLD     = Color3.fromRGB(162, 118, 42),
+    BTN_RED      = Color3.fromRGB(152, 54, 58),
+    BTN_DARK     = Color3.fromRGB(42, 47, 64),
 
-    -- Mau thuc the & hieu ung trong dau truong
-    HP_FILL      = Color3.fromRGB(62, 164, 96),
-    HP_ENEMY     = Color3.fromRGB(182, 70, 70),
-    HP_BOSS      = Color3.fromRGB(160, 62, 140),
-    FURY_FILL    = Color3.fromRGB(194, 140, 52),
-    WARN_ZONE    = Color3.fromRGB(176, 62, 62),
-    SLASH_FX     = Color3.fromRGB(188, 200, 210),
-    METAL_LIGHT  = Color3.fromRGB(174, 184, 196),
-    METAL_DARK   = Color3.fromRGB(82, 92, 108),
-    EMBER        = Color3.fromRGB(196, 118, 54),
+    HP_BAR       = Color3.fromRGB(186, 62, 66),
+    MP_BAR       = Color3.fromRGB(54, 126, 188),
+    EXP_BAR      = Color3.fromRGB(194, 152, 52),
+    SHIELD_BAR   = Color3.fromRGB(96, 168, 194),
+    HP_ENEMY     = Color3.fromRGB(184, 68, 72),
+    HP_BOSS      = Color3.fromRGB(156, 58, 146),
+    WARN_ZONE    = Color3.fromRGB(178, 58, 62),
+    METAL        = Color3.fromRGB(176, 184, 196),
 }
 
 local FONT_TITLE = Enum.Font.GothamSemibold
 local FONT_BODY  = Enum.Font.GothamMedium
 
 -- ============================================================================
--- 2. DU LIEU GAME (TUONG, CHE DO, NANG CAP, MA QUA)
+-- 2. DU LIEU GAME (8 TUONG, 5 MAN CHOI, 3 DO KHO, 5 BOSS, 6 QUAI, NHIEM VU)
 -- ============================================================================
 local CFG = {
-    VERSION = "v1.1",
+    VERSION = "v2.0",
     GUI_NAME = "ArenaChienDau_Standalone",
-    SAVE_PREFIX = "arena_chien_dau_v1_",
-    ARENA_W = 1000,
-    ARENA_H = 620,
-    PLAYER_R = 19,
+    SAVE_PREFIX = "arena_chien_dau_v2_",
+    ARENA_W = 1100,
+    ARENA_H = 660,
+    PLAYER_R = 20,
 }
 
-CFG.MODES = {
-    {
-        id = "wave",
-        name = "Vượt Ải",
-        desc = "Đánh theo đợt, Boss xuất hiện mỗi 5 ải",
-        rewardMult = 1.0,
-        accent = C.BTN_PRIMARY,
-    },
-    {
-        id = "boss",
-        name = "Săn Boss",
-        desc = "Đấu trực diện các Boss mạnh, thưởng lớn",
-        rewardMult = 1.45,
-        accent = C.BTN_DANGER,
-    },
-    {
-        id = "endless",
-        name = "Sinh Tồn",
-        desc = "Quái ra liên tục, đua điểm và chuỗi combo",
-        rewardMult = 1.2,
-        accent = C.BTN_PURPLE,
-    },
-}
-
+-- 8 Nhan Vat tham khao tu bang Sprite
 CFG.HEROES = {
     {
-        id = "kiemsi",
-        name = "Kiếm Sĩ",
-        role = "Cận chiến cân bằng",
-        costCoin = 0,
-        costGem = 0,
-        color = Color3.fromRGB(78, 142, 192),
-        trim = Color3.fromRGB(194, 166, 92),
-        hp = 140,
-        atk = 26,
-        spd = 255,
-        crit = 0.14,
-        attackType = "melee",
-        attackRange = 98,
-        attackCd = 0.30,
-        skillName = "Xoáy Kiếm",
-        skillCd = 5.0,
-        ultName = "Thiên Kiếm Trảm",
-        desc = "Chém rộng cận chiến, Xoáy Kiếm 360 độ đẩy lùi quái.",
+        id = "chienbinh", name = "Chiến Binh", role = "Cận chiến Hỏa Kiếm",
+        costCoin = 0, costGem = 0,
+        hair = Color3.fromRGB(192, 56, 56), armor = Color3.fromRGB(68, 40, 46),
+        trim = Color3.fromRGB(202, 134, 62), fx = Color3.fromRGB(202, 84, 64),
+        weapon = "sword", attackType = "melee", status = "burn",
+        hp = 160, mp = 100, atk = 28, spd = 250, crit = 0.14, range = 104, cd = 0.28,
+        s1Name = "Hỏa Trảm", s1Cost = 20, s1Cd = 4.2,
+        s2Name = "Xoáy Lửa", s2Cost = 35, s2Cd = 6.5,
+        ultName = "Liệt Hỏa Kiếm Trận",
+        desc = "Kiếm sĩ tóc đỏ thiêu đốt kẻ địch bằng những nhát chém lửa rộng.",
     },
     {
-        id = "satthu",
-        name = "Sát Thủ",
-        role = "Tốc độ & Chí mạng",
-        costCoin = 400,
-        costGem = 0,
-        color = Color3.fromRGB(130, 88, 178),
-        trim = Color3.fromRGB(186, 102, 134),
-        hp = 112,
-        atk = 24,
-        spd = 315,
-        crit = 0.28,
-        attackType = "melee",
-        attackRange = 86,
-        attackCd = 0.20,
-        skillName = "Ảnh Bộ Đột Kích",
-        skillCd = 4.2,
+        id = "satthu", name = "Sát Thủ", role = "Tốc độ & Bóng Đêm",
+        costCoin = 350, costGem = 0,
+        hair = Color3.fromRGB(174, 166, 192), armor = Color3.fromRGB(58, 42, 82),
+        trim = Color3.fromRGB(154, 102, 198), fx = Color3.fromRGB(154, 92, 198),
+        weapon = "daggers", attackType = "melee", status = "poison",
+        hp = 122, mp = 110, atk = 26, spd = 315, crit = 0.28, range = 90, cd = 0.19,
+        s1Name = "Ảnh Kích", s1Cost = 18, s1Cd = 3.5,
+        s2Name = "Độc Vũ", s2Cost = 30, s2Cd = 5.5,
         ultName = "Bão Dao Bóng Đêm",
-        desc = "Đánh cực nhanh, chí mạng cao, lướt xuyên mục tiêu.",
+        desc = "Mũ trùm tím ẩn thân, đánh cực nhanh kèm độc và tỷ lệ chí mạng cao.",
     },
     {
-        id = "xathu",
-        name = "Xạ Thủ",
-        role = "Tầm xa xuyên thấu",
-        costCoin = 800,
-        costGem = 0,
-        color = Color3.fromRGB(68, 152, 114),
-        trim = Color3.fromRGB(118, 182, 196),
-        hp = 105,
-        atk = 22,
-        spd = 265,
-        crit = 0.20,
-        attackType = "ranged",
-        attackRange = 360,
-        attackCd = 0.26,
-        skillName = "Loạt Đạn Chùm",
-        skillCd = 4.8,
-        ultName = "Pháo Kích Hủy Diệt",
-        desc = "Bắn đạn năng lượng từ xa, thả chùm 5 tia xuyên quái.",
+        id = "phapsu", name = "Pháp Sư", role = "Băng Thuật Khống Chế",
+        costCoin = 550, costGem = 0,
+        hair = Color3.fromRGB(190, 198, 208), armor = Color3.fromRGB(44, 86, 152),
+        trim = Color3.fromRGB(108, 178, 204), fx = Color3.fromRGB(88, 158, 204),
+        weapon = "staff", attackType = "ranged", status = "freeze",
+        hp = 115, mp = 150, atk = 25, spd = 255, crit = 0.18, range = 380, cd = 0.26,
+        s1Name = "Cầu Băng", s1Cost = 22, s1Cd = 4.0,
+        s2Name = "Vòng Băng Giá", s2Cost = 38, s2Cd = 6.2,
+        ultName = "Bão Tuyết Vĩnh Cửu",
+        desc = "Trượng băng bắn cầu năng lượng làm chậm và đóng băng diện rộng.",
     },
     {
-        id = "chienthan",
-        name = "Chiến Thần",
-        role = "Máu trâu & Sát thương diện rộng",
-        costCoin = 1500,
-        costGem = 20,
-        color = Color3.fromRGB(178, 118, 56),
-        trim = Color3.fromRGB(204, 174, 98),
-        hp = 205,
-        atk = 34,
-        spd = 235,
-        crit = 0.16,
-        attackType = "melee",
-        attackRange = 116,
-        attackCd = 0.36,
-        skillName = "Chấn Động Đất",
-        skillCd = 5.5,
-        ultName = "Lôi Đình Giáng Thế",
-        desc = "Đòn đánh diện rộng mạnh mẽ, giáp dày và choáng kẻ địch.",
+        id = "cungthu", name = "Cung Thủ", role = "Xạ kích Xuyên Thấu",
+        costCoin = 750, costGem = 0,
+        hair = Color3.fromRGB(142, 112, 74), armor = Color3.fromRGB(44, 108, 66),
+        trim = Color3.fromRGB(112, 186, 126), fx = Color3.fromRGB(92, 182, 114),
+        weapon = "bow", attackType = "ranged", status = "poison",
+        hp = 118, mp = 120, atk = 24, spd = 278, crit = 0.24, range = 410, cd = 0.22,
+        s1Name = "Mưa Tên", s1Cost = 20, s1Cd = 3.8,
+        s2Name = "Tiễn Xuyên", s2Cost = 32, s2Cd = 5.8,
+        ultName = "Vạn Tiễn Quy Tông",
+        desc = "Mũ trùm xanh lá bắn tên liên hoàn xuyên nhiều mục tiêu cùng lúc.",
+    },
+    {
+        id = "thankiem", name = "Thần Kiếm", role = "Kiếm Khí Băng Thanh",
+        costCoin = 1000, costGem = 15,
+        hair = Color3.fromRGB(196, 202, 210), armor = Color3.fromRGB(52, 78, 132),
+        trim = Color3.fromRGB(116, 178, 206), fx = Color3.fromRGB(98, 174, 206),
+        weapon = "katana", attackType = "melee", status = "freeze",
+        hp = 152, mp = 125, atk = 32, spd = 285, crit = 0.22, range = 114, cd = 0.24,
+        s1Name = "Kiếm Khí", s1Cost = 22, s1Cd = 3.8,
+        s2Name = "Liên Hoàn Trảm", s2Cost = 35, s2Cd = 6.0,
+        ultName = "Thiên Kiếm Hàng Lâm",
+        desc = "Tóc trắng vung trường kiếm phóng sóng kiếm khí xanh lam tầm trung.",
+    },
+    {
+        id = "dausi", name = "Đấu Sĩ", role = "Quyền Cước Hỏa Lực",
+        costCoin = 1200, costGem = 20,
+        hair = Color3.fromRGB(118, 76, 52), armor = Color3.fromRGB(76, 48, 42),
+        trim = Color3.fromRGB(194, 86, 62), fx = Color3.fromRGB(202, 138, 62),
+        weapon = "gauntlets", attackType = "melee", status = "stun",
+        hp = 200, mp = 100, atk = 34, spd = 265, crit = 0.18, range = 94, cd = 0.24,
+        s1Name = "Hỏa Quyền", s1Cost = 20, s1Cd = 3.8,
+        s2Name = "Chấn Động", s2Cost = 32, s2Cd = 5.8,
+        ultName = "Nộ Long Quyền Pháp",
+        desc = "Găng tay lửa cực trâu bò, đấm choáng kẻ địch và đẩy lùi cực mạnh.",
+    },
+    {
+        id = "kiemsu", name = "Kiếm Sư", role = "Thương Kiếm Lôi Điện",
+        costCoin = 1500, costGem = 30,
+        hair = Color3.fromRGB(76, 68, 118), armor = Color3.fromRGB(48, 56, 94),
+        trim = Color3.fromRGB(102, 166, 204), fx = Color3.fromRGB(84, 152, 206),
+        weapon = "spear", attackType = "melee", status = "stun",
+        hp = 165, mp = 130, atk = 35, spd = 280, crit = 0.24, range = 124, cd = 0.25,
+        s1Name = "Lôi Thương", s1Cost = 24, s1Cd = 4.0,
+        s2Name = "Xoáy Lam", s2Cost = 36, s2Cd = 6.0,
+        ultName = "Thương Long Xuất Hải",
+        desc = "Đòn đánh tầm dài kèm hiệu ứng choáng, cân bằng công thủ hoàn hảo.",
+    },
+    {
+        id = "maphapsu", name = "Ma Pháp Sư", role = "Hắc Ám Hủy Diệt",
+        costCoin = 2000, costGem = 45,
+        hair = Color3.fromRGB(186, 88, 166), armor = Color3.fromRGB(72, 42, 92),
+        trim = Color3.fromRGB(194, 108, 186), fx = Color3.fromRGB(182, 92, 188),
+        weapon = "orb", attackType = "ranged", status = "burn",
+        hp = 135, mp = 175, atk = 38, spd = 270, crit = 0.26, range = 400, cd = 0.23,
+        s1Name = "Tia Ma Lực", s1Cost = 24, s1Cd = 3.6,
+        s2Name = "Hắc Động", s2Cost = 42, s2Cd = 6.5,
+        ultName = "Thiên Phạt Ma Pháp",
+        desc = "Tóc hồng cầm trượng ma pháp, dồn sát thương nổ diện rộng khủng khiếp.",
     },
 }
 
+-- 5 Man choi (Stages) + 5 Boss rieng biet
+CFG.STAGES = {
+    { id = 1, name = "Màn 1 - Cánh Đồng Quái Vật", waves = 3, boss = "golem",  bossName = "GOLEM DUNG NHAM",  rewardCoin = 180, rewardGem = 8,  rewardExp = 120, theme = "grass" },
+    { id = 2, name = "Màn 2 - Hầm Ngục Xương Khô",  waves = 4, boss = "lich",   bossName = "TỬ THẦN HÀI CỐT",  rewardCoin = 280, rewardGem = 12, rewardExp = 180, theme = "crypt" },
+    { id = 3, name = "Màn 3 - Pháo Đài Băng Giá",   waves = 4, boss = "icedrag", bossName = "BĂNG LONG VƯƠNG",  rewardCoin = 400, rewardGem = 18, rewardExp = 260, theme = "ice" },
+    { id = 4, name = "Màn 4 - Hang Ổ Rồng Lửa",     waves = 5, boss = "firedrag", bossName = "HỎA LONG VƯƠNG",   rewardCoin = 560, rewardGem = 25, rewardExp = 360, theme = "lava" },
+    { id = 5, name = "Màn 5 - Đấu Trường Vô Tận",   waves = 999, boss = "darkknight", bossName = "HẮC MA KỴ SĨ", rewardCoin = 120, rewardGem = 6,  rewardExp = 100, theme = "void", endless = true },
+}
+
+CFG.DIFFS = {
+    { id = "normal", name = "Thường",   color = C.TXT_GREEN,  hpMult = 1.0, dmgMult = 1.0, rewardMult = 1.0 },
+    { id = "hard",   name = "Khó",      color = C.TXT_ORANGE, hpMult = 1.5, dmgMult = 1.35, rewardMult = 1.45 },
+    { id = "hell",   name = "Ác Mộng",  color = C.TXT_RED,    hpMult = 2.2, dmgMult = 1.8, rewardMult = 2.0 },
+}
+
+-- Nang cap vinh vien ngoai sanh
 CFG.UPGRADES = {
-    { id = "atk",  name = "Sức Mạnh",  stat = "+15% Sát thương",  baseCost = 100, step = 85,  maxLv = 15 },
-    { id = "hp",   name = "Sinh Lực",  stat = "+20% Máu tối đa",  baseCost = 90,  step = 75,  maxLv = 15 },
-    { id = "spd",  name = "Tốc Độ",    stat = "+5% Di chuyển",    baseCost = 110, step = 90,  maxLv = 10 },
-    { id = "crit", name = "Chí Mạng",  stat = "+3% Tỷ lệ Crit",   baseCost = 120, step = 100, maxLv = 12 },
-    { id = "cdr",  name = "Hồi Chiêu", stat = "-4% Thời gian hồi", baseCost = 130, step = 110, maxLv = 10 },
+    { id = "atk",  name = "Sức Mạnh",   stat = "+12% Sát thương", baseCost = 100, step = 80,  maxLv = 20 },
+    { id = "hp",   name = "Thể Lực",    stat = "+16% Máu tối đa", baseCost = 90,  step = 75,  maxLv = 20 },
+    { id = "mp",   name = "Ma Lực",     stat = "+15% MP & Hồi MP", baseCost = 95, step = 75,  maxLv = 15 },
+    { id = "spd",  name = "Thân Pháp",  stat = "+4% Tốc độ chạy", baseCost = 110, step = 90,  maxLv = 12 },
+    { id = "crit", name = "Bạo Kích",   stat = "+3% Tỷ lệ Crit",  baseCost = 120, step = 100, maxLv = 15 },
+}
+
+-- Nang cap chon 1 trong 3 trong tran (Roguelike nhu anh 3)
+CFG.INMATCH_BUFFS = {
+    { id = "atk30",   name = "Tăng Sát Thương", desc = "Sát thương +30% trong trận",  color = C.TXT_RED,    apply = function(s) s.atk = math.floor(s.atk * 1.30) end },
+    { id = "hp30",    name = "Tăng Máu",        desc = "HP tối đa +30% & hồi 40% HP", color = C.TXT_GREEN,  apply = function(s) s.maxHp = math.floor(s.maxHp * 1.30); s.hp = math.min(s.maxHp, s.hp + math.floor(s.maxHp * 0.4)) end },
+    { id = "spd25",   name = "Tăng Tốc Độ",     desc = "Tốc độ di chuyển +25%",       color = C.TXT_GOLD,   apply = function(s) s.spd = math.floor(s.spd * 1.25) end },
+    { id = "crit15",  name = "Bạo Kích Đỉnh",   desc = "Tỷ lệ chí mạng +15%",         color = C.TXT_ORANGE, apply = function(s) s.crit = math.min(0.85, s.crit + 0.15) end },
+    { id = "lifesteal", name = "Hút Máu",       desc = "Hồi 6% sát thương gây ra",    color = C.TXT_GEM,    apply = function(s) s.lifesteal = (s.lifesteal or 0) + 0.06 end },
+    { id = "mpboost", name = "Suối Ma Lực",     desc = "MP tối đa +40 & hồi nhanh",   color = C.TXT_CYAN,   apply = function(s) s.maxMp = s.maxMp + 40; s.mp = s.maxMp; s.mpRegen = s.mpRegen + 5 end },
+    { id = "shield",  name = "Khiên Hộ Mệnh",   desc = "Nhận giáp ảo +80 HP",         color = C.SHIELD_BAR, apply = function(s) s.shield = (s.shield or 0) + 80 end },
+}
+
+CFG.QUESTS = {
+    { id = "q_kill50",  title = "Tiêu Diệt 50 Quái",   target = 50, statKey = "totalKills", rewardCoin = 300, rewardGem = 15 },
+    { id = "q_win3",    title = "Thắng 3 Trận Đấu",    target = 3,  statKey = "totalWins",  rewardCoin = 450, rewardGem = 20 },
+    { id = "q_boss2",   title = "Hạ Gục 2 Boss",       target = 2,  statKey = "bossKills",  rewardCoin = 500, rewardGem = 30 },
+    { id = "q_upg3",    title = "Nâng Cấp 3 Lần",      target = 3,  statKey = "totalUpgrades", rewardCoin = 250, rewardGem = 15 },
 }
 
 CFG.CODES = {
-    ["CHIENDAU2026"] = { coins = 500, gems = 15, msg = "Nhận 500 Xu + 15 KC" },
-    ["TANTHU500"]    = { coins = 350, gems = 5,  msg = "Nhận 350 Xu + 5 KC" },
-    ["SANBOSSPRO"]   = { coins = 250, gems = 25, msg = "Nhận 250 Xu + 25 KC" },
+    ["CHIENDAU2026"] = { coins = 800,  gems = 25, msg = "Nhận 800 Xu + 25 KC" },
+    ["TANTHU500"]    = { coins = 500,  gems = 15, msg = "Nhận 500 Xu + 15 KC" },
+    ["FULLSCREEN"]   = { coins = 600,  gems = 30, msg = "Nhận 600 Xu + 30 KC" },
 }
 
 -- ============================================================================
--- 3. HE THONG LUU TRU 2 LOP (FILE JSON THEO USERID + FALLBACK _G)
+-- 3. LUU TRU 2 LOP (FILE JSON + _G FALLBACK)
 -- ============================================================================
 local SAVE = {}
 local DATA = nil
 
 local function getDefaultData()
     return {
-        coins = 150,
-        gems = 10,
+        level = 1,
+        exp = 0,
+        coins = 300,
+        gems = 20,
         bestScore = 0,
-        bestWave = 0,
         totalKills = 0,
+        totalWins = 0,
         bossKills = 0,
-        selectedHero = "kiemsi",
-        selectedMode = "wave",
-        unlockedHeroes = { kiemsi = true },
-        upgrades = { atk = 0, hp = 0, spd = 0, crit = 0, cdr = 0 },
+        totalUpgrades = 0,
+        selectedHero = "chienbinh",
+        selectedStage = 1,
+        selectedDiff = "normal",
+        unlockedHeroes = { chienbinh = true },
+        upgrades = { atk = 0, hp = 0, mp = 0, spd = 0, crit = 0 },
+        claimedQuests = {},
         usedCodes = {},
+        settings = {
+            shake = true,
+            particles = true,
+            minimap = true,
+            autoAim = true,
+        },
     }
 end
 
@@ -235,40 +277,31 @@ end
 function SAVE.Load()
     local def = getDefaultData()
     local loaded = nil
-
     if type(isfile) == "function" and type(readfile) == "function" then
         local ok, raw = pcall(function()
-            local fname = getSaveFileName()
-            if isfile(fname) then return readfile(fname) end
-            return nil
+            local fn = getSaveFileName()
+            return isfile(fn) and readfile(fn) or nil
         end)
         if ok and type(raw) == "string" and #raw > 2 then
-            local okDec, decoded = pcall(function()
-                return HttpService:JSONDecode(raw)
-            end)
-            if okDec and type(decoded) == "table" then
-                loaded = decoded
-            end
+            local okD, dec = pcall(function() return HttpService:JSONDecode(raw) end)
+            if okD and type(dec) == "table" then loaded = dec end
         end
     end
-
     if not loaded then
         local env = (type(getgenv) == "function" and getgenv()) or _G
-        if type(env.ArenaChienDau_SaveData) == "table" then
-            loaded = env.ArenaChienDau_SaveData
-        end
+        if type(env.ArenaChienDauV2_Save) == "table" then loaded = env.ArenaChienDauV2_Save end
     end
-
     if type(loaded) == "table" then
         for k, v in pairs(def) do
             if loaded[k] == nil then loaded[k] = v end
         end
-        if type(loaded.unlockedHeroes) ~= "table" then loaded.unlockedHeroes = { kiemsi = true } end
-        loaded.unlockedHeroes.kiemsi = true
+        if type(loaded.unlockedHeroes) ~= "table" then loaded.unlockedHeroes = { chienbinh = true } end
+        loaded.unlockedHeroes.chienbinh = true
         if type(loaded.upgrades) ~= "table" then loaded.upgrades = def.upgrades end
-        for k, v in pairs(def.upgrades) do
-            if loaded.upgrades[k] == nil then loaded.upgrades[k] = v end
-        end
+        for k, v in pairs(def.upgrades) do if loaded.upgrades[k] == nil then loaded.upgrades[k] = v end end
+        if type(loaded.settings) ~= "table" then loaded.settings = def.settings end
+        for k, v in pairs(def.settings) do if loaded.settings[k] == nil then loaded.settings[k] = v end end
+        if type(loaded.claimedQuests) ~= "table" then loaded.claimedQuests = {} end
         if type(loaded.usedCodes) ~= "table" then loaded.usedCodes = {} end
         DATA = loaded
     else
@@ -279,57 +312,54 @@ end
 function SAVE.Write()
     if not DATA then return end
     local env = (type(getgenv) == "function" and getgenv()) or _G
-    env.ArenaChienDau_SaveData = DATA
+    env.ArenaChienDauV2_Save = DATA
     if type(writefile) == "function" then
-        pcall(function()
-            writefile(getSaveFileName(), HttpService:JSONEncode(DATA))
-        end)
+        pcall(function() writefile(getSaveFileName(), HttpService:JSONEncode(DATA)) end)
     end
 end
 
 SAVE.Load()
 
 -- ============================================================================
--- 4. TIEN ICH TAO UI & DO HOA VECTOR (SPRITES TU VE BANG FRAME)
+-- 4. TIEN ICH UI, TINH CHI SO, VA DO HOA CHIBI / BOSS / MOB TU VE
 -- ============================================================================
 local UI = {}
 local CONNS = {}
+local GAME = {}
 
-local function trackConn(conn)
-    table.insert(CONNS, conn)
-    return conn
-end
+local function trackConn(c) table.insert(CONNS, c); return c end
 
 local function getHeroById(id)
-    for _, h in ipairs(CFG.HEROES) do
-        if h.id == id then return h end
-    end
+    for _, h in ipairs(CFG.HEROES) do if h.id == id then return h end end
     return CFG.HEROES[1]
 end
 
-local function getModeById(id)
-    for _, m in ipairs(CFG.MODES) do
-        if m.id == id then return m end
-    end
-    return CFG.MODES[1]
+local function getStageById(id)
+    for _, st in ipairs(CFG.STAGES) do if st.id == id then return st end end
+    return CFG.STAGES[1]
 end
 
-local function getUpgradeCost(upg)
-    local lv = DATA.upgrades[upg.id] or 0
-    return upg.baseCost + lv * upg.step
+local function getDiffById(id)
+    for _, df in ipairs(CFG.DIFFS) do if df.id == id then return df end end
+    return CFG.DIFFS[1]
 end
 
-local function computePlayerStats()
+local function getExpNeeded(lv)
+    return 100 + (lv - 1) * 65
+end
+
+local function computeStats()
     local h = getHeroById(DATA.selectedHero)
     local u = DATA.upgrades
-    return {
-        hero = h,
-        maxHp = math.floor(h.hp * (1 + (u.hp or 0) * 0.20)),
-        atk = math.floor(h.atk * (1 + (u.atk or 0) * 0.15)),
-        spd = math.floor(h.spd * (1 + (u.spd or 0) * 0.05)),
-        crit = math.min(0.75, h.crit + (u.crit or 0) * 0.03),
-        cdr = math.max(0.55, 1 - (u.cdr or 0) * 0.04),
-    }
+    local lvBonus = 1 + (DATA.level - 1) * 0.08
+    local maxHp = math.floor(h.hp * lvBonus * (1 + (u.hp or 0) * 0.16))
+    local maxMp = math.floor(h.mp * (1 + (u.mp or 0) * 0.15))
+    local atk   = math.floor(h.atk * lvBonus * (1 + (u.atk or 0) * 0.12))
+    local spd   = math.floor(h.spd * (1 + (u.spd or 0) * 0.04))
+    local crit  = math.min(0.75, h.crit + (u.crit or 0) * 0.03)
+    local mpReg = 8 + (u.mp or 0) * 1.5
+    local power = math.floor(maxHp * 0.8 + atk * 18 + spd * 0.6 + crit * 500 + maxMp * 1.2)
+    return { hero = h, maxHp = maxHp, maxMp = maxMp, atk = atk, spd = spd, crit = crit, mpRegen = mpReg, power = power }
 end
 
 local function addCorner(inst, px)
@@ -339,331 +369,390 @@ local function addCorner(inst, px)
     return c
 end
 
-local function addStroke(inst, color, thickness)
+local function addStroke(inst, color, thick)
     local s = Instance.new("UIStroke")
     s.Color = color or C.BORDER
-    s.Thickness = thickness or 1
+    s.Thickness = thick or 1
     s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     s.Parent = inst
     return s
 end
 
-local function addGradient(inst, topCol, botCol, rot)
+local function addGrad(inst, c1, c2, rot)
     local g = Instance.new("UIGradient")
-    g.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, topCol),
-        ColorSequenceKeypoint.new(1, botCol),
-    })
+    g.Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, c1), ColorSequenceKeypoint.new(1, c2) })
     g.Rotation = rot or 90
     g.Parent = inst
     return g
 end
 
-local function makeLabel(parent, props)
-    local lbl = Instance.new("TextLabel")
-    lbl.BackgroundTransparency = 1
-    lbl.Font = props.font or FONT_BODY
-    lbl.TextColor3 = props.color or C.TXT_MAIN
-    lbl.TextSize = props.size or 14
-    lbl.Text = props.text or ""
-    lbl.TextXAlignment = props.xAlign or Enum.TextXAlignment.Left
-    lbl.TextYAlignment = props.yAlign or Enum.TextYAlignment.Center
-    lbl.TextWrapped = props.wrap or false
-    lbl.Size = props.dim or UDim2.new(1, 0, 0, 20)
-    lbl.Position = props.pos or UDim2.new(0, 0, 0, 0)
-    lbl.ZIndex = props.z or 2
-    lbl.Parent = parent
-    return lbl
+local function makeLabel(parent, p)
+    local l = Instance.new("TextLabel")
+    l.BackgroundTransparency = 1
+    l.Font = p.font or FONT_BODY
+    l.TextColor3 = p.color or C.TXT_MAIN
+    l.TextSize = p.size or 14
+    l.Text = p.text or ""
+    l.TextXAlignment = p.xAlign or Enum.TextXAlignment.Left
+    l.TextYAlignment = p.yAlign or Enum.TextYAlignment.Center
+    l.TextWrapped = p.wrap or false
+    l.Size = p.dim or UDim2.new(1, 0, 0, 20)
+    l.Position = p.pos or UDim2.new(0, 0, 0, 0)
+    l.AnchorPoint = p.anchor or Vector2.new(0, 0)
+    l.ZIndex = p.z or 2
+    l.Parent = parent
+    return l
 end
 
-local function makeBtn(parent, props)
-    local btn = Instance.new("TextButton")
-    btn.AutoButtonColor = false
-    btn.BackgroundColor3 = props.bg or C.BTN_NEUTRAL
-    btn.Font = props.font or FONT_TITLE
-    btn.TextColor3 = props.color or C.TXT_MAIN
-    btn.TextSize = props.size or 14
-    btn.Text = props.text or ""
-    btn.Size = props.dim or UDim2.new(0, 100, 0, 34)
-    btn.Position = props.pos or UDim2.new(0, 0, 0, 0)
-    btn.AnchorPoint = props.anchor or Vector2.new(0, 0)
-    btn.ZIndex = props.z or 3
-    btn.Parent = parent
-    addCorner(btn, props.radius or 8)
-    if props.stroke ~= false then
-        addStroke(btn, props.strokeColor or C.BORDER, props.strokeWidth or 1)
+local function makeBtn(parent, p)
+    local b = Instance.new("TextButton")
+    b.AutoButtonColor = false
+    b.BackgroundColor3 = p.bg or C.BTN_DARK
+    b.Font = p.font or FONT_TITLE
+    b.TextColor3 = p.color or C.TXT_MAIN
+    b.TextSize = p.size or 13
+    b.Text = p.text or ""
+    b.Size = p.dim or UDim2.new(0, 100, 0, 34)
+    b.Position = p.pos or UDim2.new(0, 0, 0, 0)
+    b.AnchorPoint = p.anchor or Vector2.new(0, 0)
+    b.ZIndex = p.z or 3
+    b.Parent = parent
+    addCorner(b, p.radius or 8)
+    if p.stroke ~= false then
+        addStroke(b, p.strokeColor or C.BORDER, p.strokeWidth or 1)
     end
-    return btn
+    return b
 end
 
--- Helper kich hoat tuc thi cho nut bam (khong bi tre khi bam tren dien thoai)
-local function bindTap(btn, callback)
-    local lastFire = 0
+local function bindTap(btn, cb)
+    local last = 0
     trackConn(btn.InputBegan:Connect(function(inp)
         if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
             local now = os.clock()
-            if now - lastFire < 0.12 then return end
-            lastFire = now
-            callback()
+            if now - last < 0.12 then return end
+            last = now
+            cb()
         end
     end))
 end
 
--- Ve nhan vat tuong (da lop: bong do, giap vai, mu/kinh, vu khi rieng theo class)
-local function buildHeroAvatar(container, hero, zBase)
+-- Ve nhan vat chibi RPG da lop (Dau + Toc + Mat + Giap Than + Vu Khi rieng)
+local function buildChibiHero(container, hero, zBase)
     for _, ch in ipairs(container:GetChildren()) do
         if ch.Name == "HeroArt" then ch:Destroy() end
     end
 
-    local art = Instance.new("Frame")
-    art.Name = "HeroArt"
-    art.AnchorPoint = Vector2.new(0.5, 0.5)
-    art.Position = UDim2.new(0.5, 0, 0.5, 0)
-    art.Size = UDim2.new(1, 0, 1, 0)
-    art.BackgroundTransparency = 1
-    art.ZIndex = zBase
-    art.Parent = container
+    local root = Instance.new("Frame")
+    root.Name = "HeroArt"
+    root.AnchorPoint = Vector2.new(0.5, 0.5)
+    root.Position = UDim2.new(0.5, 0, 0.5, 0)
+    root.Size = UDim2.new(1, 0, 1, 0)
+    root.BackgroundTransparency = 1
+    root.ZIndex = zBase
+    root.Parent = container
 
-    -- Bong do duoi chan
-    local shadow = Instance.new("Frame")
-    shadow.AnchorPoint = Vector2.new(0.5, 0.5)
-    shadow.Position = UDim2.new(0.5, 2, 0.62, 3)
-    shadow.Size = UDim2.new(0.95, 0, 0.65, 0)
-    shadow.BackgroundColor3 = C.SHADOW
-    shadow.BackgroundTransparency = 0.45
-    shadow.BorderSizePixel = 0
-    shadow.ZIndex = zBase
-    shadow.Parent = art
-    addCorner(shadow, 999)
-
-    -- Vai giap / Ao choang
-    local shoulders = Instance.new("Frame")
-    shoulders.AnchorPoint = Vector2.new(0.5, 0.5)
-    shoulders.Position = UDim2.new(0.45, 0, 0.5, 0)
-    shoulders.Size = UDim2.new(0.76, 0, 0.96, 0)
-    shoulders.BackgroundColor3 = hero.color
-    shoulders.BorderSizePixel = 0
-    shoulders.ZIndex = zBase + 1
-    shoulders.Parent = art
-    addCorner(shoulders, 8)
-    addStroke(shoulders, hero.trim, 1.5)
-
-    -- Dau / Mu chien binh
-    local head = Instance.new("Frame")
-    head.AnchorPoint = Vector2.new(0.5, 0.5)
-    head.Position = UDim2.new(0.52, 0, 0.5, 0)
-    head.Size = UDim2.new(0.62, 0, 0.62, 0)
-    head.BackgroundColor3 = C.STONE_DARK
-    head.BorderSizePixel = 0
-    head.ZIndex = zBase + 2
-    head.Parent = art
-    addCorner(head, 999)
-    addStroke(head, hero.trim, 1.2)
-
-    -- Kinh mu (chi huong nhin sang phai theo goc 0 do)
-    local visor = Instance.new("Frame")
-    visor.AnchorPoint = Vector2.new(0.5, 0.5)
-    visor.Position = UDim2.new(0.76, 0, 0.5, 0)
-    visor.Size = UDim2.new(0.28, 0, 0.50, 0)
-    visor.BackgroundColor3 = hero.trim
-    visor.BorderSizePixel = 0
-    visor.ZIndex = zBase + 3
-    visor.Parent = head
-    addCorner(visor, 3)
-
-    -- Khop vu khi (xoay khi vung danh)
-    local weaponPivot = Instance.new("Frame")
-    weaponPivot.Name = "WeaponPivot"
-    weaponPivot.AnchorPoint = Vector2.new(0.5, 0.5)
-    weaponPivot.Position = UDim2.new(0.55, 0, 0.5, 0)
-    weaponPivot.Size = UDim2.new(1, 0, 1, 0)
-    weaponPivot.BackgroundTransparency = 1
-    weaponPivot.ZIndex = zBase + 3
-    weaponPivot.Parent = art
-
-    if hero.id == "kiemsi" then
-        -- Dai kiem + chan kiem vang
-        local guard = Instance.new("Frame")
-        guard.AnchorPoint = Vector2.new(0.5, 0.5)
-        guard.Position = UDim2.new(0.95, 0, 0.80, 0)
-        guard.Size = UDim2.new(0.14, 0, 0.44, 0)
-        guard.BackgroundColor3 = hero.trim
-        guard.BorderSizePixel = 0
-        guard.ZIndex = zBase + 4
-        guard.Parent = weaponPivot
-        addCorner(guard, 2)
-
-        local blade = Instance.new("Frame")
-        blade.AnchorPoint = Vector2.new(0, 0.5)
-        blade.Position = UDim2.new(0.98, 0, 0.80, 0)
-        blade.Size = UDim2.new(0.78, 0, 0.16, 0)
-        blade.BackgroundColor3 = C.METAL_LIGHT
-        blade.BorderSizePixel = 0
-        blade.ZIndex = zBase + 3
-        blade.Parent = weaponPivot
-        addCorner(blade, 3)
-        addStroke(blade, C.METAL_DARK, 1)
-    elseif hero.id == "satthu" then
-        -- Song dao sac ben hai ben tay
-        for _, yOff in ipairs({ 0.14, 0.86 }) do
-            local dagger = Instance.new("Frame")
-            dagger.AnchorPoint = Vector2.new(0, 0.5)
-            dagger.Position = UDim2.new(0.78, 0, yOff, 0)
-            dagger.Size = UDim2.new(0.60, 0, 0.13, 0)
-            dagger.BackgroundColor3 = C.METAL_LIGHT
-            dagger.Rotation = (yOff < 0.5) and -12 or 12
-            dagger.BorderSizePixel = 0
-            dagger.ZIndex = zBase + 3
-            dagger.Parent = weaponPivot
-            addCorner(dagger, 2)
-            addStroke(dagger, hero.trim, 1)
-        end
-    elseif hero.id == "xathu" then
-        -- Sung nang luong co nong phat sang matte
-        local barrel = Instance.new("Frame")
-        barrel.AnchorPoint = Vector2.new(0, 0.5)
-        barrel.Position = UDim2.new(0.72, 0, 0.5, 0)
-        barrel.Size = UDim2.new(0.84, 0, 0.22, 0)
-        barrel.BackgroundColor3 = C.METAL_DARK
-        barrel.BorderSizePixel = 0
-        barrel.ZIndex = zBase + 3
-        barrel.Parent = weaponPivot
-        addCorner(barrel, 3)
-        addStroke(barrel, hero.trim, 1)
-
-        local muzzle = Instance.new("Frame")
-        muzzle.AnchorPoint = Vector2.new(0.5, 0.5)
-        muzzle.Position = UDim2.new(0.95, 0, 0.5, 0)
-        muzzle.Size = UDim2.new(0.20, 0, 0.60, 0)
-        muzzle.BackgroundColor3 = hero.trim
-        muzzle.BorderSizePixel = 0
-        muzzle.ZIndex = zBase + 4
-        muzzle.Parent = barrel
-        addCorner(muzzle, 2)
-    else
-        -- Chien Than: Bua chien khong lo + sung giap
-        local shaft = Instance.new("Frame")
-        shaft.AnchorPoint = Vector2.new(0, 0.5)
-        shaft.Position = UDim2.new(0.75, 0, 0.78, 0)
-        shaft.Size = UDim2.new(0.72, 0, 0.14, 0)
-        shaft.BackgroundColor3 = C.METAL_DARK
-        shaft.BorderSizePixel = 0
-        shaft.ZIndex = zBase + 3
-        shaft.Parent = weaponPivot
-
-        local hammer = Instance.new("Frame")
-        hammer.AnchorPoint = Vector2.new(0.5, 0.5)
-        hammer.Position = UDim2.new(1.42, 0, 0.78, 0)
-        hammer.Size = UDim2.new(0.32, 0, 0.56, 0)
-        hammer.BackgroundColor3 = hero.trim
-        hammer.BorderSizePixel = 0
-        hammer.ZIndex = zBase + 4
-        hammer.Parent = weaponPivot
-        addCorner(hammer, 4)
-        addStroke(hammer, C.STONE_DARK, 1.2)
-    end
-
-    return art, weaponPivot
-end
-
--- Ve quai & Boss phan biet theo chung loai
-local function decorateEnemyNode(node, kind, col, isBoss, zBase)
-    -- Bong do duoi chan
+    -- Bong do
     local sh = Instance.new("Frame")
     sh.AnchorPoint = Vector2.new(0.5, 0.5)
-    sh.Position = UDim2.new(0.5, 2, 0.65, 3)
-    sh.Size = UDim2.new(1.02, 0, 0.68, 0)
+    sh.Position = UDim2.new(0.5, 0, 0.96, 0)
+    sh.Size = UDim2.new(0.85, 0, 0.30, 0)
+    sh.BackgroundColor3 = C.SHADOW
+    sh.BackgroundTransparency = 0.45
+    sh.BorderSizePixel = 0
+    sh.ZIndex = zBase
+    sh.Parent = root
+    addCorner(sh, 99)
+
+    -- Than giap
+    local body = Instance.new("Frame")
+    body.AnchorPoint = Vector2.new(0.5, 0.5)
+    body.Position = UDim2.new(0.5, 0, 0.72, 0)
+    body.Size = UDim2.new(0.56, 0, 0.44, 0)
+    body.BackgroundColor3 = hero.armor
+    body.BorderSizePixel = 0
+    body.ZIndex = zBase + 1
+    body.Parent = root
+    addCorner(body, 6)
+    addStroke(body, hero.trim, 1.3)
+
+    -- Dau & khuon mat chibi
+    local head = Instance.new("Frame")
+    head.AnchorPoint = Vector2.new(0.5, 0.5)
+    head.Position = UDim2.new(0.5, 0, 0.34, 0)
+    head.Size = UDim2.new(0.66, 0, 0.56, 0)
+    head.BackgroundColor3 = Color3.fromRGB(204, 174, 152)
+    head.BorderSizePixel = 0
+    head.ZIndex = zBase + 2
+    head.Parent = root
+    addCorner(head, 99)
+    addStroke(head, C.TXT_DARK, 1.2)
+
+    -- Toc / Mu trum
+    local hair = Instance.new("Frame")
+    hair.AnchorPoint = Vector2.new(0.5, 0)
+    hair.Position = UDim2.new(0.5, 0, -0.08, 0)
+    hair.Size = UDim2.new(1.12, 0, 0.58, 0)
+    hair.BackgroundColor3 = hero.hair
+    hair.BorderSizePixel = 0
+    hair.ZIndex = zBase + 4
+    hair.Parent = head
+    addCorner(hair, 8)
+    addStroke(hair, C.TXT_DARK, 1)
+
+    -- Doi mat anime
+    for _, ex in ipairs({ 0.36, 0.68 }) do
+        local eye = Instance.new("Frame")
+        eye.AnchorPoint = Vector2.new(0.5, 0.5)
+        eye.Position = UDim2.new(ex, 0, 0.62, 0)
+        eye.Size = UDim2.new(0.16, 0, 0.24, 0)
+        eye.BackgroundColor3 = hero.fx
+        eye.BorderSizePixel = 0
+        eye.ZIndex = zBase + 3
+        eye.Parent = head
+        addCorner(eye, 3)
+    end
+
+    -- Khop vu khi xoay theo huong danh
+    local wp = Instance.new("Frame")
+    wp.Name = "WeaponPivot"
+    wp.AnchorPoint = Vector2.new(0.5, 0.5)
+    wp.Position = UDim2.new(0.55, 0, 0.62, 0)
+    wp.Size = UDim2.new(1, 0, 1, 0)
+    wp.BackgroundTransparency = 1
+    wp.ZIndex = zBase + 5
+    wp.Parent = root
+
+    if hero.weapon == "sword" or hero.weapon == "katana" or hero.weapon == "spear" then
+        local len = (hero.weapon == "spear") and 1.15 or 0.92
+        local blade = Instance.new("Frame")
+        blade.AnchorPoint = Vector2.new(0, 0.5)
+        blade.Position = UDim2.new(0.62, 0, 0.5, 0)
+        blade.Size = UDim2.new(len, 0, 0.16, 0)
+        blade.BackgroundColor3 = (hero.weapon == "katana") and hero.fx or C.METAL
+        blade.BorderSizePixel = 0
+        blade.ZIndex = zBase + 5
+        blade.Parent = wp
+        addCorner(blade, 3)
+        addStroke(blade, hero.fx, 1)
+
+        local guard = Instance.new("Frame")
+        guard.AnchorPoint = Vector2.new(0.5, 0.5)
+        guard.Position = UDim2.new(0.64, 0, 0.5, 0)
+        guard.Size = UDim2.new(0.12, 0, 0.42, 0)
+        guard.BackgroundColor3 = hero.trim
+        guard.BorderSizePixel = 0
+        guard.ZIndex = zBase + 6
+        guard.Parent = wp
+        addCorner(guard, 2)
+    elseif hero.weapon == "daggers" then
+        for _, yOff in ipairs({ 0.28, 0.74 }) do
+            local dg = Instance.new("Frame")
+            dg.AnchorPoint = Vector2.new(0, 0.5)
+            dg.Position = UDim2.new(0.62, 0, yOff, 0)
+            dg.Size = UDim2.new(0.62, 0, 0.13, 0)
+            dg.BackgroundColor3 = hero.fx
+            dg.BorderSizePixel = 0
+            dg.ZIndex = zBase + 5
+            dg.Parent = wp
+            addCorner(dg, 2)
+        end
+    elseif hero.weapon == "staff" or hero.weapon == "orb" then
+        local rod = Instance.new("Frame")
+        rod.AnchorPoint = Vector2.new(0, 0.5)
+        rod.Position = UDim2.new(0.56, 0, 0.5, 0)
+        rod.Size = UDim2.new(0.86, 0, 0.11, 0)
+        rod.BackgroundColor3 = C.STONE_LIGHT
+        rod.BorderSizePixel = 0
+        rod.ZIndex = zBase + 5
+        rod.Parent = wp
+
+        local gem = Instance.new("Frame")
+        gem.AnchorPoint = Vector2.new(0.5, 0.5)
+        gem.Position = UDim2.new(1.42, 0, 0.5, 0)
+        gem.Size = UDim2.new(0.30, 0, 0.30, 0)
+        gem.BackgroundColor3 = hero.fx
+        gem.BorderSizePixel = 0
+        gem.ZIndex = zBase + 6
+        gem.Parent = wp
+        addCorner(gem, 99)
+        addStroke(gem, C.TXT_MAIN, 1)
+    elseif hero.weapon == "bow" then
+        local bow = Instance.new("Frame")
+        bow.AnchorPoint = Vector2.new(0.5, 0.5)
+        bow.Position = UDim2.new(0.95, 0, 0.5, 0)
+        bow.Size = UDim2.new(0.24, 0, 0.78, 0)
+        bow.BackgroundColor3 = hero.trim
+        bow.BackgroundTransparency = 0.2
+        bow.BorderSizePixel = 0
+        bow.ZIndex = zBase + 5
+        bow.Parent = wp
+        addCorner(bow, 99)
+        addStroke(bow, hero.fx, 1.5)
+    else
+        -- Dau Si: Gang tay lua
+        for _, yOff in ipairs({ 0.25, 0.75 }) do
+            local fist = Instance.new("Frame")
+            fist.AnchorPoint = Vector2.new(0.5, 0.5)
+            fist.Position = UDim2.new(0.88, 0, yOff, 0)
+            fist.Size = UDim2.new(0.32, 0, 0.30, 0)
+            fist.BackgroundColor3 = hero.trim
+            fist.BorderSizePixel = 0
+            fist.ZIndex = zBase + 6
+            fist.Parent = wp
+            addCorner(fist, 6)
+            addStroke(fist, C.TXT_GOLD, 1)
+        end
+    end
+
+    return root, wp
+end
+
+-- Ve quai phu & 5 Boss dac trung theo hinh anh tham khao
+local function decorateEnemySprite(node, kind, isBoss, zBase)
+    local sh = Instance.new("Frame")
+    sh.AnchorPoint = Vector2.new(0.5, 0.5)
+    sh.Position = UDim2.new(0.5, 0, 0.94, 0)
+    sh.Size = UDim2.new(0.95, 0, 0.34, 0)
     sh.BackgroundColor3 = C.SHADOW
     sh.BackgroundTransparency = 0.45
     sh.BorderSizePixel = 0
     sh.ZIndex = zBase - 1
     sh.Parent = node
-    addCorner(sh, 999)
+    addCorner(sh, 99)
 
     if isBoss then
-        -- Boss: Giap loi + Vuong mien sung + Vong hao quang
         local aura = Instance.new("Frame")
-        aura.Name = "BossAura"
         aura.AnchorPoint = Vector2.new(0.5, 0.5)
         aura.Position = UDim2.new(0.5, 0, 0.5, 0)
-        aura.Size = UDim2.new(1.42, 0, 1.42, 0)
-        aura.BackgroundColor3 = C.HP_BOSS
+        aura.Size = UDim2.new(1.45, 0, 1.45, 0)
+        aura.BackgroundColor3 = node.BackgroundColor3
         aura.BackgroundTransparency = 0.84
         aura.BorderSizePixel = 0
         aura.ZIndex = zBase - 1
         aura.Parent = node
         addCorner(aura, 999)
-        addStroke(aura, C.TXT_GOLD, 1.5)
+        addStroke(aura, C.TXT_GOLD, 1.8)
 
-        local core = Instance.new("Frame")
-        core.AnchorPoint = Vector2.new(0.5, 0.5)
-        core.Position = UDim2.new(0.5, 0, 0.5, 0)
-        core.Size = UDim2.new(0.46, 0, 0.46, 0)
-        core.BackgroundColor3 = C.TXT_GOLD
-        core.Rotation = 45
-        core.BorderSizePixel = 0
-        core.ZIndex = zBase + 2
-        core.Parent = node
-        addCorner(core, 4)
+        -- Canh rong cho Hoa Long / Bang Long
+        if kind == "firedrag" or kind == "icedrag" then
+            for _, side in ipairs({ -1, 1 }) do
+                local wing = Instance.new("Frame")
+                wing.AnchorPoint = Vector2.new(0.5, 0.5)
+                wing.Position = UDim2.new(0.5 + side * 0.72, 0, 0.42, 0)
+                wing.Size = UDim2.new(0.65, 0, 0.76, 0)
+                wing.Rotation = side * 18
+                wing.BackgroundColor3 = (kind == "firedrag") and Color3.fromRGB(178, 64, 48) or Color3.fromRGB(72, 134, 188)
+                wing.BorderSizePixel = 0
+                wing.ZIndex = zBase - 1
+                wing.Parent = node
+                addCorner(wing, 8)
+                addStroke(wing, C.TXT_DARK, 1.2)
+            end
+        end
 
-        for _, xPos in ipairs({ 0.20, 0.80 }) do
+        -- Cap sung Boss
+        for _, sx in ipairs({ 0.22, 0.78 }) do
             local horn = Instance.new("Frame")
             horn.AnchorPoint = Vector2.new(0.5, 1)
-            horn.Position = UDim2.new(xPos, 0, 0.08, 0)
-            horn.Size = UDim2.new(0.18, 0, 0.34, 0)
+            horn.Position = UDim2.new(sx, 0, 0.08, 0)
+            horn.Size = UDim2.new(0.20, 0, 0.36, 0)
+            horn.Rotation = (sx < 0.5) and -24 or 24
             horn.BackgroundColor3 = C.TXT_GOLD
-            horn.Rotation = (xPos < 0.5) and -24 or 24
             horn.BorderSizePixel = 0
             horn.ZIndex = zBase + 2
             horn.Parent = node
-            addCorner(horn, 2)
+            addCorner(horn, 3)
         end
-    elseif kind == "runner" then
-        -- Quai sat thu: Hinh thoi nhon sac
-        node.Rotation = 45
-        local eye = Instance.new("Frame")
-        eye.AnchorPoint = Vector2.new(0.5, 0.5)
-        eye.Position = UDim2.new(0.5, 0, 0.5, 0)
-        eye.Size = UDim2.new(0.42, 0, 0.42, 0)
-        eye.BackgroundColor3 = C.TXT_GOLD
-        eye.BorderSizePixel = 0
-        eye.ZIndex = zBase + 1
-        eye.Parent = node
-        addCorner(eye, 3)
-    elseif kind == "shooter" then
-        -- Quai xa thu: Loi pha le tim + vien sang
-        local orb = Instance.new("Frame")
-        orb.AnchorPoint = Vector2.new(0.5, 0.5)
-        orb.Position = UDim2.new(0.5, 0, 0.5, 0)
-        orb.Size = UDim2.new(0.46, 0, 0.46, 0)
-        orb.BackgroundColor3 = C.TXT_PURPLE
-        orb.BorderSizePixel = 0
-        orb.ZIndex = zBase + 1
-        orb.Parent = node
-        addCorner(orb, 999)
-    elseif kind == "tank" then
-        -- Quai khong lo: Tam giap thep day ben trong
-        local plate = Instance.new("Frame")
-        plate.AnchorPoint = Vector2.new(0.5, 0.5)
-        plate.Position = UDim2.new(0.5, 0, 0.5, 0)
-        plate.Size = UDim2.new(0.68, 0, 0.68, 0)
-        plate.BackgroundColor3 = C.STONE_DARK
-        plate.BorderSizePixel = 0
-        plate.ZIndex = zBase + 1
-        plate.Parent = node
-        addCorner(plate, 5)
-        addStroke(plate, C.METAL_LIGHT, 1.5)
+
+        -- Doi mat Boss phat sang matte
+        for _, ex in ipairs({ 0.34, 0.66 }) do
+            local eye = Instance.new("Frame")
+            eye.AnchorPoint = Vector2.new(0.5, 0.5)
+            eye.Position = UDim2.new(ex, 0, 0.44, 0)
+            eye.Size = UDim2.new(0.18, 0, 0.14, 0)
+            eye.BackgroundColor3 = C.TXT_GOLD
+            eye.BorderSizePixel = 0
+            eye.ZIndex = zBase + 2
+            eye.Parent = node
+            addCorner(eye, 3)
+        end
+    elseif kind == "slime" then
+        -- Slime tron mem co 2 mat sang
+        for _, ex in ipairs({ 0.34, 0.66 }) do
+            local eye = Instance.new("Frame")
+            eye.AnchorPoint = Vector2.new(0.5, 0.5)
+            eye.Position = UDim2.new(ex, 0, 0.48, 0)
+            eye.Size = UDim2.new(0.18, 0, 0.22, 0)
+            eye.BackgroundColor3 = C.TXT_DARK
+            eye.BorderSizePixel = 0
+            eye.ZIndex = zBase + 1
+            eye.Parent = node
+            addCorner(eye, 99)
+        end
+    elseif kind == "bat" then
+        -- Doi tim co 2 canh ngang
+        for _, side in ipairs({ -1, 1 }) do
+            local w = Instance.new("Frame")
+            w.AnchorPoint = Vector2.new(0.5, 0.5)
+            w.Position = UDim2.new(0.5 + side * 0.68, 0, 0.45, 0)
+            w.Size = UDim2.new(0.62, 0, 0.44, 0)
+            w.Rotation = side * -15
+            w.BackgroundColor3 = Color3.fromRGB(116, 68, 158)
+            w.BorderSizePixel = 0
+            w.ZIndex = zBase - 1
+            w.Parent = node
+            addCorner(w, 6)
+        end
+    elseif kind == "skeleton" then
+        -- Bo xuong dau trang co hoc mat den
+        for _, ex in ipairs({ 0.34, 0.66 }) do
+            local eye = Instance.new("Frame")
+            eye.AnchorPoint = Vector2.new(0.5, 0.5)
+            eye.Position = UDim2.new(ex, 0, 0.45, 0)
+            eye.Size = UDim2.new(0.20, 0, 0.22, 0)
+            eye.BackgroundColor3 = C.TXT_DARK
+            eye.BorderSizePixel = 0
+            eye.ZIndex = zBase + 1
+            eye.Parent = node
+            addCorner(eye, 99)
+        end
+    elseif kind == "mushroom" then
+        -- Nam doc co mu do cham trang
+        local cap = Instance.new("Frame")
+        cap.AnchorPoint = Vector2.new(0.5, 0.5)
+        cap.Position = UDim2.new(0.5, 0, 0.26, 0)
+        cap.Size = UDim2.new(1.25, 0, 0.62, 0)
+        cap.BackgroundColor3 = Color3.fromRGB(178, 56, 56)
+        cap.BorderSizePixel = 0
+        cap.ZIndex = zBase + 1
+        cap.Parent = node
+        addCorner(cap, 99)
+        addStroke(cap, C.TXT_DARK, 1)
+    elseif kind == "ghost" then
+        for _, ex in ipairs({ 0.36, 0.64 }) do
+            local eye = Instance.new("Frame")
+            eye.AnchorPoint = Vector2.new(0.5, 0.5)
+            eye.Position = UDim2.new(ex, 0, 0.42, 0)
+            eye.Size = UDim2.new(0.18, 0, 0.24, 0)
+            eye.BackgroundColor3 = C.TXT_GEM
+            eye.BorderSizePixel = 0
+            eye.ZIndex = zBase + 1
+            eye.Parent = node
+            addCorner(eye, 99)
+        end
     else
-        -- Linh thuong: Mat do nhin ro
-        local visor = Instance.new("Frame")
-        visor.AnchorPoint = Vector2.new(0.5, 0.5)
-        visor.Position = UDim2.new(0.5, 0, 0.45, 0)
-        visor.Size = UDim2.new(0.55, 0, 0.22, 0)
-        visor.BackgroundColor3 = C.TXT_DARK
-        visor.BorderSizePixel = 0
-        visor.ZIndex = zBase + 1
-        visor.Parent = node
-        addCorner(visor, 2)
+        -- Goblin / Nhen: mat do
+        for _, ex in ipairs({ 0.34, 0.66 }) do
+            local eye = Instance.new("Frame")
+            eye.AnchorPoint = Vector2.new(0.5, 0.5)
+            eye.Position = UDim2.new(ex, 0, 0.44, 0)
+            eye.Size = UDim2.new(0.18, 0, 0.16, 0)
+            eye.BackgroundColor3 = C.TXT_RED
+            eye.BorderSizePixel = 0
+            eye.ZIndex = zBase + 1
+            eye.Parent = node
+            addCorner(eye, 2)
+        end
     end
 end
 
@@ -705,19 +794,23 @@ local function mountScreenGui()
 end
 
 -- ============================================================================
--- 5. TRANG THAI TRONG TRAN DAU (COMBAT ENGINE STATE)
+-- 5. TRANG THAI TRAN DAU (COMBAT STATE)
 -- ============================================================================
-local GAME = {}
 local S = {
     inMatch = false,
     paused = false,
+    pickingBuff = false,
     gameOver = false,
-    mode = "wave",
+    stage = CFG.STAGES[1],
+    diff = CFG.DIFFS[1],
+    hero = CFG.HEROES[1],
     wave = 1,
+    totalWaves = 3,
     score = 0,
     kills = 0,
     coinsEarned = 0,
     gemsEarned = 0,
+    expEarned = 0,
     combo = 0,
     comboTimer = 0,
     maxCombo = 0,
@@ -728,19 +821,23 @@ local S = {
     nextWaveTimer = 0,
     spawnTimer = 0,
     enemiesToSpawn = 0,
-    bossActive = false,
+    bossSpawned = false,
 
     -- Nguoi choi
     px = CFG.ARENA_W * 0.5,
     py = CFG.ARENA_H * 0.5,
     dirX = 1,
     dirY = 0,
-    hp = 100,
-    maxHp = 100,
-    atk = 25,
+    hp = 160,
+    maxHp = 160,
+    mp = 100,
+    maxMp = 100,
+    mpRegen = 8,
+    shield = 0,
+    atk = 28,
     spd = 250,
-    crit = 0.15,
-    cdr = 1.0,
+    crit = 0.14,
+    lifesteal = 0,
     fury = 0,
     attackCd = 0,
     swingT = 0,
@@ -753,10 +850,9 @@ local S = {
     dashVx = 0,
     dashVy = 0,
     invulnTime = 0,
-    skillCd = 0,
-    skillMaxCd = 5.0,
+    s1Cd = 0,
+    s2Cd = 0,
     buffAtkTime = 0,
-    hero = CFG.HEROES[1],
 
     -- Input
     keys = { W = false, A = false, S = false, D = false },
@@ -775,563 +871,602 @@ local S = {
     hazards = {},
     floatTexts = {},
     braziers = {},
+    miniDots = {},
 }
 
 -- ============================================================================
--- 6. XAY DUNG GIAO DIEN CHINH (HEADER + TOAST + NUT MO NHANH)
+-- 6. GIAO DIEN FULL MAN HINH 100% + TOPBAR RPG + NUT MO LAI KHI THU GON
 -- ============================================================================
 local ScreenGui = mountScreenGui()
 UI.ScreenGui = ScreenGui
 
+-- Nut noi chi hien khi thu gon game
 do
-    local toggleBtn = makeBtn(ScreenGui, {
-        text = "CHIẾN ĐẤU",
-        bg = C.BG_PANEL,
+    local reopenBtn = makeBtn(ScreenGui, {
+        text = "MỞ GAME",
+        bg = C.BTN_PURPLE,
         color = C.TXT_GOLD,
         size = 13,
-        dim = UDim2.new(0, 112, 0, 34),
-        pos = UDim2.new(1, -124, 0, 52),
+        dim = UDim2.new(0, 106, 0, 36),
+        pos = UDim2.new(1, -118, 0, 52),
         radius = 10,
-        strokeColor = C.BORDER_ACT,
+        strokeColor = C.BORDER_GOLD,
         strokeWidth = 1.5,
-        z = 50,
+        z = 80,
     })
-    addGradient(toggleBtn, C.BG_PANEL_TOP, C.BG_MAIN, 90)
-    UI.ToggleBtn = toggleBtn
+    reopenBtn.Visible = false
+    UI.ReopenBtn = reopenBtn
 
     local dragging, dragStart, startPos, moved = false, nil, nil, false
-    trackConn(toggleBtn.InputBegan:Connect(function(inp)
+    trackConn(reopenBtn.InputBegan:Connect(function(inp)
         if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            moved = false
-            dragStart = inp.Position
-            startPos = toggleBtn.Position
+            dragging, moved, dragStart, startPos = true, false, inp.Position, reopenBtn.Position
         end
     end))
     trackConn(UserInputService.InputChanged:Connect(function(inp)
         if dragging and (inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch) then
-            local delta = inp.Position - dragStart
-            if delta.Magnitude > 8 then
+            local d = inp.Position - dragStart
+            if d.Magnitude > 8 then
                 moved = true
-                toggleBtn.Position = UDim2.new(
-                    startPos.X.Scale, startPos.X.Offset + delta.X,
-                    startPos.Y.Scale, startPos.Y.Offset + delta.Y
-                )
+                reopenBtn.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + d.X, startPos.Y.Scale, startPos.Y.Offset + d.Y)
             end
         end
     end))
     trackConn(UserInputService.InputEnded:Connect(function(inp)
         if dragging and (inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch) then
             dragging = false
-            if not moved and UI.MainFrame then
-                UI.MainFrame.Visible = not UI.MainFrame.Visible
-                if not UI.MainFrame.Visible and S.inMatch and not S.gameOver then
-                    S.paused = true
-                    UI.PauseOverlay.Visible = true
-                end
+            if not moved then
+                UI.MainFrame.Visible = true
+                reopenBtn.Visible = false
             end
         end
     end))
 end
 
+-- Khung FULL MAN HINH 100%
+local refreshAllUI
 do
     local main = Instance.new("Frame")
-    main.Name = "MainWindow"
-    main.AnchorPoint = Vector2.new(0.5, 0.5)
-    main.Position = UDim2.new(0.5, 0, 0.52, 0)
-    main.Size = UDim2.new(0.92, 0, 0.85, 0)
-    main.BackgroundColor3 = C.BG_MAIN
+    main.Name = "FullScreenRoot"
+    main.Position = UDim2.new(0, 0, 0, 0)
+    main.Size = UDim2.new(1, 0, 1, 0)
+    main.BackgroundColor3 = C.BG_FULL
+    main.BorderSizePixel = 0
     main.ClipsDescendants = true
     main.ZIndex = 1
     main.Parent = ScreenGui
-    addCorner(main, 12)
-    addStroke(main, C.BORDER_ACT, 1.5)
-
-    local sc = Instance.new("UISizeConstraint")
-    sc.MinSize = Vector2.new(540, 340)
-    sc.MaxSize = Vector2.new(930, 565)
-    sc.Parent = main
+    addGrad(main, C.BG_TOPBAR, C.BG_FULL, 135)
     UI.MainFrame = main
 
-    local header = Instance.new("Frame")
-    header.Name = "Header"
-    header.Size = UDim2.new(1, 0, 0, 44)
-    header.BackgroundColor3 = C.BG_PANEL
-    header.BorderSizePixel = 0
-    header.ZIndex = 5
-    header.Parent = main
-    addGradient(header, C.BG_PANEL_TOP, C.BG_PANEL, 90)
+    -- ---- TOPBAR RPG (CAO 58PX TREN CUNG FULL MAN HINH) ----
+    local topBar = Instance.new("Frame")
+    topBar.Name = "TopBar"
+    topBar.Position = UDim2.new(0, 0, 0, 0)
+    topBar.Size = UDim2.new(1, 0, 0, 58)
+    topBar.BackgroundColor3 = C.BG_TOPBAR
+    topBar.BorderSizePixel = 0
+    topBar.ZIndex = 10
+    topBar.Parent = main
+    addGrad(topBar, C.BG_PANEL_HI, C.BG_TOPBAR, 90)
 
-    local hLine = Instance.new("Frame")
-    hLine.Position = UDim2.new(0, 0, 1, -1)
-    hLine.Size = UDim2.new(1, 0, 0, 1)
-    hLine.BackgroundColor3 = C.BORDER
-    hLine.BorderSizePixel = 0
-    hLine.ZIndex = 6
-    hLine.Parent = header
+    local tbBorder = Instance.new("Frame")
+    tbBorder.Position = UDim2.new(0, 0, 1, -2)
+    tbBorder.Size = UDim2.new(1, 0, 0, 2)
+    tbBorder.BackgroundColor3 = C.BORDER_ACT
+    tbBorder.BorderSizePixel = 0
+    tbBorder.ZIndex = 11
+    tbBorder.Parent = topBar
 
-    -- Huy hieu nho ben trai tieu de
-    local badge = Instance.new("Frame")
-    badge.Position = UDim2.new(0, 12, 0.5, -10)
-    badge.Size = UDim2.new(0, 20, 0, 20)
-    badge.BackgroundColor3 = C.BTN_DANGER
-    badge.Rotation = 45
-    badge.ZIndex = 6
-    badge.Parent = header
-    addCorner(badge, 4)
-    addStroke(badge, C.TXT_GOLD, 1.5)
+    -- Khung Avatar + Lv + HP/MP/Luc Chien (goc trai tren)
+    local avaBox = Instance.new("Frame")
+    avaBox.Position = UDim2.new(0, 12, 0.5, -23)
+    avaBox.Size = UDim2.new(0, 46, 0, 46)
+    avaBox.BackgroundColor3 = C.BG_ARENA
+    avaBox.ZIndex = 11
+    avaBox.Parent = topBar
+    addCorner(avaBox, 23)
+    addStroke(avaBox, C.BORDER_GOLD, 2)
 
-    makeLabel(header, {
-        text = "ĐẤU TRƯỜNG CHIẾN ĐẤU PRO  " .. CFG.VERSION,
-        font = FONT_TITLE,
-        color = C.TXT_MAIN,
-        size = 15,
-        dim = UDim2.new(0, 300, 1, 0),
-        pos = UDim2.new(0, 42, 0, 0),
-        z = 6,
+    UI.TopAvatarHolder = Instance.new("Frame")
+    UI.TopAvatarHolder.AnchorPoint = Vector2.new(0.5, 0.5)
+    UI.TopAvatarHolder.Position = UDim2.new(0.5, 0, 0.52, 0)
+    UI.TopAvatarHolder.Size = UDim2.new(0, 28, 0, 28)
+    UI.TopAvatarHolder.BackgroundTransparency = 1
+    UI.TopAvatarHolder.ZIndex = 12
+    UI.TopAvatarHolder.Parent = avaBox
+
+    local lvTag = Instance.new("Frame")
+    lvTag.AnchorPoint = Vector2.new(0.5, 1)
+    lvTag.Position = UDim2.new(0.5, 0, 1, 3)
+    lvTag.Size = UDim2.new(0, 40, 0, 14)
+    lvTag.BackgroundColor3 = C.BTN_PURPLE
+    lvTag.ZIndex = 14
+    lvTag.Parent = avaBox
+    addCorner(lvTag, 6)
+    addStroke(lvTag, C.BORDER_GOLD, 1)
+
+    UI.TopLvLbl = makeLabel(lvTag, {
+        text = "Lv.1", font = FONT_TITLE, color = C.TXT_GOLD, size = 10,
+        xAlign = Enum.TextXAlignment.Center, dim = UDim2.new(1, 0, 1, 0), z = 15,
     })
 
-    UI.HeaderCoin = makeLabel(header, {
-        text = "Xu: 0",
-        font = FONT_TITLE,
-        color = C.TXT_GOLD,
-        size = 13,
-        xAlign = Enum.TextXAlignment.Right,
-        dim = UDim2.new(0, 110, 1, 0),
-        pos = UDim2.new(1, -295, 0, 0),
-        z = 6,
+    -- Thanh HP & MP & Luc Chien canh Avatar
+    local hpWrap = Instance.new("Frame")
+    hpWrap.Position = UDim2.new(0, 66, 0, 6)
+    hpWrap.Size = UDim2.new(0, 152, 0, 14)
+    hpWrap.BackgroundColor3 = C.BG_FULL
+    hpWrap.ZIndex = 11
+    hpWrap.Parent = topBar
+    addCorner(hpWrap, 5)
+    addStroke(hpWrap, C.BORDER, 1)
+
+    UI.TopHpFill = Instance.new("Frame")
+    UI.TopHpFill.Size = UDim2.new(1, 0, 1, 0)
+    UI.TopHpFill.BackgroundColor3 = C.HP_BAR
+    UI.TopHpFill.BorderSizePixel = 0
+    UI.TopHpFill.ZIndex = 12
+    UI.TopHpFill.Parent = hpWrap
+    addCorner(UI.TopHpFill, 5)
+
+    UI.TopHpLbl = makeLabel(hpWrap, {
+        text = "HP 160/160", font = FONT_TITLE, color = C.TXT_MAIN, size = 10,
+        xAlign = Enum.TextXAlignment.Center, dim = UDim2.new(1, 0, 1, 0), z = 13,
     })
 
-    UI.HeaderGem = makeLabel(header, {
-        text = "KC: 0",
-        font = FONT_TITLE,
-        color = C.TXT_GEM,
-        size = 13,
-        xAlign = Enum.TextXAlignment.Right,
-        dim = UDim2.new(0, 90, 1, 0),
-        pos = UDim2.new(1, -180, 0, 0),
-        z = 6,
+    local mpWrap = Instance.new("Frame")
+    mpWrap.Position = UDim2.new(0, 66, 0, 23)
+    mpWrap.Size = UDim2.new(0, 152, 0, 12)
+    mpWrap.BackgroundColor3 = C.BG_FULL
+    mpWrap.ZIndex = 11
+    mpWrap.Parent = topBar
+    addCorner(mpWrap, 5)
+    addStroke(mpWrap, C.BORDER, 1)
+
+    UI.TopMpFill = Instance.new("Frame")
+    UI.TopMpFill.Size = UDim2.new(1, 0, 1, 0)
+    UI.TopMpFill.BackgroundColor3 = C.MP_BAR
+    UI.TopMpFill.BorderSizePixel = 0
+    UI.TopMpFill.ZIndex = 12
+    UI.TopMpFill.Parent = mpWrap
+    addCorner(UI.TopMpFill, 5)
+
+    UI.TopMpLbl = makeLabel(mpWrap, {
+        text = "MP 100/100", font = FONT_TITLE, color = C.TXT_MAIN, size = 9,
+        xAlign = Enum.TextXAlignment.Center, dim = UDim2.new(1, 0, 1, 0), z = 13,
     })
 
-    local minBtn = makeBtn(header, {
-        text = "-",
-        bg = C.BTN_NEUTRAL,
-        color = C.TXT_MAIN,
-        size = 16,
-        dim = UDim2.new(0, 32, 0, 28),
-        pos = UDim2.new(1, -76, 0.5, -14),
-        radius = 6,
-        z = 6,
+    UI.TopPowerLbl = makeLabel(topBar, {
+        text = "Lực Chiến: 0", font = FONT_TITLE, color = C.TXT_GOLD, size = 11,
+        dim = UDim2.new(0, 165, 0, 16), pos = UDim2.new(0, 66, 0, 38), z = 12,
+    })
+
+    -- Vien thuoc Xu & KC o giua TopBar
+    local coinPill = Instance.new("Frame")
+    coinPill.Position = UDim2.new(0, 232, 0.5, -14)
+    coinPill.Size = UDim2.new(0, 114, 0, 28)
+    coinPill.BackgroundColor3 = C.BG_FULL
+    coinPill.ZIndex = 11
+    coinPill.Parent = topBar
+    addCorner(coinPill, 14)
+    addStroke(coinPill, C.BORDER_GOLD, 1.2)
+
+    local coinDot = Instance.new("Frame")
+    coinDot.Position = UDim2.new(0, 6, 0.5, -8)
+    coinDot.Size = UDim2.new(0, 16, 0, 16)
+    coinDot.BackgroundColor3 = C.BTN_GOLD
+    coinDot.ZIndex = 12
+    coinDot.Parent = coinPill
+    addCorner(coinDot, 8)
+    addStroke(coinDot, C.TXT_GOLD, 1.2)
+
+    UI.TopCoinLbl = makeLabel(coinPill, {
+        text = "300 Xu", font = FONT_TITLE, color = C.TXT_GOLD, size = 12,
+        dim = UDim2.new(1, -28, 1, 0), pos = UDim2.new(0, 26, 0, 0), z = 12,
+    })
+
+    local gemPill = Instance.new("Frame")
+    gemPill.Position = UDim2.new(0, 354, 0.5, -14)
+    gemPill.Size = UDim2.new(0, 104, 0, 28)
+    gemPill.BackgroundColor3 = C.BG_FULL
+    gemPill.ZIndex = 11
+    gemPill.Parent = topBar
+    addCorner(gemPill, 14)
+    addStroke(gemPill, C.BORDER_ACT, 1.2)
+
+    local gemDot = Instance.new("Frame")
+    gemDot.Position = UDim2.new(0, 8, 0.5, -7)
+    gemDot.Size = UDim2.new(0, 13, 0, 13)
+    gemDot.Rotation = 45
+    gemDot.BackgroundColor3 = C.BTN_PURPLE
+    gemDot.ZIndex = 12
+    gemDot.Parent = gemPill
+    addCorner(gemDot, 2)
+    addStroke(gemDot, C.TXT_GEM, 1.2)
+
+    UI.TopGemLbl = makeLabel(gemPill, {
+        text = "20 KC", font = FONT_TITLE, color = C.TXT_GEM, size = 12,
+        dim = UDim2.new(1, -28, 1, 0), pos = UDim2.new(0, 26, 0, 0), z = 12,
+    })
+
+    -- Nut chuc nang goc phai TopBar: Thu Gon & Dong
+    local minBtn = makeBtn(topBar, {
+        text = "-", bg = C.BTN_DARK, color = C.TXT_MAIN, size = 18,
+        dim = UDim2.new(0, 36, 0, 32), pos = UDim2.new(1, -84, 0.5, -16), radius = 8, z = 12,
     })
     bindTap(minBtn, function()
         main.Visible = false
+        UI.ReopenBtn.Visible = true
         if S.inMatch and not S.gameOver then
             S.paused = true
             UI.PauseOverlay.Visible = true
         end
     end)
 
-    local closeBtn = makeBtn(header, {
-        text = "X",
-        bg = C.BTN_DANGER,
-        color = C.TXT_MAIN,
-        size = 14,
-        dim = UDim2.new(0, 32, 0, 28),
-        pos = UDim2.new(1, -38, 0.5, -14),
-        radius = 6,
-        z = 6,
+    local closeBtn = makeBtn(topBar, {
+        text = "X", bg = C.BTN_RED, color = C.TXT_MAIN, size = 14,
+        dim = UDim2.new(0, 36, 0, 32), pos = UDim2.new(1, -42, 0.5, -16), radius = 8, z = 12,
     })
     bindTap(closeBtn, function()
         if _G.ArenaChienDau_Cleanup then _G.ArenaChienDau_Cleanup() end
     end)
 
+    -- Toast thong bao noi
     local toast = Instance.new("Frame")
     toast.AnchorPoint = Vector2.new(0.5, 0)
-    toast.Position = UDim2.new(0.5, 0, 0, 50)
-    toast.Size = UDim2.new(0, 350, 0, 32)
+    toast.Position = UDim2.new(0.5, 0, 0, 64)
+    toast.Size = UDim2.new(0, 360, 0, 34)
     toast.BackgroundColor3 = C.BG_CARD_ALT
     toast.Visible = false
-    toast.ZIndex = 40
+    toast.ZIndex = 70
     toast.Parent = main
-    addCorner(toast, 8)
-    addStroke(toast, C.BORDER_ACT, 1.2)
+    addCorner(toast, 10)
+    addStroke(toast, C.BORDER_GOLD, 1.5)
 
     UI.Toast = toast
     UI.ToastLbl = makeLabel(toast, {
-        text = "",
-        font = FONT_TITLE,
-        color = C.TXT_GOLD,
-        size = 13,
-        xAlign = Enum.TextXAlignment.Center,
-        dim = UDim2.new(1, -16, 1, 0),
-        pos = UDim2.new(0, 8, 0, 0),
-        z = 41,
+        text = "", font = FONT_TITLE, color = C.TXT_GOLD, size = 13,
+        xAlign = Enum.TextXAlignment.Center, dim = UDim2.new(1, -16, 1, 0), pos = UDim2.new(0, 8, 0, 0), z = 71,
     })
     UI.ToastToken = 0
 end
 
-local function showToast(msg, color)
+local function showToast(msg, col)
     UI.ToastToken = UI.ToastToken + 1
-    local myToken = UI.ToastToken
+    local tk = UI.ToastToken
     UI.ToastLbl.Text = msg
-    UI.ToastLbl.TextColor3 = color or C.TXT_GOLD
+    UI.ToastLbl.TextColor3 = col or C.TXT_GOLD
     UI.Toast.Visible = true
     task.delay(2.2, function()
-        if UI.ToastToken == myToken and UI.Toast then
-            UI.Toast.Visible = false
-        end
+        if UI.ToastToken == tk and UI.Toast then UI.Toast.Visible = false end
     end)
 end
 
 -- ============================================================================
--- 7. MAN HINH SANH CHO (LOBBY NANG CAP DO HOA)
+-- 7. SANH CHO FULL MAN HINH (5 TAB: VAO TRAN | TUONG 8 | NANG CAP | NHIEM VU | CAI DAT)
 -- ============================================================================
-local refreshLobbyUI
-
 do
     local lobby = Instance.new("Frame")
     lobby.Name = "LobbyView"
-    lobby.Position = UDim2.new(0, 0, 0, 44)
-    lobby.Size = UDim2.new(1, 0, 1, -44)
+    lobby.Position = UDim2.new(0, 0, 0, 58)
+    lobby.Size = UDim2.new(1, 0, 1, -58)
     lobby.BackgroundTransparency = 1
     lobby.ZIndex = 2
     lobby.Parent = UI.MainFrame
     UI.LobbyView = lobby
 
-    local tabBar = Instance.new("Frame")
-    tabBar.Position = UDim2.new(0, 12, 0, 10)
-    tabBar.Size = UDim2.new(1, -24, 0, 36)
-    tabBar.BackgroundTransparency = 1
-    tabBar.ZIndex = 3
-    tabBar.Parent = lobby
+    -- Thanh dieu huong ben trai (Sidebar RPG)
+    local sideBar = Instance.new("Frame")
+    sideBar.Position = UDim2.new(0, 10, 0, 10)
+    sideBar.Size = UDim2.new(0, 146, 1, -20)
+    sideBar.BackgroundColor3 = C.BG_PANEL
+    sideBar.ZIndex = 3
+    sideBar.Parent = lobby
+    addCorner(sideBar, 12)
+    addStroke(sideBar, C.BORDER, 1.2)
 
-    local tabList = Instance.new("UIListLayout")
-    tabList.FillDirection = Enum.FillDirection.Horizontal
-    tabList.Padding = UDim.new(0, 8)
-    tabList.Parent = tabBar
+    local sList = Instance.new("UIListLayout")
+    sList.Padding = UDim.new(0, 8)
+    sList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    sList.Parent = sideBar
 
-    local tabDefs = {
+    local sPad = Instance.new("UIPadding")
+    sPad.PaddingTop = UDim.new(0, 10)
+    sPad.PaddingLeft = UDim.new(0, 8)
+    sPad.PaddingRight = UDim.new(0, 8)
+    sPad.Parent = sideBar
+
+    local contentArea = Instance.new("Frame")
+    contentArea.Position = UDim2.new(0, 166, 0, 10)
+    contentArea.Size = UDim2.new(1, -176, 1, -20)
+    contentArea.BackgroundTransparency = 1
+    contentArea.ZIndex = 3
+    contentArea.Parent = lobby
+
+    local tabs = {
         { id = "play",    label = "VÀO TRẬN" },
-        { id = "heroes",  label = "TƯỚNG (4)" },
+        { id = "heroes",  label = "TƯỚNG (8)" },
         { id = "upgrade", label = "NÂNG CẤP" },
-        { id = "code",    label = "MÃ QUÀ & KỶ LỤC" },
+        { id = "quests",  label = "NHIỆM VỤ" },
+        { id = "settings", label = "CÀI ĐẶT & CODE" },
     }
-    UI.TabButtons = {}
-    UI.TabPages = {}
+    UI.SideBtns = {}
+    UI.LobbyPages = {}
 
-    local contentHolder = Instance.new("Frame")
-    contentHolder.Position = UDim2.new(0, 12, 0, 54)
-    contentHolder.Size = UDim2.new(1, -24, 1, -66)
-    contentHolder.BackgroundTransparency = 1
-    contentHolder.ZIndex = 3
-    contentHolder.Parent = lobby
-
-    local function switchLobbyTab(tabId)
-        for id, btn in pairs(UI.TabButtons) do
-            local active = (id == tabId)
-            btn.BackgroundColor3 = active and C.BTN_PRIMARY or C.BG_CARD
-            btn.TextColor3 = active and C.TXT_MAIN or C.TXT_SUB
+    local function switchTab(tid)
+        for id, b in pairs(UI.SideBtns) do
+            local act = (id == tid)
+            b.BackgroundColor3 = act and C.BTN_PURPLE or C.BG_CARD
+            b.TextColor3 = act and C.TXT_MAIN or C.TXT_SUB
         end
-        for id, page in pairs(UI.TabPages) do
-            page.Visible = (id == tabId)
-        end
+        for id, pg in pairs(UI.LobbyPages) do pg.Visible = (id == tid) end
     end
 
-    for _, td in ipairs(tabDefs) do
-        local b = makeBtn(tabBar, {
-            text = td.label,
-            bg = C.BG_CARD,
-            color = C.TXT_SUB,
-            size = 13,
-            dim = UDim2.new(0.24, -4, 1, 0),
-            radius = 8,
-            z = 4,
+    for _, t in ipairs(tabs) do
+        local b = makeBtn(sideBar, {
+            text = t.label, bg = C.BG_CARD, color = C.TXT_SUB, size = 13,
+            dim = UDim2.new(1, 0, 0, 42), radius = 9, z = 4,
         })
-        UI.TabButtons[td.id] = b
+        UI.SideBtns[t.id] = b
+        if t.id == "quests" then
+            local dot = Instance.new("Frame")
+            dot.AnchorPoint = Vector2.new(1, 0.5)
+            dot.Position = UDim2.new(1, -8, 0.5, 0)
+            dot.Size = UDim2.new(0, 10, 0, 10)
+            dot.BackgroundColor3 = C.TXT_RED
+            dot.Visible = false
+            dot.ZIndex = 5
+            dot.Parent = b
+            addCorner(dot, 5)
+            UI.QuestBadge = dot
+        end
 
-        local p = Instance.new("Frame")
-        p.Size = UDim2.new(1, 0, 1, 0)
-        p.BackgroundTransparency = 1
-        p.Visible = false
-        p.ZIndex = 3
-        p.Parent = contentHolder
-        UI.TabPages[td.id] = p
+        local pg = Instance.new("Frame")
+        pg.Size = UDim2.new(1, 0, 1, 0)
+        pg.BackgroundTransparency = 1
+        pg.Visible = false
+        pg.ZIndex = 3
+        pg.Parent = contentArea
+        UI.LobbyPages[t.id] = pg
 
-        bindTap(b, function() switchLobbyTab(td.id) end)
+        bindTap(b, function() switchTab(t.id) end)
     end
 
-    -- TAB 1: VAO TRAN
+    -- ---- PAGE 1: VAO TRAN (CHON MAN + DO KHO + TUONG + BAT DAU) ----
     do
-        local p = UI.TabPages.play
-        makeLabel(p, {
-            text = "CHỌN CHẾ ĐỘ CHIẾN ĐẤU",
-            font = FONT_TITLE,
-            color = C.TXT_SUB,
-            size = 12,
-            dim = UDim2.new(1, 0, 0, 20),
+        local pg = UI.LobbyPages.play
+
+        -- Cot trai: Danh sach 5 Man choi
+        local leftCol = Instance.new("Frame")
+        leftCol.Size = UDim2.new(0.56, -6, 1, 0)
+        leftCol.BackgroundColor3 = C.BG_PANEL
+        leftCol.ZIndex = 4
+        leftCol.Parent = pg
+        addCorner(leftCol, 12)
+        addStroke(leftCol, C.BORDER, 1.2)
+
+        makeLabel(leftCol, {
+            text = "CHỌN BẢN ĐỒ CHIẾN ĐẤU", font = FONT_TITLE, color = C.TXT_GOLD, size = 13,
+            dim = UDim2.new(1, -24, 0, 24), pos = UDim2.new(0, 14, 0, 10), z = 5,
         })
 
-        UI.ModeCards = {}
-        local modeRow = Instance.new("Frame")
-        modeRow.Position = UDim2.new(0, 0, 0, 24)
-        modeRow.Size = UDim2.new(1, 0, 0, 118)
-        modeRow.BackgroundTransparency = 1
-        modeRow.Parent = p
+        local stScroll = Instance.new("ScrollingFrame")
+        stScroll.Position = UDim2.new(0, 10, 0, 38)
+        stScroll.Size = UDim2.new(1, -20, 1, -48)
+        stScroll.BackgroundTransparency = 1
+        stScroll.BorderSizePixel = 0
+        stScroll.ScrollBarThickness = 4
+        stScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+        stScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+        stScroll.ZIndex = 5
+        stScroll.Parent = leftCol
 
-        local ml = Instance.new("UIListLayout")
-        ml.FillDirection = Enum.FillDirection.Horizontal
-        ml.Padding = UDim.new(0, 10)
-        ml.Parent = modeRow
+        local stList = Instance.new("UIListLayout")
+        stList.Padding = UDim.new(0, 8)
+        stList.Parent = stScroll
 
-        for _, m in ipairs(CFG.MODES) do
-            local card = makeBtn(modeRow, {
-                text = "",
-                bg = C.BG_CARD,
-                dim = UDim2.new(0.333, -7, 1, 0),
-                radius = 10,
-                z = 4,
-            })
-            addGradient(card, C.BG_CARD_ALT, C.BG_PANEL, 120)
-
-            local bar = Instance.new("Frame")
-            bar.Size = UDim2.new(1, 0, 0, 5)
-            bar.BackgroundColor3 = m.accent
-            bar.BorderSizePixel = 0
-            bar.ZIndex = 5
-            bar.Parent = card
-            addCorner(bar, 4)
-
-            makeLabel(card, {
-                text = m.name,
-                font = FONT_TITLE,
-                color = C.TXT_MAIN,
-                size = 15,
-                dim = UDim2.new(1, -18, 0, 24),
-                pos = UDim2.new(0, 10, 0, 14),
-                z = 5,
+        UI.StageCards = {}
+        for _, st in ipairs(CFG.STAGES) do
+            local card = makeBtn(stScroll, {
+                text = "", bg = C.BG_CARD, dim = UDim2.new(1, -6, 0, 62), radius = 10, z = 5,
             })
             makeLabel(card, {
-                text = m.desc,
-                font = FONT_BODY,
-                color = C.TXT_SUB,
-                size = 12,
-                wrap = true,
-                dim = UDim2.new(1, -18, 0, 44),
-                pos = UDim2.new(0, 10, 0, 38),
-                z = 5,
+                text = st.name, font = FONT_TITLE, color = C.TXT_MAIN, size = 14,
+                dim = UDim2.new(1, -20, 0, 22), pos = UDim2.new(0, 12, 0, 8), z = 6,
             })
             makeLabel(card, {
-                text = string.format("Thưởng: x%.2f Xu", m.rewardMult),
-                font = FONT_TITLE,
-                color = C.TXT_GOLD,
-                size = 12,
-                dim = UDim2.new(1, -18, 0, 20),
-                pos = UDim2.new(0, 10, 1, -26),
-                z = 5,
+                text = string.format("Boss: %s  |  Thưởng: +%d Xu, +%d KC, +%d EXP", st.bossName, st.rewardCoin, st.rewardGem, st.rewardExp),
+                font = FONT_BODY, color = C.TXT_SUB, size = 11,
+                dim = UDim2.new(1, -20, 0, 20), pos = UDim2.new(0, 12, 0, 34), z = 6,
             })
-
-            UI.ModeCards[m.id] = { card = card, stroke = card:FindFirstChildOfClass("UIStroke") }
+            UI.StageCards[st.id] = { card = card, stroke = card:FindFirstChildOfClass("UIStroke") }
             bindTap(card, function()
-                DATA.selectedMode = m.id
+                DATA.selectedStage = st.id
                 SAVE.Write()
-                refreshLobbyUI()
+                refreshAllUI()
             end)
         end
 
-        local infoBox = Instance.new("Frame")
-        infoBox.Position = UDim2.new(0, 0, 0, 152)
-        infoBox.Size = UDim2.new(1, 0, 1, -216)
-        infoBox.BackgroundColor3 = C.BG_CARD
-        infoBox.ZIndex = 4
-        infoBox.Parent = p
-        addCorner(infoBox, 10)
-        addStroke(infoBox, C.BORDER, 1)
-        addGradient(infoBox, C.BG_CARD_ALT, C.BG_PANEL, 90)
+        -- Cot phai: Do Kho + Xem truoc Tuong + Nut BAT DAU
+        local rightCol = Instance.new("Frame")
+        rightCol.Position = UDim2.new(0.56, 6, 0, 0)
+        rightCol.Size = UDim2.new(0.44, -6, 1, 0)
+        rightCol.BackgroundColor3 = C.BG_PANEL
+        rightCol.ZIndex = 4
+        rightCol.Parent = pg
+        addCorner(rightCol, 12)
+        addStroke(rightCol, C.BORDER, 1.2)
 
-        -- Khung xem truoc hinh tuong dang chon (ve bang Sprite that)
-        local previewBg = Instance.new("Frame")
-        previewBg.Position = UDim2.new(0, 14, 0.5, -28)
-        previewBg.Size = UDim2.new(0, 56, 0, 56)
-        previewBg.BackgroundColor3 = C.BG_ARENA
-        previewBg.ZIndex = 5
-        previewBg.Parent = infoBox
-        addCorner(previewBg, 28)
-        addStroke(previewBg, C.BORDER_ACT, 1.5)
-
-        local previewHolder = Instance.new("Frame")
-        previewHolder.AnchorPoint = Vector2.new(0.5, 0.5)
-        previewHolder.Position = UDim2.new(0.46, 0, 0.5, 0)
-        previewHolder.Size = UDim2.new(0, 30, 0, 30)
-        previewHolder.BackgroundTransparency = 1
-        previewHolder.ZIndex = 6
-        previewHolder.Parent = previewBg
-        UI.PlayHeroPreview = previewHolder
-
-        UI.PlayHeroName = makeLabel(infoBox, {
-            text = "",
-            font = FONT_TITLE,
-            color = C.TXT_MAIN,
-            size = 15,
-            dim = UDim2.new(1, -92, 0, 22),
-            pos = UDim2.new(0, 82, 0, 12),
-            z = 5,
-        })
-        UI.PlayHeroStats = makeLabel(infoBox, {
-            text = "",
-            font = FONT_BODY,
-            color = C.TXT_GEM,
-            size = 12,
-            dim = UDim2.new(1, -92, 0, 20),
-            pos = UDim2.new(0, 82, 0, 36),
-            z = 5,
-        })
-        UI.PlayHeroSkills = makeLabel(infoBox, {
-            text = "",
-            font = FONT_BODY,
-            color = C.TXT_SUB,
-            size = 12,
-            wrap = true,
-            dim = UDim2.new(1, -92, 0, 26),
-            pos = UDim2.new(0, 82, 0, 58),
-            z = 5,
+        makeLabel(rightCol, {
+            text = "CHỌN ĐỘ KHÓ", font = FONT_TITLE, color = C.TXT_GOLD, size = 13,
+            dim = UDim2.new(1, -24, 0, 22), pos = UDim2.new(0, 14, 0, 10), z = 5,
         })
 
-        local startBtn = makeBtn(p, {
-            text = "BẮT ĐẦU CHIẾN ĐẤU",
-            bg = C.BTN_SUCCESS,
-            color = C.TXT_MAIN,
-            size = 16,
-            dim = UDim2.new(1, 0, 0, 50),
-            pos = UDim2.new(0, 0, 1, -52),
-            radius = 10,
-            strokeColor = C.TXT_GREEN,
-            strokeWidth = 1.5,
-            z = 5,
+        local diffRow = Instance.new("Frame")
+        diffRow.Position = UDim2.new(0, 12, 0, 36)
+        diffRow.Size = UDim2.new(1, -24, 0, 36)
+        diffRow.BackgroundTransparency = 1
+        diffRow.ZIndex = 5
+        diffRow.Parent = rightCol
+        local dl = Instance.new("UIListLayout")
+        dl.FillDirection = Enum.FillDirection.Horizontal
+        dl.Padding = UDim.new(0, 6)
+        dl.Parent = diffRow
+
+        UI.DiffBtns = {}
+        for _, df in ipairs(CFG.DIFFS) do
+            local db = makeBtn(diffRow, {
+                text = df.name, bg = C.BG_CARD, color = df.color, size = 12,
+                dim = UDim2.new(0.333, -4, 1, 0), radius = 8, z = 6,
+            })
+            UI.DiffBtns[df.id] = { btn = db, stroke = db:FindFirstChildOfClass("UIStroke") }
+            bindTap(db, function()
+                DATA.selectedDiff = df.id
+                SAVE.Write()
+                refreshAllUI()
+            end)
+        end
+
+        -- Khung xem truoc Tuong & Ky nang
+        local heroBox = Instance.new("Frame")
+        heroBox.Position = UDim2.new(0, 12, 0, 82)
+        heroBox.Size = UDim2.new(1, -24, 1, -158)
+        heroBox.BackgroundColor3 = C.BG_CARD
+        heroBox.ZIndex = 5
+        heroBox.Parent = rightCol
+        addCorner(heroBox, 10)
+        addStroke(heroBox, C.BORDER, 1)
+
+        local pBg = Instance.new("Frame")
+        pBg.AnchorPoint = Vector2.new(0.5, 0)
+        pBg.Position = UDim2.new(0.5, 0, 0, 12)
+        pBg.Size = UDim2.new(0, 68, 0, 68)
+        pBg.BackgroundColor3 = C.BG_ARENA
+        pBg.ZIndex = 6
+        pBg.Parent = heroBox
+        addCorner(pBg, 34)
+        addStroke(pBg, C.BORDER_GOLD, 1.5)
+
+        UI.LobbyHeroPreview = Instance.new("Frame")
+        UI.LobbyHeroPreview.AnchorPoint = Vector2.new(0.5, 0.5)
+        UI.LobbyHeroPreview.Position = UDim2.new(0.5, 0, 0.52, 0)
+        UI.LobbyHeroPreview.Size = UDim2.new(0, 42, 0, 42)
+        UI.LobbyHeroPreview.BackgroundTransparency = 1
+        UI.LobbyHeroPreview.ZIndex = 7
+        UI.LobbyHeroPreview.Parent = pBg
+
+        UI.LobbyHeroInfo = makeLabel(heroBox, {
+            text = "", font = FONT_BODY, color = C.TXT_MAIN, size = 12, wrap = true,
+            xAlign = Enum.TextXAlignment.Center, yAlign = Enum.TextYAlignment.Top,
+            dim = UDim2.new(1, -18, 1, -90), pos = UDim2.new(0, 9, 0, 86), z = 6,
         })
-        addGradient(startBtn, Color3.fromRGB(58, 144, 96), Color3.fromRGB(36, 94, 62), 90)
+
+        local startBtn = makeBtn(rightCol, {
+            text = "BẮT ĐẦU CHIẾN ĐẤU", bg = C.BTN_GOLD, color = C.TXT_DARK, size = 16,
+            dim = UDim2.new(1, -24, 0, 52), pos = UDim2.new(0, 12, 1, -64), radius = 10,
+            strokeColor = C.TXT_GOLD, strokeWidth = 2, z = 6,
+        })
+        addGrad(startBtn, Color3.fromRGB(208, 168, 76), Color3.fromRGB(168, 118, 38), 90)
         bindTap(startBtn, function() GAME.StartMatch() end)
     end
 
-    -- TAB 2: TUONG
+    -- ---- PAGE 2: 8 TUONG (HERO ROSTER) ----
     do
-        local p = UI.TabPages.heroes
+        local pg = UI.LobbyPages.heroes
         local scroll = Instance.new("ScrollingFrame")
         scroll.Size = UDim2.new(1, 0, 1, 0)
         scroll.BackgroundTransparency = 1
         scroll.BorderSizePixel = 0
-        scroll.ScrollBarThickness = 4
-        scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+        scroll.ScrollBarThickness = 5
         scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
-        scroll.ZIndex = 3
-        scroll.Parent = p
+        scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+        scroll.ZIndex = 4
+        scroll.Parent = pg
 
         local grid = Instance.new("UIGridLayout")
-        grid.CellSize = UDim2.new(0.49, -4, 0, 144)
+        grid.CellSize = UDim2.new(0.49, -4, 0, 148)
         grid.CellPadding = UDim2.new(0, 10, 0, 10)
         grid.Parent = scroll
 
         UI.HeroCards = {}
         for _, h in ipairs(CFG.HEROES) do
             local card = Instance.new("Frame")
-            card.BackgroundColor3 = C.BG_CARD
+            card.BackgroundColor3 = C.BG_PANEL
             card.ZIndex = 4
             card.Parent = scroll
             addCorner(card, 10)
-            local st = addStroke(card, C.BORDER, 1)
-            addGradient(card, C.BG_CARD_ALT, C.BG_PANEL, 110)
+            local st = addStroke(card, C.BORDER, 1.2)
 
-            local iconBg = Instance.new("Frame")
-            iconBg.Position = UDim2.new(0, 10, 0, 10)
-            iconBg.Size = UDim2.new(0, 42, 0, 42)
-            iconBg.BackgroundColor3 = C.BG_ARENA
-            iconBg.ZIndex = 5
-            iconBg.Parent = card
-            addCorner(iconBg, 21)
-            addStroke(iconBg, h.trim, 1)
+            local ava = Instance.new("Frame")
+            ava.Position = UDim2.new(0, 10, 0, 10)
+            ava.Size = UDim2.new(0, 48, 0, 48)
+            ava.BackgroundColor3 = C.BG_ARENA
+            ava.ZIndex = 5
+            ava.Parent = card
+            addCorner(ava, 24)
+            addStroke(ava, h.fx, 1.5)
 
-            local iconSprite = Instance.new("Frame")
-            iconSprite.AnchorPoint = Vector2.new(0.5, 0.5)
-            iconSprite.Position = UDim2.new(0.45, 0, 0.5, 0)
-            iconSprite.Size = UDim2.new(0, 22, 0, 22)
-            iconSprite.BackgroundTransparency = 1
-            iconSprite.ZIndex = 6
-            iconSprite.Parent = iconBg
-            buildHeroAvatar(iconSprite, h, 6)
+            local sp = Instance.new("Frame")
+            sp.AnchorPoint = Vector2.new(0.5, 0.5)
+            sp.Position = UDim2.new(0.5, 0, 0.52, 0)
+            sp.Size = UDim2.new(0, 28, 0, 28)
+            sp.BackgroundTransparency = 1
+            sp.ZIndex = 6
+            sp.Parent = ava
+            buildChibiHero(sp, h, 6)
 
             makeLabel(card, {
-                text = h.name .. " - " .. h.role,
-                font = FONT_TITLE,
-                color = C.TXT_MAIN,
-                size = 13,
-                dim = UDim2.new(1, -66, 0, 20),
-                pos = UDim2.new(0, 58, 0, 10),
-                z = 5,
+                text = h.name .. " - " .. h.role, font = FONT_TITLE, color = C.TXT_MAIN, size = 13,
+                dim = UDim2.new(1, -72, 0, 20), pos = UDim2.new(0, 66, 0, 10), z = 5,
             })
             makeLabel(card, {
-                text = string.format("HP %d | ATK %d | SPD %d | CRIT %d%%", h.hp, h.atk, h.spd, math.floor(h.crit * 100)),
-                font = FONT_BODY,
-                color = C.TXT_GEM,
-                size = 11,
-                dim = UDim2.new(1, -66, 0, 18),
-                pos = UDim2.new(0, 58, 0, 32),
-                z = 5,
+                text = string.format("HP %d | MP %d | ATK %d | CRIT %d%%", h.hp, h.mp, h.atk, math.floor(h.crit * 100)),
+                font = FONT_BODY, color = C.TXT_CYAN, size = 11,
+                dim = UDim2.new(1, -72, 0, 18), pos = UDim2.new(0, 66, 0, 32), z = 5,
             })
             makeLabel(card, {
-                text = h.desc,
-                font = FONT_BODY,
-                color = C.TXT_SUB,
-                size = 11,
-                wrap = true,
-                dim = UDim2.new(1, -24, 0, 34),
-                pos = UDim2.new(0, 12, 0, 58),
-                z = 5,
+                text = h.desc, font = FONT_BODY, color = C.TXT_SUB, size = 11, wrap = true,
+                dim = UDim2.new(1, -24, 0, 34), pos = UDim2.new(0, 12, 0, 64), z = 5,
             })
 
-            local actBtn = makeBtn(card, {
-                text = "CHỌN",
-                bg = C.BTN_PRIMARY,
-                color = C.TXT_MAIN,
-                size = 12,
-                dim = UDim2.new(1, -24, 0, 32),
-                pos = UDim2.new(0, 12, 1, -42),
-                radius = 7,
-                z = 5,
+            local btn = makeBtn(card, {
+                text = "CHỌN", bg = C.BTN_BLUE, color = C.TXT_MAIN, size = 12,
+                dim = UDim2.new(1, -24, 0, 34), pos = UDim2.new(0, 12, 1, -44), radius = 8, z = 5,
             })
+            UI.HeroCards[h.id] = { stroke = st, btn = btn }
 
-            UI.HeroCards[h.id] = { stroke = st, btn = actBtn }
-            bindTap(actBtn, function()
+            bindTap(btn, function()
                 if DATA.unlockedHeroes[h.id] then
                     DATA.selectedHero = h.id
                     SAVE.Write()
-                    refreshLobbyUI()
-                    showToast("Đã trang bị tướng " .. h.name, C.TXT_GREEN)
+                    refreshAllUI()
+                    showToast("Đã trang bị: " .. h.name, C.TXT_GREEN)
                 elseif DATA.coins >= h.costCoin and DATA.gems >= h.costGem then
                     DATA.coins = DATA.coins - h.costCoin
                     DATA.gems = DATA.gems - h.costGem
                     DATA.unlockedHeroes[h.id] = true
                     DATA.selectedHero = h.id
                     SAVE.Write()
-                    refreshLobbyUI()
+                    refreshAllUI()
                     showToast("Mở khóa thành công: " .. h.name, C.TXT_GOLD)
                 else
-                    showToast("Chưa đủ Xu hoặc KC để mở khóa!", C.TXT_RED)
+                    showToast("Chưa đủ Xu hoặc KC!", C.TXT_RED)
                 end
             end)
         end
     end
 
-    -- TAB 3: NANG CAP
+    -- ---- PAGE 3: NANG CAP VINH VIEN ----
     do
-        local p = UI.TabPages.upgrade
+        local pg = UI.LobbyPages.upgrade
         local scroll = Instance.new("ScrollingFrame")
         scroll.Size = UDim2.new(1, 0, 1, 0)
         scroll.BackgroundTransparency = 1
         scroll.BorderSizePixel = 0
         scroll.ScrollBarThickness = 4
-        scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
         scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
-        scroll.ZIndex = 3
-        scroll.Parent = p
+        scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+        scroll.ZIndex = 4
+        scroll.Parent = pg
 
         local list = Instance.new("UIListLayout")
         list.Padding = UDim.new(0, 8)
@@ -1340,119 +1475,211 @@ do
         UI.UpgradeRows = {}
         for _, upg in ipairs(CFG.UPGRADES) do
             local row = Instance.new("Frame")
-            row.Size = UDim2.new(1, -6, 0, 56)
-            row.BackgroundColor3 = C.BG_CARD
+            row.Size = UDim2.new(1, -6, 0, 62)
+            row.BackgroundColor3 = C.BG_PANEL
             row.ZIndex = 4
             row.Parent = scroll
-            addCorner(row, 8)
-            addStroke(row, C.BORDER, 1)
+            addCorner(row, 10)
+            addStroke(row, C.BORDER, 1.2)
 
-            local titleLbl = makeLabel(row, {
-                text = "",
-                font = FONT_TITLE,
-                color = C.TXT_MAIN,
-                size = 14,
-                dim = UDim2.new(0.6, 0, 0, 22),
-                pos = UDim2.new(0, 14, 0, 8),
-                z = 5,
+            local tLbl = makeLabel(row, {
+                text = "", font = FONT_TITLE, color = C.TXT_MAIN, size = 14,
+                dim = UDim2.new(0.6, 0, 0, 22), pos = UDim2.new(0, 14, 0, 10), z = 5,
             })
             makeLabel(row, {
-                text = upg.stat .. " mỗi cấp",
-                font = FONT_BODY,
-                color = C.TXT_SUB,
-                size = 12,
-                dim = UDim2.new(0.6, 0, 0, 18),
-                pos = UDim2.new(0, 14, 0, 30),
-                z = 5,
+                text = upg.stat .. " mỗi cấp", font = FONT_BODY, color = C.TXT_SUB, size = 12,
+                dim = UDim2.new(0.6, 0, 0, 18), pos = UDim2.new(0, 14, 0, 34), z = 5,
             })
 
-            local buyBtn = makeBtn(row, {
-                text = "NÂNG",
-                bg = C.BTN_WARN,
-                color = C.TXT_MAIN,
-                size = 12,
-                dim = UDim2.new(0, 138, 0, 34),
-                pos = UDim2.new(1, -150, 0.5, -17),
-                radius = 7,
-                z = 5,
+            local b = makeBtn(row, {
+                text = "NÂNG", bg = C.BTN_PURPLE, color = C.TXT_MAIN, size = 12,
+                dim = UDim2.new(0, 150, 0, 36), pos = UDim2.new(1, -164, 0.5, -18), radius = 8, z = 5,
             })
+            UI.UpgradeRows[upg.id] = { title = tLbl, btn = b }
 
-            UI.UpgradeRows[upg.id] = { title = titleLbl, btn = buyBtn }
-            bindTap(buyBtn, function()
+            bindTap(b, function()
                 local lv = DATA.upgrades[upg.id] or 0
                 if lv >= upg.maxLv then
                     showToast(upg.name .. " đã đạt cấp tối đa!", C.TXT_GOLD)
                     return
                 end
-                local cost = getUpgradeCost(upg)
+                local cost = upg.baseCost + lv * upg.step
                 if DATA.coins >= cost then
                     DATA.coins = DATA.coins - cost
                     DATA.upgrades[upg.id] = lv + 1
+                    DATA.totalUpgrades = (DATA.totalUpgrades or 0) + 1
                     SAVE.Write()
-                    refreshLobbyUI()
+                    refreshAllUI()
                     showToast("Đã nâng " .. upg.name .. " lên Lv." .. tostring(lv + 1), C.TXT_GREEN)
                 else
-                    showToast("Cần " .. tostring(cost) .. " Xu để nâng cấp!", C.TXT_RED)
+                    showToast("Cần " .. tostring(cost) .. " Xu!", C.TXT_RED)
                 end
             end)
         end
     end
 
-    -- TAB 4: MA QUA & KY LUC
+    -- ---- PAGE 4: NHIEM VU & NHAN TAT CA ----
     do
-        local p = UI.TabPages.code
-        local statsCard = Instance.new("Frame")
-        statsCard.Size = UDim2.new(1, 0, 0, 118)
-        statsCard.BackgroundColor3 = C.BG_CARD
-        statsCard.ZIndex = 4
-        statsCard.Parent = p
-        addCorner(statsCard, 10)
-        addStroke(statsCard, C.BORDER, 1)
+        local pg = UI.LobbyPages.quests
+        local scroll = Instance.new("ScrollingFrame")
+        scroll.Size = UDim2.new(1, 0, 1, -56)
+        scroll.BackgroundTransparency = 1
+        scroll.BorderSizePixel = 0
+        scroll.ScrollBarThickness = 4
+        scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+        scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+        scroll.ZIndex = 4
+        scroll.Parent = pg
 
-        makeLabel(statsCard, {
-            text = "THÀNH TÍCH CHIẾN ĐẤU",
-            font = FONT_TITLE,
-            color = C.TXT_GOLD,
-            size = 13,
-            dim = UDim2.new(1, -24, 0, 22),
-            pos = UDim2.new(0, 14, 0, 10),
-            z = 5,
+        local list = Instance.new("UIListLayout")
+        list.Padding = UDim.new(0, 8)
+        list.Parent = scroll
+
+        UI.QuestRows = {}
+        for _, q in ipairs(CFG.QUESTS) do
+            local row = Instance.new("Frame")
+            row.Size = UDim2.new(1, -6, 0, 68)
+            row.BackgroundColor3 = C.BG_PANEL
+            row.ZIndex = 4
+            row.Parent = scroll
+            addCorner(row, 10)
+            addStroke(row, C.BORDER, 1.2)
+
+            makeLabel(row, {
+                text = q.title, font = FONT_TITLE, color = C.TXT_MAIN, size = 14,
+                dim = UDim2.new(0.65, 0, 0, 22), pos = UDim2.new(0, 14, 0, 8), z = 5,
+            })
+
+            local pBg = Instance.new("Frame")
+            pBg.Position = UDim2.new(0, 14, 0, 36)
+            pBg.Size = UDim2.new(0.55, 0, 0, 14)
+            pBg.BackgroundColor3 = C.BG_FULL
+            pBg.ZIndex = 5
+            pBg.Parent = row
+            addCorner(pBg, 5)
+
+            local pFill = Instance.new("Frame")
+            pFill.Size = UDim2.new(0, 0, 1, 0)
+            pFill.BackgroundColor3 = C.EXP_BAR
+            pFill.BorderSizePixel = 0
+            pFill.ZIndex = 6
+            pFill.Parent = pBg
+            addCorner(pFill, 5)
+
+            local pLbl = makeLabel(pBg, {
+                text = "0/0", font = FONT_TITLE, color = C.TXT_MAIN, size = 10,
+                xAlign = Enum.TextXAlignment.Center, dim = UDim2.new(1, 0, 1, 0), z = 7,
+            })
+
+            local cBtn = makeBtn(row, {
+                text = string.format("+%d Xu, +%d KC", q.rewardCoin, q.rewardGem),
+                bg = C.BTN_DARK, color = C.TXT_MAIN, size = 11,
+                dim = UDim2.new(0, 152, 0, 36), pos = UDim2.new(1, -166, 0.5, -18), radius = 8, z = 5,
+            })
+
+            UI.QuestRows[q.id] = { fill = pFill, lbl = pLbl, btn = cBtn }
+            bindTap(cBtn, function()
+                if DATA.claimedQuests[q.id] then return end
+                local cur = DATA[q.statKey] or 0
+                if cur >= q.target then
+                    DATA.claimedQuests[q.id] = true
+                    DATA.coins = DATA.coins + q.rewardCoin
+                    DATA.gems = DATA.gems + q.rewardGem
+                    SAVE.Write()
+                    refreshAllUI()
+                    showToast("Nhận thưởng: +" .. q.rewardCoin .. " Xu, +" .. q.rewardGem .. " KC", C.TXT_GREEN)
+                else
+                    showToast("Chưa hoàn thành nhiệm vụ này!", C.TXT_SUB)
+                end
+            end)
+        end
+
+        local claimAllBtn = makeBtn(pg, {
+            text = "NHẬN TẤT CẢ NHIỆM VỤ HOÀN THÀNH", bg = C.BTN_PURPLE, color = C.TXT_MAIN, size = 14,
+            dim = UDim2.new(1, 0, 0, 44), pos = UDim2.new(0, 0, 1, -46), radius = 10, z = 5,
         })
-        UI.RecordLbl = makeLabel(statsCard, {
-            text = "",
-            font = FONT_BODY,
-            color = C.TXT_MAIN,
-            size = 13,
-            wrap = true,
-            dim = UDim2.new(1, -28, 0, 74),
-            pos = UDim2.new(0, 14, 0, 36),
-            z = 5,
+        bindTap(claimAllBtn, function()
+            local count, tc, tg = 0, 0, 0
+            for _, q in ipairs(CFG.QUESTS) do
+                if not DATA.claimedQuests[q.id] and (DATA[q.statKey] or 0) >= q.target then
+                    DATA.claimedQuests[q.id] = true
+                    DATA.coins = DATA.coins + q.rewardCoin
+                    DATA.gems = DATA.gems + q.rewardGem
+                    count = count + 1
+                    tc = tc + q.rewardCoin
+                    tg = tg + q.rewardGem
+                end
+            end
+            if count > 0 then
+                SAVE.Write()
+                refreshAllUI()
+                showToast(string.format("Đã nhận %d nhiệm vụ (+%d Xu, +%d KC)", count, tc, tg), C.TXT_GREEN)
+            else
+                showToast("Chưa có nhiệm vụ nào sẵn sàng nhận!", C.TXT_SUB)
+            end
+        end)
+    end
+
+    -- ---- PAGE 5: CAI DAT & MA QUA ----
+    do
+        local pg = UI.LobbyPages.settings
+
+        local setCard = Instance.new("Frame")
+        setCard.Size = UDim2.new(1, 0, 0, 174)
+        setCard.BackgroundColor3 = C.BG_PANEL
+        setCard.ZIndex = 4
+        setCard.Parent = pg
+        addCorner(setCard, 10)
+        addStroke(setCard, C.BORDER, 1.2)
+
+        makeLabel(setCard, {
+            text = "CÀI ĐẶT HIỂN THỊ & ĐIỀU KHIỂN", font = FONT_TITLE, color = C.TXT_GOLD, size = 13,
+            dim = UDim2.new(1, -24, 0, 22), pos = UDim2.new(0, 14, 0, 10), z = 5,
         })
+
+        local setDefs = {
+            { key = "shake",     label = "Rung màn hình khi đánh" },
+            { key = "particles", label = "Hiệu ứng tia lửa & tàn ảnh" },
+            { key = "minimap",   label = "Hiện Radar Minimap góc trái" },
+            { key = "autoAim",   label = "Tự động khóa mục tiêu gần" },
+        }
+        UI.SettingBtns = {}
+        for idx, sd in ipairs(setDefs) do
+            local colIdx = (idx - 1) % 2
+            local rowIdx = math.floor((idx - 1) / 2)
+            local b = makeBtn(setCard, {
+                text = sd.label .. ": BẬT", bg = C.BG_CARD, color = C.TXT_MAIN, size = 12,
+                dim = UDim2.new(0.48, -6, 0, 42),
+                pos = UDim2.new(colIdx * 0.50 + 0.02, 0, 0, 42 + rowIdx * 54),
+                radius = 8, z = 5,
+            })
+            UI.SettingBtns[sd.key] = { btn = b, label = sd.label }
+            bindTap(b, function()
+                DATA.settings[sd.key] = not DATA.settings[sd.key]
+                SAVE.Write()
+                refreshAllUI()
+            end)
+        end
 
         local codeCard = Instance.new("Frame")
-        codeCard.Position = UDim2.new(0, 0, 0, 130)
-        codeCard.Size = UDim2.new(1, 0, 0, 120)
-        codeCard.BackgroundColor3 = C.BG_CARD
+        codeCard.Position = UDim2.new(0, 0, 0, 186)
+        codeCard.Size = UDim2.new(1, 0, 0, 118)
+        codeCard.BackgroundColor3 = C.BG_PANEL
         codeCard.ZIndex = 4
-        codeCard.Parent = p
+        codeCard.Parent = pg
         addCorner(codeCard, 10)
-        addStroke(codeCard, C.BORDER, 1)
+        addStroke(codeCard, C.BORDER, 1.2)
 
         makeLabel(codeCard, {
-            text = "NHẬP MÃ QUÀ TẶNG (Thử: CHIENDAU2026, TANTHU500, SANBOSSPRO)",
-            font = FONT_TITLE,
-            color = C.TXT_SUB,
-            size = 12,
-            wrap = true,
-            dim = UDim2.new(1, -28, 0, 26),
-            pos = UDim2.new(0, 14, 0, 10),
-            z = 5,
+            text = "MÃ QUÀ TẶNG (Thử: CHIENDAU2026, TANTHU500, FULLSCREEN)",
+            font = FONT_TITLE, color = C.TXT_SUB, size = 12,
+            dim = UDim2.new(1, -24, 0, 22), pos = UDim2.new(0, 14, 0, 10), z = 5,
         })
 
         local box = Instance.new("TextBox")
-        box.Position = UDim2.new(0, 14, 0, 46)
-        box.Size = UDim2.new(1, -156, 0, 38)
-        box.BackgroundColor3 = C.BG_MAIN
+        box.Position = UDim2.new(0, 14, 0, 40)
+        box.Size = UDim2.new(1, -158, 0, 38)
+        box.BackgroundColor3 = C.BG_FULL
         box.Font = FONT_TITLE
         box.TextColor3 = C.TXT_MAIN
         box.PlaceholderColor3 = C.TXT_SUB
@@ -1465,98 +1692,86 @@ do
         addCorner(box, 8)
         addStroke(box, C.BORDER, 1)
 
-        local redeemBtn = makeBtn(codeCard, {
-            text = "NHẬN QUÀ",
-            bg = C.BTN_SUCCESS,
-            color = C.TXT_MAIN,
-            size = 13,
-            dim = UDim2.new(0, 126, 0, 38),
-            pos = UDim2.new(1, -140, 0, 46),
-            radius = 8,
-            z = 5,
+        local rBtn = makeBtn(codeCard, {
+            text = "NHẬN QUÀ", bg = C.BTN_GREEN, color = C.TXT_MAIN, size = 13,
+            dim = UDim2.new(0, 128, 0, 38), pos = UDim2.new(1, -142, 0, 40), radius = 8, z = 5,
         })
-        bindTap(redeemBtn, function()
+        bindTap(rBtn, function()
             local code = string.upper(string.gsub(box.Text or "", "%s+", ""))
-            if code == "" then
-                showToast("Hãy nhập mã quà trước!", C.TXT_RED)
-                return
-            end
-            local reward = CFG.CODES[code]
-            if not reward then
-                showToast("Mã quà không hợp lệ!", C.TXT_RED)
-                return
-            end
-            if DATA.usedCodes[code] then
-                showToast("Bạn đã dùng mã này rồi!", C.TXT_RED)
-                return
-            end
+            local rw = CFG.CODES[code]
+            if not rw then showToast("Mã quà không hợp lệ!", C.TXT_RED); return end
+            if DATA.usedCodes[code] then showToast("Mã này đã được dùng!", C.TXT_RED); return end
             DATA.usedCodes[code] = true
-            DATA.coins = DATA.coins + reward.coins
-            DATA.gems = DATA.gems + reward.gems
+            DATA.coins = DATA.coins + rw.coins
+            DATA.gems = DATA.gems + rw.gems
             box.Text = ""
             SAVE.Write()
-            refreshLobbyUI()
-            showToast("Thành công: " .. reward.msg, C.TXT_GREEN)
+            refreshAllUI()
+            showToast("Thành công: " .. rw.msg, C.TXT_GREEN)
         end)
 
         makeLabel(codeCard, {
-            text = "Phím PC: WASD/Mũi tên di chuyển | J/Space Đánh | K/Shift Lướt | L/Q Kỹ năng | U/E Tuyệt chiêu",
-            font = FONT_BODY,
-            color = C.TXT_SUB,
-            size = 11,
-            wrap = true,
-            dim = UDim2.new(1, -28, 0, 24),
-            pos = UDim2.new(0, 14, 1, -28),
-            z = 5,
+            text = "Phím PC: WASD/Mũi tên di chuyển | J/Space Đánh | K/Shift Lướt | L/Q Chiêu 1 | I/R Chiêu 2 | U/E Tuyệt Chiêu",
+            font = FONT_BODY, color = C.TXT_SUB, size = 11, wrap = true,
+            dim = UDim2.new(1, -24, 0, 24), pos = UDim2.new(0, 14, 1, -28), z = 5,
         })
     end
 
-    switchLobbyTab("play")
+    switchTab("play")
 end
 
-refreshLobbyUI = function()
-    UI.HeaderCoin.Text = "Xu: " .. tostring(DATA.coins)
-    UI.HeaderGem.Text = "KC: " .. tostring(DATA.gems)
+refreshAllUI = function()
+    local st = computeStats()
+    buildChibiHero(UI.TopAvatarHolder, st.hero, 12)
+    UI.TopLvLbl.Text = "Lv." .. tostring(DATA.level)
+    UI.TopHpLbl.Text = string.format("HP %d/%d", S.inMatch and math.floor(S.hp) or st.maxHp, S.inMatch and S.maxHp or st.maxHp)
+    UI.TopMpLbl.Text = string.format("MP %d/%d", S.inMatch and math.floor(S.mp) or st.maxMp, S.inMatch and S.maxMp or st.maxMp)
+    UI.TopPowerLbl.Text = "Lực Chiến: " .. tostring(st.power)
+    UI.TopCoinLbl.Text = tostring(DATA.coins) .. " Xu"
+    UI.TopGemLbl.Text = tostring(DATA.gems) .. " KC"
 
-    for id, pack in pairs(UI.ModeCards) do
-        local sel = (DATA.selectedMode == id)
+    for id, pack in pairs(UI.StageCards) do
+        local sel = (DATA.selectedStage == id)
         pack.card.BackgroundColor3 = sel and C.BG_CARD_ALT or C.BG_CARD
-        if pack.stroke then
-            pack.stroke.Color = sel and C.BORDER_ACT or C.BORDER
-            pack.stroke.Thickness = sel and 2 or 1
-        end
+        pack.stroke.Color = sel and C.BORDER_GOLD or C.BORDER
+        pack.stroke.Thickness = sel and 2 or 1
     end
 
-    local st = computePlayerStats()
-    buildHeroAvatar(UI.PlayHeroPreview, st.hero, 6)
-    UI.PlayHeroName.Text = "Tướng đang chọn: " .. st.hero.name .. " (" .. st.hero.role .. ")"
-    UI.PlayHeroStats.Text = string.format(
-        "HP: %d  |  ATK: %d  |  SPD: %d  |  CRIT: %d%%  |  Hồi chiêu: -%d%%",
-        st.maxHp, st.atk, st.spd, math.floor(st.crit * 100), math.floor((1 - st.cdr) * 100)
+    for id, pack in pairs(UI.DiffBtns) do
+        local sel = (DATA.selectedDiff == id)
+        pack.btn.BackgroundColor3 = sel and C.BG_CARD_ALT or C.BG_CARD
+        pack.stroke.Color = sel and C.BORDER_ACT or C.BORDER
+        pack.stroke.Thickness = sel and 2 or 1
+    end
+
+    buildChibiHero(UI.LobbyHeroPreview, st.hero, 7)
+    UI.LobbyHeroInfo.Text = string.format(
+        "%s (%s)\nHP %d  |  MP %d  |  ATK %d  |  CRIT %d%%\nChiêu 1: %s  |  Chiêu 2: %s\nTuyệt chiêu: %s",
+        st.hero.name, st.hero.role, st.maxHp, st.maxMp, st.atk, math.floor(st.crit * 100),
+        st.hero.s1Name, st.hero.s2Name, st.hero.ultName
     )
-    UI.PlayHeroSkills.Text = "Kỹ năng: " .. st.hero.skillName .. "  |  Tuyệt chiêu: " .. st.hero.ultName
 
     for _, h in ipairs(CFG.HEROES) do
         local pack = UI.HeroCards[h.id]
         local unlocked = DATA.unlockedHeroes[h.id] == true
-        local equipped = (DATA.selectedHero == h.id)
-        if equipped then
-            pack.btn.Text = "ĐANG DÙNG"
-            pack.btn.BackgroundColor3 = C.BTN_SUCCESS
+        local eq = (DATA.selectedHero == h.id)
+        if eq then
+            pack.btn.Text = "ĐANG TRANG BỊ"
+            pack.btn.BackgroundColor3 = C.BTN_GREEN
             pack.stroke.Color = C.TXT_GREEN
             pack.stroke.Thickness = 2
         elseif unlocked then
             pack.btn.Text = "CHỌN TƯỚNG"
-            pack.btn.BackgroundColor3 = C.BTN_PRIMARY
+            pack.btn.BackgroundColor3 = C.BTN_BLUE
             pack.stroke.Color = C.BORDER
-            pack.stroke.Thickness = 1
+            pack.stroke.Thickness = 1.2
         else
-            local costTxt = tostring(h.costCoin) .. " Xu"
-            if h.costGem > 0 then costTxt = costTxt .. " + " .. tostring(h.costGem) .. " KC" end
-            pack.btn.Text = "MỞ KHÓA (" .. costTxt .. ")"
-            pack.btn.BackgroundColor3 = C.BTN_WARN
+            local ct = tostring(h.costCoin) .. " Xu"
+            if h.costGem > 0 then ct = ct .. " + " .. tostring(h.costGem) .. " KC" end
+            pack.btn.Text = "MỞ KHÓA (" .. ct .. ")"
+            pack.btn.BackgroundColor3 = C.BTN_GOLD
             pack.stroke.Color = C.BORDER
-            pack.stroke.Thickness = 1
+            pack.stroke.Thickness = 1.2
         end
     end
 
@@ -1566,401 +1781,337 @@ refreshLobbyUI = function()
         pack.title.Text = string.format("%s (Lv.%d/%d)", upg.name, lv, upg.maxLv)
         if lv >= upg.maxLv then
             pack.btn.Text = "TỐI ĐA"
-            pack.btn.BackgroundColor3 = C.BTN_NEUTRAL
+            pack.btn.BackgroundColor3 = C.BTN_DARK
         else
-            pack.btn.Text = "NÂNG (" .. tostring(getUpgradeCost(upg)) .. " Xu)"
-            pack.btn.BackgroundColor3 = C.BTN_WARN
+            pack.btn.Text = "NÂNG (" .. tostring(upg.baseCost + lv * upg.step) .. " Xu)"
+            pack.btn.BackgroundColor3 = C.BTN_PURPLE
         end
     end
 
-    UI.RecordLbl.Text = string.format(
-        "Điểm cao nhất: %d   |   Ải cao nhất: %d\nTổng quái đã hạ: %d   |   Boss đã hạ: %d",
-        DATA.bestScore, DATA.bestWave, DATA.totalKills, DATA.bossKills
-    )
+    local anyClaimable = false
+    for _, q in ipairs(CFG.QUESTS) do
+        local pack = UI.QuestRows[q.id]
+        local cur = math.min(q.target, DATA[q.statKey] or 0)
+        pack.fill.Size = UDim2.new(cur / q.target, 0, 1, 0)
+        pack.lbl.Text = string.format("%d / %d", cur, q.target)
+        if DATA.claimedQuests[q.id] then
+            pack.btn.Text = "ĐÃ NHẬN"
+            pack.btn.BackgroundColor3 = C.BTN_DARK
+        elseif cur >= q.target then
+            anyClaimable = true
+            pack.btn.Text = "NHẬN THƯỞNG"
+            pack.btn.BackgroundColor3 = C.BTN_GREEN
+        else
+            pack.btn.Text = string.format("+%d Xu, +%d KC", q.rewardCoin, q.rewardGem)
+            pack.btn.BackgroundColor3 = C.BG_CARD
+        end
+    end
+    UI.QuestBadge.Visible = anyClaimable
+
+    for key, pack in pairs(UI.SettingBtns) do
+        local on = DATA.settings[key] == true
+        pack.btn.Text = pack.label .. (on and ": BẬT" or ": TẮT")
+        pack.btn.BackgroundColor3 = on and C.BTN_GREEN or C.BG_CARD
+    end
 end
 
 -- ============================================================================
--- 8. MAN HINH DAU TRUONG (SAN DAU CO DAI + NHAN VAT DA LOP + HUD + NUT)
+-- 8. MAN HINH CHIEN DAU FULL MAN HINH (ARENA + MINIMAP + JOYSTICK + 5 NUT)
 -- ============================================================================
 do
     local combat = Instance.new("Frame")
     combat.Name = "CombatView"
-    combat.Position = UDim2.new(0, 0, 0, 44)
-    combat.Size = UDim2.new(1, 0, 1, -44)
-    combat.BackgroundColor3 = C.BG_MAIN
+    combat.Position = UDim2.new(0, 0, 0, 58)
+    combat.Size = UDim2.new(1, 0, 1, -58)
+    combat.BackgroundColor3 = C.BG_FULL
     combat.Visible = false
     combat.ClipsDescendants = true
     combat.ZIndex = 2
     combat.Parent = UI.MainFrame
     UI.CombatView = combat
 
-    -- San dau co dai (Gradient nen + Vong tron trung tam + 4 Tru lua 4 goc)
+    -- San dau phu gan nhu toan man hinh
     local arena = Instance.new("Frame")
     arena.Name = "ArenaCanvas"
-    arena.Position = UDim2.new(0, 8, 0, 44)
-    arena.Size = UDim2.new(1, -16, 1, -52)
+    arena.Position = UDim2.new(0, 6, 0, 6)
+    arena.Size = UDim2.new(1, -12, 1, -12)
     arena.BackgroundColor3 = C.BG_ARENA
     arena.ClipsDescendants = true
     arena.ZIndex = 2
     arena.Parent = combat
-    addCorner(arena, 10)
-    addStroke(arena, C.STONE_LIGHT, 2)
-    addGradient(arena, C.BG_ARENA_IN, C.BG_MAIN, 135)
+    addCorner(arena, 12)
+    addStroke(arena, C.BORDER_ACT, 2)
+    addGrad(arena, C.BG_ARENA_MID, C.BG_FULL, 135)
     UI.Arena = arena
 
-    -- Luoi gach da
+    -- Luoi gach ham nguc + bui co trang tri
     for i = 1, 9 do
-        local vline = Instance.new("Frame")
-        vline.Position = UDim2.new(i / 10, 0, 0, 0)
-        vline.Size = UDim2.new(0, 1, 1, 0)
-        vline.BackgroundColor3 = C.BG_ARENA_G
-        vline.BackgroundTransparency = 0.45
-        vline.BorderSizePixel = 0
-        vline.ZIndex = 2
-        vline.Parent = arena
+        local vl = Instance.new("Frame")
+        vl.Position = UDim2.new(i / 10, 0, 0, 0)
+        vl.Size = UDim2.new(0, 1, 1, 0)
+        vl.BackgroundColor3 = C.BG_ARENA_G
+        vl.BackgroundTransparency = 0.55
+        vl.BorderSizePixel = 0
+        vl.ZIndex = 2
+        vl.Parent = arena
     end
     for i = 1, 5 do
-        local hline = Instance.new("Frame")
-        hline.Position = UDim2.new(0, 0, i / 6, 0)
-        hline.Size = UDim2.new(1, 0, 0, 1)
-        hline.BackgroundColor3 = C.BG_ARENA_G
-        hline.BackgroundTransparency = 0.45
-        hline.BorderSizePixel = 0
-        hline.ZIndex = 2
-        hline.Parent = arena
+        local hl = Instance.new("Frame")
+        hl.Position = UDim2.new(0, 0, i / 6, 0)
+        hl.Size = UDim2.new(1, 0, 0, 1)
+        hl.BackgroundColor3 = C.BG_ARENA_G
+        hl.BackgroundTransparency = 0.55
+        hl.BorderSizePixel = 0
+        hl.ZIndex = 2
+        hl.Parent = arena
     end
 
-    -- Vong tron dau truong trung tam
+    -- Cong dich chuyen o phia tren san dau
+    local portal = Instance.new("Frame")
+    portal.AnchorPoint = Vector2.new(0.5, 0)
+    portal.Position = UDim2.new(0.5, 0, 0, 6)
+    portal.Size = UDim2.new(0, 74, 0, 22)
+    portal.BackgroundColor3 = C.BTN_BLUE
+    portal.BackgroundTransparency = 0.35
+    portal.ZIndex = 3
+    portal.Parent = arena
+    addCorner(portal, 11)
+    addStroke(portal, C.TXT_CYAN, 1.5)
+
+    -- Vong tron chien dau trung tam
     local midRing = Instance.new("Frame")
     midRing.AnchorPoint = Vector2.new(0.5, 0.5)
     midRing.Position = UDim2.new(0.5, 0, 0.5, 0)
-    midRing.Size = UDim2.new(0, 210, 0, 210)
-    midRing.BackgroundColor3 = C.BG_ARENA_IN
-    midRing.BackgroundTransparency = 0.72
+    midRing.Size = UDim2.new(0, 220, 0, 220)
+    midRing.BackgroundTransparency = 1
     midRing.ZIndex = 2
     midRing.Parent = arena
-    addCorner(midRing, 105)
-    addStroke(midRing, C.STONE_LIGHT, 2)
+    addCorner(midRing, 110)
+    addStroke(midRing, C.STONE_LIGHT, 1.5)
 
-    local innerRing = Instance.new("Frame")
-    innerRing.AnchorPoint = Vector2.new(0.5, 0.5)
-    innerRing.Position = UDim2.new(0.5, 0, 0.5, 0)
-    innerRing.Size = UDim2.new(0, 118, 0, 118)
-    innerRing.BackgroundTransparency = 1
-    innerRing.ZIndex = 2
-    innerRing.Parent = arena
-    addCorner(innerRing, 59)
-    addStroke(innerRing, C.STONE_DARK, 1.5)
+    -- 4 Duoc lua 4 goc
+    for _, cp in ipairs({ { 0.05, 0.14 }, { 0.95, 0.14 }, { 0.05, 0.86 }, { 0.95, 0.86 } }) do
+        local pil = Instance.new("Frame")
+        pil.AnchorPoint = Vector2.new(0.5, 0.5)
+        pil.Position = UDim2.new(cp[1], 0, cp[2], 0)
+        pil.Size = UDim2.new(0, 22, 0, 22)
+        pil.BackgroundColor3 = C.STONE_DARK
+        pil.ZIndex = 3
+        pil.Parent = arena
+        addCorner(pil, 11)
+        addStroke(pil, C.STONE_LIGHT, 1.2)
 
-    local emblem = Instance.new("Frame")
-    emblem.AnchorPoint = Vector2.new(0.5, 0.5)
-    emblem.Position = UDim2.new(0.5, 0, 0.5, 0)
-    emblem.Size = UDim2.new(0, 28, 0, 28)
-    emblem.BackgroundColor3 = C.STONE_DARK
-    emblem.BackgroundTransparency = 0.45
-    emblem.Rotation = 45
-    emblem.BorderSizePixel = 0
-    emblem.ZIndex = 2
-    emblem.Parent = arena
-    addCorner(emblem, 4)
-
-    -- 4 Tru lua (Brazier) trang tri o 4 goc san dau
-    local corners = {
-        { 0.06, 0.12 }, { 0.94, 0.12 },
-        { 0.06, 0.88 }, { 0.94, 0.88 },
-    }
-    for _, cp in ipairs(corners) do
-        local pillar = Instance.new("Frame")
-        pillar.AnchorPoint = Vector2.new(0.5, 0.5)
-        pillar.Position = UDim2.new(cp[1], 0, cp[2], 0)
-        pillar.Size = UDim2.new(0, 24, 0, 24)
-        pillar.BackgroundColor3 = C.STONE_DARK
-        pillar.ZIndex = 3
-        pillar.Parent = arena
-        addCorner(pillar, 12)
-        addStroke(pillar, C.STONE_LIGHT, 1.5)
-
-        local ember = Instance.new("Frame")
-        ember.AnchorPoint = Vector2.new(0.5, 0.5)
-        ember.Position = UDim2.new(0.5, 0, 0.5, 0)
-        ember.Size = UDim2.new(0, 11, 0, 11)
-        ember.BackgroundColor3 = C.EMBER
-        ember.BorderSizePixel = 0
-        ember.ZIndex = 4
-        ember.Parent = pillar
-        addCorner(ember, 6)
-        table.insert(S.braziers, ember)
+        local emb = Instance.new("Frame")
+        emb.AnchorPoint = Vector2.new(0.5, 0.5)
+        emb.Position = UDim2.new(0.5, 0, 0.5, 0)
+        emb.Size = UDim2.new(0, 10, 0, 10)
+        emb.BackgroundColor3 = C.TXT_ORANGE
+        emb.BorderSizePixel = 0
+        emb.ZIndex = 4
+        emb.Parent = pil
+        addCorner(emb, 5)
+        table.insert(S.braziers, emb)
     end
 
     local entityLayer = Instance.new("Frame")
-    entityLayer.Name = "EntityLayer"
     entityLayer.Size = UDim2.new(1, 0, 1, 0)
     entityLayer.BackgroundTransparency = 1
     entityLayer.ZIndex = 5
     entityLayer.Parent = arena
     UI.EntityLayer = entityLayer
 
-    -- Nhan vat nguoi choi (khung xoay theo huong + vong buff/no)
+    -- Nhan vat nguoi choi
     local pNode = Instance.new("Frame")
-    pNode.Name = "Player"
     pNode.AnchorPoint = Vector2.new(0.5, 0.5)
-    pNode.Size = UDim2.new(0, 32, 0, 32)
+    pNode.Size = UDim2.new(0, 38, 0, 38)
     pNode.BackgroundTransparency = 1
     pNode.ZIndex = 10
     pNode.Parent = arena
     UI.PlayerNode = pNode
 
-    local pAura = Instance.new("Frame")
-    pAura.AnchorPoint = Vector2.new(0.5, 0.5)
-    pAura.Position = UDim2.new(0.5, 0, 0.5, 0)
-    pAura.Size = UDim2.new(1.55, 0, 1.55, 0)
-    pAura.BackgroundColor3 = C.TXT_GOLD
-    pAura.BackgroundTransparency = 0.85
-    pAura.Visible = false
-    pAura.ZIndex = 9
-    pAura.Parent = pNode
-    addCorner(pAura, 999)
-    UI.PlayerAuraStroke = addStroke(pAura, C.TXT_GOLD, 1.5)
-    UI.PlayerAura = pAura
+    -- Vong tron chan nguoi choi (giong anh 3)
+    local pRing = Instance.new("Frame")
+    pRing.AnchorPoint = Vector2.new(0.5, 0.5)
+    pRing.Position = UDim2.new(0.5, 0, 0.78, 0)
+    pRing.Size = UDim2.new(1.35, 0, 0.65, 0)
+    pRing.BackgroundTransparency = 1
+    pRing.ZIndex = 8
+    pRing.Parent = pNode
+    addCorner(pRing, 99)
+    UI.PlayerRingStroke = addStroke(pRing, C.TXT_CYAN, 1.6)
 
-    local pSprite = Instance.new("Frame")
-    pSprite.AnchorPoint = Vector2.new(0.5, 0.5)
-    pSprite.Position = UDim2.new(0.5, 0, 0.5, 0)
-    pSprite.Size = UDim2.new(1, 0, 1, 0)
-    pSprite.BackgroundTransparency = 1
-    pSprite.ZIndex = 10
-    pSprite.Parent = pNode
-    UI.PlayerSprite = pSprite
+    -- Thanh mau nho tren dau nguoi choi
+    local pHpBg = Instance.new("Frame")
+    pHpBg.AnchorPoint = Vector2.new(0.5, 1)
+    pHpBg.Position = UDim2.new(0.5, 0, 0, -4)
+    pHpBg.Size = UDim2.new(0, 38, 0, 5)
+    pHpBg.BackgroundColor3 = C.BG_FULL
+    pHpBg.BorderSizePixel = 0
+    pHpBg.ZIndex = 14
+    pHpBg.Parent = pNode
+    addCorner(pHpBg, 2)
 
-    -- Thanh HUD phia tren san dau
-    local hud = Instance.new("Frame")
-    hud.Position = UDim2.new(0, 8, 0, 4)
-    hud.Size = UDim2.new(1, -16, 0, 36)
-    hud.BackgroundColor3 = C.BG_PANEL
-    hud.ZIndex = 8
-    hud.Parent = combat
-    addCorner(hud, 8)
-    addStroke(hud, C.BORDER, 1)
-    addGradient(hud, C.BG_PANEL_TOP, C.BG_PANEL, 90)
+    UI.PlayerMiniHp = Instance.new("Frame")
+    UI.PlayerMiniHp.Size = UDim2.new(1, 0, 1, 0)
+    UI.PlayerMiniHp.BackgroundColor3 = C.TXT_GREEN
+    UI.PlayerMiniHp.BorderSizePixel = 0
+    UI.PlayerMiniHp.ZIndex = 15
+    UI.PlayerMiniHp.Parent = pHpBg
+    addCorner(UI.PlayerMiniHp, 2)
 
-    local hpBg = Instance.new("Frame")
-    hpBg.Position = UDim2.new(0, 10, 0, 6)
-    hpBg.Size = UDim2.new(0, 168, 0, 13)
-    hpBg.BackgroundColor3 = C.BG_MAIN
-    hpBg.ZIndex = 9
-    hpBg.Parent = hud
-    addCorner(hpBg, 4)
-    addStroke(hpBg, C.BORDER, 1)
+    UI.PlayerSprite = Instance.new("Frame")
+    UI.PlayerSprite.AnchorPoint = Vector2.new(0.5, 0.5)
+    UI.PlayerSprite.Position = UDim2.new(0.5, 0, 0.5, 0)
+    UI.PlayerSprite.Size = UDim2.new(1, 0, 1, 0)
+    UI.PlayerSprite.BackgroundTransparency = 1
+    UI.PlayerSprite.ZIndex = 10
+    UI.PlayerSprite.Parent = pNode
 
-    UI.HpFill = Instance.new("Frame")
-    UI.HpFill.Size = UDim2.new(1, 0, 1, 0)
-    UI.HpFill.BackgroundColor3 = C.HP_FILL
-    UI.HpFill.BorderSizePixel = 0
-    UI.HpFill.ZIndex = 10
-    UI.HpFill.Parent = hpBg
-    addCorner(UI.HpFill, 4)
-    addGradient(UI.HpFill, Color3.fromRGB(82, 184, 114), Color3.fromRGB(44, 128, 72), 90)
+    -- ---- MINIMAP RADAR (GOC TREN TRAI SAN DAU) ----
+    local mini = Instance.new("Frame")
+    mini.Position = UDim2.new(0, 12, 0, 12)
+    mini.Size = UDim2.new(0, 96, 0, 68)
+    mini.BackgroundColor3 = C.BG_FULL
+    mini.BackgroundTransparency = 0.25
+    mini.ZIndex = 22
+    mini.Parent = arena
+    addCorner(mini, 8)
+    addStroke(mini, C.BORDER_ACT, 1.2)
+    UI.Minimap = mini
 
-    UI.HpText = makeLabel(hpBg, {
-        text = "HP 140/140",
-        font = FONT_TITLE,
-        color = C.TXT_MAIN,
-        size = 10,
-        xAlign = Enum.TextXAlignment.Center,
-        dim = UDim2.new(1, 0, 1, 0),
-        z = 11,
+    local miniP = Instance.new("Frame")
+    miniP.AnchorPoint = Vector2.new(0.5, 0.5)
+    miniP.Size = UDim2.new(0, 6, 0, 6)
+    miniP.BackgroundColor3 = C.TXT_GREEN
+    miniP.BorderSizePixel = 0
+    miniP.ZIndex = 24
+    miniP.Parent = mini
+    addCorner(miniP, 3)
+    UI.MiniPlayerDot = miniP
+
+    -- ---- THANH TRANG THAI DOT & DONG HO (TREN GIUA) ----
+    local wavePill = Instance.new("Frame")
+    wavePill.AnchorPoint = Vector2.new(0.5, 0)
+    wavePill.Position = UDim2.new(0.5, 0, 0, 10)
+    wavePill.Size = UDim2.new(0, 230, 0, 30)
+    wavePill.BackgroundColor3 = C.BG_TOPBAR
+    wavePill.BackgroundTransparency = 0.15
+    wavePill.ZIndex = 22
+    wavePill.Parent = arena
+    addCorner(wavePill, 15)
+    addStroke(wavePill, C.BORDER_ACT, 1.2)
+
+    UI.HudWaveLbl = makeLabel(wavePill, {
+        text = "Đợt 1/3  |  00:00", font = FONT_TITLE, color = C.TXT_MAIN, size = 13,
+        xAlign = Enum.TextXAlignment.Center, dim = UDim2.new(1, 0, 1, 0), z = 23,
     })
 
-    local furyBg = Instance.new("Frame")
-    furyBg.Position = UDim2.new(0, 10, 0, 22)
-    furyBg.Size = UDim2.new(0, 168, 0, 8)
-    furyBg.BackgroundColor3 = C.BG_MAIN
-    furyBg.ZIndex = 9
-    furyBg.Parent = hud
-    addCorner(furyBg, 4)
-
-    UI.FuryFill = Instance.new("Frame")
-    UI.FuryFill.Size = UDim2.new(0, 0, 1, 0)
-    UI.FuryFill.BackgroundColor3 = C.FURY_FILL
-    UI.FuryFill.BorderSizePixel = 0
-    UI.FuryFill.ZIndex = 10
-    UI.FuryFill.Parent = furyBg
-    addCorner(UI.FuryFill, 4)
-    addGradient(UI.FuryFill, Color3.fromRGB(204, 162, 74), Color3.fromRGB(162, 104, 38), 90)
-
-    UI.HudWave = makeLabel(hud, {
-        text = "Ải 1",
-        font = FONT_TITLE,
-        color = C.TXT_GOLD,
-        size = 13,
-        xAlign = Enum.TextXAlignment.Center,
-        dim = UDim2.new(0, 110, 1, 0),
-        pos = UDim2.new(0.5, -108, 0, 0),
-        z = 9,
-    })
-    UI.HudScore = makeLabel(hud, {
-        text = "Điểm: 0",
-        font = FONT_TITLE,
-        color = C.TXT_MAIN,
-        size = 13,
-        xAlign = Enum.TextXAlignment.Center,
-        dim = UDim2.new(0, 110, 1, 0),
-        pos = UDim2.new(0.5, 4, 0, 0),
-        z = 9,
-    })
-    UI.HudCombo = makeLabel(hud, {
-        text = "",
-        font = FONT_TITLE,
-        color = C.TXT_PURPLE,
-        size = 13,
-        xAlign = Enum.TextXAlignment.Right,
-        dim = UDim2.new(0, 104, 1, 0),
-        pos = UDim2.new(1, -188, 0, 0),
-        z = 9,
+    UI.HudComboLbl = makeLabel(arena, {
+        text = "", font = FONT_TITLE, color = C.TXT_GOLD, size = 15,
+        xAlign = Enum.TextXAlignment.Right, dim = UDim2.new(0, 150, 0, 26),
+        pos = UDim2.new(1, -68, 0, 12), z = 22,
     })
 
-    local pauseBtn = makeBtn(hud, {
-        text = "TẠM DỪNG",
-        bg = C.BTN_NEUTRAL,
-        color = C.TXT_MAIN,
-        size = 11,
-        dim = UDim2.new(0, 74, 0, 26),
-        pos = UDim2.new(1, -80, 0.5, -13),
-        radius = 6,
-        z = 9,
+    local pauseBtn = makeBtn(arena, {
+        text = "||", bg = C.BG_TOPBAR, color = C.TXT_MAIN, size = 14,
+        dim = UDim2.new(0, 38, 0, 34), pos = UDim2.new(1, -50, 0, 10), radius = 10, z = 22,
     })
     bindTap(pauseBtn, function()
-        if S.gameOver then return end
+        if S.gameOver or S.pickingBuff then return end
         S.paused = not S.paused
         UI.PauseOverlay.Visible = S.paused
     end)
 
+    -- Thanh mau Boss
     local bossBar = Instance.new("Frame")
     bossBar.AnchorPoint = Vector2.new(0.5, 0)
-    bossBar.Position = UDim2.new(0.5, 0, 0, 8)
-    bossBar.Size = UDim2.new(0, 310, 0, 24)
+    bossBar.Position = UDim2.new(0.5, 0, 0, 46)
+    bossBar.Size = UDim2.new(0, 320, 0, 24)
     bossBar.BackgroundColor3 = C.BG_PANEL
     bossBar.Visible = false
-    bossBar.ZIndex = 15
+    bossBar.ZIndex = 22
     bossBar.Parent = arena
-    addCorner(bossBar, 6)
-    addStroke(bossBar, C.TXT_GOLD, 1.5)
+    addCorner(bossBar, 7)
+    addStroke(bossBar, C.BORDER_GOLD, 1.5)
 
     UI.BossHpFill = Instance.new("Frame")
     UI.BossHpFill.Size = UDim2.new(1, 0, 1, 0)
     UI.BossHpFill.BackgroundColor3 = C.HP_BOSS
     UI.BossHpFill.BorderSizePixel = 0
-    UI.BossHpFill.ZIndex = 16
+    UI.BossHpFill.ZIndex = 23
     UI.BossHpFill.Parent = bossBar
-    addCorner(UI.BossHpFill, 5)
-    addGradient(UI.BossHpFill, Color3.fromRGB(178, 76, 158), Color3.fromRGB(118, 42, 106), 90)
+    addCorner(UI.BossHpFill, 6)
 
     UI.BossHpText = makeLabel(bossBar, {
-        text = "BOSS",
-        font = FONT_TITLE,
-        color = C.TXT_MAIN,
-        size = 11,
-        xAlign = Enum.TextXAlignment.Center,
-        dim = UDim2.new(1, 0, 1, 0),
-        z = 17,
+        text = "BOSS", font = FONT_TITLE, color = C.TXT_MAIN, size = 11,
+        xAlign = Enum.TextXAlignment.Center, dim = UDim2.new(1, 0, 1, 0), z = 24,
     })
     UI.BossBar = bossBar
 
     UI.WaveBanner = makeLabel(arena, {
-        text = "",
-        font = FONT_TITLE,
-        color = C.TXT_GOLD,
-        size = 20,
-        xAlign = Enum.TextXAlignment.Center,
-        dim = UDim2.new(1, 0, 0, 34),
-        pos = UDim2.new(0, 0, 0.20, 0),
-        z = 18,
+        text = "", font = FONT_TITLE, color = C.TXT_GOLD, size = 22,
+        xAlign = Enum.TextXAlignment.Center, dim = UDim2.new(1, 0, 0, 36),
+        pos = UDim2.new(0, 0, 0.24, 0), z = 24,
     })
 
-    -- JOYSTICK CAM UNG TUC THI (GOC TRAI DUOI)
+    -- ---- JOYSTICK LON GOC TRAI DUOI ----
     local joyBase = Instance.new("Frame")
-    joyBase.Position = UDim2.new(0, 18, 1, -124)
-    joyBase.Size = UDim2.new(0, 106, 0, 106)
-    joyBase.BackgroundColor3 = C.BG_PANEL
+    joyBase.Position = UDim2.new(0, 22, 1, -138)
+    joyBase.Size = UDim2.new(0, 118, 0, 118)
+    joyBase.BackgroundColor3 = C.BG_TOPBAR
     joyBase.BackgroundTransparency = 0.35
-    joyBase.ZIndex = 20
+    joyBase.ZIndex = 24
     joyBase.Parent = arena
-    addCorner(joyBase, 53)
-    addStroke(joyBase, C.BORDER_ACT, 1.5)
-
-    local joyInnerRing = Instance.new("Frame")
-    joyInnerRing.AnchorPoint = Vector2.new(0.5, 0.5)
-    joyInnerRing.Position = UDim2.new(0.5, 0, 0.5, 0)
-    joyInnerRing.Size = UDim2.new(0, 62, 0, 62)
-    joyInnerRing.BackgroundTransparency = 1
-    joyInnerRing.ZIndex = 20
-    joyInnerRing.Parent = joyBase
-    addCorner(joyInnerRing, 31)
-    addStroke(joyInnerRing, C.BORDER, 1)
+    addCorner(joyBase, 59)
+    addStroke(joyBase, C.BORDER_ACT, 1.8)
 
     local joyKnob = Instance.new("Frame")
     joyKnob.AnchorPoint = Vector2.new(0.5, 0.5)
     joyKnob.Position = UDim2.new(0.5, 0, 0.5, 0)
-    joyKnob.Size = UDim2.new(0, 42, 0, 42)
-    joyKnob.BackgroundColor3 = C.BTN_PRIMARY
-    joyKnob.BackgroundTransparency = 0.16
-    joyKnob.ZIndex = 21
+    joyKnob.Size = UDim2.new(0, 46, 0, 46)
+    joyKnob.BackgroundColor3 = C.BTN_PURPLE
+    joyKnob.BackgroundTransparency = 0.18
+    joyKnob.ZIndex = 25
     joyKnob.Parent = joyBase
-    addCorner(joyKnob, 21)
+    addCorner(joyKnob, 23)
     addStroke(joyKnob, C.TXT_MAIN, 1.5)
 
-    local function updateJoystick(pos)
-        local center = joyBase.AbsolutePosition + joyBase.AbsoluteSize * 0.5
-        local dx, dy = pos.X - center.X, pos.Y - center.Y
-        local maxR = 36
+    local function updateJoy(pos)
+        local c = joyBase.AbsolutePosition + joyBase.AbsoluteSize * 0.5
+        local dx, dy = pos.X - c.X, pos.Y - c.Y
+        local maxR = 40
         local dist = math.sqrt(dx * dx + dy * dy)
-        if dist > maxR then
-            dx, dy = dx / dist * maxR, dy / dist * maxR
-        end
+        if dist > maxR then dx, dy = dx / dist * maxR, dy / dist * maxR end
         joyKnob.Position = UDim2.new(0.5, dx, 0.5, dy)
-        if dist > 5 then
-            S.joyX, S.joyY = dx / maxR, dy / maxR
-        else
-            S.joyX, S.joyY = 0, 0
-        end
+        if dist > 6 then S.joyX, S.joyY = dx / maxR, dy / maxR
+        else S.joyX, S.joyY = 0, 0 end
     end
 
     trackConn(joyBase.InputBegan:Connect(function(inp)
         if inp.UserInputType == Enum.UserInputType.Touch or inp.UserInputType == Enum.UserInputType.MouseButton1 then
-            S.joyActive = true
-            S.joyId = inp
-            updateJoystick(inp.Position)
+            S.joyActive, S.joyId = true, inp
+            updateJoy(inp.Position)
         end
     end))
     trackConn(UserInputService.InputChanged:Connect(function(inp)
         if S.joyActive and (inp == S.joyId or inp.UserInputType == Enum.UserInputType.MouseMovement) then
-            updateJoystick(inp.Position)
+            updateJoy(inp.Position)
         end
     end))
     trackConn(UserInputService.InputEnded:Connect(function(inp)
         if S.joyActive and (inp == S.joyId or inp.UserInputType == Enum.UserInputType.MouseButton1) then
-            S.joyActive = false
-            S.joyId = nil
-            S.joyX, S.joyY = 0, 0
+            S.joyActive, S.joyId, S.joyX, S.joyY = false, nil, 0, 0
             joyKnob.Position = UDim2.new(0.5, 0, 0.5, 0)
         end
     end))
 
-    -- 4 NUT CHIEN DAU CAM UNG TUC THI (CO BIEU TUONG VECTOR TU VE)
+    -- ---- 5 NUT CHIEN DAU VONG CUNG GOC PHAI DUOI (NHU ANH 3) ----
     local atkBtn = makeBtn(arena, {
-        text = "ĐÁNH",
-        bg = C.BTN_DANGER,
-        color = C.TXT_MAIN,
-        size = 13,
-        dim = UDim2.new(0, 74, 0, 74),
-        pos = UDim2.new(1, -90, 1, -90),
-        radius = 37,
-        strokeColor = C.TXT_RED,
-        strokeWidth = 2,
-        z = 20,
+        text = "ĐÁNH", bg = C.BTN_PURPLE, color = C.TXT_MAIN, size = 14,
+        dim = UDim2.new(0, 82, 0, 82), pos = UDim2.new(1, -100, 1, -100), radius = 41,
+        strokeColor = C.TXT_GEM, strokeWidth = 2.2, z = 24,
     })
-    atkBtn.BackgroundTransparency = 0.16
-    addGradient(atkBtn, Color3.fromRGB(168, 66, 66), Color3.fromRGB(116, 40, 40), 120)
+    atkBtn.BackgroundTransparency = 0.14
     trackConn(atkBtn.InputBegan:Connect(function(inp)
         if inp.UserInputType == Enum.UserInputType.Touch or inp.UserInputType == Enum.UserInputType.MouseButton1 then
             S.holdAttack = true
@@ -1973,429 +2124,387 @@ do
         end
     end))
 
-    local dashBtn = makeBtn(arena, {
-        text = "LƯỚT",
-        bg = C.BTN_PRIMARY,
-        color = C.TXT_MAIN,
-        size = 11,
-        dim = UDim2.new(0, 56, 0, 56),
-        pos = UDim2.new(1, -156, 1, -70),
-        radius = 28,
-        strokeColor = C.BORDER_ACT,
-        z = 20,
+    UI.DashBtn = makeBtn(arena, {
+        text = "LƯỚT", bg = C.BTN_BLUE, color = C.TXT_MAIN, size = 11,
+        dim = UDim2.new(0, 56, 0, 56), pos = UDim2.new(1, -168, 1, -72), radius = 28,
+        strokeColor = C.TXT_CYAN, z = 24,
     })
-    dashBtn.BackgroundTransparency = 0.18
-    UI.DashBtn = dashBtn
-    bindTap(dashBtn, function() GAME.TryDash() end)
+    UI.DashBtn.BackgroundTransparency = 0.16
+    bindTap(UI.DashBtn, function() GAME.TryDash() end)
 
-    local skillBtn = makeBtn(arena, {
-        text = "KỸ NĂNG",
-        bg = C.BTN_WARN,
-        color = C.TXT_MAIN,
-        size = 10,
-        dim = UDim2.new(0, 62, 0, 62),
-        pos = UDim2.new(1, -148, 1, -138),
-        radius = 31,
-        strokeColor = C.TXT_GOLD,
-        z = 20,
+    UI.S1Btn = makeBtn(arena, {
+        text = "CHIÊU 1", bg = C.BTN_GOLD, color = C.TXT_MAIN, size = 10,
+        dim = UDim2.new(0, 58, 0, 58), pos = UDim2.new(1, -164, 1, -140), radius = 29,
+        strokeColor = C.TXT_GOLD, z = 24,
     })
-    skillBtn.BackgroundTransparency = 0.18
-    UI.SkillBtn = skillBtn
-    bindTap(skillBtn, function() GAME.TrySkill() end)
+    UI.S1Btn.BackgroundTransparency = 0.16
+    bindTap(UI.S1Btn, function() GAME.TrySkill1() end)
 
-    local ultBtn = makeBtn(arena, {
-        text = "0% NỘ",
-        bg = C.BTN_PURPLE,
-        color = C.TXT_MAIN,
-        size = 10,
-        dim = UDim2.new(0, 62, 0, 62),
-        pos = UDim2.new(1, -80, 1, -162),
-        radius = 31,
-        strokeColor = C.TXT_PURPLE,
-        z = 20,
+    UI.S2Btn = makeBtn(arena, {
+        text = "CHIÊU 2", bg = C.BTN_RED, color = C.TXT_MAIN, size = 10,
+        dim = UDim2.new(0, 58, 0, 58), pos = UDim2.new(1, -110, 1, -178), radius = 29,
+        strokeColor = C.TXT_RED, z = 24,
     })
-    ultBtn.BackgroundTransparency = 0.18
-    UI.UltBtn = ultBtn
-    bindTap(ultBtn, function() GAME.TryUlt() end)
+    UI.S2Btn.BackgroundTransparency = 0.16
+    bindTap(UI.S2Btn, function() GAME.TrySkill2() end)
 
-    -- OVERLAY TAM DUNG
+    UI.UltBtn = makeBtn(arena, {
+        text = "0% NỘ", bg = C.BTN_PURPLE, color = C.TXT_GOLD, size = 10,
+        dim = UDim2.new(0, 62, 0, 62), pos = UDim2.new(1, -44, 1, -184), anchor = Vector2.new(0.5, 0),
+        radius = 31, strokeColor = C.BORDER_GOLD, strokeWidth = 1.8, z = 24,
+    })
+    UI.UltBtn.BackgroundTransparency = 0.14
+    bindTap(UI.UltBtn, function() GAME.TryUlt() end)
+
+    -- ---- POPUP CHON 1 TRONG 3 NANG CAP GIUA TRAN (ROGUELIKE NHU ANH 3) ----
+    local buffOv = Instance.new("Frame")
+    buffOv.Size = UDim2.new(1, 0, 1, 0)
+    buffOv.BackgroundColor3 = C.SHADOW
+    buffOv.BackgroundTransparency = 0.25
+    buffOv.Visible = false
+    buffOv.ZIndex = 40
+    buffOv.Parent = combat
+    UI.BuffOverlay = buffOv
+
+    local bCard = Instance.new("Frame")
+    bCard.AnchorPoint = Vector2.new(0.5, 0.5)
+    bCard.Position = UDim2.new(0.5, 0, 0.5, 0)
+    bCard.Size = UDim2.new(0, 480, 0, 270)
+    bCard.BackgroundColor3 = C.BG_PANEL
+    bCard.ZIndex = 41
+    bCard.Parent = buffOv
+    addCorner(bCard, 14)
+    addStroke(bCard, C.BORDER_ACT, 2)
+
+    makeLabel(bCard, {
+        text = "CHỌN MỘT NÂNG CẤP CHIẾN ĐẤU", font = FONT_TITLE, color = C.TXT_GOLD, size = 16,
+        xAlign = Enum.TextXAlignment.Center, dim = UDim2.new(1, 0, 0, 32), pos = UDim2.new(0, 0, 0, 12), z = 42,
+    })
+
+    UI.BuffChoices = {}
+    for i = 1, 3 do
+        local ch = makeBtn(bCard, {
+            text = "", bg = C.BG_CARD, dim = UDim2.new(1, -36, 0, 58),
+            pos = UDim2.new(0, 18, 0, 52 + (i - 1) * 68), radius = 10, z = 42,
+        })
+        local t = makeLabel(ch, {
+            text = "", font = FONT_TITLE, color = C.TXT_MAIN, size = 14,
+            dim = UDim2.new(1, -24, 0, 22), pos = UDim2.new(0, 14, 0, 8), z = 43,
+        })
+        local d = makeLabel(ch, {
+            text = "", font = FONT_BODY, color = C.TXT_SUB, size = 12,
+            dim = UDim2.new(1, -24, 0, 20), pos = UDim2.new(0, 14, 0, 32), z = 43,
+        })
+        UI.BuffChoices[i] = { btn = ch, title = t, desc = d, buff = nil }
+        bindTap(ch, function()
+            local bf = UI.BuffChoices[i].buff
+            if bf and S.pickingBuff then
+                bf.apply(S)
+                S.pickingBuff = false
+                buffOv.Visible = false
+                showToast("Đã nhận nâng cấp: " .. bf.name, bf.color)
+            end
+        end)
+    end
+
+    -- ---- OVERLAY TAM DUNG ----
     local pauseOv = Instance.new("Frame")
     pauseOv.Size = UDim2.new(1, 0, 1, 0)
-    pauseOv.BackgroundColor3 = Color3.fromRGB(10, 12, 16)
-    pauseOv.BackgroundTransparency = 0.35
+    pauseOv.BackgroundColor3 = C.SHADOW
+    pauseOv.BackgroundTransparency = 0.30
     pauseOv.Visible = false
-    pauseOv.ZIndex = 30
+    pauseOv.ZIndex = 45
     pauseOv.Parent = combat
     UI.PauseOverlay = pauseOv
 
     local pCard = Instance.new("Frame")
     pCard.AnchorPoint = Vector2.new(0.5, 0.5)
     pCard.Position = UDim2.new(0.5, 0, 0.5, 0)
-    pCard.Size = UDim2.new(0, 260, 0, 166)
+    pCard.Size = UDim2.new(0, 280, 0, 176)
     pCard.BackgroundColor3 = C.BG_PANEL
-    pCard.ZIndex = 31
+    pCard.ZIndex = 46
     pCard.Parent = pauseOv
     addCorner(pCard, 12)
-    addStroke(pCard, C.BORDER_ACT, 1.5)
+    addStroke(pCard, C.BORDER_ACT, 1.8)
 
     makeLabel(pCard, {
-        text = "ĐANG TẠM DỪNG",
-        font = FONT_TITLE,
-        color = C.TXT_GOLD,
-        size = 16,
-        xAlign = Enum.TextXAlignment.Center,
-        dim = UDim2.new(1, 0, 0, 32),
-        pos = UDim2.new(0, 0, 0, 14),
-        z = 32,
+        text = "ĐANG TẠM DỪNG", font = FONT_TITLE, color = C.TXT_GOLD, size = 17,
+        xAlign = Enum.TextXAlignment.Center, dim = UDim2.new(1, 0, 0, 34), pos = UDim2.new(0, 0, 0, 14), z = 47,
     })
-    local resumeBtn = makeBtn(pCard, {
-        text = "TIẾP TỤC CHIẾN ĐẤU",
-        bg = C.BTN_SUCCESS,
-        color = C.TXT_MAIN,
-        size = 13,
-        dim = UDim2.new(1, -36, 0, 38),
-        pos = UDim2.new(0, 18, 0, 58),
-        radius = 8,
-        z = 32,
+    local resBtn = makeBtn(pCard, {
+        text = "TIẾP TỤC CHIẾN ĐẤU", bg = C.BTN_GREEN, color = C.TXT_MAIN, size = 13,
+        dim = UDim2.new(1, -36, 0, 40), pos = UDim2.new(0, 18, 0, 60), radius = 8, z = 47,
     })
-    bindTap(resumeBtn, function()
-        S.paused = false
-        pauseOv.Visible = false
-    end)
+    bindTap(resBtn, function() S.paused = false; pauseOv.Visible = false end)
 
     local quitBtn = makeBtn(pCard, {
-        text = "VỀ SẢNH CHỜ",
-        bg = C.BTN_DANGER,
-        color = C.TXT_MAIN,
-        size = 13,
-        dim = UDim2.new(1, -36, 0, 38),
-        pos = UDim2.new(0, 18, 0, 108),
-        radius = 8,
-        z = 32,
+        text = "VỀ MENU CHÍNH", bg = C.BTN_RED, color = C.TXT_MAIN, size = 13,
+        dim = UDim2.new(1, -36, 0, 40), pos = UDim2.new(0, 18, 0, 112), radius = 8, z = 47,
     })
-    bindTap(quitBtn, function() GAME.EndMatch(true) end)
+    bindTap(quitBtn, function() GAME.EndMatch(false, true) end)
 
-    -- OVERLAY KET THUC TRAN
+    -- ---- OVERLAY THANG TRAN / THUA TRAN ----
     local endOv = Instance.new("Frame")
     endOv.Size = UDim2.new(1, 0, 1, 0)
-    endOv.BackgroundColor3 = Color3.fromRGB(10, 12, 16)
-    endOv.BackgroundTransparency = 0.25
+    endOv.BackgroundColor3 = C.SHADOW
+    endOv.BackgroundTransparency = 0.22
     endOv.Visible = false
-    endOv.ZIndex = 30
+    endOv.ZIndex = 50
     endOv.Parent = combat
     UI.EndOverlay = endOv
 
     local eCard = Instance.new("Frame")
     eCard.AnchorPoint = Vector2.new(0.5, 0.5)
     eCard.Position = UDim2.new(0.5, 0, 0.5, 0)
-    eCard.Size = UDim2.new(0, 324, 0, 234)
+    eCard.Size = UDim2.new(0, 350, 0, 248)
     eCard.BackgroundColor3 = C.BG_PANEL
-    eCard.ZIndex = 31
+    eCard.ZIndex = 51
     eCard.Parent = endOv
-    addCorner(eCard, 12)
-    addStroke(eCard, C.BORDER_ACT, 1.5)
+    addCorner(eCard, 14)
+    UI.EndCardStroke = addStroke(eCard, C.BORDER_GOLD, 2)
 
     UI.EndTitle = makeLabel(eCard, {
-        text = "KẾT THÚC TRẬN ĐẤU",
-        font = FONT_TITLE,
-        color = C.TXT_RED,
-        size = 17,
-        xAlign = Enum.TextXAlignment.Center,
-        dim = UDim2.new(1, 0, 0, 30),
-        pos = UDim2.new(0, 0, 0, 14),
-        z = 32,
+        text = "THẮNG TRẬN", font = FONT_TITLE, color = C.TXT_GOLD, size = 20,
+        xAlign = Enum.TextXAlignment.Center, dim = UDim2.new(1, 0, 0, 34), pos = UDim2.new(0, 0, 0, 14), z = 52,
     })
     UI.EndStats = makeLabel(eCard, {
-        text = "",
-        font = FONT_BODY,
-        color = C.TXT_MAIN,
-        size = 13,
-        wrap = true,
-        xAlign = Enum.TextXAlignment.Center,
-        dim = UDim2.new(1, -28, 0, 104),
-        pos = UDim2.new(0, 14, 0, 50),
-        z = 32,
+        text = "", font = FONT_BODY, color = C.TXT_MAIN, size = 13, wrap = true,
+        xAlign = Enum.TextXAlignment.Center, dim = UDim2.new(1, -28, 0, 114), pos = UDim2.new(0, 14, 0, 56), z = 52,
     })
 
-    local retryBtn = makeBtn(eCard, {
-        text = "CHƠI LẠI",
-        bg = C.BTN_SUCCESS,
-        color = C.TXT_MAIN,
-        size = 13,
-        dim = UDim2.new(0.46, 0, 0, 38),
-        pos = UDim2.new(0.04, 0, 1, -52),
-        radius = 8,
-        z = 32,
+    local menuBtn = makeBtn(eCard, {
+        text = "VỀ MENU", bg = C.BTN_BLUE, color = C.TXT_MAIN, size = 13,
+        dim = UDim2.new(0.45, 0, 0, 40), pos = UDim2.new(0.04, 0, 1, -54), radius = 8, z = 52,
     })
-    bindTap(retryBtn, function() GAME.StartMatch() end)
+    bindTap(menuBtn, function() GAME.ReturnToLobby() end)
 
-    local backBtn = makeBtn(eCard, {
-        text = "VỀ SẢNH",
-        bg = C.BTN_PRIMARY,
-        color = C.TXT_MAIN,
-        size = 13,
-        dim = UDim2.new(0.46, 0, 0, 38),
-        pos = UDim2.new(0.50, 0, 1, -52),
-        radius = 8,
-        z = 32,
+    UI.EndNextBtn = makeBtn(eCard, {
+        text = "CHƠI LẠI", bg = C.BTN_GOLD, color = C.TXT_DARK, size = 13,
+        dim = UDim2.new(0.45, 0, 0, 40), pos = UDim2.new(0.51, 0, 1, -54), radius = 8, z = 52,
     })
-    bindTap(backBtn, function() GAME.ReturnToLobby() end)
+    bindTap(UI.EndNextBtn, function() GAME.StartMatch() end)
 end
 
 -- ============================================================================
--- 9. CO CHE CHIEN DAU & HIEU UNG DO HOA (SLASH, SPARKS, AFTERIMAGE, AI)
+-- 9. CO CHE CHIEN DAU, TRANG THAI, MINIMAP, CHON NANG CAP & AI QUAI/BOSS
 -- ============================================================================
 do
-    local function toScalePos(x, y)
-        return UDim2.new(x / CFG.ARENA_W, 0, y / CFG.ARENA_H, 0)
-    end
+    local function toPos(x, y) return UDim2.new(x / CFG.ARENA_W, 0, y / CFG.ARENA_H, 0) end
 
     local function clearEntities()
-        for _, child in ipairs(UI.EntityLayer:GetChildren()) do
-            child:Destroy()
-        end
-        S.enemies = {}
-        S.projs = {}
-        S.pickups = {}
-        S.effects = {}
-        S.sparks = {}
-        S.hazards = {}
-        S.floatTexts = {}
+        for _, ch in ipairs(UI.EntityLayer:GetChildren()) do ch:Destroy() end
+        for _, d in ipairs(S.miniDots) do if d and d.Parent then d:Destroy() end end
+        S.enemies, S.projs, S.pickups, S.effects, S.sparks, S.hazards, S.floatTexts, S.miniDots = {}, {}, {}, {}, {}, {}, {}, {}
     end
 
-    local function addShake(power, dur)
-        S.shakePower = math.max(S.shakePower, power)
+    local function addShake(pow, dur)
+        if not DATA.settings.shake then return end
+        S.shakePower = math.max(S.shakePower, pow)
         S.shakeTimer = math.max(S.shakeTimer, dur)
     end
 
-    local function spawnFloatText(x, y, text, color, size)
-        local lbl = makeLabel(UI.EntityLayer, {
-            text = text,
-            font = FONT_TITLE,
-            color = color or C.TXT_MAIN,
-            size = size or 13,
-            xAlign = Enum.TextXAlignment.Center,
-            dim = UDim2.new(0, 96, 0, 20),
-            pos = toScalePos(x, y),
-            z = 16,
+    local function spawnFloat(x, y, txt, col, sz)
+        local l = makeLabel(UI.EntityLayer, {
+            text = txt, font = FONT_TITLE, color = col or C.TXT_MAIN, size = sz or 13,
+            xAlign = Enum.TextXAlignment.Center, dim = UDim2.new(0, 104, 0, 20),
+            pos = toPos(x, y), anchor = Vector2.new(0.5, 0.5), z = 18,
         })
-        lbl.AnchorPoint = Vector2.new(0.5, 0.5)
-        table.insert(S.floatTexts, {
-            ui = lbl, x = x, y = y, vy = -50, life = 0.65, maxLife = 0.65,
-        })
+        table.insert(S.floatTexts, { ui = l, x = x, y = y, vy = -52, life = 0.65, maxLife = 0.65 })
     end
 
-    local function spawnRingFX(x, y, radius, color, dur)
+    local function spawnRing(x, y, rad, col, dur)
         local f = Instance.new("Frame")
         f.AnchorPoint = Vector2.new(0.5, 0.5)
-        f.Position = toScalePos(x, y)
+        f.Position = toPos(x, y)
         f.Size = UDim2.new(0, 12, 0, 12)
-        f.BackgroundColor3 = color
+        f.BackgroundColor3 = col
         f.BackgroundTransparency = 0.72
         f.ZIndex = 7
         f.Parent = UI.EntityLayer
         addCorner(f, 999)
-        addStroke(f, color, 2)
-        table.insert(S.effects, {
-            ui = f, kind = "ring", x = x, y = y, maxR = radius, life = dur or 0.25, maxLife = dur or 0.25,
-        })
+        addStroke(f, col, 2)
+        table.insert(S.effects, { ui = f, kind = "ring", maxR = rad, life = dur or 0.24, maxLife = dur or 0.24 })
     end
 
-    -- Vet chem sac net xoay theo huong tan cong
-    local function spawnSlashArc(x, y, angleDeg, lengthPx, color, dur)
-        local slash = Instance.new("Frame")
-        slash.AnchorPoint = Vector2.new(0.5, 0.5)
-        slash.Position = toScalePos(x, y)
-        slash.Size = UDim2.new(0, 12, 0, lengthPx)
-        slash.Rotation = angleDeg
-        slash.BackgroundColor3 = color
-        slash.BackgroundTransparency = 0.15
-        slash.BorderSizePixel = 0
-        slash.ZIndex = 12
-        slash.Parent = UI.EntityLayer
-        addCorner(slash, 6)
-        addStroke(slash, C.TXT_MAIN, 1)
-        table.insert(S.effects, {
-            ui = slash, kind = "slash", life = dur or 0.14, maxLife = dur or 0.14,
-        })
+    local function spawnSlash(x, y, deg, lenPx, col, dur)
+        local s = Instance.new("Frame")
+        s.AnchorPoint = Vector2.new(0.5, 0.5)
+        s.Position = toPos(x, y)
+        s.Size = UDim2.new(0, 14, 0, lenPx)
+        s.Rotation = deg
+        s.BackgroundColor3 = col
+        s.BackgroundTransparency = 0.14
+        s.BorderSizePixel = 0
+        s.ZIndex = 13
+        s.Parent = UI.EntityLayer
+        addCorner(s, 7)
+        addStroke(s, C.TXT_MAIN, 1)
+        table.insert(S.effects, { ui = s, kind = "slash", life = dur or 0.14, maxLife = dur or 0.14 })
     end
 
-    -- Tan anh khi luot nhanh (Dash Afterimage)
-    local function spawnAfterimage(x, y, rotDeg, col)
-        local ghost = Instance.new("Frame")
-        ghost.AnchorPoint = Vector2.new(0.5, 0.5)
-        ghost.Position = toScalePos(x, y)
-        ghost.Size = UDim2.new(0, 26, 0, 26)
-        ghost.Rotation = rotDeg
-        ghost.BackgroundColor3 = col
-        ghost.BackgroundTransparency = 0.45
-        ghost.BorderSizePixel = 0
-        ghost.ZIndex = 7
-        ghost.Parent = UI.EntityLayer
-        addCorner(ghost, 10)
-        table.insert(S.effects, {
-            ui = ghost, kind = "ghost", life = 0.22, maxLife = 0.22,
-        })
+    local function spawnGhost(x, y, col)
+        if not DATA.settings.particles then return end
+        local g = Instance.new("Frame")
+        g.AnchorPoint = Vector2.new(0.5, 0.5)
+        g.Position = toPos(x, y)
+        g.Size = UDim2.new(0, 28, 0, 28)
+        g.BackgroundColor3 = col
+        g.BackgroundTransparency = 0.45
+        g.BorderSizePixel = 0
+        g.ZIndex = 7
+        g.Parent = UI.EntityLayer
+        addCorner(g, 12)
+        table.insert(S.effects, { ui = g, kind = "ghost", life = 0.20, maxLife = 0.20 })
     end
 
-    -- Tia lua va cham (Hit Sparks)
-    local function spawnSparks(x, y, color, count)
-        for _ = 1, (count or 5) do
-            local ang = RNG:NextNumber(0, math.pi * 2)
-            local spd = RNG:NextNumber(90, 220)
-            local sp = Instance.new("Frame")
-            sp.AnchorPoint = Vector2.new(0.5, 0.5)
-            sp.Position = toScalePos(x, y)
-            sp.Size = UDim2.new(0, 6, 0, 6)
-            sp.Rotation = 45
-            sp.BackgroundColor3 = color
-            sp.BorderSizePixel = 0
-            sp.ZIndex = 13
-            sp.Parent = UI.EntityLayer
-            table.insert(S.sparks, {
-                ui = sp,
-                x = x,
-                y = y,
-                vx = math.cos(ang) * spd,
-                vy = math.sin(ang) * spd,
-                life = RNG:NextNumber(0.16, 0.28),
-                maxLife = 0.28,
-            })
+    local function spawnSparks(x, y, col, cnt)
+        if not DATA.settings.particles then return end
+        for _ = 1, (cnt or 4) do
+            local a = RNG:NextNumber(0, math.pi * 2)
+            local sp = RNG:NextNumber(90, 220)
+            local f = Instance.new("Frame")
+            f.AnchorPoint = Vector2.new(0.5, 0.5)
+            f.Position = toPos(x, y)
+            f.Size = UDim2.new(0, 6, 0, 6)
+            f.Rotation = 45
+            f.BackgroundColor3 = col
+            f.BorderSizePixel = 0
+            f.ZIndex = 14
+            f.Parent = UI.EntityLayer
+            table.insert(S.sparks, { ui = f, x = x, y = y, vx = math.cos(a) * sp, vy = math.sin(a) * sp, life = 0.22, maxLife = 0.22 })
         end
     end
 
     local function spawnPickup(x, y)
-        local roll = RNG:NextNumber()
+        local r = RNG:NextNumber()
         local kind, col, txt
-        if roll < 0.50 then
-            kind, col, txt = "heal", C.TXT_GREEN, "+HP"
-        elseif roll < 0.78 then
-            kind, col, txt = "fury", C.TXT_GOLD, "+NỘ"
-        else
-            kind, col, txt = "atk", C.TXT_RED, "+ATK"
-        end
-        local node = Instance.new("Frame")
-        node.AnchorPoint = Vector2.new(0.5, 0.5)
-        node.Position = toScalePos(x, y)
-        node.Size = UDim2.new(0, 26, 0, 26)
-        node.BackgroundColor3 = C.BG_PANEL
-        node.ZIndex = 6
-        node.Parent = UI.EntityLayer
-        addCorner(node, 13)
-        addStroke(node, col, 1.5)
-        makeLabel(node, {
-            text = txt,
-            font = FONT_TITLE,
-            color = col,
-            size = 9,
-            xAlign = Enum.TextXAlignment.Center,
-            dim = UDim2.new(1, 0, 1, 0),
-            z = 7,
-        })
-        table.insert(S.pickups, { ui = node, x = x, y = y, kind = kind, life = 11.0 })
+        if r < 0.35 then kind, col, txt = "heal", C.TXT_GREEN, "+HP"
+        elseif r < 0.62 then kind, col, txt = "mp", C.TXT_CYAN, "+MP"
+        elseif r < 0.82 then kind, col, txt = "fury", C.TXT_GOLD, "+NỘ"
+        else kind, col, txt = "atk", C.TXT_RED, "+ATK" end
+
+        local n = Instance.new("Frame")
+        n.AnchorPoint = Vector2.new(0.5, 0.5)
+        n.Position = toPos(x, y)
+        n.Size = UDim2.new(0, 26, 0, 26)
+        n.BackgroundColor3 = C.BG_PANEL
+        n.ZIndex = 6
+        n.Parent = UI.EntityLayer
+        addCorner(n, 13)
+        addStroke(n, col, 1.5)
+        makeLabel(n, { text = txt, font = FONT_TITLE, color = col, size = 9, xAlign = Enum.TextXAlignment.Center, dim = UDim2.new(1, 0, 1, 0), z = 7 })
+        table.insert(S.pickups, { ui = n, x = x, y = y, kind = kind, life = 11 })
     end
 
-    local function spawnProjectile(owner, x, y, vx, vy, dmg, radius, color, pierce)
-        local node = Instance.new("Frame")
-        node.AnchorPoint = Vector2.new(0.5, 0.5)
-        node.Position = toScalePos(x, y)
-        local px = math.max(9, math.floor(radius * 1.45))
-        node.Size = UDim2.new(0, px, 0, px)
-        node.BackgroundColor3 = color
-        node.ZIndex = 9
-        node.Parent = UI.EntityLayer
-        addCorner(node, px)
-        addStroke(node, C.TXT_MAIN, 1)
-
-        local core = Instance.new("Frame")
-        core.AnchorPoint = Vector2.new(0.5, 0.5)
-        core.Position = UDim2.new(0.5, 0, 0.5, 0)
-        core.Size = UDim2.new(0.45, 0, 0.45, 0)
-        core.BackgroundColor3 = C.TXT_MAIN
-        core.BorderSizePixel = 0
-        core.ZIndex = 10
-        core.Parent = node
-        addCorner(core, 99)
-
+    local function spawnProj(owner, x, y, vx, vy, dmg, rad, col, pierce, status)
+        local n = Instance.new("Frame")
+        n.AnchorPoint = Vector2.new(0.5, 0.5)
+        n.Position = toPos(x, y)
+        local px = math.max(10, math.floor(rad * 1.45))
+        n.Size = UDim2.new(0, px, 0, px)
+        n.BackgroundColor3 = col
+        n.ZIndex = 10
+        n.Parent = UI.EntityLayer
+        addCorner(n, px)
+        addStroke(n, C.TXT_MAIN, 1)
         table.insert(S.projs, {
-            ui = node, owner = owner, x = x, y = y, vx = vx, vy = vy,
-            dmg = dmg, r = radius, pierce = pierce or 0, hitMap = {}, life = 2.4,
+            ui = n, owner = owner, x = x, y = y, vx = vx, vy = vy,
+            dmg = dmg, r = rad, pierce = pierce or 0, status = status, hitMap = {}, life = 2.4,
         })
     end
 
-    local function spawnHazard(x, y, radius, delay, dmg)
-        local node = Instance.new("Frame")
-        node.AnchorPoint = Vector2.new(0.5, 0.5)
-        node.Position = toScalePos(x, y)
-        node.Size = UDim2.new((radius * 2) / CFG.ARENA_W, 0, (radius * 2) / CFG.ARENA_H, 0)
-        node.BackgroundColor3 = C.WARN_ZONE
-        node.BackgroundTransparency = 0.80
-        node.ZIndex = 5
-        node.Parent = UI.EntityLayer
-        addCorner(node, 999)
-        addStroke(node, C.TXT_RED, 1.5)
+    local function spawnHazard(x, y, rad, delay, dmg)
+        local n = Instance.new("Frame")
+        n.AnchorPoint = Vector2.new(0.5, 0.5)
+        n.Position = toPos(x, y)
+        n.Size = UDim2.new((rad * 2) / CFG.ARENA_W, 0, (rad * 2) / CFG.ARENA_H, 0)
+        n.BackgroundColor3 = C.WARN_ZONE
+        n.BackgroundTransparency = 0.80
+        n.ZIndex = 5
+        n.Parent = UI.EntityLayer
+        addCorner(n, 999)
+        addStroke(n, C.TXT_RED, 1.5)
 
-        -- Vong nap nang luong ben trong bao thoi gian no chinh xac
-        local charge = Instance.new("Frame")
-        charge.AnchorPoint = Vector2.new(0.5, 0.5)
-        charge.Position = UDim2.new(0.5, 0, 0.5, 0)
-        charge.Size = UDim2.new(0.1, 0, 0.1, 0)
-        charge.BackgroundColor3 = C.TXT_RED
-        charge.BackgroundTransparency = 0.65
-        charge.BorderSizePixel = 0
-        charge.ZIndex = 5
-        charge.Parent = node
-        addCorner(charge, 999)
-
-        table.insert(S.hazards, {
-            ui = node, charge = charge, x = x, y = y, r = radius, dmg = dmg, timer = delay, maxTimer = delay,
-        })
+        local ch = Instance.new("Frame")
+        ch.AnchorPoint = Vector2.new(0.5, 0.5)
+        ch.Position = UDim2.new(0.5, 0, 0.5, 0)
+        ch.Size = UDim2.new(0.1, 0, 0.1, 0)
+        ch.BackgroundColor3 = C.TXT_RED
+        ch.BackgroundTransparency = 0.65
+        ch.BorderSizePixel = 0
+        ch.ZIndex = 5
+        ch.Parent = n
+        addCorner(ch, 999)
+        table.insert(S.hazards, { ui = n, charge = ch, x = x, y = y, r = rad, dmg = dmg, timer = delay, maxTimer = delay })
     end
 
-    local function spawnEnemy(kind, waveNum)
+    local function openBuffPicker()
+        S.pickingBuff = true
+        local pool = {}
+        for _, b in ipairs(CFG.INMATCH_BUFFS) do table.insert(pool, b) end
+        for i = 1, 3 do
+            local idx = RNG:NextInteger(1, #pool)
+            local bf = table.remove(pool, idx)
+            UI.BuffChoices[i].buff = bf
+            UI.BuffChoices[i].title.Text = bf.name
+            UI.BuffChoices[i].title.TextColor3 = bf.color
+            UI.BuffChoices[i].desc.Text = bf.desc
+        end
+        UI.BuffOverlay.Visible = true
+    end
+
+    local function spawnEnemy(kind, waveNum, isBoss)
         local side = RNG:NextInteger(1, 4)
         local x, y
-        if side == 1 then x, y = RNG:NextNumber(40, CFG.ARENA_W - 40), 28
-        elseif side == 2 then x, y = RNG:NextNumber(40, CFG.ARENA_W - 40), CFG.ARENA_H - 28
-        elseif side == 3 then x, y = 28, RNG:NextNumber(40, CFG.ARENA_H - 40)
-        else x, y = CFG.ARENA_W - 28, RNG:NextNumber(40, CFG.ARENA_H - 40) end
+        if side == 1 then x, y = RNG:NextNumber(50, CFG.ARENA_W - 50), 34
+        elseif side == 2 then x, y = RNG:NextNumber(50, CFG.ARENA_W - 50), CFG.ARENA_H - 34
+        elseif side == 3 then x, y = 34, RNG:NextNumber(50, CFG.ARENA_H - 50)
+        else x, y = CFG.ARENA_W - 34, RNG:NextNumber(50, CFG.ARENA_H - 50) end
 
-        local scale = 1 + (waveNum - 1) * 0.16
-        local hp, spd, dmg, rad, col, scoreVal, coinVal, isBoss, title = 62, 112, 12, 17, Color3.fromRGB(174, 82, 82), 20, 5, false, nil
-        if kind == "runner" then
-            hp, spd, dmg, rad = math.floor(42 * scale), 155, math.floor(11 * scale), 15
-            col = Color3.fromRGB(184, 128, 58)
-            scoreVal, coinVal = 25, 6
-        elseif kind == "shooter" then
-            hp, spd, dmg, rad = math.floor(54 * scale), 92, math.floor(13 * scale), 16
-            col = Color3.fromRGB(136, 86, 174)
-            scoreVal, coinVal = 35, 8
-        elseif kind == "tank" then
-            hp, spd, dmg, rad = math.floor(125 * scale), 72, math.floor(18 * scale), 23
-            col = Color3.fromRGB(158, 66, 66)
-            scoreVal, coinVal = 50, 12
-        elseif kind == "boss" then
-            isBoss = true
-            local bossNames = { "HẮC KỴ SĨ", "HỎA MA VƯƠNG", "LÔI THẦN HỘ VỆ", "CHÚA TỂ BÓNG TỐI" }
-            title = bossNames[((math.floor((waveNum - 1) / 5)) % #bossNames) + 1]
-            hp, spd, dmg, rad = math.floor(420 * scale), 104, math.floor(24 * scale), 32
-            col = C.HP_BOSS
-            scoreVal, coinVal = 300, 65
+        local stgScale = 1 + (S.stage.id - 1) * 0.35 + (waveNum - 1) * 0.16
+        local hpM = stgScale * S.diff.hpMult
+        local dmgM = stgScale * S.diff.dmgMult
+        local hp, spd, dmg, rad, col, ranged, title = 64, 108, 12, 17, Color3.fromRGB(76, 168, 92), false, nil
+
+        if isBoss then
+            title = S.stage.bossName
+            hp, spd, dmg, rad = math.floor(460 * hpM), 106, math.floor(24 * dmgM), 34
+            if kind == "firedrag" then col = Color3.fromRGB(168, 52, 48)
+            elseif kind == "icedrag" then col = Color3.fromRGB(56, 118, 178)
+            elseif kind == "golem" then col = Color3.fromRGB(124, 92, 72)
+            elseif kind == "lich" then col = Color3.fromRGB(108, 62, 152)
+            else col = Color3.fromRGB(86, 48, 128) end
+        elseif kind == "slime" then
+            hp, spd, dmg, rad = math.floor(52 * hpM), 96, math.floor(10 * dmgM), 16
+            col = Color3.fromRGB(68, 168, 92)
+        elseif kind == "bat" then
+            hp, spd, dmg, rad = math.floor(42 * hpM), 158, math.floor(11 * dmgM), 15
+            col = Color3.fromRGB(122, 74, 166)
+        elseif kind == "skeleton" then
+            hp, spd, dmg, rad = math.floor(74 * hpM), 114, math.floor(14 * dmgM), 18
+            col = Color3.fromRGB(178, 182, 190)
+        elseif kind == "mushroom" then
+            hp, spd, dmg, rad = math.floor(86 * hpM), 84, math.floor(13 * dmgM), 18
+            col = Color3.fromRGB(186, 158, 134)
+        elseif kind == "ghost" then
+            hp, spd, dmg, rad, ranged = math.floor(58 * hpM), 98, math.floor(14 * dmgM), 16, true
+            col = Color3.fromRGB(154, 164, 196)
         else
-            hp, dmg = math.floor(62 * scale), math.floor(12 * scale)
+            hp, spd, dmg, rad = math.floor(68 * hpM), 132, math.floor(13 * dmgM), 17
+            col = Color3.fromRGB(92, 148, 66)
         end
 
-        local node = Instance.new("Frame")
-        node.AnchorPoint = Vector2.new(0.5, 0.5)
-        node.Position = toScalePos(x, y)
-        local px = math.floor(rad * 1.48)
-        node.Size = UDim2.new(0, px, 0, px)
-        node.BackgroundColor3 = col
-        node.ZIndex = isBoss and 9 or 8
-        node.Parent = UI.EntityLayer
-        addCorner(node, (kind == "tank" or isBoss) and 8 or (kind == "runner" and 4 or px))
-        addStroke(node, isBoss and C.TXT_GOLD or C.TXT_DARK, isBoss and 2 or 1.2)
-        decorateEnemyNode(node, kind, col, isBoss, isBoss and 9 or 8)
+        local n = Instance.new("Frame")
+        n.AnchorPoint = Vector2.new(0.5, 0.5)
+        n.Position = toPos(x, y)
+        local px = math.floor(rad * 1.55)
+        n.Size = UDim2.new(0, px, 0, px)
+        n.BackgroundColor3 = col
+        n.ZIndex = isBoss and 10 or 8
+        n.Parent = UI.EntityLayer
+        addCorner(n, isBoss and 10 or px)
+        addStroke(n, isBoss and C.BORDER_GOLD or C.TXT_DARK, isBoss and 2 or 1.2)
+        decorateEnemySprite(n, kind, isBoss, isBoss and 10 or 8)
 
         local hpFill = nil
         if not isBoss then
@@ -2403,28 +2512,37 @@ do
             hb.AnchorPoint = Vector2.new(0.5, 1)
             hb.Position = UDim2.new(0.5, 0, 0, -5)
             hb.Size = UDim2.new(0, 30, 0, 4)
-            hb.BackgroundColor3 = C.BG_MAIN
+            hb.BackgroundColor3 = C.BG_FULL
             hb.BorderSizePixel = 0
-            hb.ZIndex = 11
-            hb.Parent = node
-
+            hb.ZIndex = 12
+            hb.Parent = n
             hpFill = Instance.new("Frame")
             hpFill.Size = UDim2.new(1, 0, 1, 0)
             hpFill.BackgroundColor3 = C.HP_ENEMY
             hpFill.BorderSizePixel = 0
-            hpFill.ZIndex = 12
+            hpFill.ZIndex = 13
             hpFill.Parent = hb
         end
 
+        -- Cham tren Minimap
+        local mdot = Instance.new("Frame")
+        mdot.AnchorPoint = Vector2.new(0.5, 0.5)
+        mdot.Size = UDim2.new(0, isBoss and 8 or 4, 0, isBoss and 8 or 4)
+        mdot.BackgroundColor3 = isBoss and C.TXT_GEM or C.TXT_RED
+        mdot.BorderSizePixel = 0
+        mdot.ZIndex = 23
+        mdot.Parent = UI.Minimap
+        addCorner(mdot, 9)
+        table.insert(S.miniDots, mdot)
+
         local e = {
-            ui = node, hpFill = hpFill, kind = kind, isBoss = isBoss, title = title,
-            x = x, y = y, hp = hp, maxHp = hp, spd = spd, dmg = dmg, r = rad,
-            baseCol = col, flashT = 0, stunT = 0, atkCd = RNG:NextNumber(0.6, 1.4),
-            bossSkillCd = 3.2, scoreVal = scoreVal, coinVal = coinVal,
+            ui = n, hpFill = hpFill, mdot = mdot, kind = kind, isBoss = isBoss, title = title,
+            x = x, y = y, hp = hp, maxHp = hp, spd = spd, dmg = dmg, r = rad, ranged = ranged,
+            baseCol = col, flashT = 0, stunT = 0, slowT = 0, burnT = 0, burnTick = 0,
+            atkCd = RNG:NextNumber(0.8, 1.5), bossSkillCd = 3.0,
         }
         table.insert(S.enemies, e)
         if isBoss then
-            S.bossActive = true
             UI.BossBar.Visible = true
             UI.BossHpText.Text = title .. " (" .. tostring(hp) .. " HP)"
             UI.BossHpFill.Size = UDim2.new(1, 0, 1, 0)
@@ -2433,38 +2551,52 @@ do
 
     local function damagePlayer(amount)
         if S.invulnTime > 0 or S.gameOver then return end
-        S.hp = math.max(0, S.hp - amount)
-        S.invulnTime = 0.45
+        local rem = amount
+        if S.shield > 0 then
+            local absorb = math.min(S.shield, rem)
+            S.shield = S.shield - absorb
+            rem = rem - absorb
+        end
+        if rem > 0 then S.hp = math.max(0, S.hp - rem) end
+        S.invulnTime = 0.42
         S.fury = math.min(100, S.fury + 8)
         S.combo = 0
         addShake(7, 0.16)
-        spawnSparks(S.px, S.py, C.TXT_RED, 6)
-        spawnFloatText(S.px, S.py - 22, "-" .. tostring(amount), C.TXT_RED, 14)
-        if S.hp <= 0 then GAME.EndMatch(false) end
+        spawnSparks(S.px, S.py, C.TXT_RED, 5)
+        spawnFloat(S.px, S.py - 24, "-" .. tostring(amount), C.TXT_RED, 14)
+        if S.hp <= 0 then GAME.EndMatch(false, false) end
     end
 
-    local function damageEnemy(e, rawDmg, knockX, knockY, stunDur)
+    local function damageEnemy(e, rawDmg, kx, ky, status)
         if e.hp <= 0 then return end
         local isCrit = RNG:NextNumber() < S.crit
         local mult = (S.buffAtkTime > 0) and 1.35 or 1.0
         local dmg = math.max(1, math.floor(rawDmg * mult * (isCrit and 1.65 or 1.0)))
         e.hp = e.hp - dmg
         e.flashT = 0.10
-        if stunDur and stunDur > 0 then
-            e.stunT = math.max(e.stunT, e.isBoss and (stunDur * 0.35) or stunDur)
+
+        if S.lifesteal > 0 then
+            S.hp = math.min(S.maxHp, S.hp + math.max(1, math.floor(dmg * S.lifesteal)))
         end
-        if knockX and knockY then
-            local kMult = e.isBoss and 0.25 or 1.0
-            e.x = math.clamp(e.x + knockX * kMult, 24, CFG.ARENA_W - 24)
-            e.y = math.clamp(e.y + knockY * kMult, 24, CFG.ARENA_H - 24)
+        if status == "burn" or status == "poison" then
+            e.burnT = 3.0
+        elseif status == "freeze" then
+            e.slowT = 2.4
+        elseif status == "stun" then
+            e.stunT = math.max(e.stunT, e.isBoss and 0.25 or 0.65)
+        end
+        if kx and ky then
+            local km = e.isBoss and 0.22 or 1.0
+            e.x = math.clamp(e.x + kx * km, 28, CFG.ARENA_W - 28)
+            e.y = math.clamp(e.y + ky * km, 28, CFG.ARENA_H - 28)
         end
 
         S.fury = math.min(100, S.fury + (e.isBoss and 4.5 or 3.5))
-        spawnSparks(e.x, e.y, isCrit and C.TXT_GOLD or C.SLASH_FX, isCrit and 7 or 4)
-        spawnFloatText(
-            e.x + RNG:NextNumber(-12, 12), e.y - 18,
-            isCrit and ("CRIT " .. tostring(dmg)) or tostring(dmg),
-            isCrit and C.TXT_GOLD or C.TXT_MAIN, isCrit and 15 or 12
+        spawnSparks(e.x, e.y, isCrit and C.TXT_GOLD or S.hero.fx, isCrit and 6 or 3)
+        spawnFloat(
+            e.x + RNG:NextNumber(-12, 12), e.y - 20,
+            isCrit and ("-" .. tostring(dmg) .. "!") or ("-" .. tostring(dmg)),
+            isCrit and C.TXT_GOLD or C.TXT_RED, isCrit and 15 or 12
         )
 
         if e.hp <= 0 then
@@ -2472,30 +2604,23 @@ do
             S.combo = S.combo + 1
             S.comboTimer = 3.2
             if S.combo > S.maxCombo then S.maxCombo = S.combo end
-
-            local modeInfo = getModeById(S.mode)
-            local comboBonus = 1 + math.min(1.5, S.combo * 0.04)
-            S.score = S.score + math.floor(e.scoreVal * comboBonus)
-            S.coinsEarned = S.coinsEarned + math.max(1, math.floor(e.coinVal * modeInfo.rewardMult))
+            S.score = S.score + math.floor((e.isBoss and 350 or 25) * (1 + math.min(1.5, S.combo * 0.04)))
+            S.coinsEarned = S.coinsEarned + math.floor((e.isBoss and 75 or 7) * S.diff.rewardMult)
+            S.expEarned = S.expEarned + (e.isBoss and 80 or 12)
             if e.isBoss then
-                S.gemsEarned = S.gemsEarned + 3
-                DATA.bossKills = DATA.bossKills + 1
-                S.bossActive = false
+                S.gemsEarned = S.gemsEarned + 4
+                DATA.bossKills = (DATA.bossKills or 0) + 1
                 UI.BossBar.Visible = false
                 addShake(12, 0.30)
-                spawnRingFX(e.x, e.y, 145, C.TXT_GOLD, 0.40)
-                spawnSparks(e.x, e.y, C.TXT_GOLD, 14)
+                spawnRing(e.x, e.y, 150, C.TXT_GOLD, 0.40)
             else
-                spawnRingFX(e.x, e.y, 46, e.baseCol, 0.20)
+                spawnRing(e.x, e.y, 46, e.baseCol, 0.18)
             end
-            if RNG:NextNumber() < (e.isBoss and 0.90 or 0.14) then
-                spawnPickup(e.x, e.y)
-            end
+            if RNG:NextNumber() < (e.isBoss and 0.90 or 0.18) then spawnPickup(e.x, e.y) end
             e.ui:Destroy()
+            if e.mdot then e.mdot:Destroy() end
         else
-            if e.hpFill then
-                e.hpFill.Size = UDim2.new(math.clamp(e.hp / e.maxHp, 0, 1), 0, 1, 0)
-            end
+            if e.hpFill then e.hpFill.Size = UDim2.new(math.clamp(e.hp / e.maxHp, 0, 1), 0, 1, 0) end
             if e.isBoss then
                 UI.BossHpFill.Size = UDim2.new(math.clamp(e.hp / e.maxHp, 0, 1), 0, 1, 0)
                 UI.BossHpText.Text = e.title .. " (" .. tostring(math.max(0, e.hp)) .. " HP)"
@@ -2503,75 +2628,62 @@ do
         end
     end
 
-    local function findNearestEnemy(maxDist)
-        local best, bestD = nil, maxDist or 9999
+    local function findNearest(maxD)
+        local best, bd = nil, maxD or 9999
         for _, e in ipairs(S.enemies) do
             if e.hp > 0 then
                 local d = math.sqrt((e.x - S.px) ^ 2 + (e.y - S.py) ^ 2)
-                if d < bestD then bestD, best = d, e end
+                if d < bd then bd, best = d, e end
             end
         end
-        return best, bestD
+        return best
     end
 
-    function GAME.StartWave(waveNum)
-        S.wave = waveNum
+    function GAME.StartWave(w)
+        S.wave = w
         S.waveBannerTimer = 2.0
-        if S.mode == "boss" then
-            UI.WaveBanner.Text = "SĂN BOSS - CẤP " .. tostring(waveNum)
-            S.enemiesToSpawn = 2 + math.min(5, waveNum)
-            spawnEnemy("boss", waveNum * 2)
-        elseif S.mode == "endless" then
-            UI.WaveBanner.Text = "SINH TỒN - ĐỢT " .. tostring(waveNum)
-            S.enemiesToSpawn = 8 + waveNum * 3
-        else
-            local isBossWave = (waveNum % 5 == 0)
-            UI.WaveBanner.Text = isBossWave and ("CẢNH BÁO BOSS - ẢI " .. tostring(waveNum)) or ("ẢI " .. tostring(waveNum))
-            S.enemiesToSpawn = isBossWave and (4 + math.floor(waveNum * 0.5)) or (5 + waveNum * 2)
-            if isBossWave then spawnEnemy("boss", waveNum) end
-        end
-        S.spawnTimer = 0.4
+        local isBossWave = (not S.stage.endless and w == S.totalWaves) or (S.stage.endless and w % 3 == 0)
+        UI.WaveBanner.Text = isBossWave and ("CẢNH BÁO BOSS - " .. S.stage.bossName) or ("ĐỢT " .. tostring(w))
+        S.enemiesToSpawn = isBossWave and (4 + w) or (6 + w * 2)
+        if isBossWave then spawnEnemy(S.stage.boss, w, true) end
+        S.spawnTimer = 0.45
     end
 
     function GAME.TryAttack()
-        if not S.inMatch or S.paused or S.gameOver or S.attackCd > 0 then return end
+        if not S.inMatch or S.paused or S.pickingBuff or S.gameOver or S.attackCd > 0 then return end
         local h = S.hero
-        S.attackCd = h.attackCd * S.cdr
+        S.attackCd = h.cd
         S.comboStep = (S.comboStep % 3) + 1
         S.comboResetT = 1.1
         S.swingT = 0.16
         S.swingSign = -S.swingSign
 
         local ax, ay = S.dirX, S.dirY
-        local near = findNearestEnemy(h.attackType == "ranged" and 420 or 160)
-        if near then
-            local dx, dy = near.x - S.px, near.y - S.py
-            local dist = math.sqrt(dx * dx + dy * dy)
-            if dist > 1 then
-                ax, ay = dx / dist, dy / dist
-                S.dirX, S.dirY = ax, ay
+        if DATA.settings.autoAim then
+            local near = findNearest(h.attackType == "ranged" and 440 or 180)
+            if near then
+                local dx, dy = near.x - S.px, near.y - S.py
+                local d = math.sqrt(dx * dx + dy * dy)
+                if d > 1 then ax, ay = dx / d, dy / d; S.dirX, S.dirY = ax, ay end
             end
         end
 
-        local dmgMult = (S.comboStep == 3) and 1.35 or 1.0
-        local finalDmg = math.floor(S.atk * dmgMult)
-        local angDeg = math.deg(math.atan2(ay, ax))
-
+        local dmg = math.floor(S.atk * ((S.comboStep == 3) and 1.35 or 1.0))
+        local deg = math.deg(math.atan2(ay, ax))
         if h.attackType == "ranged" then
-            spawnProjectile("player", S.px + ax * 20, S.py + ay * 20, ax * 560, ay * 560, finalDmg, 8, h.trim, (S.comboStep == 3) and 2 or 0)
-            spawnRingFX(S.px + ax * 20, S.py + ay * 20, 20, h.trim, 0.12)
+            spawnProj("player", S.px + ax * 22, S.py + ay * 22, ax * 580, ay * 580, dmg, 9, h.fx, (S.comboStep == 3) and 2 or 0, h.status)
+            spawnRing(S.px + ax * 22, S.py + ay * 22, 22, h.fx, 0.12)
         else
-            local hitX = S.px + ax * (h.attackRange * 0.48)
-            local hitY = S.py + ay * (h.attackRange * 0.48)
-            local hitR = h.attackRange * (S.comboStep == 3 and 0.72 or 0.58)
-            spawnSlashArc(hitX, hitY, angDeg, math.floor(hitR * 1.15), S.comboStep == 3 and C.TXT_GOLD or C.SLASH_FX, 0.14)
-            spawnRingFX(hitX, hitY, hitR * 0.85, S.comboStep == 3 and C.TXT_GOLD or h.color, 0.15)
+            local hx, hy = S.px + ax * (h.range * 0.48), S.py + ay * (h.range * 0.48)
+            local hr = h.range * ((S.comboStep == 3) and 0.72 or 0.58)
+            spawnSlash(hx, hy, deg, math.floor(hr * 1.18), S.comboStep == 3 and C.TXT_GOLD or h.fx, 0.14)
+            spawnRing(hx, hy, hr * 0.82, h.fx, 0.14)
             for _, e in ipairs(S.enemies) do
                 if e.hp > 0 then
-                    local dx, dy = e.x - hitX, e.y - hitY
-                    if math.sqrt(dx * dx + dy * dy) <= (hitR + e.r) then
-                        local push = (S.comboStep == 3) and 34 or 16
-                        damageEnemy(e, finalDmg, ax * push, ay * push, S.comboStep == 3 and 0.18 or 0)
+                    local dx, dy = e.x - hx, e.y - hy
+                    if math.sqrt(dx * dx + dy * dy) <= (hr + e.r) then
+                        local push = (S.comboStep == 3) and 36 or 16
+                        damageEnemy(e, dmg, ax * push, ay * push, S.comboStep == 3 and h.status or nil)
                     end
                 end
             end
@@ -2580,134 +2692,120 @@ do
     end
 
     function GAME.TryDash()
-        if not S.inMatch or S.paused or S.gameOver or S.dashCd > 0 then return end
-        S.dashCd = 1.6 * S.cdr
+        if not S.inMatch or S.paused or S.pickingBuff or S.gameOver or S.dashCd > 0 then return end
+        S.dashCd = 1.5
         S.dashTime = 0.16
         S.dashGhostT = 0
-        S.invulnTime = math.max(S.invulnTime, 0.24)
-        S.dashVx = S.dirX * 760
-        S.dashVy = S.dirY * 760
-        spawnRingFX(S.px, S.py, 36, C.TXT_GEM, 0.20)
+        S.invulnTime = math.max(S.invulnTime, 0.26)
+        S.dashVx, S.dashVy = S.dirX * 780, S.dirY * 780
+        spawnRing(S.px, S.py, 38, C.TXT_CYAN, 0.18)
     end
 
-    function GAME.TrySkill()
-        if not S.inMatch or S.paused or S.gameOver or S.skillCd > 0 then return end
+    function GAME.TrySkill1()
+        if not S.inMatch or S.paused or S.pickingBuff or S.gameOver or S.s1Cd > 0 then return end
         local h = S.hero
-        S.skillCd = h.skillCd * S.cdr
-        S.skillMaxCd = S.skillCd
+        if S.mp < h.s1Cost then showToast("Không đủ MP!", C.TXT_CYAN); return end
+        S.mp = S.mp - h.s1Cost
+        S.s1Cd = h.s1Cd
         S.swingT = 0.22
-        addShake(6, 0.15)
+        addShake(5.5, 0.14)
+        spawnFloat(S.px, S.py - 30, h.s1Name, h.fx, 13)
 
-        if h.id == "kiemsi" then
-            spawnRingFX(S.px, S.py, 150, h.color, 0.30)
-            spawnRingFX(S.px, S.py, 110, h.trim, 0.22)
-            for _, e in ipairs(S.enemies) do
-                if e.hp > 0 then
-                    local dx, dy = e.x - S.px, e.y - S.py
-                    local d = math.sqrt(dx * dx + dy * dy)
-                    if d <= 148 + e.r then
-                        local nx, ny = (d > 1 and dx / d or 1), (d > 1 and dy / d or 0)
-                        damageEnemy(e, math.floor(S.atk * 2.2), nx * 65, ny * 65, 0.35)
-                    end
-                end
-            end
-        elseif h.id == "satthu" then
-            S.dashTime = 0.20
-            S.dashGhostT = 0
-            S.invulnTime = math.max(S.invulnTime, 0.35)
-            S.dashVx = S.dirX * 880
-            S.dashVy = S.dirY * 880
-            local angDeg = math.deg(math.atan2(S.dirY, S.dirX))
-            spawnSlashArc(S.px + S.dirX * 65, S.py + S.dirY * 65, angDeg, 96, h.trim, 0.20)
-            spawnRingFX(S.px + S.dirX * 60, S.py + S.dirY * 60, 120, h.color, 0.26)
-            for _, e in ipairs(S.enemies) do
-                if e.hp > 0 then
-                    local dx, dy = e.x - (S.px + S.dirX * 65), e.y - (S.py + S.dirY * 65)
-                    if math.sqrt(dx * dx + dy * dy) <= 125 + e.r then
-                        damageEnemy(e, math.floor(S.atk * 2.5), S.dirX * 25, S.dirY * 25, 0.25)
-                    end
-                end
-            end
-        elseif h.id == "xathu" then
-            local baseAngle = math.atan2(S.dirY, S.dirX)
+        if h.attackType == "ranged" then
+            local ba = math.atan2(S.dirY, S.dirX)
             for i = -2, 2 do
-                local ang = baseAngle + i * 0.18
-                spawnProjectile("player", S.px, S.py, math.cos(ang) * 600, math.sin(ang) * 600, math.floor(S.atk * 1.45), 9, C.TXT_GREEN, 3)
+                local a = ba + i * 0.16
+                spawnProj("player", S.px, S.py, math.cos(a) * 600, math.sin(a) * 600, math.floor(S.atk * 1.55), 10, h.fx, 2, h.status)
             end
         else
-            spawnRingFX(S.px, S.py, 178, h.color, 0.35)
-            spawnRingFX(S.px, S.py, 125, h.trim, 0.25)
-            spawnSparks(S.px, S.py, h.trim, 12)
+            spawnRing(S.px, S.py, 155, h.fx, 0.28)
             for _, e in ipairs(S.enemies) do
                 if e.hp > 0 then
                     local dx, dy = e.x - S.px, e.y - S.py
                     local d = math.sqrt(dx * dx + dy * dy)
-                    if d <= 178 + e.r then
+                    if d <= 155 + e.r then
                         local nx, ny = (d > 1 and dx / d or 1), (d > 1 and dy / d or 0)
-                        damageEnemy(e, math.floor(S.atk * 2.4), nx * 45, ny * 45, 0.90)
+                        damageEnemy(e, math.floor(S.atk * 2.1), nx * 58, ny * 58, h.status)
                     end
+                end
+            end
+        end
+    end
+
+    function GAME.TrySkill2()
+        if not S.inMatch or S.paused or S.pickingBuff or S.gameOver or S.s2Cd > 0 then return end
+        local h = S.hero
+        if S.mp < h.s2Cost then showToast("Không đủ MP!", C.TXT_CYAN); return end
+        S.mp = S.mp - h.s2Cost
+        S.s2Cd = h.s2Cd
+        S.invulnTime = math.max(S.invulnTime, 0.35)
+        addShake(7.5, 0.18)
+        spawnFloat(S.px, S.py - 32, h.s2Name, C.TXT_GOLD, 14)
+        spawnRing(S.px, S.py, 200, h.fx, 0.34)
+        spawnRing(S.px, S.py, 135, C.TXT_GOLD, 0.24)
+        for _, e in ipairs(S.enemies) do
+            if e.hp > 0 then
+                local dx, dy = e.x - S.px, e.y - S.py
+                local d = math.sqrt(dx * dx + dy * dy)
+                if d <= 200 + e.r then
+                    local nx, ny = (d > 1 and dx / d or 1), (d > 1 and dy / d or 0)
+                    damageEnemy(e, math.floor(S.atk * 2.7), nx * 65, ny * 65, h.status)
                 end
             end
         end
     end
 
     function GAME.TryUlt()
-        if not S.inMatch or S.paused or S.gameOver then return end
-        if S.fury < 100 then
-            showToast("Chưa đủ 100% Nộ!", C.TXT_PURPLE)
-            return
-        end
+        if not S.inMatch or S.paused or S.pickingBuff or S.gameOver then return end
+        if S.fury < 100 then showToast("Chưa đủ 100% Nộ!", C.TXT_GEM); return end
         S.fury = 0
-        S.invulnTime = math.max(S.invulnTime, 0.75)
-        addShake(13, 0.35)
-        spawnRingFX(S.px, S.py, 265, C.TXT_PURPLE, 0.45)
-        spawnRingFX(S.px, S.py, 180, C.TXT_GOLD, 0.35)
-        spawnSparks(S.px, S.py, C.TXT_GOLD, 16)
-        spawnFloatText(S.px, S.py - 34, S.hero.ultName, C.TXT_GOLD, 16)
-
+        S.invulnTime = math.max(S.invulnTime, 0.80)
+        addShake(13, 0.36)
+        spawnRing(S.px, S.py, 290, S.hero.fx, 0.46)
+        spawnRing(S.px, S.py, 195, C.TXT_GOLD, 0.34)
+        spawnFloat(S.px, S.py - 36, S.hero.ultName, C.TXT_GOLD, 16)
         for _, e in ipairs(S.enemies) do
             if e.hp > 0 then
                 local dx, dy = e.x - S.px, e.y - S.py
                 local d = math.sqrt(dx * dx + dy * dy)
-                if d <= 265 + e.r then
+                if d <= 290 + e.r then
                     local nx, ny = (d > 1 and dx / d or 1), (d > 1 and dy / d or 0)
-                    damageEnemy(e, math.floor(S.atk * 4.2), nx * 70, ny * 70, 0.85)
+                    damageEnemy(e, math.floor(S.atk * 4.5), nx * 75, ny * 75, S.hero.status)
                 end
             end
         end
         for i = 1, 12 do
-            local ang = (i / 12) * math.pi * 2
-            spawnProjectile("player", S.px, S.py, math.cos(ang) * 520, math.sin(ang) * 520, math.floor(S.atk * 1.5), 10, C.TXT_GOLD, 2)
+            local a = (i / 12) * math.pi * 2
+            spawnProj("player", S.px, S.py, math.cos(a) * 540, math.sin(a) * 540, math.floor(S.atk * 1.6), 10, C.TXT_GOLD, 2, S.hero.status)
         end
     end
 
     function GAME.StartMatch()
         clearEntities()
-        local st = computePlayerStats()
-        S.inMatch = true
-        S.paused = false
-        S.gameOver = false
-        S.mode = DATA.selectedMode
+        local st = computeStats()
+        S.inMatch, S.paused, S.pickingBuff, S.gameOver = true, false, false, false
+        S.stage = getStageById(DATA.selectedStage)
+        S.diff = getDiffById(DATA.selectedDiff)
         S.hero = st.hero
+        S.totalWaves = S.stage.waves
         S.maxHp, S.hp = st.maxHp, st.maxHp
-        S.atk, S.spd, S.crit, S.cdr = st.atk, st.spd, st.crit, st.cdr
+        S.maxMp, S.mp, S.mpRegen = st.maxMp, st.maxMp, st.mpRegen
+        S.shield, S.lifesteal = 0, 0
+        S.atk, S.spd, S.crit = st.atk, st.spd, st.crit
         S.fury = 0
         S.px, S.py = CFG.ARENA_W * 0.5, CFG.ARENA_H * 0.5
         S.dirX, S.dirY = 1, 0
-        S.score, S.kills, S.coinsEarned, S.gemsEarned = 0, 0, 0, 0
-        S.combo, S.maxCombo, S.comboTimer = 0, 0, 0
-        S.matchTime = 0
-        S.attackCd, S.swingT, S.dashCd, S.dashTime = 0, 0, 0, 0
-        S.invulnTime = 0.5
-        S.skillCd = 0
-        S.skillMaxCd = st.hero.skillCd * st.cdr
-        S.buffAtkTime = 0
-        S.bossActive = false
-        S.holdAttack = false
+        S.score, S.kills, S.coinsEarned, S.gemsEarned, S.expEarned = 0, 0, 0, 0, 0
+        S.combo, S.maxCombo, S.comboTimer, S.matchTime = 0, 0, 0, 0
+        S.attackCd, S.swingT, S.dashCd, S.dashTime, S.s1Cd, S.s2Cd = 0, 0, 0, 0, 0, 0
+        S.invulnTime, S.buffAtkTime, S.holdAttack = 0.6, 0, false
 
-        local _, wp = buildHeroAvatar(UI.PlayerSprite, st.hero, 10)
+        local _, wp = buildChibiHero(UI.PlayerSprite, st.hero, 10)
         UI.WeaponPivot = wp
+        UI.PlayerRingStroke.Color = st.hero.fx
+        UI.Minimap.Visible = DATA.settings.minimap == true
         UI.BossBar.Visible = false
+        UI.BuffOverlay.Visible = false
         UI.PauseOverlay.Visible = false
         UI.EndOverlay.Visible = false
         UI.LobbyView.Visible = false
@@ -2716,60 +2814,78 @@ do
         GAME.StartWave(1)
     end
 
-    function GAME.EndMatch(isManualQuit)
+    function GAME.EndMatch(isVictory, isManualQuit)
         S.gameOver = true
         S.paused = false
+        S.pickingBuff = false
         S.holdAttack = false
         UI.PauseOverlay.Visible = false
+        UI.BuffOverlay.Visible = false
+
+        if isVictory then
+            DATA.totalWins = (DATA.totalWins or 0) + 1
+            S.coinsEarned = S.coinsEarned + math.floor(S.stage.rewardCoin * S.diff.rewardMult)
+            S.gemsEarned = S.gemsEarned + math.floor(S.stage.rewardGem * S.diff.rewardMult)
+            S.expEarned = S.expEarned + math.floor(S.stage.rewardExp * S.diff.rewardMult)
+        end
 
         DATA.coins = DATA.coins + S.coinsEarned
         DATA.gems = DATA.gems + S.gemsEarned
-        DATA.totalKills = DATA.totalKills + S.kills
+        DATA.totalKills = (DATA.totalKills or 0) + S.kills
         if S.score > DATA.bestScore then DATA.bestScore = S.score end
-        if S.wave > DATA.bestWave then DATA.bestWave = S.wave end
-        SAVE.Write()
-        refreshLobbyUI()
 
-        if isManualQuit then
-            GAME.ReturnToLobby()
-            return
+        -- Cong EXP & Kiem tra Len Cap
+        DATA.exp = (DATA.exp or 0) + S.expEarned
+        local leveledUp = false
+        while DATA.exp >= getExpNeeded(DATA.level) do
+            DATA.exp = DATA.exp - getExpNeeded(DATA.level)
+            DATA.level = DATA.level + 1
+            leveledUp = true
         end
 
-        UI.EndTitle.Text = "TRẬN ĐẤU KẾT THÚC"
+        SAVE.Write()
+        refreshAllUI()
+
+        if isManualQuit then GAME.ReturnToLobby(); return end
+
+        UI.EndTitle.Text = isVictory and "THẮNG TRẬN!" or "THUA TRẬN"
+        UI.EndTitle.TextColor3 = isVictory and C.TXT_GOLD or C.TXT_RED
+        UI.EndCardStroke.Color = isVictory and C.BORDER_GOLD or C.TXT_RED
+        UI.EndNextBtn.Text = isVictory and "TIẾP TỤC" or "THỬ LẠI"
+        local lvNote = leveledUp and ("\nLÊN CẤP MỚI: Lv." .. tostring(DATA.level) .. " (+HP & +ATK)") or ""
         UI.EndStats.Text = string.format(
-            "Chế độ: %s  |  Đạt Ải: %d\nĐiểm số: %d  |  Combo tối đa: %d\nQuái đã hạ: %d\nThưởng nhận: +%d Xu  |  +%d KC",
-            getModeById(S.mode).name, S.wave, S.score, S.maxCombo, S.kills, S.coinsEarned, S.gemsEarned
+            "%s (%s)\nQuái đã hạ: %d  |  Combo tối đa: %d\nThưởng: +%d Xu  |  +%d KC  |  +%d EXP%s",
+            S.stage.name, S.diff.name, S.kills, S.maxCombo, S.coinsEarned, S.gemsEarned, S.expEarned, lvNote
         )
         UI.EndOverlay.Visible = true
     end
 
     function GAME.ReturnToLobby()
-        S.inMatch = false
-        S.paused = false
-        S.gameOver = false
+        S.inMatch, S.paused, S.pickingBuff, S.gameOver = false, false, false, false
         clearEntities()
         UI.CombatView.Visible = false
         UI.LobbyView.Visible = true
-        refreshLobbyUI()
+        refreshAllUI()
     end
 
     -- Vong lap cap nhat 60 FPS
     trackConn(RunService.RenderStepped:Connect(function(dt)
-        if not S.inMatch or S.paused or S.gameOver then return end
+        if not S.inMatch or S.paused or S.pickingBuff or S.gameOver then return end
         dt = math.min(dt, 0.05)
         S.matchTime = S.matchTime + dt
+        S.mp = math.min(S.maxMp, S.mp + S.mpRegen * dt)
 
-        -- Hieu ung ngon lua 4 tru goc san dau
         local pulse = 0.5 + 0.5 * math.sin(S.matchTime * 6)
-        for idx, ember in ipairs(S.braziers) do
-            local sz = 9 + math.floor((pulse + (idx % 2) * 0.25) * 3)
-            ember.Size = UDim2.new(0, sz, 0, sz)
+        for idx, emb in ipairs(S.braziers) do
+            local sz = 8 + math.floor((pulse + (idx % 2) * 0.25) * 3)
+            emb.Size = UDim2.new(0, sz, 0, sz)
         end
 
         if S.attackCd > 0 then S.attackCd = math.max(0, S.attackCd - dt) end
         if S.swingT > 0 then S.swingT = math.max(0, S.swingT - dt) end
         if S.dashCd > 0 then S.dashCd = math.max(0, S.dashCd - dt) end
-        if S.skillCd > 0 then S.skillCd = math.max(0, S.skillCd - dt) end
+        if S.s1Cd > 0 then S.s1Cd = math.max(0, S.s1Cd - dt) end
+        if S.s2Cd > 0 then S.s2Cd = math.max(0, S.s2Cd - dt) end
         if S.invulnTime > 0 then S.invulnTime = math.max(0, S.invulnTime - dt) end
         if S.buffAtkTime > 0 then S.buffAtkTime = math.max(0, S.buffAtkTime - dt) end
         if S.comboResetT > 0 then
@@ -2792,7 +2908,7 @@ do
             S.dashGhostT = S.dashGhostT - dt
             if S.dashGhostT <= 0 then
                 S.dashGhostT = 0.035
-                spawnAfterimage(S.px, S.py, math.deg(math.atan2(S.dirY, S.dirX)), S.hero.color)
+                spawnGhost(S.px, S.py, S.hero.fx)
             end
             S.px = math.clamp(S.px + S.dashVx * dt, CFG.PLAYER_R, CFG.ARENA_W - CFG.PLAYER_R)
             S.py = math.clamp(S.py + S.dashVy * dt, CFG.PLAYER_R, CFG.ARENA_H - CFG.PLAYER_R)
@@ -2812,89 +2928,99 @@ do
             end
         end
 
+        -- Spawn quai
         if S.enemiesToSpawn > 0 then
             S.spawnTimer = S.spawnTimer - dt
             if S.spawnTimer <= 0 then
                 S.enemiesToSpawn = S.enemiesToSpawn - 1
-                S.spawnTimer = math.max(0.32, 1.15 - S.wave * 0.04)
-                local roll = RNG:NextNumber()
-                local kind = "grunt"
-                if S.wave >= 2 and roll < 0.25 then kind = "runner"
-                elseif S.wave >= 3 and roll < 0.48 then kind = "shooter"
-                elseif S.wave >= 4 and roll < 0.66 then kind = "tank" end
-                spawnEnemy(kind, S.wave)
+                S.spawnTimer = math.max(0.32, 1.05 - S.wave * 0.05)
+                local kinds = { "slime", "bat", "skeleton", "goblin", "mushroom", "ghost" }
+                local k = kinds[RNG:NextInteger(1, math.min(#kinds, 2 + S.stage.id))]
+                spawnEnemy(k, S.wave, false)
             end
         end
 
-        local aliveCount = 0
+        local alive = 0
         for i = #S.enemies, 1, -1 do
             local e = S.enemies[i]
             if e.hp <= 0 then
                 table.remove(S.enemies, i)
             else
-                aliveCount = aliveCount + 1
+                alive = alive + 1
                 if e.flashT > 0 then
                     e.flashT = e.flashT - dt
                     e.ui.BackgroundColor3 = (e.flashT > 0) and C.TXT_MAIN or e.baseCol
                 end
-                if e.stunT > 0 then
-                    e.stunT = e.stunT - dt
-                else
-                    local dx, dy = S.px - e.x, S.py - e.y
-                    local dist = math.sqrt(dx * dx + dy * dy)
-                    local nx, ny = (dist > 1 and dx / dist or 0), (dist > 1 and dy / dist or 0)
-
-                    if e.kind == "shooter" and dist < 210 then
-                        e.x = math.clamp(e.x - nx * e.spd * 0.4 * dt, 24, CFG.ARENA_W - 24)
-                        e.y = math.clamp(e.y - ny * e.spd * 0.4 * dt, 24, CFG.ARENA_H - 24)
+                if e.burnT > 0 then
+                    e.burnT = e.burnT - dt
+                    e.burnTick = e.burnTick - dt
+                    if e.burnTick <= 0 then
+                        e.burnTick = 0.6
+                        damageEnemy(e, math.max(4, math.floor(S.atk * 0.25)), 0, 0, nil)
+                    end
+                end
+                if e.hp > 0 then
+                    if e.stunT > 0 then
+                        e.stunT = e.stunT - dt
                     else
-                        e.x = math.clamp(e.x + nx * e.spd * dt, 24, CFG.ARENA_W - 24)
-                        e.y = math.clamp(e.y + ny * e.spd * dt, 24, CFG.ARENA_H - 24)
-                    end
-
-                    if e.kind == "shooter" then
-                        e.atkCd = e.atkCd - dt
-                        if e.atkCd <= 0 then
-                            e.atkCd = 1.9
-                            spawnProjectile("enemy", e.x, e.y, nx * 290, ny * 290, e.dmg, 7, C.TXT_PURPLE, 0)
+                        local spMult = (e.slowT > 0) and 0.50 or 1.0
+                        if e.slowT > 0 then e.slowT = e.slowT - dt end
+                        local dx, dy = S.px - e.x, S.py - e.y
+                        local dist = math.sqrt(dx * dx + dy * dy)
+                        local nx, ny = (dist > 1 and dx / dist or 0), (dist > 1 and dy / dist or 0)
+                        if e.ranged and dist < 210 then
+                            e.x = math.clamp(e.x - nx * e.spd * 0.35 * spMult * dt, 28, CFG.ARENA_W - 28)
+                            e.y = math.clamp(e.y - ny * e.spd * 0.35 * spMult * dt, 28, CFG.ARENA_H - 28)
+                        else
+                            e.x = math.clamp(e.x + nx * e.spd * spMult * dt, 28, CFG.ARENA_W - 28)
+                            e.y = math.clamp(e.y + ny * e.spd * spMult * dt, 28, CFG.ARENA_H - 28)
                         end
-                    end
-
-                    if e.isBoss then
-                        e.bossSkillCd = e.bossSkillCd - dt
-                        if e.bossSkillCd <= 0 then
-                            e.bossSkillCd = 3.6
-                            if RNG:NextNumber() < 0.5 then
-                                for k = 1, 8 do
-                                    local a = (k / 8) * math.pi * 2 + S.matchTime
-                                    spawnProjectile("enemy", e.x, e.y, math.cos(a) * 260, math.sin(a) * 260, e.dmg, 8, C.TXT_RED, 0)
-                                end
-                            else
-                                spawnHazard(S.px, S.py, 78, 1.05, math.floor(e.dmg * 1.35))
-                                spawnHazard(
-                                    math.clamp(S.px + RNG:NextNumber(-120, 120), 80, CFG.ARENA_W - 80),
-                                    math.clamp(S.py + RNG:NextNumber(-90, 90), 80, CFG.ARENA_H - 80),
-                                    72, 1.15, math.floor(e.dmg * 1.2)
-                                )
+                        if e.ranged then
+                            e.atkCd = e.atkCd - dt
+                            if e.atkCd <= 0 then
+                                e.atkCd = 2.0
+                                spawnProj("enemy", e.x, e.y, nx * 290, ny * 290, e.dmg, 7, C.TXT_GEM, 0, nil)
                             end
                         end
+                        if e.isBoss then
+                            e.bossSkillCd = e.bossSkillCd - dt
+                            if e.bossSkillCd <= 0 then
+                                e.bossSkillCd = 3.4
+                                if RNG:NextNumber() < 0.5 then
+                                    for k = 1, 8 do
+                                        local a = (k / 8) * math.pi * 2 + S.matchTime
+                                        spawnProj("enemy", e.x, e.y, math.cos(a) * 265, math.sin(a) * 265, e.dmg, 8, C.TXT_RED, 0, nil)
+                                    end
+                                else
+                                    spawnHazard(S.px, S.py, 82, 1.05, math.floor(e.dmg * 1.35))
+                                    spawnHazard(math.clamp(S.px + RNG:NextNumber(-130, 130), 80, CFG.ARENA_W - 80), math.clamp(S.py + RNG:NextNumber(-90, 90), 80, CFG.ARENA_H - 80), 74, 1.15, math.floor(e.dmg * 1.2))
+                                end
+                            end
+                        end
+                        if dist < (e.r + CFG.PLAYER_R - 4) then damagePlayer(e.dmg) end
                     end
-
-                    if dist < (e.r + CFG.PLAYER_R - 4) then damagePlayer(e.dmg) end
+                    e.ui.Position = toPos(e.x, e.y)
+                    if e.mdot then e.mdot.Position = UDim2.new(e.x / CFG.ARENA_W, 0, e.y / CFG.ARENA_H, 0) end
                 end
-                e.ui.Position = toScalePos(e.x, e.y)
             end
         end
 
-        if S.enemiesToSpawn <= 0 and aliveCount == 0 then
+        -- Het dot -> Thang tran hoac chon Nang cap roi sang dot sau
+        if S.enemiesToSpawn <= 0 and alive == 0 then
             S.nextWaveTimer = S.nextWaveTimer + dt
-            if S.nextWaveTimer >= 1.1 then
+            if S.nextWaveTimer >= 0.9 then
                 S.nextWaveTimer = 0
-                S.hp = math.min(S.maxHp, S.hp + math.floor(S.maxHp * 0.15))
-                GAME.StartWave(S.wave + 1)
+                if not S.stage.endless and S.wave >= S.totalWaves then
+                    GAME.EndMatch(true, false)
+                    return
+                else
+                    openBuffPicker()
+                    GAME.StartWave(S.wave + 1)
+                end
             end
         end
 
+        -- Cap nhat dan, vung no, vat pham, hieu ung
         for i = #S.projs, 1, -1 do
             local p = S.projs[i]
             p.life = p.life - dt
@@ -2903,84 +3029,67 @@ do
             if not dead then
                 if p.owner == "player" then
                     for _, e in ipairs(S.enemies) do
-                        if e.hp > 0 and not p.hitMap[e] then
-                            local d = math.sqrt((e.x - p.x) ^ 2 + (e.y - p.y) ^ 2)
-                            if d <= (p.r + e.r) then
-                                p.hitMap[e] = true
-                                damageEnemy(e, p.dmg, p.vx * 0.02, p.vy * 0.02, 0)
-                                if p.pierce > 0 then p.pierce = p.pierce - 1
-                                else dead = true break end
-                            end
+                        if e.hp > 0 and not p.hitMap[e] and math.sqrt((e.x - p.x) ^ 2 + (e.y - p.y) ^ 2) <= (p.r + e.r) then
+                            p.hitMap[e] = true
+                            damageEnemy(e, p.dmg, p.vx * 0.02, p.vy * 0.02, p.status)
+                            if p.pierce > 0 then p.pierce = p.pierce - 1 else dead = true break end
                         end
                     end
-                else
-                    local d = math.sqrt((S.px - p.x) ^ 2 + (S.py - p.y) ^ 2)
-                    if d <= (p.r + CFG.PLAYER_R - 2) then
-                        damagePlayer(p.dmg)
-                        dead = true
-                    end
+                elseif math.sqrt((S.px - p.x) ^ 2 + (S.py - p.y) ^ 2) <= (p.r + CFG.PLAYER_R - 2) then
+                    damagePlayer(p.dmg); dead = true
                 end
             end
-            if dead then p.ui:Destroy(); table.remove(S.projs, i)
-            else p.ui.Position = toScalePos(p.x, p.y) end
+            if dead then p.ui:Destroy(); table.remove(S.projs, i) else p.ui.Position = toPos(p.x, p.y) end
         end
 
         for i = #S.hazards, 1, -1 do
             local h = S.hazards[i]
             h.timer = h.timer - dt
-            local ratio = 1 - math.clamp(h.timer / h.maxTimer, 0, 1)
-            h.ui.BackgroundTransparency = 0.84 - ratio * 0.38
-            h.charge.Size = UDim2.new(ratio, 0, ratio, 0)
+            local r = 1 - math.clamp(h.timer / h.maxTimer, 0, 1)
+            h.charge.Size = UDim2.new(r, 0, r, 0)
             if h.timer <= 0 then
-                spawnRingFX(h.x, h.y, h.r, C.TXT_RED, 0.24)
-                spawnSparks(h.x, h.y, C.EMBER, 8)
-                local d = math.sqrt((S.px - h.x) ^ 2 + (S.py - h.y) ^ 2)
-                if d <= h.r + CFG.PLAYER_R * 0.5 then damagePlayer(h.dmg) end
-                h.ui:Destroy()
-                table.remove(S.hazards, i)
+                spawnRing(h.x, h.y, h.r, C.TXT_RED, 0.24)
+                if math.sqrt((S.px - h.x) ^ 2 + (S.py - h.y) ^ 2) <= h.r + CFG.PLAYER_R * 0.5 then damagePlayer(h.dmg) end
+                h.ui:Destroy(); table.remove(S.hazards, i)
             end
         end
 
         for i = #S.pickups, 1, -1 do
             local pk = S.pickups[i]
             pk.life = pk.life - dt
-            local d = math.sqrt((S.px - pk.x) ^ 2 + (S.py - pk.y) ^ 2)
-            if d <= CFG.PLAYER_R + 18 then
+            if math.sqrt((S.px - pk.x) ^ 2 + (S.py - pk.y) ^ 2) <= CFG.PLAYER_R + 20 then
                 if pk.kind == "heal" then
-                    local heal = math.floor(S.maxHp * 0.25)
-                    S.hp = math.min(S.maxHp, S.hp + heal)
-                    spawnFloatText(S.px, S.py - 20, "+" .. tostring(heal) .. " HP", C.TXT_GREEN, 13)
+                    local hl = math.floor(S.maxHp * 0.25)
+                    S.hp = math.min(S.maxHp, S.hp + hl)
+                    spawnFloat(S.px, S.py - 22, "+" .. hl .. " HP", C.TXT_GREEN, 13)
+                elseif pk.kind == "mp" then
+                    S.mp = math.min(S.maxMp, S.mp + 45)
+                    spawnFloat(S.px, S.py - 22, "+45 MP", C.TXT_CYAN, 13)
                 elseif pk.kind == "fury" then
-                    S.fury = math.min(100, S.fury + 40)
-                    spawnFloatText(S.px, S.py - 20, "+40% NỘ", C.TXT_GOLD, 13)
+                    S.fury = math.min(100, S.fury + 38)
+                    spawnFloat(S.px, S.py - 22, "+38% NỘ", C.TXT_GOLD, 13)
                 else
                     S.buffAtkTime = 8.0
-                    spawnFloatText(S.px, S.py - 20, "+35% ATK (8s)", C.TXT_RED, 13)
+                    spawnFloat(S.px, S.py - 22, "+35% ATK", C.TXT_RED, 13)
                 end
-                pk.ui:Destroy()
-                table.remove(S.pickups, i)
+                pk.ui:Destroy(); table.remove(S.pickups, i)
             elseif pk.life <= 0 then
-                pk.ui:Destroy()
-                table.remove(S.pickups, i)
+                pk.ui:Destroy(); table.remove(S.pickups, i)
             end
         end
 
         for i = #S.effects, 1, -1 do
             local fx = S.effects[i]
             fx.life = fx.life - dt
-            if fx.life <= 0 then
-                fx.ui:Destroy()
-                table.remove(S.effects, i)
+            if fx.life <= 0 then fx.ui:Destroy(); table.remove(S.effects, i)
             else
                 local prog = 1 - (fx.life / fx.maxLife)
                 if fx.kind == "ring" then
-                    local curR = fx.maxR * (0.35 + prog * 0.65)
-                    fx.ui.Size = UDim2.new((curR * 2) / CFG.ARENA_W, 0, (curR * 2) / CFG.ARENA_H, 0)
+                    local cr = fx.maxR * (0.35 + prog * 0.65)
+                    fx.ui.Size = UDim2.new((cr * 2) / CFG.ARENA_W, 0, (cr * 2) / CFG.ARENA_H, 0)
                     fx.ui.BackgroundTransparency = 0.65 + prog * 0.35
-                elseif fx.kind == "slash" then
-                    fx.ui.BackgroundTransparency = 0.15 + prog * 0.85
                 else
-                    fx.ui.BackgroundTransparency = 0.45 + prog * 0.55
+                    fx.ui.BackgroundTransparency = 0.25 + prog * 0.75
                 end
             end
         end
@@ -2988,12 +3097,10 @@ do
         for i = #S.sparks, 1, -1 do
             local sp = S.sparks[i]
             sp.life = sp.life - dt
-            if sp.life <= 0 then
-                sp.ui:Destroy()
-                table.remove(S.sparks, i)
+            if sp.life <= 0 then sp.ui:Destroy(); table.remove(S.sparks, i)
             else
                 sp.x, sp.y = sp.x + sp.vx * dt, sp.y + sp.vy * dt
-                sp.ui.Position = toScalePos(sp.x, sp.y)
+                sp.ui.Position = toPos(sp.x, sp.y)
                 sp.ui.BackgroundTransparency = 1 - (sp.life / sp.maxLife)
             end
         end
@@ -3001,85 +3108,66 @@ do
         for i = #S.floatTexts, 1, -1 do
             local ft = S.floatTexts[i]
             ft.life = ft.life - dt
-            if ft.life <= 0 then
-                ft.ui:Destroy()
-                table.remove(S.floatTexts, i)
+            if ft.life <= 0 then ft.ui:Destroy(); table.remove(S.floatTexts, i)
             else
                 ft.y = ft.y + ft.vy * dt
-                ft.ui.Position = toScalePos(ft.x, ft.y)
+                ft.ui.Position = toPos(ft.x, ft.y)
                 ft.ui.TextTransparency = 1 - (ft.life / ft.maxLife)
             end
         end
 
         if S.shakeTimer > 0 then
             S.shakeTimer = S.shakeTimer - dt
-            local ox = RNG:NextNumber(-S.shakePower, S.shakePower)
-            local oy = RNG:NextNumber(-S.shakePower, S.shakePower)
-            UI.Arena.Position = UDim2.new(0, 8 + ox, 0, 44 + oy)
-            if S.shakeTimer <= 0 then
-                S.shakePower = 0
-                UI.Arena.Position = UDim2.new(0, 8, 0, 44)
-            end
+            UI.Arena.Position = UDim2.new(0, 6 + RNG:NextNumber(-S.shakePower, S.shakePower), 0, 6 + RNG:NextNumber(-S.shakePower, S.shakePower))
+            if S.shakeTimer <= 0 then S.shakePower = 0; UI.Arena.Position = UDim2.new(0, 6, 0, 6) end
         end
 
-        -- Cap nhat nhan vat (xoay theo huong + vung vu khi + vong hao quang)
-        UI.PlayerNode.Position = toScalePos(S.px, S.py)
-        UI.PlayerSprite.Rotation = math.deg(math.atan2(S.dirY, S.dirX))
+        -- Cap nhat vi tri nhan vat, vu khi, Minimap & HUD TopBar
+        UI.PlayerNode.Position = toPos(S.px, S.py)
+        UI.MiniPlayerDot.Position = UDim2.new(S.px / CFG.ARENA_W, 0, S.py / CFG.ARENA_H, 0)
         if UI.WeaponPivot then
-            if S.swingT > 0 then
-                local swingAngle = (S.swingT / 0.16) * 78 * S.swingSign
-                UI.WeaponPivot.Rotation = swingAngle
-            else
-                UI.WeaponPivot.Rotation = 0
-            end
+            local baseDeg = math.deg(math.atan2(S.dirY, S.dirX))
+            local swing = (S.swingT > 0) and ((S.swingT / 0.16) * 75 * S.swingSign) or 0
+            UI.WeaponPivot.Rotation = baseDeg + swing
         end
 
-        if S.buffAtkTime > 0 then
-            UI.PlayerAura.Visible = true
-            UI.PlayerAura.BackgroundColor3 = C.TXT_RED
-            UI.PlayerAuraStroke.Color = C.TXT_RED
-        elseif S.fury >= 100 then
-            UI.PlayerAura.Visible = true
-            UI.PlayerAura.BackgroundColor3 = C.TXT_GOLD
-            UI.PlayerAuraStroke.Color = C.TXT_GOLD
-        else
-            UI.PlayerAura.Visible = false
-        end
+        local hpRatio = math.clamp(S.hp / math.max(1, S.maxHp), 0, 1)
+        local mpRatio = math.clamp(S.mp / math.max(1, S.maxMp), 0, 1)
+        UI.PlayerMiniHp.Size = UDim2.new(hpRatio, 0, 1, 0)
+        UI.TopHpFill.Size = UDim2.new(hpRatio, 0, 1, 0)
+        UI.TopMpFill.Size = UDim2.new(mpRatio, 0, 1, 0)
+        UI.TopHpLbl.Text = string.format("HP %d/%d", math.floor(S.hp), S.maxHp)
+        UI.TopMpLbl.Text = string.format("MP %d/%d", math.floor(S.mp), S.maxMp)
 
-        UI.HpFill.Size = UDim2.new(math.clamp(S.hp / math.max(1, S.maxHp), 0, 1), 0, 1, 0)
-        UI.HpText.Text = string.format("HP %d/%d", math.floor(S.hp), S.maxHp)
-        UI.FuryFill.Size = UDim2.new(math.clamp(S.fury / 100, 0, 1), 0, 1, 0)
-        UI.HudWave.Text = "Ải " .. tostring(S.wave)
-        UI.HudScore.Text = "Điểm: " .. tostring(S.score)
-        UI.HudCombo.Text = (S.combo >= 2) and ("COMBO x" .. tostring(S.combo)) or ""
+        local mins = math.floor(S.matchTime / 60)
+        local secs = math.floor(S.matchTime % 60)
+        local waveStr = S.stage.endless and ("Đợt " .. tostring(S.wave)) or string.format("Đợt %d/%d", S.wave, S.totalWaves)
+        UI.HudWaveLbl.Text = string.format("%s  |  %02d:%02d", waveStr, mins, secs)
+        UI.HudComboLbl.Text = (S.combo >= 2) and ("COMBO x" .. tostring(S.combo)) or ""
 
         UI.DashBtn.Text = (S.dashCd > 0) and string.format("%.1fs", S.dashCd) or "LƯỚT"
-        UI.SkillBtn.Text = (S.skillCd > 0) and string.format("%.1fs", S.skillCd) or "KỸ NĂNG"
+        UI.S1Btn.Text = (S.s1Cd > 0) and string.format("%.1fs", S.s1Cd) or "CHIÊU 1"
+        UI.S2Btn.Text = (S.s2Cd > 0) and string.format("%.1fs", S.s2Cd) or "CHIÊU 2"
         UI.UltBtn.Text = (S.fury >= 100) and "TUYỆT CHIÊU" or (tostring(math.floor(S.fury)) .. "% NỘ")
     end))
 end
 
 -- ============================================================================
--- 10. HO TRO PHIM PC (WASD / MUI TEN / J / K / L / U)
+-- 10. HO TRO PHIM PC
 -- ============================================================================
 do
     trackConn(UserInputService.InputBegan:Connect(function(inp, gp)
-        if gp or not S.inMatch or S.paused or S.gameOver then return end
+        if gp or not S.inMatch or S.paused or S.pickingBuff or S.gameOver then return end
         local kc = inp.KeyCode
         if kc == Enum.KeyCode.W or kc == Enum.KeyCode.Up then S.keys.W = true
         elseif kc == Enum.KeyCode.S or kc == Enum.KeyCode.Down then S.keys.S = true
         elseif kc == Enum.KeyCode.A or kc == Enum.KeyCode.Left then S.keys.A = true
         elseif kc == Enum.KeyCode.D or kc == Enum.KeyCode.Right then S.keys.D = true
-        elseif kc == Enum.KeyCode.J or kc == Enum.KeyCode.Space then
-            S.holdAttack = true
-            GAME.TryAttack()
-        elseif kc == Enum.KeyCode.K or kc == Enum.KeyCode.LeftShift then
-            GAME.TryDash()
-        elseif kc == Enum.KeyCode.L or kc == Enum.KeyCode.Q then
-            GAME.TrySkill()
-        elseif kc == Enum.KeyCode.U or kc == Enum.KeyCode.E then
-            GAME.TryUlt()
-        end
+        elseif kc == Enum.KeyCode.J or kc == Enum.KeyCode.Space then S.holdAttack = true; GAME.TryAttack()
+        elseif kc == Enum.KeyCode.K or kc == Enum.KeyCode.LeftShift then GAME.TryDash()
+        elseif kc == Enum.KeyCode.L or kc == Enum.KeyCode.Q then GAME.TrySkill1()
+        elseif kc == Enum.KeyCode.I or kc == Enum.KeyCode.R then GAME.TrySkill2()
+        elseif kc == Enum.KeyCode.U or kc == Enum.KeyCode.E then GAME.TryUlt() end
     end))
 
     trackConn(UserInputService.InputEnded:Connect(function(inp)
@@ -3088,23 +3176,19 @@ do
         elseif kc == Enum.KeyCode.S or kc == Enum.KeyCode.Down then S.keys.S = false
         elseif kc == Enum.KeyCode.A or kc == Enum.KeyCode.Left then S.keys.A = false
         elseif kc == Enum.KeyCode.D or kc == Enum.KeyCode.Right then S.keys.D = false
-        elseif kc == Enum.KeyCode.J or kc == Enum.KeyCode.Space then
-            S.holdAttack = false
-        end
+        elseif kc == Enum.KeyCode.J or kc == Enum.KeyCode.Space then S.holdAttack = false end
     end))
 end
 
 -- ============================================================================
--- 11. HAM DON DEP & KHOI TAO BAN DAU
+-- 11. DON DEP & KHOI TAO
 -- ============================================================================
 _G.ArenaChienDau_Cleanup = function()
     S.inMatch = false
-    for _, conn in ipairs(CONNS) do
-        pcall(function() conn:Disconnect() end)
-    end
+    for _, c in ipairs(CONNS) do pcall(function() c:Disconnect() end) end
     CONNS = {}
     if ScreenGui and ScreenGui.Parent then ScreenGui:Destroy() end
 end
 
-refreshLobbyUI()
-showToast("Chào mừng đến Đấu Trường Chiến Đấu Pro " .. CFG.VERSION, C.TXT_GOLD)
+refreshAllUI()
+showToast("Đấu Trường Chiến Đấu Pro " .. CFG.VERSION .. " (Full Màn Hình)", C.TXT_GOLD)
