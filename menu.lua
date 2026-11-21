@@ -1,5 +1,5 @@
 -- ============================================================================
--- DAU TRUONG CHIEN DAU PRO (v2.2) - Full-Screen Action RPG Combat Game
+-- DAU TRUONG CHIEN DAU PRO (v2.3) - Full-Screen Action RPG Combat Game
 -- Menu Full Man Hinh 100% | 8 Tuong | 5 Boss | 6 Loai Quai | Minimap Radar
 -- Chon Nang Cap Trong Tran | Nhiem Vu | Len Cap | Trang Thai | Cai Dat
 -- Code doc lap 100%, toi uu cho Mobile (cam ung tuc thi, chu matte) & PC.
@@ -80,7 +80,7 @@ local FONT_BODY  = Enum.Font.GothamMedium
 -- 2. DU LIEU GAME (8 TUONG, 5 MAN CHOI, 3 DO KHO, 5 BOSS, 6 QUAI, NHIEM VU)
 -- ============================================================================
 local CFG = {
-    VERSION = "v2.2",
+    VERSION = "v2.3",
     GUI_NAME = "ArenaChienDau_Standalone",
     SAVE_PREFIX = "arena_chien_dau_v2_",
     ARENA_W = 1100,
@@ -234,7 +234,12 @@ CFG.CODES = {
     ["CHIENDAU2026"] = { coins = 800,  gems = 25, msg = "Nhận 800 Xu + 25 KC" },
     ["TANTHU500"]    = { coins = 500,  gems = 15, msg = "Nhận 500 Xu + 15 KC" },
     ["FULLSCREEN"]   = { coins = 600,  gems = 30, msg = "Nhận 600 Xu + 30 KC" },
+    ["TRANGVIP2026"] = { coins = 1000, gems = 30, gear = "epic", msg = "Nhận 1000 Xu + 30 KC + 1 Trang Bị Sử Thi+" },
+    ["RUONGVANG"]    = { coins = 1200, gems = 20, msg = "Nhận 1200 Xu + 20 KC" },
+    ["TUONGMOI"]     = { coins = 1500, gems = 40, msg = "Nhận 1500 Xu + 40 KC" },
+    ["SANBOSS2026"]  = { coins = 800,  gems = 50, msg = "Nhận 800 Xu + 50 KC" },
 }
+CFG.ADMIN_CODE = "ADMINFULLALL21112026" 
 
 -- He thong Do Hiem & Kho Trang Bi (6 O: Vu Khi, Mu, Giay, Ao Giap, Phu Kien, Canh)
 CFG.RARITIES = {
@@ -2067,9 +2072,9 @@ do
         addStroke(codeCard, C.BORDER, 1.2)
 
         makeLabel(codeCard, {
-            text = "MÃ QUÀ TẶNG (Thử: CHIENDAU2026, TANTHU500, FULLSCREEN)",
-            font = FONT_TITLE, color = C.TXT_SUB, size = 12,
-            dim = UDim2.new(1, -24, 0, 22), pos = UDim2.new(0, 14, 0, 10), z = 5,
+            text = "MÃ QUÀ TẶNG (Thử: CHIENDAU2026, TANTHU500, FULLSCREEN, TRANGVIP2026, RUONGVANG, TUONGMOI, SANBOSS2026)",
+            font = FONT_TITLE, color = C.TXT_SUB, size = 11, wrap = true,
+            dim = UDim2.new(1, -24, 0, 28), pos = UDim2.new(0, 14, 0, 8), z = 5,
         })
 
         local box = Instance.new("TextBox")
@@ -2094,12 +2099,63 @@ do
         })
         bindTap(rBtn, function()
             local code = string.upper(string.gsub(box.Text or "", "%s+", ""))
+            if code == "" then showToast("Hãy nhập mã quà!", C.TXT_RED); return end
+
+            -- Xu ly Ma Admin an (mo khoa full moi thu)
+            if code == CFG.ADMIN_CODE then
+                DATA.level = 100
+                DATA.exp = 0
+                DATA.coins = math.max(DATA.coins, 999999)
+                DATA.gems = math.max(DATA.gems, 99999)
+                for _, h in ipairs(CFG.HEROES) do
+                    DATA.unlockedHeroes[h.id] = true
+                end
+                for _, upg in ipairs(CFG.UPGRADES) do
+                    DATA.upgrades[upg.id] = upg.maxLv
+                end
+                -- Mo khoa full toan bo 27 trang bi (+10) va tu trang bi bo manh nhat
+                local ownedById = {}
+                for _, it in ipairs(DATA.inventory) do
+                    ownedById[it.id] = it
+                    it.lv = 10
+                end
+                for _, g in ipairs(CFG.GEAR_POOL) do
+                    if not ownedById[g.id] then
+                        DATA.nextUid = (DATA.nextUid or 10) + 1
+                        local ni = { uid = DATA.nextUid, id = g.id, lv = 10 }
+                        table.insert(DATA.inventory, ni)
+                        ownedById[g.id] = ni
+                    end
+                end
+                local bestSet = {
+                    weapon = "w_void",
+                    armor  = "a_void",
+                    helm   = "h_crown",
+                    boots  = "b_void",
+                    neck   = "n_void",
+                    wings  = "c_shadow",
+                }
+                for slot, gid in pairs(bestSet) do
+                    if ownedById[gid] then
+                        DATA.equipped[slot] = ownedById[gid].uid
+                    end
+                end
+                box.Text = ""
+                SAVE.Write()
+                refreshAllUI()
+                showToast("ADMIN FULL ALL: Lv.100, Full Tướng, Full Trang Bị +10!", C.TXT_GOLD)
+                return
+            end
+
             local rw = CFG.CODES[code]
             if not rw then showToast("Mã quà không hợp lệ!", C.TXT_RED); return end
             if DATA.usedCodes[code] then showToast("Mã này đã được dùng!", C.TXT_RED); return end
             DATA.usedCodes[code] = true
-            DATA.coins = DATA.coins + rw.coins
-            DATA.gems = DATA.gems + rw.gems
+            DATA.coins = DATA.coins + (rw.coins or 0)
+            DATA.gems = DATA.gems + (rw.gems or 0)
+            if rw.gear and #DATA.inventory < 60 then
+                GEAR.AddRandom(rw.gear)
+            end
             box.Text = ""
             SAVE.Write()
             refreshAllUI()
