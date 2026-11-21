@@ -1,5 +1,5 @@
 -- ============================================================
--- THU THANH 2D (TOWER DEFENSE) v1.0 - HOAT ANH MUOT + 5 THAP + 6 QUAI + 3 BAN DO
+-- THU THANH 2D (TOWER DEFENSE) v2.0 - DO HOA CHI TIET 5 THAP + 6 QUAI + CONG XOAY + THANH TRI + HOAT ANH
 -- Full-Screen Mobile & PC | Tu dong luu ky luc | Phim tat PC: RightShift
 -- ============================================================
 local _ok, _err = pcall(function()
@@ -337,63 +337,183 @@ function GFX.buildTowerSprite(parent, towerDef, size, zBase)
 	root.ZIndex = zBase
 	root.Parent = parent
 
-	-- De thap 3D
+	-- Bong do duoi chan thap
+	local shad = Instance.new("Frame")
+	shad.Size = UDim2.fromScale(0.92, 0.88)
+	shad.Position = UDim2.fromScale(0.5, 0.56)
+	shad.AnchorPoint = Vector2.new(0.5, 0.5)
+	shad.BackgroundColor3 = Color3.fromRGB(8, 10, 18)
+	shad.BackgroundTransparency = 0.5
+	shad.BorderSizePixel = 0
+	shad.ZIndex = zBase
+	shad.Parent = root
+	addCorner(shad, 10)
+
+	-- De thap theo tung chung loai
 	local base = Instance.new("Frame")
 	base.Size = UDim2.fromScale(0.84, 0.84)
 	base.Position = UDim2.fromScale(0.5, 0.5)
 	base.AnchorPoint = Vector2.new(0.5, 0.5)
 	base.BackgroundColor3 = towerDef.BaseCol
 	base.BorderSizePixel = 0
-	base.ZIndex = zBase
+	base.ZIndex = zBase + 1
 	base.Parent = root
-	addCorner(base, 8)
-	addStroke(base, THEME.Outline, 2)
+	addCorner(base, (towerDef.Id == "tesla" or towerDef.Id == "frost") and 12 or 7)
+	addStroke(base, THEME.Outline, 2.0)
+
+	-- Chi tiet trang tri rieng cho tung loai thap
+	if towerDef.Id == "archer" then
+		-- Mai rom vang + go
+		addGradient(base, Color3.fromRGB(168, 122, 62), Color3.fromRGB(108, 74, 38), 90)
+		local roof = Instance.new("Frame")
+		roof.Size = UDim2.fromScale(0.76, 0.76)
+		roof.Position = UDim2.fromScale(0.5, 0.5)
+		roof.AnchorPoint = Vector2.new(0.5, 0.5)
+		roof.BackgroundColor3 = Color3.fromRGB(214, 178, 64)
+		roof.BorderSizePixel = 0
+		roof.ZIndex = zBase + 2
+		roof.Parent = base
+		addCorner(roof, 8)
+		addStroke(roof, THEME.Outline, 1.5)
+	elseif towerDef.Id == "cannon" then
+		-- Be thep xam + 4 goc cam noi bat
+		addGradient(base, Color3.fromRGB(82, 88, 108), Color3.fromRGB(46, 50, 66), 90)
+		for _, pos in ipairs({{0.12,0.12},{0.88,0.12},{0.12,0.88},{0.88,0.88}}) do
+			local bolt = Instance.new("Frame")
+			bolt.Size = UDim2.fromScale(0.22, 0.22)
+			bolt.Position = UDim2.fromScale(pos[1], pos[2])
+			bolt.AnchorPoint = Vector2.new(0.5, 0.5)
+			bolt.BackgroundColor3 = Color3.fromRGB(224, 112, 38)
+			bolt.BorderSizePixel = 0
+			bolt.ZIndex = zBase + 2
+			bolt.Parent = base
+			addCorner(bolt, 3)
+			addStroke(bolt, THEME.Outline, 1.1)
+		end
+	elseif towerDef.Id == "frost" then
+		-- 3 khoi tinh the bang xanh lam xep tang
+		addGradient(base, Color3.fromRGB(92, 206, 228), Color3.fromRGB(34, 126, 198), 90)
+		for _, ang in ipairs({-32, 32}) do
+			local shard = Instance.new("Frame")
+			shard.Size = UDim2.fromScale(0.32, 0.62)
+			shard.Position = UDim2.fromScale(ang < 0 and 0.24 or 0.76, 0.42)
+			shard.AnchorPoint = Vector2.new(0.5, 0.5)
+			shard.Rotation = ang
+			shard.BackgroundColor3 = Color3.fromRGB(168, 226, 236)
+			shard.BorderSizePixel = 0
+			shard.ZIndex = zBase + 2
+			shard.Parent = base
+			addCorner(shard, 4)
+			addStroke(shard, THEME.Outline, 1.3)
+		end
+	elseif towerDef.Id == "tesla" then
+		-- De tim cong nghe + 2 tru cuon day dong 2 ben
+		addGradient(base, Color3.fromRGB(154, 72, 218), Color3.fromRGB(84, 34, 154), 90)
+		for _, ox in ipairs({0.18, 0.82}) do
+			local coil = Instance.new("Frame")
+			coil.Size = UDim2.fromScale(0.24, 0.54)
+			coil.Position = UDim2.fromScale(ox, 0.5)
+			coil.AnchorPoint = Vector2.new(0.5, 0.5)
+			coil.BackgroundColor3 = Color3.fromRGB(208, 128, 52)
+			coil.BorderSizePixel = 0
+			coil.ZIndex = zBase + 2
+			coil.Parent = base
+			addCorner(coil, 4)
+			addStroke(coil, THEME.Outline, 1.3)
+		end
+	elseif towerDef.Id == "laser" then
+		-- Thap thanh hong tim vien vang + doi canh thien than 2 ben
+		addGradient(base, Color3.fromRGB(214, 74, 152), Color3.fromRGB(136, 36, 108), 90)
+		for _, side in ipairs({-1, 1}) do
+			local wing = Instance.new("Frame")
+			wing.Size = UDim2.fromScale(0.34, 0.66)
+			wing.Position = UDim2.fromScale(side < 0 and 0.04 or 0.96, 0.42)
+			wing.AnchorPoint = Vector2.new(0.5, 0.5)
+			wing.Rotation = side * 22
+			wing.BackgroundColor3 = Color3.fromRGB(224, 118, 186)
+			wing.BorderSizePixel = 0
+			wing.ZIndex = zBase + 2
+			wing.Parent = base
+			addCorner(wing, 6)
+			addStroke(wing, Color3.fromRGB(224, 184, 54), 1.5)
+		end
+	end
 
 	-- Khop xoay nong sung (Turret pivot)
 	local turret = Instance.new("Frame")
-	turret.Size = UDim2.fromScale(0.68, 0.68)
+	turret.Size = UDim2.fromScale(0.56, 0.56)
 	turret.Position = UDim2.fromScale(0.5, 0.5)
 	turret.AnchorPoint = Vector2.new(0.5, 0.5)
 	turret.BackgroundColor3 = towerDef.TopCol
 	turret.BorderSizePixel = 0
-	turret.ZIndex = zBase + 2
+	turret.ZIndex = zBase + 4
 	turret.Parent = root
 	addCorner(turret, 99)
 	addStroke(turret, THEME.Outline, 1.8)
 
-	-- Nong sung (chi ve ben phai 0 do de xoay theo atan2)
+	-- Nong sung / vu khi chi ve ben phai (0 do)
 	local barrel = Instance.new("Frame")
-	if towerDef.Kind == "Cannon" or towerDef.Kind == "Bomb" then
-		barrel.Size = UDim2.fromScale(0.75, 0.42)
-	elseif towerDef.Kind == "Laser" then
-		barrel.Size = UDim2.fromScale(0.82, 0.28)
+	if towerDef.Id == "cannon" then
+		barrel.Size = UDim2.fromScale(0.92, 0.54)
+		barrel.BackgroundColor3 = Color3.fromRGB(48, 52, 66)
+	elseif towerDef.Id == "archer" then
+		barrel.Size = UDim2.fromScale(0.84, 0.24)
+		barrel.BackgroundColor3 = Color3.fromRGB(214, 182, 68)
+	elseif towerDef.Id == "laser" then
+		barrel.Size = UDim2.fromScale(0.95, 0.30)
+		barrel.BackgroundColor3 = Color3.fromRGB(228, 102, 188)
 	else
-		barrel.Size = UDim2.fromScale(0.72, 0.30)
+		barrel.Size = UDim2.fromScale(0.78, 0.32)
+		barrel.BackgroundColor3 = towerDef.Accent
 	end
 	barrel.Position = UDim2.fromScale(0.55, 0.5)
 	barrel.AnchorPoint = Vector2.new(0.1, 0.5)
-	barrel.BackgroundColor3 = towerDef.Accent
 	barrel.BorderSizePixel = 0
-	barrel.ZIndex = zBase + 1
+	barrel.ZIndex = zBase + 3
 	barrel.Parent = turret
 	addCorner(barrel, 4)
 	addStroke(barrel, THEME.Outline, 1.5)
 
-	-- Loi phat sang o giua
+	-- Vong canh cung cho thap Cung Thu hoac vien cam cho Dai Bac
+	if towerDef.Id == "archer" then
+		local bow = Instance.new("Frame")
+		bow.Size = UDim2.fromScale(0.28, 1.15)
+		bow.Position = UDim2.fromScale(0.68, 0.5)
+		bow.AnchorPoint = Vector2.new(0.5, 0.5)
+		bow.BackgroundColor3 = Color3.fromRGB(154, 96, 44)
+		bow.BorderSizePixel = 0
+		bow.ZIndex = zBase + 4
+		bow.Parent = turret
+		addCorner(bow, 6)
+		addStroke(bow, THEME.Outline, 1.2)
+	elseif towerDef.Id == "cannon" then
+		local band = Instance.new("Frame")
+		band.Size = UDim2.fromScale(0.24, 1.04)
+		band.Position = UDim2.fromScale(0.55, 0.5)
+		band.AnchorPoint = Vector2.new(0.5, 0.5)
+		band.BackgroundColor3 = Color3.fromRGB(224, 118, 38)
+		band.BorderSizePixel = 0
+		band.ZIndex = zBase + 4
+		band.Parent = barrel
+		addCorner(band, 2)
+	end
+
+	-- Loi phat sang o dinh thap
 	local core = Instance.new("Frame")
-	core.Size = UDim2.fromScale(0.36, 0.36)
+	core.Size = UDim2.fromScale(0.46, 0.46)
 	core.Position = UDim2.fromScale(0.5, 0.5)
 	core.AnchorPoint = Vector2.new(0.5, 0.5)
 	core.BackgroundColor3 = towerDef.Accent
 	core.BorderSizePixel = 0
-	core.ZIndex = zBase + 3
+	core.ZIndex = zBase + 5
 	core.Parent = turret
 	addCorner(core, 99)
+	addStroke(core, THEME.Outline, 1.2)
 
 	return root, turret, barrel, base
 end
 
-function GFX.buildEnemySprite(parent, def, zBase)
+function GFX.buildEnemySprite(parent, def, kind, zBase)
 	local sz = def.Size
 	local holder = Instance.new("Frame")
 	holder.Size = UDim2.fromOffset(sz, sz)
@@ -404,8 +524,8 @@ function GFX.buildEnemySprite(parent, def, zBase)
 
 	-- Bong duoi chan
 	local shadow = Instance.new("Frame")
-	shadow.Size = UDim2.fromOffset(sz * 0.85, sz * 0.35)
-	shadow.Position = UDim2.new(0.5, 0, 1, -2)
+	shadow.Size = UDim2.fromOffset(sz * 0.88, sz * 0.34)
+	shadow.Position = UDim2.new(0.5, 0, 1, -1)
 	shadow.AnchorPoint = Vector2.new(0.5, 0.5)
 	shadow.BackgroundColor3 = Color3.fromRGB(8, 10, 16)
 	shadow.BackgroundTransparency = 0.45
@@ -414,7 +534,7 @@ function GFX.buildEnemySprite(parent, def, zBase)
 	shadow.Parent = holder
 	addCorner(shadow, 99)
 
-	-- Than quai (se nhun nhay khi buoc)
+	-- Than quai chinh
 	local body = Instance.new("Frame")
 	body.Size = UDim2.fromScale(1, 1)
 	body.Position = UDim2.fromScale(0.5, 0.5)
@@ -422,46 +542,194 @@ function GFX.buildEnemySprite(parent, def, zBase)
 	body.BackgroundColor3 = def.Color
 	body.BackgroundTransparency = def.Alpha or 0
 	body.BorderSizePixel = 0
-	body.ZIndex = zBase + 1
+	body.ZIndex = zBase + 2
 	body.Parent = holder
-	addCorner(body, def.Boss and 10 or 99)
-	addStroke(body, def.Boss and THEME.TextGold or THEME.Outline, def.Boss and 2.4 or 1.8)
+	addCorner(body, (kind == "golem" or kind == "knight") and 6 or (def.Boss and 9 or 99))
+	local bodyStroke = addStroke(body, def.Boss and THEME.TextGold or THEME.Outline, def.Boss and 2.4 or 1.8)
 
-	-- 2 mat gian du
-	for _, ox in ipairs({0.32, 0.68}) do
-		local eye = Instance.new("Frame")
-		eye.Size = UDim2.fromScale(0.22, 0.22)
-		eye.Position = UDim2.fromScale(ox, 0.42)
-		eye.AnchorPoint = Vector2.new(0.5, 0.5)
-		eye.BackgroundColor3 = def.Eye
-		eye.BorderSizePixel = 0
-		eye.ZIndex = zBase + 2
-		eye.Parent = body
-		addCorner(eye, 99)
-	end
+	local wingL, wingR = nil, nil
 
-	-- Vuong mien cho Boss
-	if def.Boss then
+	-- Chi tiet dac trung cho 6 loai quai (Monster Character Breakdown)
+	if kind == "slime" then
+		-- Dom sang thach bong + mieng cuoi
+		local gloss = Instance.new("Frame")
+		gloss.Size = UDim2.fromScale(0.32, 0.22)
+		gloss.Position = UDim2.fromScale(0.28, 0.24)
+		gloss.AnchorPoint = Vector2.new(0.5, 0.5)
+		gloss.BackgroundColor3 = Color3.fromRGB(196, 232, 186)
+		gloss.BackgroundTransparency = 0.3
+		gloss.BorderSizePixel = 0
+		gloss.ZIndex = zBase + 3
+		gloss.Parent = body
+		addCorner(gloss, 99)
+	elseif kind == "goblin" then
+		-- Tai nhon 2 ben + dao gam bac ben phai
+		for _, side in ipairs({-1, 1}) do
+			local ear = Instance.new("Frame")
+			ear.Size = UDim2.fromScale(0.36, 0.22)
+			ear.Position = UDim2.fromScale(side < 0 and -0.06 or 1.06, 0.36)
+			ear.AnchorPoint = Vector2.new(0.5, 0.5)
+			ear.Rotation = side * -24
+			ear.BackgroundColor3 = def.Color
+			ear.BorderSizePixel = 0
+			ear.ZIndex = zBase + 1
+			ear.Parent = body
+			addCorner(ear, 3)
+			addStroke(ear, THEME.Outline, 1.3)
+		end
+		local dagger = Instance.new("Frame")
+		dagger.Size = UDim2.fromScale(0.46, 0.16)
+		dagger.Position = UDim2.fromScale(1.12, 0.68)
+		dagger.AnchorPoint = Vector2.new(0.5, 0.5)
+		dagger.Rotation = -28
+		dagger.BackgroundColor3 = Color3.fromRGB(204, 212, 224)
+		dagger.BorderSizePixel = 0
+		dagger.ZIndex = zBase + 3
+		dagger.Parent = body
+		addCorner(dagger, 2)
+		addStroke(dagger, THEME.Outline, 1.2)
+	elseif kind == "knight" then
+		-- Khe mu tru chu T + khien ben trai + kiem ben phai
+		local visor = Instance.new("Frame")
+		visor.Size = UDim2.fromScale(0.62, 0.18)
+		visor.Position = UDim2.fromScale(0.5, 0.44)
+		visor.AnchorPoint = Vector2.new(0.5, 0.5)
+		visor.BackgroundColor3 = Color3.fromRGB(24, 30, 44)
+		visor.BorderSizePixel = 0
+		visor.ZIndex = zBase + 3
+		visor.Parent = body
+		addCorner(visor, 2)
+
+		local shield = Instance.new("Frame")
+		shield.Size = UDim2.fromScale(0.38, 0.64)
+		shield.Position = UDim2.fromScale(-0.08, 0.56)
+		shield.AnchorPoint = Vector2.new(0.5, 0.5)
+		shield.BackgroundColor3 = Color3.fromRGB(96, 134, 186)
+		shield.BorderSizePixel = 0
+		shield.ZIndex = zBase + 3
+		shield.Parent = body
+		addCorner(shield, 4)
+		addStroke(shield, THEME.Outline, 1.4)
+
+		local sword = Instance.new("Frame")
+		sword.Size = UDim2.fromScale(0.18, 0.72)
+		sword.Position = UDim2.fromScale(1.08, 0.44)
+		sword.AnchorPoint = Vector2.new(0.5, 0.5)
+		sword.Rotation = 16
+		sword.BackgroundColor3 = Color3.fromRGB(206, 214, 224)
+		sword.BorderSizePixel = 0
+		sword.ZIndex = zBase + 3
+		sword.Parent = body
+		addCorner(sword, 2)
+		addStroke(sword, THEME.Outline, 1.2)
+	elseif kind == "wraith" then
+		-- Mu trum bong ma + duoi ma tim lo lung
+		local tail = Instance.new("Frame")
+		tail.Size = UDim2.fromScale(0.66, 0.42)
+		tail.Position = UDim2.fromScale(0.5, 0.94)
+		tail.AnchorPoint = Vector2.new(0.5, 0.5)
+		tail.BackgroundColor3 = Color3.fromRGB(164, 108, 224)
+		tail.BackgroundTransparency = 0.35
+		tail.BorderSizePixel = 0
+		tail.ZIndex = zBase + 1
+		tail.Parent = body
+		addCorner(tail, 99)
+	elseif kind == "golem" then
+		-- 2 canh tay da to 2 ben + khe nut dung nham cam ruc
+		for _, side in ipairs({-1, 1}) do
+			local arm = Instance.new("Frame")
+			arm.Size = UDim2.fromScale(0.34, 0.56)
+			arm.Position = UDim2.fromScale(side < 0 and -0.14 or 1.14, 0.55)
+			arm.AnchorPoint = Vector2.new(0.5, 0.5)
+			arm.BackgroundColor3 = Color3.fromRGB(122, 68, 48)
+			arm.BorderSizePixel = 0
+			arm.ZIndex = zBase + 1
+			arm.Parent = body
+			addCorner(arm, 4)
+			addStroke(arm, THEME.Outline, 1.5)
+		end
+		local crack = Instance.new("Frame")
+		crack.Size = UDim2.fromScale(0.54, 0.16)
+		crack.Position = UDim2.fromScale(0.5, 0.72)
+		crack.AnchorPoint = Vector2.new(0.5, 0.5)
+		crack.BackgroundColor3 = Color3.fromRGB(228, 126, 38)
+		crack.BorderSizePixel = 0
+		crack.ZIndex = zBase + 3
+		crack.Parent = body
+		addCorner(crack, 3)
+	elseif kind == "boss" then
+		-- Doi canh rong do-den dap nhip nhang + vuong mien vang
+		wingL = Instance.new("Frame")
+		wingL.Size = UDim2.fromScale(0.58, 0.44)
+		wingL.Position = UDim2.fromScale(-0.22, 0.42)
+		wingL.AnchorPoint = Vector2.new(0.5, 0.5)
+		wingL.Rotation = -18
+		wingL.BackgroundColor3 = Color3.fromRGB(154, 28, 46)
+		wingL.BorderSizePixel = 0
+		wingL.ZIndex = zBase + 1
+		wingL.Parent = body
+		addCorner(wingL, 6)
+		addStroke(wingL, THEME.Outline, 1.8)
+
+		wingR = Instance.new("Frame")
+		wingR.Size = UDim2.fromScale(0.58, 0.44)
+		wingR.Position = UDim2.fromScale(1.22, 0.42)
+		wingR.AnchorPoint = Vector2.new(0.5, 0.5)
+		wingR.Rotation = 18
+		wingR.BackgroundColor3 = Color3.fromRGB(154, 28, 46)
+		wingR.BorderSizePixel = 0
+		wingR.ZIndex = zBase + 1
+		wingR.Parent = body
+		addCorner(wingR, 6)
+		addStroke(wingR, THEME.Outline, 1.8)
+
 		local crown = Instance.new("Frame")
 		crown.Size = UDim2.fromScale(0.56, 0.24)
-		crown.Position = UDim2.fromScale(0.5, -0.06)
+		crown.Position = UDim2.fromScale(0.5, -0.08)
 		crown.AnchorPoint = Vector2.new(0.5, 0.5)
 		crown.BackgroundColor3 = THEME.TextGold
 		crown.BorderSizePixel = 0
-		crown.ZIndex = zBase + 3
+		crown.ZIndex = zBase + 4
 		crown.Parent = body
 		addCorner(crown, 4)
 		addStroke(crown, THEME.Outline, 1.4)
 	end
 
+	-- 2 mat gian du (hoac mat sang)
+	for _, ox in ipairs({0.33, 0.67}) do
+		local eye = Instance.new("Frame")
+		eye.Size = UDim2.fromScale(0.20, 0.20)
+		eye.Position = UDim2.fromScale(ox, 0.42)
+		eye.AnchorPoint = Vector2.new(0.5, 0.5)
+		eye.BackgroundColor3 = def.Eye
+		eye.BorderSizePixel = 0
+		eye.ZIndex = zBase + 4
+		eye.Parent = body
+		addCorner(eye, 99)
+	end
+
+	-- Lop phu tinh the bang khi bi lam cham (Frozen state)
+	local frostCoat = Instance.new("Frame")
+	frostCoat.Size = UDim2.fromScale(1.16, 1.16)
+	frostCoat.Position = UDim2.fromScale(0.5, 0.5)
+	frostCoat.AnchorPoint = Vector2.new(0.5, 0.5)
+	frostCoat.BackgroundColor3 = Color3.fromRGB(118, 212, 236)
+	frostCoat.BackgroundTransparency = 0.55
+	frostCoat.BorderSizePixel = 0
+	frostCoat.Visible = false
+	frostCoat.ZIndex = zBase + 5
+	frostCoat.Parent = body
+	addCorner(frostCoat, 8)
+	addStroke(frostCoat, Color3.fromRGB(186, 232, 240), 1.6)
+
 	-- Thanh mau tren dau
 	local hpBg = Instance.new("Frame")
 	hpBg.Size = UDim2.fromOffset(math.max(24, sz + 6), 5)
-	hpBg.Position = UDim2.new(0.5, 0, 0, -9)
+	hpBg.Position = UDim2.new(0.5, 0, 0, -10)
 	hpBg.AnchorPoint = Vector2.new(0.5, 0.5)
 	hpBg.BackgroundColor3 = Color3.fromRGB(16, 18, 28)
 	hpBg.BorderSizePixel = 0
-	hpBg.ZIndex = zBase + 4
+	hpBg.ZIndex = zBase + 6
 	hpBg.Parent = holder
 	addCorner(hpBg, 3)
 	addStroke(hpBg, THEME.Outline, 1)
@@ -470,11 +738,11 @@ function GFX.buildEnemySprite(parent, def, zBase)
 	hpFill.Size = UDim2.fromScale(1, 1)
 	hpFill.BackgroundColor3 = def.Boss and Color3.fromRGB(216, 62, 82) or Color3.fromRGB(76, 206, 98)
 	hpFill.BorderSizePixel = 0
-	hpFill.ZIndex = zBase + 5
+	hpFill.ZIndex = zBase + 7
 	hpFill.Parent = hpBg
 	addCorner(hpFill, 3)
 
-	return holder, body, hpFill
+	return holder, body, hpFill, frostCoat, wingL, wingR, bodyStroke
 end
 
 -- ============================================================
@@ -1393,30 +1661,65 @@ local function buildMapBoard(mp)
 		end
 	end
 
-	-- Cong xuat phat & Thanh tri muc tieu
+	-- Cong xoan do xuat phat & Thanh tri xanh-vang chi tiet
 	local pStart = TD.pathPoints[1]
 	local pEnd = TD.pathPoints[#TD.pathPoints]
 	local gate = Instance.new("Frame")
-	gate.Size = UDim2.fromOffset(30, 30)
+	gate.Size = UDim2.fromOffset(34, 34)
 	gate.Position = UDim2.fromOffset(pStart.x, pStart.y)
 	gate.AnchorPoint = Vector2.new(0.5, 0.5)
-	gate.BackgroundColor3 = Color3.fromRGB(168, 46, 56)
+	gate.BackgroundColor3 = Color3.fromRGB(54, 58, 72)
 	gate.BorderSizePixel = 0
 	gate.ZIndex = 7
 	gate.Parent = UI.tileLayer
-	addCorner(gate, 99)
-	addStroke(gate, THEME.Outline, 2)
+	addCorner(gate, 10)
+	addStroke(gate, THEME.Outline, 2.2)
+
+	local vortex = Instance.new("Frame")
+	vortex.Size = UDim2.fromOffset(22, 22)
+	vortex.Position = UDim2.fromScale(0.5, 0.5)
+	vortex.AnchorPoint = Vector2.new(0.5, 0.5)
+	vortex.BackgroundColor3 = Color3.fromRGB(218, 42, 58)
+	vortex.BorderSizePixel = 0
+	vortex.ZIndex = 8
+	vortex.Parent = gate
+	addCorner(vortex, 7)
+	addStroke(vortex, Color3.fromRGB(232, 118, 86), 1.5)
+	addGradient(vortex, Color3.fromRGB(232, 68, 72), Color3.fromRGB(112, 16, 32), 45)
+	UI.portalVortex = vortex
 
 	local castle = Instance.new("Frame")
-	castle.Size = UDim2.fromOffset(34, 34)
+	castle.Size = UDim2.fromOffset(36, 36)
 	castle.Position = UDim2.fromOffset(pEnd.x, pEnd.y)
 	castle.AnchorPoint = Vector2.new(0.5, 0.5)
-	castle.BackgroundColor3 = Color3.fromRGB(64, 152, 218)
+	castle.BackgroundColor3 = Color3.fromRGB(154, 118, 82)
 	castle.BorderSizePixel = 0
 	castle.ZIndex = 7
 	castle.Parent = UI.tileLayer
 	addCorner(castle, 8)
 	addStroke(castle, THEME.TextGold, 2.2)
+	for _, tx in ipairs({0.2, 0.8}) do
+		local spire = Instance.new("Frame")
+		spire.Size = UDim2.fromOffset(10, 14)
+		spire.Position = UDim2.fromScale(tx, 0.14)
+		spire.AnchorPoint = Vector2.new(0.5, 0.5)
+		spire.BackgroundColor3 = Color3.fromRGB(48, 142, 214)
+		spire.BorderSizePixel = 0
+		spire.ZIndex = 8
+		spire.Parent = castle
+		addCorner(spire, 4)
+		addStroke(spire, THEME.Outline, 1.3)
+	end
+	local cGate = Instance.new("Frame")
+	cGate.Size = UDim2.fromOffset(12, 14)
+	cGate.Position = UDim2.fromScale(0.5, 0.72)
+	cGate.AnchorPoint = Vector2.new(0.5, 0.5)
+	cGate.BackgroundColor3 = Color3.fromRGB(82, 48, 28)
+	cGate.BorderSizePixel = 0
+	cGate.ZIndex = 8
+	cGate.Parent = castle
+	addCorner(cGate, 5)
+	addStroke(cGate, THEME.Outline, 1.2)
 end
 
 local function buildWaveQueue(waveNum)
@@ -1453,13 +1756,14 @@ local function spawnEnemy(kind)
 	local scaleHP = 1 + (TD.wave - 1) * 0.24
 	local maxHp = math.floor(def.HP * scaleHP)
 	local p0 = TD.pathPoints[1]
-	local node, body, hpFill = GFX.buildEnemySprite(UI.enemyLayer, def, 15)
+	local node, body, hpFill, frostCoat, wingL, wingR = GFX.buildEnemySprite(UI.enemyLayer, def, kind, 15)
 	node.Position = UDim2.fromOffset(p0.x, p0.y)
 	table.insert(TD.enemies, {
-		Def = def, HP = maxHp, MaxHP = maxHp,
+		Kind = kind, Def = def, HP = maxHp, MaxHP = maxHp,
 		X = p0.x, Y = p0.y, WpIdx = 2, Progress = 0,
 		SlowTimer = 0, SlowFactor = 1, HitFlash = 0, BobPhase = math.random() * 6,
-		Node = node, Body = body, HpFill = hpFill, Dead = false
+		Node = node, Body = body, HpFill = hpFill, FrostCoat = frostCoat,
+		WingL = wingL, WingR = wingR, Dead = false
 	})
 end
 
@@ -1519,15 +1823,24 @@ local function fireTower(t, target)
 		damageEnemy(target, t.Damage)
 	else
 		local pNode = Instance.new("Frame")
-		local pSz = (t.Def.Kind == "Bomb") and 11 or 8
-		pNode.Size = UDim2.fromOffset(pSz, pSz)
+		if t.Def.Kind == "Arrow" then
+			pNode.Size = UDim2.fromOffset(14, 4)
+			pNode.Rotation = ang
+			addCorner(pNode, 2)
+		elseif t.Def.Kind == "Frost" then
+			pNode.Size = UDim2.fromOffset(11, 6)
+			pNode.Rotation = ang
+			addCorner(pNode, 3)
+		else
+			pNode.Size = UDim2.fromOffset(12, 12)
+			addCorner(pNode, 99)
+		end
 		pNode.Position = UDim2.fromOffset(t.X, t.Y)
 		pNode.AnchorPoint = Vector2.new(0.5, 0.5)
 		pNode.BackgroundColor3 = t.Def.Accent
 		pNode.BorderSizePixel = 0
 		pNode.ZIndex = 20
 		pNode.Parent = UI.fxLayer
-		addCorner(pNode, 99)
 		addStroke(pNode, THEME.Outline, 1.4)
 		table.insert(TD.projectiles, {
 			X = t.X, Y = t.Y, Target = target, TX = target.X, TY = target.Y,
@@ -1698,6 +2011,11 @@ track(RunService.RenderStepped:Connect(function(rawDt)
 		UI.board.Position = UDim2.fromOffset(0, 4)
 	end
 
+	-- Xoay vong cong quai
+	if UI.portalVortex and UI.portalVortex.Parent then
+		UI.portalVortex.Rotation = (UI.portalVortex.Rotation + dt * 160) % 360
+	end
+
 	-- Hoi chieu Thien Thach
 	if TD.skillCd > 0 then
 		local prevCeil = math.ceil(TD.skillCd)
@@ -1729,6 +2047,7 @@ track(RunService.RenderStepped:Connect(function(rawDt)
 				e.SlowTimer = math.max(0, e.SlowTimer - dt)
 				if e.SlowTimer == 0 then e.SlowFactor = 1 end
 			end
+			if e.FrostCoat then e.FrostCoat.Visible = (e.SlowTimer > 0) end
 			if e.HitFlash > 0 then
 				e.HitFlash = math.max(0, e.HitFlash - rawDt)
 				e.Body.BackgroundColor3 = Color3.fromRGB(224, 224, 232)
@@ -1736,6 +2055,11 @@ track(RunService.RenderStepped:Connect(function(rawDt)
 				e.Body.BackgroundColor3 = Color3.fromRGB(96, 186, 224)
 			else
 				e.Body.BackgroundColor3 = e.Def.Color
+			end
+			if e.WingL and e.WingR then
+				local flap = math.sin(e.BobPhase * 1.4) * 20
+				e.WingL.Rotation = -18 + flap
+				e.WingR.Rotation = 18 - flap
 			end
 
 			local wp = TD.pathPoints[e.WpIdx]
@@ -1821,6 +2145,7 @@ track(RunService.RenderStepped:Connect(function(rawDt)
 			p.X += (dx / dist) * step
 			p.Y += (dy / dist) * step
 			p.Node.Position = UDim2.fromOffset(p.X, p.Y)
+			if not p.Splash then p.Node.Rotation = math.deg(math.atan2(dy, dx)) end
 		end
 	end
 
@@ -1845,5 +2170,5 @@ screenGui.Destroying:Connect(function()
 end)
 end)
 if not _ok then
-	warn("[ThuThanh2D v1.0 ERROR]: " .. tostring(_err))
+	warn("[ThuThanh2D v2.0 ERROR]: " .. tostring(_err))
 end
