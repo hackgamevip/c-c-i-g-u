@@ -1,11 +1,11 @@
 --[[
     ========================================================================
-    DÒ MÌN - STANDALONE v1.0
-    Game Dò Mìn (Minesweeper) 2D Toàn Màn Hình cho Roblox Mobile & PC
-    - Đồ họa Cyber-Navy & Cyan-Teal matte đồng bộ bộ icon vector
-    - 6 màn chơi: 9x9 (10 mìn) đến 30x30 (190 mìn) chạy mượt 60 FPS mobile
-    - Nước mở đầu luôn an toàn, hỗ trợ Mở nhanh ô số, Cắm cờ 1 chạm & chuột phải PC
-    - Hệ thống Xu thưởng theo độ khó, Gợi ý 10 Xu và Hồi sinh gỡ mìn 30 Xu
+    DÒ MÌN - STANDALONE v2.0 (ĐỒ HỌA HOẠT HÌNH 3D ROYAL BLUE)
+    Game Dò Mìn 2D Toàn Màn Hình cho Roblox Mobile & PC
+    - Nâng cấp đồ họa 3D Arcade Royal Blue: Logo Dò Mìn, Bom, Cờ, Cúp Vàng, Nổ Bom
+    - Tích hợp sẵn ảnh sprite từ bộ đồ họa (writefile + getcustomasset) có dự phòng vector
+    - 6 màn chơi từ Dễ 9x9 (+100 Xu) đến Địa Ngục 30x30 (+2999 Xu)
+    - Nút 3D bóng đẹp rõ chữ, Gợi ý 10 Xu, Hồi sinh gỡ mìn 30 Xu & Phóng to/Thu nhỏ
     ========================================================================
 ]]
 
@@ -15,68 +15,169 @@ end
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
 local CoreGui = game:GetService("CoreGui")
 
 local LocalPlayer = Players.LocalPlayer
 
 -- ========================================================================
--- [PHẦN 01] CẤU HÌNH, BẢNG MÀU CYBER-NAVY MATTE & 6 MÀN CHƠI
+-- [PHẦN 01] NẠP BỘ SPRITE ĐỒ HỌA TÍCH HỢP (CÓ DỰ PHÒNG VECTOR)
+-- ========================================================================
+local Assets = {}
+do
+    local RAW_B64 = {
+        logo   = "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",
+        bomb   = "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",
+        flag   = "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",
+        trophy = "iVBORw0KGgoAAAANSUhEUgAAADoAAABACAMAAAB83JS9AAAB/lBMVEVaJxVZVWwiHyRcIwScXgthVmdlZo9pWSRwX1ahKQD86mDdpR1nZ4iPiKFMM01NNSz20yVqXGcrMFxhXY42CQH55JAsL2NsTRGTjKLZMwBpRyiHXyfYZxSEd4aalKxFO0qKcmWWd1mDeZAjHiw5QVc4QWn/AAAuLlU9RlNLO0pmSDiHXjCGdHWwlRavi2LimFM5R4ZbOiKGdnb//wAzO2MAAP9VVaqIYz6Cd4eiiX6Yipj////y78AAAAAGAwb7xwT81gz6twP5hgFKNzA0KjgzNU/5lwFNREb1eQH6pgP85S50VTA4LTg8MjgtKEUsLU0oBgFrVUtsSjHqaAP85RdWSToSERj86U1LNi8xFQRROzhpRyzoWAJLRU/8+a45PVNEO0UFAwboSQD+9zVGRk342Sg0NEfTZQH8/utYUUiFe5b7+c0tJy84NThZVG/PVQFqRyw0NVJNSFVuJwJzVDD8940ZGiszHTssLElRFwFVNRRRRVWVhouVkq3OlQz8828AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAmokWzAAAAgHRSTlMX3er395+hFx76+vnSoxxe+GjhaQ76LO/Y+WMh+mhw50zgy7lE3gG2KmaGaLD35/nepDoBQAEDiouPOQH6APP6+vr6LRYp+hP6+vsUIycYIvgREvn6EvL7SfYPMvpK+kNL1fr6L/oa+PoOsPvuEZL3TfLp9yn70Q739hdtT5T5+qs+TCUAAAeASURBVHjahZcHW9tYFoavLMndxqYEQmghmzopszPbd7kqDkKSHXCj2AZjMIYwQEyfIQT46/udK9kYZ3fmPMBjJL36TrvnXrO5PluoLlSr1eWFPqseJfufZP0X9qsLy2QPyWT1KPxH6ItQYcEj94Ut4xfo8nL1D9FCoVAs4k84XOgaXgR0//fRf4eBhQEX2VffWHV5OVQIQ/p3UWDLX9nX4nn4p5+++TYzEz6vMcZCC+H/j4ayBcbC/5qamrpJJH7pWiJxczM1NRkeHg4lkXvWh774ORQKFbK1yUQiIUnTh4EV3rWVwOH0qTSbuElnRP5eVY/mjvY99EUxS8kIn6tjY9KhD1QCvlUq3gsOpbHEOAR2UOOF5O7u0SOg2Wwhy9jx8ZvZOB6rjCrvYrGUdm+p2DtFznN+OBYcWFtby3gl310AWixkapM3N4mxsUMux1KpmGXbpdK6sFLJtk3L0PSYIvPpsVmEPhnOLCRB7pJqKJ2IS6enksTlkXps/bGwbRjB2+KD3Wre8pVTPHUqJYYyaK8FqIaZOnbqR6jc/edgZOTDh4mJiRJJCtFYjFzRbjt5exZM7yBioCycmOaVp++fKsqV0nSj9c+wA1h9ZCQKa7otw7FsoPKoorxTKlvPhgTL/jb8LQ5HP1/cRZsT7abrNsHercJc19V1XdMM04YZt7KRKpfLqVhgSx3KgGUFNnXK33+OUi5LE0CjB0CBlXVhuGyZgLXbiCX+Kytbz4IbOzvzQG9O+IcLcdWMGK67Wj8gVSHpwQ5Y04pELMdyHM1Sti6DG8mdHQ+NRXWnZJuliAGtliucdVst8T7DcECaTuQxarZt6dYooY2dV4Q+57fRlvU4AjOaZRfpWfU8Jc5wPFENd8/kbaNlyUCvG57Dp1xpthwFec/HgCLWejdWwgVqnFFhSloKaCB4vbFBDickrriusUfoLakeHFx0UCHsoVd039Y182pr0EPDbBJdpLmGmQ94qj7aERWqtmVUeCBwZbUcmwNtEDo3nI7zvFXWnDOgVB1Cy9+hTp4HeMRAgvmW+gXoK/bXuXD8kO/pOjxeye8BvajX71D7bqiUJttBHwbyNvpD5ggV6J/Q/iwo8TPHNQyZ55VmWY/WL+50/V7UoY5AFle44ugWUvIy2GhsbApUjXO+p+mGlc9HkJ3Vi4voPWp4qIECyKZm2GfwN73W2NzcxMoJHcdP+JWpG5oiR/Sy7t5Fo60elPw1NZlXTEcz25xfBl83Nhuk+iJ8rEpYb4ZuGBGZ2gmt37r310cr+QmQ65gjzz1RcrhYewPZCrlsRGJAqRF7QhVZciK2Y1glFBeVaRC6KdBjNR7gZyWwZglE2Ue1bgfbuGE6Vok6Kq6uNZLz8wJlxEoBLrcN3d42yhpk3fsmpl4yjXbJNEsyyOfSQBIkWFItFs9rk+oWv4pY1jbJYvF0SSHqWNum3aZWHIwPZD7Nd1AGNitYftYuPXZ0Te9ZOEJUb2+vR/JEYp72oD47pFJ/y5G2TqwPChIJkmVydutHQQp/5/8iNo59wc54ox8VBuuTDs0lU1fEKAzEv2CGZzzVR4+8PadazGaztbQq/YbNJuLoeldTkCZJDkpBlYZ/H8qYYMdVKb7C822EK8YDdaBtaRaRP0qqkPTJLkobTzZ7fh4afzuNgBWLOlrMUNPQYldI0In05w7pofNddI5li2DPf3hLAZ/t0eAUwVoKZTZAZMYnfZb17MzIVTY0owYoJWeO4yDW0jo5yy/VNwOZjI9+pwoWZJHYadpfDVvsVSWhqY53SD/Sh6pevNlQ6IenqFJFQ11ou8JSkUDW7kVzuaWlpT4UkmCfPAHLZUwchzJV4YfS+PFxjfkwyNzudyhpgnzy9/ejXCmXqbY2Sno4q46PH9d6UFJdmn9wgiHJ85l/jj1d4bdl2uMM00Qj4RSRhm6og+4K1aUe9Gdk+Mn5t7fUj0rZFahjY3iiNPFEOpO5RwXbgzIkODyFBZSXY0131dtwLMuIKRW+Is2mGYFerIQuPXC4lk7QlEpFL7BjuS0KFgMGnQXl0/gG62TYC5b1JvgYE5ly21qtf67fRcXuQV7TrsGlIBOkjz5IE04yaP7RW4MaSfNHmlivCBgtFoQs+5QjdJHYHjTJ/oF6Rut1cfpIpVK0eBzRkPC5wl8OMagC3V3sR+dqvwT4aLPlwtuLO7Gxe5OGegMLLzA0wDzNRcH2omFCccRrrWqdyUQuo6ew08n8cmhNRLr78aNgH6BBoOX7w6EhBgWxPjoA8FNOkGB70VDQU32AUqaw5B1CGzmoHn302d6W2CCUgHtQnEJI1qrwLUIFCfZjP3pJo7i9J4xWHJ0SS3vt9kQEhd0aSuY6ZL/qGqEYTQ+tcxjnz4YyPulZb10z6nM80nN27zFcfTmUy3WwPtVk5jo4KB5bEc+uwAKB7qsGg/dkP1rNrIEN/E9RPjgYb+R6vF184DAD+1qNS9LJyclvHcPnwUEJpg7kGBAv2F/x06s6V13G15jMxnX6C0xVv3imqtfX168HhhnrgrDFR99/k/RteG6YrOsRSwox9mvyiCSPcO2/H5aaHPJnD6QAAAAASUVORK5CYII=",
+        boom   = "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",
+    }
+
+    local B64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+    local B64_MAP = {}
+    for i = 1, #B64_CHARS do
+        B64_MAP[string.byte(B64_CHARS, i)] = i - 1
+    end
+
+    local function decodeBase64(data)
+        local out = {}
+        local n = #data
+        local i = 1
+        while i <= n do
+            local a = B64_MAP[string.byte(data, i)] or 0
+            local b = B64_MAP[string.byte(data, i + 1)] or 0
+            local cByte = string.byte(data, i + 2)
+            local dByte = string.byte(data, i + 3)
+            local c = cByte and B64_MAP[cByte] or 0
+            local d = dByte and B64_MAP[dByte] or 0
+            local bits = a * 262144 + b * 4096 + c * 64 + d
+            local b1 = math.floor(bits / 65536) % 256
+            local b2 = math.floor(bits / 256) % 256
+            local b3 = bits % 256
+            if cByte == 61 or not cByte then
+                table.insert(out, string.char(b1))
+            elseif dByte == 61 or not dByte then
+                table.insert(out, string.char(b1, b2))
+            else
+                table.insert(out, string.char(b1, b2, b3))
+            end
+            i = i + 4
+        end
+        return table.concat(out)
+    end
+
+    local canCustom = (type(writefile) == "function") and (type(getcustomasset) == "function")
+    if canCustom then
+        if type(makefolder) == "function" then
+            pcall(makefolder, "DoMin_Assets_v2")
+        end
+        for name, b64 in pairs(RAW_B64) do
+            pcall(function()
+                local fpath = "DoMin_Assets_v2/" .. name .. ".png"
+                if type(isfile) ~= "function" or not isfile(fpath) then
+                    writefile(fpath, decodeBase64(b64))
+                end
+                local id = getcustomasset(fpath)
+                if type(id) == "string" and #id > 0 then
+                    Assets[name] = id
+                end
+            end)
+        end
+    end
+end
+
+-- ========================================================================
+-- [PHẦN 02] CẤU HÌNH, BẢNG MÀU ROYAL BLUE 3D MATTE & 6 MÀN CHƠI
 -- ========================================================================
 local SAVE_FILE = "DoMin_Stats_v1.json"
 
+-- Bảng màu Royal Blue 3D Arcade (mọi kênh RGB của chữ đều <= 215 chống chói mobile)
 local UITheme = {
-    BgMain        = Color3.fromRGB(9, 15, 28),
-    BgPanel       = Color3.fromRGB(14, 23, 40),
-    BgPanelLight  = Color3.fromRGB(18, 30, 52),
-    BgCard        = Color3.fromRGB(18, 31, 54),
-    BgButton      = Color3.fromRGB(20, 35, 60),
-    BgActive      = Color3.fromRGB(24, 58, 82),
-    StrokeSubtle  = Color3.fromRGB(36, 76, 98),
-    StrokeStrong  = Color3.fromRGB(56, 134, 152),
-    AccentCyan    = Color3.fromRGB(76, 192, 206),
+    BgMain        = Color3.fromRGB(11, 24, 58),
+    BgMainLight   = Color3.fromRGB(18, 42, 96),
+    BgPanel       = Color3.fromRGB(16, 38, 88),
+    BgPanelDark   = Color3.fromRGB(12, 27, 66),
+    BgCard        = Color3.fromRGB(22, 52, 114),
+    BgButton      = Color3.fromRGB(26, 66, 138),
+    BgActive      = Color3.fromRGB(36, 102, 186),
 
-    TextPrimary   = Color3.fromRGB(206, 212, 215),
-    TextSecondary = Color3.fromRGB(142, 168, 186),
-    TextMuted     = Color3.fromRGB(104, 134, 154),
+    RimBlue       = Color3.fromRGB(58, 162, 214),
+    StrokeSubtle  = Color3.fromRGB(46, 118, 186),
+    StrokeStrong  = Color3.fromRGB(74, 178, 214),
 
-    ColorRed      = Color3.fromRGB(204, 92, 96),
-    ColorGold     = Color3.fromRGB(204, 168, 84),
-    ColorGreen    = Color3.fromRGB(88, 186, 132),
-    ColorDanger   = Color3.fromRGB(190, 82, 86),
+    -- Màu nút 3D chuẩn bộ đồ họa (Xanh lá / Xanh dương / Tím / Đỏ / Vàng)
+    BtnGreen      = Color3.fromRGB(42, 148, 52),
+    BtnGreenDark  = Color3.fromRGB(22, 92, 30),
+    BtnBlue       = Color3.fromRGB(32, 112, 198),
+    BtnBlueDark   = Color3.fromRGB(18, 66, 132),
+    BtnPurple     = Color3.fromRGB(118, 58, 194),
+    BtnPurpleDark = Color3.fromRGB(74, 30, 132),
+    BtnRed        = Color3.fromRGB(184, 46, 56),
+    BtnRedDark    = Color3.fromRGB(122, 24, 32),
+    BtnGold       = Color3.fromRGB(194, 140, 28),
+    BtnGoldDark   = Color3.fromRGB(132, 88, 14),
+
+    -- Màu chữ matte (tất cả <= 215)
+    TextPrimary   = Color3.fromRGB(210, 214, 215),
+    TextSecondary = Color3.fromRGB(160, 186, 212),
+    TextMuted     = Color3.fromRGB(122, 154, 192),
+    ColorGold     = Color3.fromRGB(212, 182, 82),
+    ColorRed      = Color3.fromRGB(210, 102, 104),
+    ColorGreen    = Color3.fromRGB(118, 206, 132),
+    AccentCyan    = Color3.fromRGB(96, 198, 214),
 }
 
--- 4 Chủ đề bàn Dò Mìn (mọi kênh RGB của chữ/số đều <= 215)
+-- 4 Chủ đề bàn cờ (mặc định Hoạt Hình chuẩn ảnh mẫu 3D xanh dương!)
 local BoardThemes = {
+    Cartoon = {
+        Name        = "Hoạt Hình",
+        BoardOuter  = Color3.fromRGB(22, 64, 134),
+        CellHidden  = Color3.fromRGB(118, 166, 212),
+        CellOpen    = Color3.fromRGB(188, 198, 212),
+        GridLine    = Color3.fromRGB(42, 78, 142),
+        CellMineHit = Color3.fromRGB(204, 108, 116),
+        CellHint    = Color3.fromRGB(102, 188, 128),
+        FlagColor   = Color3.fromRGB(198, 42, 52),
+        MineColor   = Color3.fromRGB(36, 40, 56),
+        NumColors   = {
+            Color3.fromRGB(28, 86, 198),    -- 1 Xanh dương đậm
+            Color3.fromRGB(28, 134, 46),    -- 2 Xanh lá đậm
+            Color3.fromRGB(196, 36, 42),    -- 3 Đỏ đậm
+            Color3.fromRGB(178, 118, 16),   -- 4 Vàng cam
+            Color3.fromRGB(128, 42, 178),   -- 5 Tím
+            Color3.fromRGB(194, 92, 22),    -- 6 Cam
+            Color3.fromRGB(92, 42, 142),    -- 7 Tím sẫm
+            Color3.fromRGB(28, 124, 178),   -- 8 Xanh lam
+        },
+    },
     Dark = {
         Name        = "Tối",
         BoardOuter  = Color3.fromRGB(12, 20, 36),
-        CellHidden  = Color3.fromRGB(32, 46, 72),
+        CellHidden  = Color3.fromRGB(34, 50, 78),
         CellOpen    = Color3.fromRGB(17, 25, 42),
-        GridLine    = Color3.fromRGB(48, 72, 102),
-        CellMineHit = Color3.fromRGB(96, 34, 40),
+        GridLine    = Color3.fromRGB(52, 76, 108),
+        CellMineHit = Color3.fromRGB(104, 34, 42),
         CellHint    = Color3.fromRGB(34, 78, 62),
         FlagColor   = Color3.fromRGB(206, 94, 92),
         MineColor   = Color3.fromRGB(194, 88, 92),
         NumColors   = {
-            Color3.fromRGB(96, 184, 212),   -- 1
-            Color3.fromRGB(94, 188, 128),   -- 2
-            Color3.fromRGB(206, 104, 104),  -- 3
-            Color3.fromRGB(152, 136, 210),  -- 4
-            Color3.fromRGB(206, 152, 84),   -- 5
-            Color3.fromRGB(86, 194, 184),   -- 6
-            Color3.fromRGB(186, 188, 196),  -- 7
-            Color3.fromRGB(146, 154, 168),  -- 8
+            Color3.fromRGB(96, 184, 212),
+            Color3.fromRGB(94, 188, 128),
+            Color3.fromRGB(206, 104, 104),
+            Color3.fromRGB(152, 136, 210),
+            Color3.fromRGB(206, 152, 84),
+            Color3.fromRGB(86, 194, 184),
+            Color3.fromRGB(186, 188, 196),
+            Color3.fromRGB(146, 154, 168),
         },
     },
     Emerald = {
         Name        = "Ngọc",
         BoardOuter  = Color3.fromRGB(13, 28, 25),
-        CellHidden  = Color3.fromRGB(32, 66, 56),
+        CellHidden  = Color3.fromRGB(34, 68, 58),
         CellOpen    = Color3.fromRGB(18, 38, 33),
-        GridLine    = Color3.fromRGB(48, 90, 76),
-        CellMineHit = Color3.fromRGB(96, 36, 40),
+        GridLine    = Color3.fromRGB(50, 92, 78),
+        CellMineHit = Color3.fromRGB(102, 36, 42),
         CellHint    = Color3.fromRGB(48, 98, 72),
         FlagColor   = Color3.fromRGB(208, 102, 92),
         MineColor   = Color3.fromRGB(198, 92, 92),
@@ -89,27 +190,6 @@ local BoardThemes = {
             Color3.fromRGB(94, 200, 188),
             Color3.fromRGB(186, 196, 192),
             Color3.fromRGB(144, 162, 156),
-        },
-    },
-    Sand = {
-        Name        = "Cát",
-        BoardOuter  = Color3.fromRGB(42, 33, 24),
-        CellHidden  = Color3.fromRGB(142, 116, 84),
-        CellOpen    = Color3.fromRGB(108, 86, 60),
-        GridLine    = Color3.fromRGB(82, 62, 42),
-        CellMineHit = Color3.fromRGB(138, 52, 52),
-        CellHint    = Color3.fromRGB(94, 134, 86),
-        FlagColor   = Color3.fromRGB(178, 46, 46),
-        MineColor   = Color3.fromRGB(46, 36, 28),
-        NumColors   = {
-            Color3.fromRGB(36, 98, 164),
-            Color3.fromRGB(36, 122, 64),
-            Color3.fromRGB(168, 42, 44),
-            Color3.fromRGB(96, 52, 146),
-            Color3.fromRGB(146, 76, 26),
-            Color3.fromRGB(28, 116, 118),
-            Color3.fromRGB(42, 36, 30),
-            Color3.fromRGB(72, 64, 56),
         },
     },
     Paper = {
@@ -135,7 +215,7 @@ local BoardThemes = {
     },
 }
 
-local THEME_ORDER = { "Dark", "Emerald", "Sand", "Paper" }
+local THEME_ORDER = { "Cartoon", "Dark", "Emerald", "Paper" }
 
 local STAGES = {
     { key = "Easy",   title = "Dễ",       size = 9,  mines = 10,  reward = 100 },
@@ -150,32 +230,32 @@ local FONT_MAIN = Enum.Font.GothamSemibold
 local FONT_BODY = Enum.Font.GothamMedium
 
 local Config = {
-    StageIndex    = 1,
-    ThemeKey      = "Dark",
-    QuickChord    = true,     -- Chạm vào ô số đã đủ cờ để mở nhanh xung quanh
-    SoundEnabled  = true,
-    CellSize      = 32,
+    StageIndex   = 1,
+    ThemeKey     = "Cartoon",
+    QuickChord   = true,
+    SoundEnabled = true,
+    CellSize     = 32,
 }
 
 local State = {
-    Screen          = "HOME",   -- "HOME" | "GAME"
-    TouchMode       = "DIG",    -- "DIG" (Mở ô) | "FLAG" (Cắm cờ)
-    Mines           = {},       -- Mines[r][c] = true/false
-    Counts          = {},       -- Counts[r][c] = 0..8
-    Revealed        = {},       -- Revealed[r][c] = true/false
-    Flagged         = {},       -- Flagged[r][c] = true/false
-    Generated       = false,
-    GameOver        = false,
-    Won             = false,
-    RevealedCount   = 0,
-    FlagsPlaced     = 0,
-    Elapsed         = 0,
-    HitMineCell     = nil,      -- { r, c } ô mìn vừa chạm để hỗ trợ Hồi sinh 30 Xu
-    HintCell        = nil,
-    Minimized       = false,
-    Destroyed       = false,
-    ResetConfirmAt  = 0,
-    TempAlertToken  = 0,
+    Screen         = "HOME",
+    TouchMode      = "DIG",
+    Mines          = {},
+    Counts         = {},
+    Revealed       = {},
+    Flagged        = {},
+    Generated      = false,
+    GameOver       = false,
+    Won            = false,
+    RevealedCount  = 0,
+    FlagsPlaced    = 0,
+    Elapsed        = 0,
+    HitMineCell    = nil,
+    HintCell       = nil,
+    Minimized      = false,
+    Destroyed      = false,
+    ResetConfirmAt = 0,
+    TempAlertToken = 0,
 }
 
 local Stats = {
@@ -185,24 +265,16 @@ local Stats = {
 }
 
 local UI = {
-    CellNodes = {},
+    CellNodes   = {},
     Connections = {},
 }
 
 -- ========================================================================
--- [PHẦN 02] TIỆN ÍCH LƯU DỮ LIỆU, ÂM THANH & BỘ ICON VECTOR CYBER-TEAL
+-- [PHẦN 03] TIỆN ÍCH LƯU DỮ LIỆU, NÚT 3D BÓNG & ICON SPRITE/VECTOR
 -- ========================================================================
-local function getStage()
-    return STAGES[Config.StageIndex] or STAGES[1]
-end
-
-local function getTheme()
-    return BoardThemes[Config.ThemeKey] or BoardThemes.Dark
-end
-
-local function cellKey(r, c)
-    return r * 1000 + c
-end
+local function getStage() return STAGES[Config.StageIndex] or STAGES[1] end
+local function getTheme() return BoardThemes[Config.ThemeKey] or BoardThemes.Cartoon end
+local function cellKey(r, c) return r * 1000 + c end
 
 local function loadStats()
     if type(isfile) == "function" and type(readfile) == "function" then
@@ -215,9 +287,6 @@ local function loadStats()
                     Stats.Wins   = tonumber(data.Wins) or 0
                     Stats.Losses = tonumber(data.Losses) or 0
                     Stats.Xu     = tonumber(data.Xu) or 0
-                    if data.ThemeKey and BoardThemes[data.ThemeKey] then
-                        Config.ThemeKey = data.ThemeKey
-                    end
                 end
             end
         end
@@ -255,15 +324,15 @@ end
 
 local function addCorner(parent, radius)
     local c = Instance.new("UICorner")
-    c.CornerRadius = UDim.new(0, radius or 6)
+    c.CornerRadius = UDim.new(0, radius or 8)
     c.Parent = parent
     return c
 end
 
 local function addStroke(parent, color, thickness, transparency)
     local s = Instance.new("UIStroke")
-    s.Color = color or UITheme.StrokeSubtle
-    s.Thickness = thickness or 1.2
+    s.Color = color or UITheme.RimBlue
+    s.Thickness = thickness or 1.6
     s.Transparency = transparency or 0
     s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     s.Parent = parent
@@ -278,65 +347,168 @@ local function addGradient(parent, topColor, bottomColor, rot)
     return g
 end
 
--- Bộ icon vector sắc nét (không dùng emoji bị lỗi ô vuông trên mobile)
+local function bindInstantTap(button, callback, rightClickCb)
+    local pressPos, pressType, lastFire = nil, nil, 0
+    trackConn(button.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch
+            or input.UserInputType == Enum.UserInputType.MouseButton1
+            or input.UserInputType == Enum.UserInputType.MouseButton2 then
+            pressPos = input.Position
+            pressType = input.UserInputType
+        end
+    end))
+    trackConn(button.InputEnded:Connect(function(input)
+        if not pressPos or input.UserInputType ~= pressType then return end
+        local delta = (input.Position - pressPos).Magnitude
+        local pType = pressType
+        pressPos, pressType = nil, nil
+        local now = os.clock()
+        if delta <= 14 and (now - lastFire) >= 0.07 then
+            lastFire = now
+            if pType == Enum.UserInputType.MouseButton2 and rightClickCb then
+                rightClickCb(input.Position)
+            elseif pType ~= Enum.UserInputType.MouseButton2 then
+                callback(input.Position)
+            end
+        end
+    end))
+end
+
+-- Tạo nút 3D bóng chuẩn đồ họa Arcade (chữ nằm trên TextLabel riêng nên luôn sắc nét!)
+local function make3DButton(parent, text, size, pos, mainColor, darkColor, textColor, textSize, onTap)
+    local btn = Instance.new("TextButton")
+    btn.Size = size
+    btn.Position = pos
+    btn.BackgroundColor3 = darkColor
+    btn.BorderSizePixel = 0
+    btn.AutoButtonColor = false
+    btn.Text = ""
+    btn.Parent = parent
+    addCorner(btn, 10)
+    local outerStroke = addStroke(btn, Color3.fromRGB(10, 18, 38), 1.8, 0.1)
+
+    -- Mặt nút 3D nổi phía trên
+    local face = Instance.new("Frame")
+    face.Name = "Face"
+    face.Size = UDim2.new(1, 0, 1, -4)
+    face.Position = UDim2.new(0, 0, 0, 0)
+    face.BackgroundColor3 = mainColor
+    face.BorderSizePixel = 0
+    face.ZIndex = btn.ZIndex + 1
+    face.Parent = btn
+    addCorner(face, 9)
+
+    -- Dải sáng bóng nhẹ ở nửa trên
+    local gloss = Instance.new("Frame")
+    gloss.Size = UDim2.new(1, -6, 0.42, 0)
+    gloss.Position = UDim2.new(0, 3, 0, 2)
+    gloss.BackgroundColor3 = Color3.fromRGB(215, 225, 240)
+    gloss.BackgroundTransparency = 0.80
+    gloss.BorderSizePixel = 0
+    gloss.ZIndex = face.ZIndex + 1
+    gloss.Parent = face
+    addCorner(gloss, 7)
+
+    local lbl = Instance.new("TextLabel")
+    lbl.Name = "Label"
+    lbl.Size = UDim2.new(1, -10, 1, 0)
+    lbl.Position = UDim2.new(0, 5, 0, 0)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = text
+    lbl.Font = FONT_MAIN
+    lbl.TextSize = textSize or 14
+    lbl.TextColor3 = textColor or UITheme.TextPrimary
+    lbl.ZIndex = gloss.ZIndex + 1
+    lbl.Parent = face
+
+    bindInstantTap(btn, onTap)
+    return btn, face, lbl, outerStroke
+end
+
+-- Bộ icon kết hợp Sprite ảnh thật (từ ảnh mẫu) + dự phòng Vector
 local Icons = {}
+
+function Icons.drawSpriteOr(parent, spriteKey, sizeScale, fallbackFn)
+    local assetId = Assets[spriteKey]
+    if assetId then
+        local img = Instance.new("ImageLabel")
+        img.Name = "Sprite_" .. spriteKey
+        img.Size = UDim2.new(sizeScale or 0.84, 0, sizeScale or 0.84, 0)
+        img.AnchorPoint = Vector2.new(0.5, 0.5)
+        img.Position = UDim2.new(0.5, 0, 0.5, 0)
+        img.BackgroundTransparency = 1
+        img.Image = assetId
+        img.ScaleType = Enum.ScaleType.Fit
+        img.ZIndex = parent.ZIndex + 2
+        img.Parent = parent
+        return img
+    elseif fallbackFn then
+        return fallbackFn(parent)
+    end
+    return nil
+end
 
 function Icons.drawMinus(parent, color)
     local bar = Instance.new("Frame")
-    bar.Size = UDim2.new(0, 14, 0, 2.5)
+    bar.Size = UDim2.new(0, 14, 0, 2.8)
     bar.AnchorPoint = Vector2.new(0.5, 0.5)
     bar.Position = UDim2.new(0.5, 0, 0.5, 0)
-    bar.BackgroundColor3 = color or UITheme.AccentCyan
+    bar.BackgroundColor3 = color or UITheme.TextPrimary
     bar.BorderSizePixel = 0
+    bar.ZIndex = parent.ZIndex + 2
     bar.Parent = parent
     addCorner(bar, 2)
 end
 
 function Icons.drawPlus(parent, color)
-    local col = color or UITheme.AccentCyan
+    local col = color or UITheme.TextPrimary
     Icons.drawMinus(parent, col)
     local vbar = Instance.new("Frame")
-    vbar.Size = UDim2.new(0, 2.5, 0, 14)
+    vbar.Size = UDim2.new(0, 2.8, 0, 14)
     vbar.AnchorPoint = Vector2.new(0.5, 0.5)
     vbar.Position = UDim2.new(0.5, 0, 0.5, 0)
     vbar.BackgroundColor3 = col
     vbar.BorderSizePixel = 0
+    vbar.ZIndex = parent.ZIndex + 2
     vbar.Parent = parent
     addCorner(vbar, 2)
 end
 
 function Icons.drawCloseX(parent, color)
-    local col = color or UITheme.ColorRed
+    local col = color or UITheme.TextPrimary
     for _, rot in ipairs({ 45, -45 }) do
         local bar = Instance.new("Frame")
-        bar.Size = UDim2.new(0, 15, 0, 2.5)
+        bar.Size = UDim2.new(0, 15, 0, 2.8)
         bar.AnchorPoint = Vector2.new(0.5, 0.5)
         bar.Position = UDim2.new(0.5, 0, 0.5, 0)
         bar.Rotation = rot
         bar.BackgroundColor3 = col
         bar.BorderSizePixel = 0
+        bar.ZIndex = parent.ZIndex + 2
         bar.Parent = parent
         addCorner(bar, 2)
     end
 end
 
 function Icons.drawHome(parent, color)
-    local col = color or UITheme.AccentCyan
+    local col = color or UITheme.TextPrimary
     local wrap = Instance.new("Frame")
     wrap.Size = UDim2.new(0, 18, 0, 18)
     wrap.AnchorPoint = Vector2.new(0.5, 0.5)
     wrap.Position = UDim2.new(0.5, 0, 0.5, 0)
     wrap.BackgroundTransparency = 1
+    wrap.ZIndex = parent.ZIndex + 2
     wrap.Parent = parent
 
     for _, cfg in ipairs({ { -4, -38 }, { 4, 38 } }) do
         local roof = Instance.new("Frame")
-        roof.Size = UDim2.new(0, 11, 0, 2.4)
+        roof.Size = UDim2.new(0, 11, 0, 2.5)
         roof.AnchorPoint = Vector2.new(0.5, 0.5)
         roof.Position = UDim2.new(0.5, cfg[1], 0, 5)
         roof.Rotation = cfg[2]
         roof.BackgroundColor3 = col
         roof.BorderSizePixel = 0
+        roof.ZIndex = wrap.ZIndex
         roof.Parent = wrap
         addCorner(roof, 2)
     end
@@ -345,158 +517,70 @@ function Icons.drawHome(parent, color)
     body.AnchorPoint = Vector2.new(0.5, 1)
     body.Position = UDim2.new(0.5, 0, 1, -1)
     body.BackgroundTransparency = 1
+    body.ZIndex = wrap.ZIndex
     body.Parent = wrap
     addStroke(body, col, 2, 0)
     addCorner(body, 2)
-
-    local door = Instance.new("Frame")
-    door.Size = UDim2.new(0, 4, 0, 5)
-    door.AnchorPoint = Vector2.new(0.5, 1)
-    door.Position = UDim2.new(0.5, 0, 1, 0)
-    door.BackgroundColor3 = col
-    door.BorderSizePixel = 0
-    door.Parent = body
-    addCorner(door, 1)
 end
 
-function Icons.drawMine(parent, sizeScale, color)
-    local col = color or UITheme.ColorRed
+function Icons.drawMineVector(parent, color)
+    local col = color or Color3.fromRGB(36, 40, 56)
     local wrap = Instance.new("Frame")
-    wrap.Size = UDim2.new(sizeScale or 0.68, 0, sizeScale or 0.68, 0)
+    wrap.Size = UDim2.new(0.72, 0, 0.72, 0)
     wrap.AnchorPoint = Vector2.new(0.5, 0.5)
     wrap.Position = UDim2.new(0.5, 0, 0.5, 0)
     wrap.BackgroundTransparency = 1
-    wrap.ZIndex = 7
+    wrap.ZIndex = parent.ZIndex + 2
     wrap.Parent = parent
-
-    -- 4 gai chéo & ngang/dọc
     for _, rot in ipairs({ 0, 45, 90, 135 }) do
-        local spike = Instance.new("Frame")
-        spike.Size = UDim2.new(0.96, 0, 0.14, 0)
-        spike.AnchorPoint = Vector2.new(0.5, 0.5)
-        spike.Position = UDim2.new(0.5, 0, 0.5, 0)
-        spike.Rotation = rot
-        spike.BackgroundColor3 = col
-        spike.BorderSizePixel = 0
-        spike.ZIndex = 7
-        spike.Parent = wrap
-        addCorner(spike, 2)
+        local sp = Instance.new("Frame")
+        sp.Size = UDim2.new(0.95, 0, 0.15, 0)
+        sp.AnchorPoint = Vector2.new(0.5, 0.5)
+        sp.Position = UDim2.new(0.5, 0, 0.5, 0)
+        sp.Rotation = rot
+        sp.BackgroundColor3 = col
+        sp.BorderSizePixel = 0
+        sp.ZIndex = wrap.ZIndex
+        sp.Parent = wrap
+        addCorner(sp, 2)
     end
-
     local core = Instance.new("Frame")
     core.Size = UDim2.new(0.62, 0, 0.62, 0)
     core.AnchorPoint = Vector2.new(0.5, 0.5)
     core.Position = UDim2.new(0.5, 0, 0.5, 0)
     core.BackgroundColor3 = col
     core.BorderSizePixel = 0
-    core.ZIndex = 8
+    core.ZIndex = wrap.ZIndex + 1
     core.Parent = wrap
     addCorner(core, 30)
-
-    local shine = Instance.new("Frame")
-    shine.Size = UDim2.new(0.24, 0, 0.24, 0)
-    shine.Position = UDim2.new(0.22, 0, 0.22, 0)
-    shine.BackgroundColor3 = UITheme.TextPrimary
-    shine.BackgroundTransparency = 0.35
-    shine.BorderSizePixel = 0
-    shine.ZIndex = 9
-    shine.Parent = core
-    addCorner(shine, 10)
     return wrap
 end
 
-function Icons.drawFlag(parent, sizeScale, color)
-    local col = color or UITheme.ColorRed
+function Icons.drawFlagVector(parent, color)
+    local col = color or Color3.fromRGB(198, 42, 52)
     local wrap = Instance.new("Frame")
-    wrap.Size = UDim2.new(sizeScale or 0.64, 0, sizeScale or 0.64, 0)
+    wrap.Size = UDim2.new(0.68, 0, 0.68, 0)
     wrap.AnchorPoint = Vector2.new(0.5, 0.5)
     wrap.Position = UDim2.new(0.5, 0, 0.5, 0)
     wrap.BackgroundTransparency = 1
-    wrap.ZIndex = 7
+    wrap.ZIndex = parent.ZIndex + 2
     wrap.Parent = parent
-
-    -- Cán cờ
     local pole = Instance.new("Frame")
     pole.Size = UDim2.new(0.14, 0, 0.84, 0)
     pole.Position = UDim2.new(0.24, 0, 0.08, 0)
-    pole.BackgroundColor3 = UITheme.TextPrimary
+    pole.BackgroundColor3 = Color3.fromRGB(64, 72, 92)
     pole.BorderSizePixel = 0
-    pole.ZIndex = 7
+    pole.ZIndex = wrap.ZIndex
     pole.Parent = wrap
     addCorner(pole, 2)
-
-    -- Đế cờ
-    local base = Instance.new("Frame")
-    base.Size = UDim2.new(0.54, 0, 0.14, 0)
-    base.Position = UDim2.new(0.16, 0, 0.84, 0)
-    base.BackgroundColor3 = UITheme.TextSecondary
-    base.BorderSizePixel = 0
-    base.ZIndex = 7
-    base.Parent = wrap
-    addCorner(base, 2)
-
-    -- Lá cờ
     local cloth = Instance.new("Frame")
-    cloth.Size = UDim2.new(0.52, 0, 0.40, 0)
+    cloth.Size = UDim2.new(0.54, 0, 0.42, 0)
     cloth.Position = UDim2.new(0.36, 0, 0.10, 0)
     cloth.BackgroundColor3 = col
     cloth.BorderSizePixel = 0
-    cloth.ZIndex = 8
+    cloth.ZIndex = wrap.ZIndex + 1
     cloth.Parent = wrap
     addCorner(cloth, 3)
-    return wrap
-end
-
-function Icons.drawSpeaker(parent, muted, color)
-    local col = color or UITheme.AccentCyan
-    local wrap = Instance.new("Frame")
-    wrap.Name = "SpeakerIcon"
-    wrap.Size = UDim2.new(0, 20, 0, 16)
-    wrap.AnchorPoint = Vector2.new(0, 0.5)
-    wrap.Position = UDim2.new(0, 10, 0.5, 0)
-    wrap.BackgroundTransparency = 1
-    wrap.Parent = parent
-
-    local box = Instance.new("Frame")
-    box.Size = UDim2.new(0, 5, 0, 7)
-    box.Position = UDim2.new(0, 1, 0.5, -3)
-    box.BackgroundColor3 = col
-    box.BorderSizePixel = 0
-    box.Parent = wrap
-    addCorner(box, 1)
-
-    local cone = Instance.new("Frame")
-    cone.Size = UDim2.new(0, 5, 0, 12)
-    cone.Position = UDim2.new(0, 5, 0.5, -6)
-    cone.BackgroundColor3 = col
-    cone.BorderSizePixel = 0
-    cone.Parent = wrap
-    addCorner(cone, 2)
-
-    if muted then
-        for _, rot in ipairs({ 45, -45 }) do
-            local xbar = Instance.new("Frame")
-            xbar.Size = UDim2.new(0, 8, 0, 2)
-            xbar.AnchorPoint = Vector2.new(0.5, 0.5)
-            xbar.Position = UDim2.new(0, 15, 0.5, 0)
-            xbar.Rotation = rot
-            xbar.BackgroundColor3 = UITheme.ColorRed
-            xbar.BorderSizePixel = 0
-            xbar.Parent = wrap
-            addCorner(xbar, 1)
-        end
-    else
-        for idx, h in ipairs({ 6, 11 }) do
-            local wave = Instance.new("Frame")
-            wave.Size = UDim2.new(0, 2, 0, h)
-            wave.AnchorPoint = Vector2.new(0.5, 0.5)
-            wave.Position = UDim2.new(0, 11 + idx * 3, 0.5, 0)
-            wave.BackgroundColor3 = col
-            wave.BorderSizePixel = 0
-            wave.Parent = wrap
-            addCorner(wave, 2)
-        end
-    end
     return wrap
 end
 
@@ -510,40 +594,25 @@ function Icons.drawCoin(parent)
     coin.Parent = parent
     addCorner(coin, 12)
     addStroke(coin, Color3.fromRGB(28, 22, 14), 1.6, 0)
-
     local inner = Instance.new("Frame")
-    inner.Size = UDim2.new(0, 13, 0, 13)
+    inner.Size = UDim2.new(0, 12, 0, 12)
     inner.AnchorPoint = Vector2.new(0.5, 0.5)
     inner.Position = UDim2.new(0.5, 0, 0.5, 0)
     inner.BackgroundColor3 = Color3.fromRGB(212, 178, 64)
     inner.BorderSizePixel = 0
     inner.Parent = coin
     addCorner(inner, 10)
-
-    for _, rot in ipairs({ 0, 45 }) do
-        local star = Instance.new("Frame")
-        star.Size = UDim2.new(0, 6, 0, 6)
-        star.AnchorPoint = Vector2.new(0.5, 0.5)
-        star.Position = UDim2.new(0.5, 0, 0.5, 0)
-        star.Rotation = rot
-        star.BackgroundColor3 = Color3.fromRGB(168, 114, 24)
-        star.BorderSizePixel = 0
-        star.Parent = inner
-        addCorner(star, 1)
-    end
-    return coin
 end
 
 local function createXuPill(parent)
     local pill = Instance.new("Frame")
-    pill.Name = "XuPill"
-    pill.Size = UDim2.new(0, 116, 0, 34)
-    pill.Position = UDim2.new(1, -210, 0.5, -17)
-    pill.BackgroundColor3 = UITheme.BgCard
+    pill.Size = UDim2.new(0, 118, 0, 34)
+    pill.Position = UDim2.new(1, -212, 0.5, -17)
+    pill.BackgroundColor3 = UITheme.BgPanelDark
     pill.BorderSizePixel = 0
     pill.Parent = parent
-    addCorner(pill, 7)
-    addStroke(pill, UITheme.ColorGold, 1.4, 0.2)
+    addCorner(pill, 9)
+    addStroke(pill, UITheme.ColorGold, 1.8, 0.1)
     Icons.drawCoin(pill)
 
     local lbl = Instance.new("TextLabel")
@@ -559,51 +628,9 @@ local function createXuPill(parent)
     return lbl
 end
 
-local function bindInstantTap(button, callback, rightClickCb)
-    local pressPos = nil
-    local pressType = nil
-    local lastFire = 0
-
-    trackConn(button.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Touch
-            or input.UserInputType == Enum.UserInputType.MouseButton1
-            or input.UserInputType == Enum.UserInputType.MouseButton2 then
-            pressPos = input.Position
-            pressType = input.UserInputType
-        end
-    end))
-
-    trackConn(button.InputEnded:Connect(function(input)
-        if not pressPos or input.UserInputType ~= pressType then return end
-        local delta = (input.Position - pressPos).Magnitude
-        local pType = pressType
-        pressPos = nil
-        pressType = nil
-        local now = os.clock()
-        if delta <= 14 and (now - lastFire) >= 0.07 then
-            lastFire = now
-            if pType == Enum.UserInputType.MouseButton2 and rightClickCb then
-                rightClickCb(input.Position)
-            elseif pType ~= Enum.UserInputType.MouseButton2 then
-                callback(input.Position)
-            end
-        end
-    end))
-end
-
-local function makeCyberIconBtn(parent, sizePx, pos, strokeColor, drawFn, onTap)
-    local b = Instance.new("TextButton")
-    b.Size = UDim2.new(0, sizePx, 0, sizePx)
-    b.Position = pos
-    b.BackgroundColor3 = UITheme.BgCard
-    b.BorderSizePixel = 0
-    b.AutoButtonColor = false
-    b.Text = ""
-    b.Parent = parent
-    addCorner(b, 6)
-    addStroke(b, strokeColor or UITheme.AccentCyan, 1.4, 0.15)
-    if drawFn then drawFn(b, strokeColor or UITheme.AccentCyan) end
-    bindInstantTap(b, onTap)
+local function makeArcadeIconBtn(parent, sizePx, pos, mainCol, darkCol, drawFn, onTap)
+    local b, face = make3DButton(parent, "", UDim2.new(0, sizePx, 0, sizePx), pos, mainCol, darkCol, UITheme.TextPrimary, 12, onTap)
+    if drawFn then drawFn(face, UITheme.TextPrimary) end
     return b
 end
 
@@ -617,9 +644,7 @@ local function playSfx(soundId, volume, pitch)
         snd.PlaybackSpeed = pitch or 1.0
         snd.Parent = SoundFolder
         snd:Play()
-        task.delay(1.2, function()
-            if snd and snd.Parent then snd:Destroy() end
-        end)
+        task.delay(1.2, function() if snd and snd.Parent then snd:Destroy() end end)
     end)
 end
 
@@ -635,7 +660,7 @@ local function formatTime(sec)
 end
 
 -- ========================================================================
--- [PHẦN 03] LOGIC DÒ MÌN (AN TOÀN NƯỚC ĐẦU, LOANG VÙNG 0 & MỞ NHANH Ô SỐ)
+-- [PHẦN 04] LOGIC DÒ MÌN
 -- ========================================================================
 local function inBounds(r, c)
     local n = getStage().size
@@ -656,13 +681,10 @@ local function resetArrays()
     end
 end
 
--- Sinh mìn sau nước chạm đầu tiên, đảm bảo vùng 3x3 quanh nước đầu không có mìn
 local function generateMines(safeR, safeC)
     local stg = getStage()
     local n = stg.size
-    local totalMines = stg.mines
     local pool = {}
-
     for r = 1, n do
         for c = 1, n do
             if math.abs(r - safeR) > 1 or math.abs(c - safeC) > 1 then
@@ -670,31 +692,22 @@ local function generateMines(safeR, safeC)
             end
         end
     end
-
-    -- Xáo trộn Fisher-Yates
     for i = #pool, 2, -1 do
         local j = math.random(1, i)
         pool[i], pool[j] = pool[j], pool[i]
     end
-
-    local placed = math.min(totalMines, #pool)
-    for i = 1, placed do
+    for i = 1, math.min(stg.mines, #pool) do
         local pos = pool[i]
         State.Mines[pos[1]][pos[2]] = true
     end
-
-    -- Tính số mìn xung quanh cho từng ô
     for r = 1, n do
         for c = 1, n do
             if not State.Mines[r][c] then
                 local cnt = 0
                 for dr = -1, 1 do
                     for dc = -1, 1 do
-                        if not (dr == 0 and dc == 0) then
-                            local nr, nc = r + dr, c + dc
-                            if inBounds(nr, nc) and State.Mines[nr][nc] then
-                                cnt = cnt + 1
-                            end
+                        if not (dr == 0 and dc == 0) and inBounds(r + dr, c + dc) and State.Mines[r + dr][c + dc] then
+                            cnt = cnt + 1
                         end
                     end
                 end
@@ -706,7 +719,7 @@ local function generateMines(safeR, safeC)
 end
 
 -- ========================================================================
--- [PHẦN 04] KHỞI TẠO SCREEN GUI & NÚT THU GỌN NỔI
+-- [PHẦN 05] KHỞI TẠO SCREEN GUI & NÚT THU GỌN NỔI
 -- ========================================================================
 loadStats()
 
@@ -736,23 +749,22 @@ Root.BorderSizePixel = 0
 Root.Active = true
 Root.Parent = ScreenGui
 
--- Nút nổi khi thu gọn (KHÔNG dùng UIGradient trực tiếp lên TextButton để chữ luôn sáng rõ)
 local FloatBtn = Instance.new("TextButton")
 FloatBtn.Name = "FloatingReopen"
-FloatBtn.Size = UDim2.new(0, 96, 0, 38)
+FloatBtn.Size = UDim2.new(0, 98, 0, 38)
 FloatBtn.Position = UDim2.new(0, 16, 0, 74)
-FloatBtn.BackgroundColor3 = Color3.fromRGB(18, 34, 58)
+FloatBtn.BackgroundColor3 = UITheme.BtnBlue
 FloatBtn.BorderSizePixel = 0
 FloatBtn.AutoButtonColor = false
 FloatBtn.Text = "DÒ MÌN"
 FloatBtn.Font = FONT_MAIN
 FloatBtn.TextSize = 14
-FloatBtn.TextColor3 = Color3.fromRGB(172, 212, 215)
+FloatBtn.TextColor3 = UITheme.TextPrimary
 FloatBtn.Visible = false
 FloatBtn.ZIndex = 50
 FloatBtn.Parent = ScreenGui
-addCorner(FloatBtn, 8)
-addStroke(FloatBtn, UITheme.AccentCyan, 1.8, 0.1)
+addCorner(FloatBtn, 10)
+addStroke(FloatBtn, UITheme.RimBlue, 2, 0.05)
 
 do
     local dragging, dragStart, startPos, moved = false, nil, nil, false
@@ -785,7 +797,7 @@ local openHomeScreen, enterGameScreen, rebuildBoard, renderCell, updateTopStatus
 local startNewGame, handleDig, handleFlag, useHint, reviveFromMine, showBanner, hideBanner, showTempAlert
 
 -- ========================================================================
--- [PHẦN 05] SẢNH CHÍNH (HOME SCREEN)
+-- [PHẦN 06] SẢNH CHÍNH (GIAO DIỆN ROYAL BLUE 3D + LOGO DÒ MÌN)
 -- ========================================================================
 local HomeScreen = Instance.new("Frame")
 HomeScreen.Name = "HomeScreen"
@@ -794,16 +806,15 @@ HomeScreen.BackgroundColor3 = UITheme.BgMain
 HomeScreen.BorderSizePixel = 0
 HomeScreen.Visible = true
 HomeScreen.Parent = Root
-addGradient(HomeScreen, Color3.fromRGB(12, 21, 38), UITheme.BgMain, 135)
+addGradient(HomeScreen, UITheme.BgMainLight, UITheme.BgMain, 135)
 
 do
     local HomeTop = Instance.new("Frame")
-    HomeTop.Size = UDim2.new(1, 0, 0, 50)
+    HomeTop.Size = UDim2.new(1, 0, 0, 52)
     HomeTop.BackgroundColor3 = UITheme.BgPanel
     HomeTop.BorderSizePixel = 0
     HomeTop.Parent = HomeScreen
-    addGradient(HomeTop, UITheme.BgPanelLight, UITheme.BgPanel, 90)
-    addStroke(HomeTop, UITheme.StrokeSubtle, 1, 0.25)
+    addStroke(HomeTop, UITheme.RimBlue, 1.5, 0.2)
 
     local HomeBrand = Instance.new("TextLabel")
     HomeBrand.Size = UDim2.new(0, 180, 1, 0)
@@ -811,117 +822,78 @@ do
     HomeBrand.BackgroundTransparency = 1
     HomeBrand.Text = "DÒ MÌN"
     HomeBrand.Font = FONT_MAIN
-    HomeBrand.TextSize = 17
-    HomeBrand.TextColor3 = UITheme.AccentCyan
+    HomeBrand.TextSize = 18
+    HomeBrand.TextColor3 = UITheme.ColorGold
     HomeBrand.TextXAlignment = Enum.TextXAlignment.Left
     HomeBrand.Parent = HomeTop
 
     UI.HomeXuLabel = createXuPill(HomeTop)
 
-    makeCyberIconBtn(HomeTop, 34, UDim2.new(1, -86, 0.5, -17), UITheme.AccentCyan, Icons.drawMinus, function()
+    makeArcadeIconBtn(HomeTop, 36, UDim2.new(1, -88, 0.5, -18), UITheme.BtnBlue, UITheme.BtnBlueDark, Icons.drawMinus, function()
         State.Minimized = true
         Root.Visible = false
         FloatBtn.Visible = true
         sfxClick()
     end)
 
-    makeCyberIconBtn(HomeTop, 34, UDim2.new(1, -44, 0.5, -17), UITheme.ColorRed, Icons.drawCloseX, function()
+    makeArcadeIconBtn(HomeTop, 36, UDim2.new(1, -44, 0.5, -18), UITheme.BtnRed, UITheme.BtnRedDark, Icons.drawCloseX, function()
         if _G.DoMinStandaloneCleanup then _G.DoMinStandaloneCleanup() end
     end)
 
     local HomeBody = Instance.new("Frame")
-    HomeBody.Size = UDim2.new(1, -24, 1, -66)
-    HomeBody.Position = UDim2.new(0, 12, 0, 58)
+    HomeBody.Size = UDim2.new(1, -24, 1, -68)
+    HomeBody.Position = UDim2.new(0, 12, 0, 60)
     HomeBody.BackgroundTransparency = 1
     HomeBody.Parent = HomeScreen
 
-    -- CỘT TRÁI: Biểu tượng Mìn & Cờ + Nút Bắt đầu
+    -- CỘT TRÁI: Khung 3D Royal Blue chứa Logo DÒ MÌN + Nút Chơi Ngay xanh lá 3D
     local LeftCard = Instance.new("Frame")
     LeftCard.Size = UDim2.new(0.40, -8, 1, 0)
     LeftCard.BackgroundColor3 = UITheme.BgPanel
     LeftCard.BorderSizePixel = 0
     LeftCard.Parent = HomeBody
-    addCorner(LeftCard, 12)
-    addStroke(LeftCard, UITheme.StrokeSubtle, 1.2, 0.15)
-    addGradient(LeftCard, UITheme.BgPanelLight, UITheme.BgPanel, 135)
+    addCorner(LeftCard, 14)
+    addStroke(LeftCard, UITheme.RimBlue, 2.2, 0.1)
+    addGradient(LeftCard, UITheme.BgCard, UITheme.BgPanelDark, 135)
 
-    local LogoWrap = Instance.new("Frame")
-    LogoWrap.Size = UDim2.new(0, 136, 0, 66)
-    LogoWrap.AnchorPoint = Vector2.new(0.5, 0)
-    LogoWrap.Position = UDim2.new(0.5, 0, 0, 32)
-    LogoWrap.BackgroundColor3 = UITheme.BgCard
-    LogoWrap.BorderSizePixel = 0
-    LogoWrap.Parent = LeftCard
-    addCorner(LogoWrap, 12)
-    addStroke(LogoWrap, UITheme.AccentCyan, 1.6, 0.2)
+    local LogoBox = Instance.new("Frame")
+    LogoBox.Size = UDim2.new(1, -28, 0, 150)
+    LogoBox.Position = UDim2.new(0, 14, 0, 16)
+    LogoBox.BackgroundTransparency = 1
+    LogoBox.ZIndex = 3
+    LogoBox.Parent = LeftCard
 
-    local mSlot = Instance.new("Frame")
-    mSlot.Size = UDim2.new(0, 44, 0, 44)
-    mSlot.Position = UDim2.new(0, 16, 0.5, -22)
-    mSlot.BackgroundTransparency = 1
-    mSlot.Parent = LogoWrap
-    Icons.drawMine(mSlot, 0.85, UITheme.ColorRed)
+    Icons.drawSpriteOr(LogoBox, "logo", 0.96, function(p)
+        local fallback = Instance.new("TextLabel")
+        fallback.Size = UDim2.new(1, 0, 1, 0)
+        fallback.BackgroundTransparency = 1
+        fallback.Text = "DÒ MÌN"
+        fallback.Font = FONT_MAIN
+        fallback.TextSize = 28
+        fallback.TextColor3 = UITheme.ColorGold
+        fallback.Parent = p
+    end)
 
-    local fSlot = Instance.new("Frame")
-    fSlot.Size = UDim2.new(0, 44, 0, 44)
-    fSlot.Position = UDim2.new(1, -60, 0.5, -22)
-    fSlot.BackgroundTransparency = 1
-    fSlot.Parent = LogoWrap
-    Icons.drawFlag(fSlot, 0.82, UITheme.AccentCyan)
-
-    local HeroTitle = Instance.new("TextLabel")
-    HeroTitle.Size = UDim2.new(1, -20, 0, 34)
-    HeroTitle.Position = UDim2.new(0, 10, 0, 110)
-    HeroTitle.BackgroundTransparency = 1
-    HeroTitle.Text = "DÒ MÌN"
-    HeroTitle.Font = FONT_MAIN
-    HeroTitle.TextSize = 26
-    HeroTitle.TextColor3 = UITheme.TextPrimary
-    HeroTitle.Parent = LeftCard
-
-    local heroLine = Instance.new("Frame")
-    heroLine.Size = UDim2.new(0, 64, 0, 2)
-    heroLine.AnchorPoint = Vector2.new(0.5, 0)
-    heroLine.Position = UDim2.new(0.5, 0, 0, 148)
-    heroLine.BackgroundColor3 = UITheme.AccentCyan
-    heroLine.BackgroundTransparency = 0.35
-    heroLine.BorderSizePixel = 0
-    heroLine.Parent = LeftCard
-    addCorner(heroLine, 2)
-
-    -- Nút BẮT ĐẦU CHƠI (chữ sáng rõ, không addGradient lên TextButton)
-    local PlayBtn = Instance.new("TextButton")
-    PlayBtn.Size = UDim2.new(1, -28, 0, 48)
-    PlayBtn.Position = UDim2.new(0, 14, 1, -70)
-    PlayBtn.BackgroundColor3 = Color3.fromRGB(24, 72, 58)
-    PlayBtn.BorderSizePixel = 0
-    PlayBtn.AutoButtonColor = false
-    PlayBtn.Text = "BẮT ĐẦU CHƠI"
-    PlayBtn.Font = FONT_MAIN
-    PlayBtn.TextSize = 16
-    PlayBtn.TextColor3 = Color3.fromRGB(186, 214, 198)
-    PlayBtn.Parent = LeftCard
-    addCorner(PlayBtn, 9)
-    addStroke(PlayBtn, UITheme.ColorGreen, 1.6, 0.15)
-    bindInstantTap(PlayBtn, function()
+    -- Nút 3D xanh lá "Chơi Ngay" giống ảnh mẫu
+    make3DButton(LeftCard, "CHƠI NGAY", UDim2.new(1, -32, 0, 48), UDim2.new(0, 16, 1, -68), UITheme.BtnGreen, UITheme.BtnGreenDark, UITheme.TextPrimary, 16, function()
         sfxClick()
         enterGameScreen()
     end)
 
-    -- CỘT PHẢI: Chọn 6 màn chơi + 4 giao diện bàn cờ
+    -- CỘT PHẢI: Chọn màn chơi + Giao diện bàn cờ + Chế độ chơi
     local RightCard = Instance.new("ScrollingFrame")
     RightCard.Size = UDim2.new(0.60, -4, 1, 0)
     RightCard.Position = UDim2.new(0.40, 4, 0, 0)
     RightCard.BackgroundColor3 = UITheme.BgPanel
     RightCard.BorderSizePixel = 0
     RightCard.ScrollBarThickness = 4
-    RightCard.ScrollBarImageColor3 = UITheme.StrokeStrong
+    RightCard.ScrollBarImageColor3 = UITheme.RimBlue
     RightCard.AutomaticCanvasSize = Enum.AutomaticSize.Y
     RightCard.CanvasSize = UDim2.new(0, 0, 0, 0)
     RightCard.Parent = HomeBody
-    addCorner(RightCard, 12)
-    addStroke(RightCard, UITheme.StrokeSubtle, 1.2, 0.15)
-    addGradient(RightCard, UITheme.BgPanelLight, UITheme.BgPanel, 135)
+    addCorner(RightCard, 14)
+    addStroke(RightCard, UITheme.RimBlue, 2.2, 0.1)
+    addGradient(RightCard, UITheme.BgCard, UITheme.BgPanelDark, 135)
 
     local rPad = Instance.new("UIPadding")
     rPad.PaddingTop = UDim.new(0, 12)
@@ -943,7 +915,7 @@ do
         lbl.Text = text
         lbl.Font = FONT_MAIN
         lbl.TextSize = 11
-        lbl.TextColor3 = UITheme.TextMuted
+        lbl.TextColor3 = UITheme.TextSecondary
         lbl.TextXAlignment = Enum.TextXAlignment.Left
         lbl.Parent = RightCard
         return lbl
@@ -953,7 +925,7 @@ do
 
     local StageGrid = Instance.new("Frame")
     StageGrid.LayoutOrder = 2
-    StageGrid.Size = UDim2.new(1, 0, 0, 126)
+    StageGrid.Size = UDim2.new(1, 0, 0, 128)
     StageGrid.BackgroundTransparency = 1
     StageGrid.Parent = RightCard
 
@@ -963,18 +935,18 @@ do
         local row = math.floor((idx - 1) / 3)
         local card = Instance.new("TextButton")
         card.Size = UDim2.new(0.32, 0, 0, 58)
-        card.Position = UDim2.new(col * 0.34, 0, 0, row * 64)
-        card.BackgroundColor3 = UITheme.BgCard
+        card.Position = UDim2.new(col * 0.34, 0, 0, row * 65)
+        card.BackgroundColor3 = UITheme.BgButton
         card.BorderSizePixel = 0
         card.AutoButtonColor = false
         card.Text = ""
         card.Parent = StageGrid
-        addCorner(card, 8)
-        local st = addStroke(card, UITheme.StrokeSubtle, 1.2, 0.25)
+        addCorner(card, 9)
+        local st = addStroke(card, UITheme.StrokeSubtle, 1.5, 0.15)
 
         local t1 = Instance.new("TextLabel")
         t1.Size = UDim2.new(1, 0, 0, 22)
-        t1.Position = UDim2.new(0, 0, 0, 5)
+        t1.Position = UDim2.new(0, 0, 0, 6)
         t1.BackgroundTransparency = 1
         t1.Text = stg.title .. "  " .. stg.size .. "x" .. stg.size
         t1.Font = FONT_MAIN
@@ -984,7 +956,7 @@ do
 
         local t2 = Instance.new("TextLabel")
         t2.Size = UDim2.new(1, 0, 0, 16)
-        t2.Position = UDim2.new(0, 0, 0, 26)
+        t2.Position = UDim2.new(0, 0, 0, 28)
         t2.BackgroundTransparency = 1
         t2.Text = stg.mines .. " mìn  |  +" .. stg.reward .. " Xu"
         t2.Font = FONT_BODY
@@ -998,7 +970,6 @@ do
             sfxClick()
             updateHomeUI()
         end)
-
         UI.HomeStageBtns[sIdx] = { card = card, stroke = st, t1 = t1 }
     end
 
@@ -1020,11 +991,11 @@ do
         b.AutoButtonColor = false
         b.Text = BoardThemes[key].Name
         b.Font = FONT_MAIN
-        b.TextSize = 12
+        b.TextSize = 11
         b.TextColor3 = UITheme.TextSecondary
         b.Parent = HomeThemeRow
-        addCorner(b, 7)
-        local st = addStroke(b, UITheme.StrokeSubtle, 1.2, 0.3)
+        addCorner(b, 8)
+        local st = addStroke(b, UITheme.StrokeSubtle, 1.4, 0.2)
         bindInstantTap(b, function()
             Config.ThemeKey = key
             saveStats()
@@ -1054,8 +1025,8 @@ do
         b.TextSize = 11
         b.TextColor3 = UITheme.TextPrimary
         b.Parent = OptRow
-        addCorner(b, 7)
-        local st = addStroke(b, UITheme.StrokeSubtle, 1.2, 0.3)
+        addCorner(b, 8)
+        local st = addStroke(b, UITheme.StrokeSubtle, 1.4, 0.2)
         bindInstantTap(b, onTap)
         return b, st
     end
@@ -1074,7 +1045,7 @@ do
 end
 
 -- ========================================================================
--- [PHẦN 06] MÀN HÌNH CHƠI GAME (GAME SCREEN)
+-- [PHẦN 07] MÀN HÌNH CHƠI GAME (BẢNG TRÒ CHƠI 3D ROYAL BLUE)
 -- ========================================================================
 local GameScreen = Instance.new("Frame")
 GameScreen.Name = "GameScreen"
@@ -1083,25 +1054,24 @@ GameScreen.BackgroundColor3 = UITheme.BgMain
 GameScreen.BorderSizePixel = 0
 GameScreen.Visible = false
 GameScreen.Parent = Root
-addGradient(GameScreen, Color3.fromRGB(12, 21, 38), UITheme.BgMain, 135)
+addGradient(GameScreen, UITheme.BgMainLight, UITheme.BgMain, 135)
 
 do
     local TopBar = Instance.new("Frame")
-    TopBar.Size = UDim2.new(1, 0, 0, 50)
+    TopBar.Size = UDim2.new(1, 0, 0, 52)
     TopBar.BackgroundColor3 = UITheme.BgPanel
     TopBar.BorderSizePixel = 0
     TopBar.Parent = GameScreen
-    addGradient(TopBar, UITheme.BgPanelLight, UITheme.BgPanel, 90)
-    addStroke(TopBar, UITheme.StrokeSubtle, 1, 0.25)
+    addStroke(TopBar, UITheme.RimBlue, 1.5, 0.2)
 
-    makeCyberIconBtn(TopBar, 34, UDim2.new(0, 12, 0.5, -17), UITheme.AccentCyan, Icons.drawHome, function()
+    makeArcadeIconBtn(TopBar, 36, UDim2.new(0, 12, 0.5, -18), UITheme.BtnBlue, UITheme.BtnBlueDark, Icons.drawHome, function()
         sfxClick()
         openHomeScreen()
     end)
 
     local StageLabel = Instance.new("TextLabel")
     StageLabel.Size = UDim2.new(0, 160, 0, 18)
-    StageLabel.Position = UDim2.new(0, 56, 0, 7)
+    StageLabel.Position = UDim2.new(0, 58, 0, 8)
     StageLabel.BackgroundTransparency = 1
     StageLabel.Text = "Dễ  9x9"
     StageLabel.Font = FONT_MAIN
@@ -1113,7 +1083,7 @@ do
 
     local ClockLabel = Instance.new("TextLabel")
     ClockLabel.Size = UDim2.new(0, 160, 0, 16)
-    ClockLabel.Position = UDim2.new(0, 56, 0, 27)
+    ClockLabel.Position = UDim2.new(0, 58, 0, 28)
     ClockLabel.BackgroundTransparency = 1
     ClockLabel.Text = "Thời gian: 00:00"
     ClockLabel.Font = FONT_BODY
@@ -1123,63 +1093,91 @@ do
     ClockLabel.Parent = TopBar
     UI.ClockLabel = ClockLabel
 
+    -- Hộp đếm Cờ & Mìn ở giữa TopBar (kèm sprite Cờ & Bom từ ảnh mẫu!)
     local StatusPill = Instance.new("Frame")
-    StatusPill.Size = UDim2.new(0, 232, 0, 34)
+    StatusPill.Size = UDim2.new(0, 240, 0, 36)
     StatusPill.AnchorPoint = Vector2.new(0.5, 0.5)
     StatusPill.Position = UDim2.new(0.5, 0, 0.5, 0)
-    StatusPill.BackgroundColor3 = UITheme.BgCard
+    StatusPill.BackgroundColor3 = UITheme.BgPanelDark
     StatusPill.BorderSizePixel = 0
     StatusPill.Parent = TopBar
-    addCorner(StatusPill, 8)
-    UI.StatusStroke = addStroke(StatusPill, UITheme.AccentCyan, 1.5, 0.15)
+    addCorner(StatusPill, 9)
+    UI.StatusStroke = addStroke(StatusPill, UITheme.RimBlue, 1.8, 0.1)
 
-    local StatusLabel = Instance.new("TextLabel")
-    StatusLabel.Size = UDim2.new(1, -12, 1, 0)
-    StatusLabel.Position = UDim2.new(0, 6, 0, 0)
-    StatusLabel.BackgroundTransparency = 1
-    StatusLabel.Text = "Mìn còn: 10  |  Mở: 0/71"
-    StatusLabel.Font = FONT_MAIN
-    StatusLabel.TextSize = 13
-    StatusLabel.TextColor3 = UITheme.TextPrimary
-    StatusLabel.Parent = StatusPill
-    UI.StatusLabel = StatusLabel
+    local fIconBox = Instance.new("Frame")
+    fIconBox.Size = UDim2.new(0, 22, 0, 22)
+    fIconBox.Position = UDim2.new(0, 10, 0.5, -11)
+    fIconBox.BackgroundTransparency = 1
+    fIconBox.Parent = StatusPill
+    Icons.drawSpriteOr(fIconBox, "flag", 1, Icons.drawFlagVector)
+
+    local StatusFlagLbl = Instance.new("TextLabel")
+    StatusFlagLbl.Size = UDim2.new(0, 68, 1, 0)
+    StatusFlagLbl.Position = UDim2.new(0, 36, 0, 0)
+    StatusFlagLbl.BackgroundTransparency = 1
+    StatusFlagLbl.Text = "Cờ: 0"
+    StatusFlagLbl.Font = FONT_MAIN
+    StatusFlagLbl.TextSize = 13
+    StatusFlagLbl.TextColor3 = UITheme.TextPrimary
+    StatusFlagLbl.TextXAlignment = Enum.TextXAlignment.Left
+    StatusFlagLbl.Parent = StatusPill
+    UI.StatusFlagLbl = StatusFlagLbl
+
+    local bIconBox = Instance.new("Frame")
+    bIconBox.Size = UDim2.new(0, 22, 0, 22)
+    bIconBox.Position = UDim2.new(0.5, 6, 0.5, -11)
+    bIconBox.BackgroundTransparency = 1
+    bIconBox.Parent = StatusPill
+    Icons.drawSpriteOr(bIconBox, "bomb", 1, Icons.drawMineVector)
+
+    local StatusMineLbl = Instance.new("TextLabel")
+    StatusMineLbl.Size = UDim2.new(0, 88, 1, 0)
+    StatusMineLbl.Position = UDim2.new(0.5, 32, 0, 0)
+    StatusMineLbl.BackgroundTransparency = 1
+    StatusMineLbl.Text = "Mìn: 10"
+    StatusMineLbl.Font = FONT_MAIN
+    StatusMineLbl.TextSize = 13
+    StatusMineLbl.TextColor3 = UITheme.ColorGold
+    StatusMineLbl.TextXAlignment = Enum.TextXAlignment.Left
+    StatusMineLbl.Parent = StatusPill
+    UI.StatusMineLbl = StatusMineLbl
 
     UI.GameXuLabel = createXuPill(TopBar)
 
-    makeCyberIconBtn(TopBar, 34, UDim2.new(1, -86, 0.5, -17), UITheme.AccentCyan, Icons.drawMinus, function()
+    makeArcadeIconBtn(TopBar, 36, UDim2.new(1, -88, 0.5, -18), UITheme.BtnBlue, UITheme.BtnBlueDark, Icons.drawMinus, function()
         State.Minimized = true
         Root.Visible = false
         FloatBtn.Visible = true
         sfxClick()
     end)
 
-    makeCyberIconBtn(TopBar, 34, UDim2.new(1, -44, 0.5, -17), UITheme.ColorRed, Icons.drawCloseX, function()
+    makeArcadeIconBtn(TopBar, 36, UDim2.new(1, -44, 0.5, -18), UITheme.BtnRed, UITheme.BtnRedDark, Icons.drawCloseX, function()
         if _G.DoMinStandaloneCleanup then _G.DoMinStandaloneCleanup() end
     end)
 end
 
 local MainArea = Instance.new("Frame")
-MainArea.Size = UDim2.new(1, -16, 1, -58)
-MainArea.Position = UDim2.new(0, 8, 0, 54)
+MainArea.Size = UDim2.new(1, -16, 1, -60)
+MainArea.Position = UDim2.new(0, 8, 0, 56)
 MainArea.BackgroundTransparency = 1
 MainArea.Parent = GameScreen
 
 local BoardContainer = Instance.new("Frame")
-BoardContainer.Size = UDim2.new(1, -244, 1, 0)
+BoardContainer.Size = UDim2.new(1, -246, 1, 0)
 BoardContainer.BackgroundColor3 = getTheme().BoardOuter
 BoardContainer.BorderSizePixel = 0
 BoardContainer.ClipsDescendants = true
 BoardContainer.Parent = MainArea
-addCorner(BoardContainer, 10)
-addStroke(BoardContainer, UITheme.StrokeSubtle, 1.3, 0.2)
+addCorner(BoardContainer, 14)
+addStroke(BoardContainer, UITheme.RimBlue, 2.2, 0.1)
 UI.BoardContainer = BoardContainer
 
 local AlertStrip = Instance.new("TextLabel")
 AlertStrip.Size = UDim2.new(0, 270, 0, 24)
 AlertStrip.AnchorPoint = Vector2.new(0.5, 0)
 AlertStrip.Position = UDim2.new(0.5, 0, 0, 8)
-AlertStrip.BackgroundColor3 = UITheme.BgPanel
-AlertStrip.BackgroundTransparency = 0.06
+AlertStrip.BackgroundColor3 = UITheme.BgPanelDark
+AlertStrip.BackgroundTransparency = 0.05
 AlertStrip.BorderSizePixel = 0
 AlertStrip.Text = ""
 AlertStrip.Font = FONT_MAIN
@@ -1188,17 +1186,17 @@ AlertStrip.TextColor3 = UITheme.ColorGold
 AlertStrip.Visible = false
 AlertStrip.ZIndex = 25
 AlertStrip.Parent = BoardContainer
-addCorner(AlertStrip, 6)
-addStroke(AlertStrip, UITheme.ColorGold, 1.2, 0.2)
+addCorner(AlertStrip, 7)
+addStroke(AlertStrip, UITheme.ColorGold, 1.5, 0.15)
 UI.AlertStrip = AlertStrip
 
 local BoardScroll = Instance.new("ScrollingFrame")
-BoardScroll.Size = UDim2.new(1, -8, 1, -8)
-BoardScroll.Position = UDim2.new(0, 4, 0, 4)
+BoardScroll.Size = UDim2.new(1, -10, 1, -10)
+BoardScroll.Position = UDim2.new(0, 5, 0, 5)
 BoardScroll.BackgroundTransparency = 1
 BoardScroll.BorderSizePixel = 0
 BoardScroll.ScrollBarThickness = 5
-BoardScroll.ScrollBarImageColor3 = UITheme.StrokeStrong
+BoardScroll.ScrollBarImageColor3 = UITheme.RimBlue
 BoardScroll.ElasticBehavior = Enum.ElasticBehavior.WhenScrollable
 BoardScroll.ScrollingDirection = Enum.ScrollingDirection.XY
 BoardScroll.CanvasSize = UDim2.new(0, 400, 0, 400)
@@ -1211,8 +1209,8 @@ BoardFrame.BackgroundColor3 = getTheme().CellHidden
 BoardFrame.BorderSizePixel = 0
 BoardFrame.ClipsDescendants = true
 BoardFrame.Parent = BoardScroll
-addCorner(BoardFrame, 4)
-addStroke(BoardFrame, UITheme.StrokeStrong, 1.6, 0.2)
+addCorner(BoardFrame, 8)
+addStroke(BoardFrame, Color3.fromRGB(14, 30, 68), 2.5, 0.05)
 UI.BoardFrame = BoardFrame
 
 local CellsLayer = Instance.new("Frame")
@@ -1238,146 +1236,107 @@ InputOverlay.Parent = BoardFrame
 local function screenToCell(screenPos)
     local absPos = BoardFrame.AbsolutePosition
     local cs = Config.CellSize
-    local c = math.floor((screenPos.X - absPos.X) / cs) + 1
-    local r = math.floor((screenPos.Y - absPos.Y) / cs) + 1
-    return r, c
+    return math.floor((screenPos.Y - absPos.Y) / cs) + 1, math.floor((screenPos.X - absPos.X) / cs) + 1
 end
 
 bindInstantTap(InputOverlay, function(screenPos)
     if State.GameOver then return end
     local r, c = screenToCell(screenPos)
     if not inBounds(r, c) then return end
-    if State.TouchMode == "FLAG" then
-        handleFlag(r, c)
-    else
-        handleDig(r, c)
-    end
+    if State.TouchMode == "FLAG" then handleFlag(r, c) else handleDig(r, c) end
 end, function(screenPos)
     if State.GameOver then return end
     local r, c = screenToCell(screenPos)
-    if inBounds(r, c) then
-        handleFlag(r, c)
-    end
+    if inBounds(r, c) then handleFlag(r, c) end
 end)
 
--- Banner kết quả trận (có nút Hồi sinh 30 Xu khi đạp trúng mìn!)
+-- Banner thông báo Thắng (Cúp vàng + xanh dương) / Thua (Bom nổ + đỏ) giống ảnh mẫu!
 do
     local Banner = Instance.new("Frame")
-    Banner.Size = UDim2.new(0, 316, 0, 158)
+    Banner.Size = UDim2.new(0, 326, 0, 198)
     Banner.AnchorPoint = Vector2.new(0.5, 0.5)
     Banner.Position = UDim2.new(0.5, 0, 0.5, 0)
-    Banner.BackgroundColor3 = UITheme.BgPanel
+    Banner.BackgroundColor3 = UITheme.BgCard
     Banner.BorderSizePixel = 0
     Banner.Visible = false
     Banner.ZIndex = 35
     Banner.Parent = BoardContainer
-    addCorner(Banner, 12)
-    addGradient(Banner, UITheme.BgPanelLight, UITheme.BgPanel, 135)
-    UI.BannerStroke = addStroke(Banner, UITheme.ColorGold, 2, 0.1)
+    addCorner(Banner, 14)
+    UI.BannerStroke = addStroke(Banner, UITheme.RimBlue, 2.5, 0.05)
     UI.WinBanner = Banner
 
+    local BannerIconWrap = Instance.new("Frame")
+    BannerIconWrap.Size = UDim2.new(0, 62, 0, 62)
+    BannerIconWrap.AnchorPoint = Vector2.new(0.5, 0)
+    BannerIconWrap.Position = UDim2.new(0.5, 0, 0, 10)
+    BannerIconWrap.BackgroundTransparency = 1
+    BannerIconWrap.ZIndex = 36
+    BannerIconWrap.Parent = Banner
+    UI.BannerIconWrap = BannerIconWrap
+
     local BannerTitle = Instance.new("TextLabel")
-    BannerTitle.Size = UDim2.new(1, -20, 0, 34)
-    BannerTitle.Position = UDim2.new(0, 10, 0, 14)
+    BannerTitle.Size = UDim2.new(1, -20, 0, 30)
+    BannerTitle.Position = UDim2.new(0, 10, 0, 76)
     BannerTitle.BackgroundTransparency = 1
     BannerTitle.Text = "CHIẾN THẮNG!"
     BannerTitle.Font = FONT_MAIN
     BannerTitle.TextSize = 20
-    BannerTitle.TextColor3 = UITheme.ColorGreen
+    BannerTitle.TextColor3 = UITheme.ColorGold
     BannerTitle.ZIndex = 36
     BannerTitle.Parent = Banner
     UI.BannerTitle = BannerTitle
 
     local BannerSub = Instance.new("TextLabel")
-    BannerSub.Size = UDim2.new(1, -20, 0, 36)
-    BannerSub.Position = UDim2.new(0, 10, 0, 50)
+    BannerSub.Size = UDim2.new(1, -20, 0, 28)
+    BannerSub.Position = UDim2.new(0, 10, 0, 108)
     BannerSub.BackgroundTransparency = 1
     BannerSub.Text = ""
     BannerSub.Font = FONT_BODY
-    BannerSub.TextSize = 13
-    BannerSub.TextColor3 = UITheme.TextSecondary
+    BannerSub.TextSize = 12
+    BannerSub.TextColor3 = UITheme.TextPrimary
     BannerSub.TextWrapped = true
     BannerSub.ZIndex = 36
     BannerSub.Parent = Banner
     UI.BannerSub = BannerSub
 
-    local PlayAgainBtn = Instance.new("TextButton")
-    PlayAgainBtn.Size = UDim2.new(0, 138, 0, 36)
-    PlayAgainBtn.Position = UDim2.new(0, 14, 1, -48)
-    PlayAgainBtn.BackgroundColor3 = Color3.fromRGB(24, 72, 58)
-    PlayAgainBtn.BorderSizePixel = 0
-    PlayAgainBtn.AutoButtonColor = false
-    PlayAgainBtn.Text = "Chơi ván mới"
-    PlayAgainBtn.Font = FONT_MAIN
-    PlayAgainBtn.TextSize = 13
-    PlayAgainBtn.TextColor3 = Color3.fromRGB(186, 214, 198)
-    PlayAgainBtn.ZIndex = 36
-    PlayAgainBtn.Parent = Banner
-    addCorner(PlayAgainBtn, 8)
-    addStroke(PlayAgainBtn, UITheme.ColorGreen, 1.3, 0.2)
-    bindInstantTap(PlayAgainBtn, function()
+    local pBtn = make3DButton(Banner, "Chơi lại", UDim2.new(0, 142, 0, 38), UDim2.new(0, 14, 1, -50), UITheme.BtnGreen, UITheme.BtnGreenDark, UITheme.TextPrimary, 13, function()
         sfxClick()
         startNewGame()
     end)
+    pBtn.ZIndex = 36
 
-    local ReviveBtn = Instance.new("TextButton")
-    ReviveBtn.Size = UDim2.new(0, 142, 0, 36)
-    ReviveBtn.Position = UDim2.new(1, -156, 1, -48)
-    ReviveBtn.BackgroundColor3 = Color3.fromRGB(64, 54, 28)
-    ReviveBtn.BorderSizePixel = 0
-    ReviveBtn.AutoButtonColor = false
-    ReviveBtn.Text = "Hồi sinh 30 Xu"
-    ReviveBtn.Font = FONT_MAIN
-    ReviveBtn.TextSize = 13
-    ReviveBtn.TextColor3 = UITheme.ColorGold
-    ReviveBtn.ZIndex = 36
-    ReviveBtn.Parent = Banner
-    addCorner(ReviveBtn, 8)
-    addStroke(ReviveBtn, UITheme.ColorGold, 1.3, 0.2)
-    bindInstantTap(ReviveBtn, function()
+    local rBtn = make3DButton(Banner, "Hồi sinh 30 Xu", UDim2.new(0, 146, 0, 38), UDim2.new(1, -160, 1, -50), UITheme.BtnGold, UITheme.BtnGoldDark, UITheme.TextPrimary, 13, function()
         reviveFromMine()
     end)
-    UI.ReviveBtn = ReviveBtn
+    rBtn.ZIndex = 36
+    UI.ReviveBtn = rBtn
 
-    local ViewBtn = Instance.new("TextButton")
-    ViewBtn.Size = UDim2.new(0, 142, 0, 36)
-    ViewBtn.Position = UDim2.new(1, -156, 1, -48)
-    ViewBtn.BackgroundColor3 = UITheme.BgButton
-    ViewBtn.BorderSizePixel = 0
-    ViewBtn.AutoButtonColor = false
-    ViewBtn.Text = "Xem bàn cờ"
-    ViewBtn.Font = FONT_BODY
-    ViewBtn.TextSize = 13
-    ViewBtn.TextColor3 = UITheme.TextPrimary
-    ViewBtn.Visible = false
-    ViewBtn.ZIndex = 36
-    ViewBtn.Parent = Banner
-    addCorner(ViewBtn, 8)
-    addStroke(ViewBtn, UITheme.StrokeSubtle, 1.2, 0.25)
-    bindInstantTap(ViewBtn, function()
+    local vBtn = make3DButton(Banner, "Xem bàn cờ", UDim2.new(0, 146, 0, 38), UDim2.new(1, -160, 1, -50), UITheme.BtnBlue, UITheme.BtnBlueDark, UITheme.TextPrimary, 13, function()
         sfxClick()
         hideBanner()
     end)
-    UI.ViewBtn = ViewBtn
+    vBtn.ZIndex = 36
+    vBtn.Visible = false
+    UI.ViewBtn = vBtn
 end
 
 -- ========================================================================
--- [PHẦN 07] BẢNG ĐIỀU KHIỂN PHẢI (MỞ Ô / CẮM CỜ + TIỆN ÍCH + THU PHÓNG)
+-- [PHẦN 08] BẢNG ĐIỀU KHIỂN PHẢI (NÚT 3D BÓNG ĐẸP + PHÓNG TO / THU NHỎ)
 -- ========================================================================
 do
     local SidePanel = Instance.new("ScrollingFrame")
-    SidePanel.Size = UDim2.new(0, 236, 1, 0)
-    SidePanel.Position = UDim2.new(1, -236, 0, 0)
+    SidePanel.Size = UDim2.new(0, 238, 1, 0)
+    SidePanel.Position = UDim2.new(1, -238, 0, 0)
     SidePanel.BackgroundColor3 = UITheme.BgPanel
     SidePanel.BorderSizePixel = 0
     SidePanel.ScrollBarThickness = 4
-    SidePanel.ScrollBarImageColor3 = UITheme.StrokeStrong
+    SidePanel.ScrollBarImageColor3 = UITheme.RimBlue
     SidePanel.AutomaticCanvasSize = Enum.AutomaticSize.Y
     SidePanel.CanvasSize = UDim2.new(0, 0, 0, 0)
     SidePanel.Parent = MainArea
-    addCorner(SidePanel, 10)
-    addStroke(SidePanel, UITheme.StrokeSubtle, 1.2, 0.15)
-    addGradient(SidePanel, UITheme.BgPanelLight, UITheme.BgPanel, 135)
+    addCorner(SidePanel, 14)
+    addStroke(SidePanel, UITheme.RimBlue, 2.2, 0.1)
+    addGradient(SidePanel, UITheme.BgCard, UITheme.BgPanelDark, 135)
 
     local pad = Instance.new("UIPadding")
     pad.PaddingTop = UDim.new(0, 10)
@@ -1388,7 +1347,7 @@ do
 
     local layout = Instance.new("UIListLayout")
     layout.SortOrder = Enum.SortOrder.LayoutOrder
-    layout.Padding = UDim.new(0, 7)
+    layout.Padding = UDim.new(0, 8)
     layout.Parent = SidePanel
 
     local function makeHeader(text, order)
@@ -1399,45 +1358,27 @@ do
         lbl.Text = text
         lbl.Font = FONT_MAIN
         lbl.TextSize = 11
-        lbl.TextColor3 = UITheme.TextMuted
+        lbl.TextColor3 = UITheme.TextSecondary
         lbl.TextXAlignment = Enum.TextXAlignment.Left
         lbl.Parent = SidePanel
         return lbl
-    end
-
-    local function makeBtn(parent, text, size, pos, bgColor, textColor, strokeColor, onTap)
-        local btn = Instance.new("TextButton")
-        btn.Size = size
-        btn.Position = pos
-        btn.BackgroundColor3 = bgColor or UITheme.BgButton
-        btn.BorderSizePixel = 0
-        btn.AutoButtonColor = false
-        btn.Text = text
-        btn.Font = FONT_MAIN
-        btn.TextSize = 12
-        btn.TextColor3 = textColor or UITheme.TextPrimary
-        btn.Parent = parent
-        addCorner(btn, 7)
-        local st = addStroke(btn, strokeColor or UITheme.StrokeSubtle, 1.2, 0.25)
-        bindInstantTap(btn, onTap)
-        return btn, st
     end
 
     makeHeader("CHẾ ĐỘ CHẠM", 1)
 
     local TouchRow = Instance.new("Frame")
     TouchRow.LayoutOrder = 2
-    TouchRow.Size = UDim2.new(1, 0, 0, 36)
+    TouchRow.Size = UDim2.new(1, 0, 0, 38)
     TouchRow.BackgroundTransparency = 1
     TouchRow.Parent = SidePanel
 
-    UI.DigBtn, UI.DigStroke = makeBtn(TouchRow, "Mở ô", UDim2.new(0.48, 0, 1, 0), UDim2.new(0, 0, 0, 0), UITheme.BgActive, UITheme.AccentCyan, UITheme.AccentCyan, function()
+    UI.DigBtn, UI.DigFace, UI.DigLbl = make3DButton(TouchRow, "Mở ô", UDim2.new(0.48, 0, 1, 0), UDim2.new(0, 0, 0, 0), UITheme.BtnBlue, UITheme.BtnBlueDark, UITheme.TextPrimary, 13, function()
         State.TouchMode = "DIG"
         sfxClick()
         updateControlsUI()
     end)
 
-    UI.FlagBtn, UI.FlagStroke = makeBtn(TouchRow, "Cắm cờ", UDim2.new(0.48, 0, 1, 0), UDim2.new(0.52, 0, 0, 0), UITheme.BgButton, UITheme.TextSecondary, UITheme.StrokeSubtle, function()
+    UI.FlagBtn, UI.FlagFace, UI.FlagLbl = make3DButton(TouchRow, "Cắm cờ", UDim2.new(0.48, 0, 1, 0), UDim2.new(0.52, 0, 0, 0), UITheme.BgButton, UITheme.BgPanelDark, UITheme.TextSecondary, 13, function()
         State.TouchMode = "FLAG"
         sfxClick()
         updateControlsUI()
@@ -1447,80 +1388,76 @@ do
 
     local ActRow = Instance.new("Frame")
     ActRow.LayoutOrder = 4
-    ActRow.Size = UDim2.new(1, 0, 0, 34)
+    ActRow.Size = UDim2.new(1, 0, 0, 38)
     ActRow.BackgroundTransparency = 1
     ActRow.Parent = SidePanel
 
-    makeBtn(ActRow, "Ván mới", UDim2.new(0.48, 0, 1, 0), UDim2.new(0, 0, 0, 0), Color3.fromRGB(24, 68, 58), Color3.fromRGB(186, 214, 198), UITheme.ColorGreen, function()
+    make3DButton(ActRow, "Ván mới", UDim2.new(0.48, 0, 1, 0), UDim2.new(0, 0, 0, 0), UITheme.BtnGreen, UITheme.BtnGreenDark, UITheme.TextPrimary, 13, function()
         sfxClick()
         startNewGame()
     end)
 
-    makeBtn(ActRow, "Gợi ý 10 Xu", UDim2.new(0.48, 0, 1, 0), UDim2.new(0.52, 0, 0, 0), Color3.fromRGB(54, 48, 28), UITheme.ColorGold, UITheme.ColorGold, function()
+    make3DButton(ActRow, "Gợi ý 10 Xu", UDim2.new(0.48, 0, 1, 0), UDim2.new(0.52, 0, 0, 0), UITheme.BtnPurple, UITheme.BtnPurpleDark, UITheme.TextPrimary, 12, function()
         useHint()
     end)
 
     makeHeader("TIỆN ÍCH", 5)
 
-    local function makeToggle(order, initText, onTap)
-        local b, s = makeBtn(SidePanel, initText, UDim2.new(1, 0, 0, 30), UDim2.new(0, 0, 0, 0), UITheme.BgButton, UITheme.TextPrimary, UITheme.StrokeSubtle, onTap)
+    local function makeToggle(order, initText, mainCol, darkCol, onTap)
+        local b, face, lbl = make3DButton(SidePanel, initText, UDim2.new(1, 0, 0, 34), UDim2.new(0, 0, 0, 0), mainCol, darkCol, UITheme.TextPrimary, 12, onTap)
         b.LayoutOrder = order
-        b.TextSize = 11
-        return b, s
+        return b, face, lbl
     end
 
-    UI.ChordBtn, UI.ChordStroke = makeToggle(6, "Mở nhanh ô số: Bật", function()
+    UI.ChordBtn, UI.ChordFace, UI.ChordLbl = makeToggle(6, "Mở nhanh ô số: Bật", UITheme.BgButton, UITheme.BgPanelDark, function()
         Config.QuickChord = not Config.QuickChord
         sfxClick()
         updateControlsUI()
     end)
 
-    UI.SoundBtn, UI.SoundStroke = makeToggle(7, "Âm thanh: Bật", function()
+    UI.SoundBtn, UI.SoundFace, UI.SoundLbl = makeToggle(7, "Âm thanh: Bật", UITheme.BgButton, UITheme.BgPanelDark, function()
         Config.SoundEnabled = not Config.SoundEnabled
         if Config.SoundEnabled then sfxClick() end
         updateControlsUI()
     end)
 
-    UI.ResetBtn, UI.ResetStroke = makeToggle(8, "Đặt lại thống kê", function()
+    UI.ResetBtn, UI.ResetFace, UI.ResetLbl = makeToggle(8, "Đặt lại thống kê", UITheme.BtnRed, UITheme.BtnRedDark, function()
         local now = os.clock()
         if (now - State.ResetConfirmAt) <= 3.0 then
             State.ResetConfirmAt = 0
             Stats.Wins, Stats.Losses, Stats.Xu = 0, 0, 0
             saveStats()
             sfxClick()
-            UI.ResetBtn.Text = "Đặt lại thống kê"
+            UI.ResetLbl.Text = "Đặt lại thống kê"
             updateTopStatus()
         else
             State.ResetConfirmAt = now
             sfxFlag()
-            UI.ResetBtn.Text = "Chạm lần nữa để xóa!"
+            UI.ResetLbl.Text = "Chạm lần nữa để xóa!"
             task.delay(3.1, function()
                 if not State.Destroyed and State.ResetConfirmAt == now then
-                    UI.ResetBtn.Text = "Đặt lại thống kê"
+                    UI.ResetLbl.Text = "Đặt lại thống kê"
                 end
             end)
         end
     end)
-    UI.ResetBtn.BackgroundColor3 = Color3.fromRGB(54, 28, 34)
-    UI.ResetBtn.TextColor3 = UITheme.ColorRed
-    UI.ResetStroke.Color = UITheme.ColorDanger
 
     makeHeader("PHÓNG TO / THU NHỎ", 9)
 
     local ZoomRow = Instance.new("Frame")
     ZoomRow.LayoutOrder = 10
-    ZoomRow.Size = UDim2.new(1, 0, 0, 34)
+    ZoomRow.Size = UDim2.new(1, 0, 0, 36)
     ZoomRow.BackgroundTransparency = 1
     ZoomRow.Parent = SidePanel
 
-    local ZoomOutBtn = makeBtn(ZoomRow, "", UDim2.new(0.28, 0, 1, 0), UDim2.new(0, 0, 0, 0), UITheme.BgCard, UITheme.AccentCyan, UITheme.AccentCyan, function()
+    local _, zOutFace = make3DButton(ZoomRow, "", UDim2.new(0.28, 0, 1, 0), UDim2.new(0, 0, 0, 0), UITheme.BtnBlue, UITheme.BtnBlueDark, UITheme.TextPrimary, 12, function()
         Config.CellSize = math.max(18, Config.CellSize - 4)
         sfxClick()
         rebuildBoard(true)
     end)
-    Icons.drawMinus(ZoomOutBtn, UITheme.AccentCyan)
+    Icons.drawMinus(zOutFace, UITheme.TextPrimary)
 
-    makeBtn(ZoomRow, "Vừa màn", UDim2.new(0.40, 0, 1, 0), UDim2.new(0.30, 0, 0, 0), UITheme.BgActive, UITheme.TextPrimary, UITheme.StrokeStrong, function()
+    make3DButton(ZoomRow, "Vừa màn", UDim2.new(0.40, 0, 1, 0), UDim2.new(0.30, 0, 0, 0), UITheme.BgButton, UITheme.BgPanelDark, UITheme.TextPrimary, 11, function()
         local n = getStage().size
         local availW = math.max(180, BoardScroll.AbsoluteSize.X - 18)
         local availH = math.max(180, BoardScroll.AbsoluteSize.Y - 18)
@@ -1528,18 +1465,18 @@ do
         Config.CellSize = math.clamp(fit, (n >= 25 and 24 or 20), 46)
         sfxClick()
         rebuildBoard(false)
-    end).TextSize = 11
+    end)
 
-    local ZoomInBtn = makeBtn(ZoomRow, "", UDim2.new(0.28, 0, 1, 0), UDim2.new(0.72, 0, 0, 0), UITheme.BgCard, UITheme.AccentCyan, UITheme.AccentCyan, function()
+    local _, zInFace = make3DButton(ZoomRow, "", UDim2.new(0.28, 0, 1, 0), UDim2.new(0.72, 0, 0, 0), UITheme.BtnBlue, UITheme.BtnBlueDark, UITheme.TextPrimary, 12, function()
         Config.CellSize = math.min(54, Config.CellSize + 4)
         sfxClick()
         rebuildBoard(true)
     end)
-    Icons.drawPlus(ZoomInBtn, UITheme.AccentCyan)
+    Icons.drawPlus(zInFace, UITheme.TextPrimary)
 end
 
 -- ========================================================================
--- [PHẦN 08] VẼ BÀN DÒ MÌN SIÊU NHẸ (THEO YÊU CẦU TỪNG Ô)
+-- [PHẦN 09] VẼ BÀN DÒ MÌN 3D SIÊU NHẸ (SPRITE BOM / CỜ / NỔ)
 -- ========================================================================
 renderCell = function(r, c)
     local key = cellKey(r, c)
@@ -1571,7 +1508,7 @@ renderCell = function(r, c)
 
     if isHit then
         cell.BackgroundColor3 = th.CellMineHit
-        Icons.drawMine(cell, 0.72, th.MineColor)
+        Icons.drawSpriteOr(cell, "boom", 0.90, function(p) Icons.drawMineVector(p, th.MineColor) end)
     elseif isRev then
         cell.BackgroundColor3 = th.CellOpen
         local cnt = State.Counts[r][c]
@@ -1581,17 +1518,17 @@ renderCell = function(r, c)
             lbl.BackgroundTransparency = 1
             lbl.Text = tostring(cnt)
             lbl.Font = FONT_MAIN
-            lbl.TextSize = math.clamp(math.floor(cs * 0.56), 11, 26)
+            lbl.TextSize = math.clamp(math.floor(cs * 0.60), 12, 28)
             lbl.TextColor3 = th.NumColors[cnt] or UITheme.TextPrimary
             lbl.ZIndex = 6
             lbl.Parent = cell
         end
     elseif showMine then
-        cell.BackgroundColor3 = th.CellOpen
-        Icons.drawMine(cell, 0.68, th.MineColor)
+        cell.BackgroundColor3 = th.CellMineHit
+        Icons.drawSpriteOr(cell, "bomb", 0.86, function(p) Icons.drawMineVector(p, th.MineColor) end)
     elseif isFlag then
         cell.BackgroundTransparency = 1
-        Icons.drawFlag(cell, 0.68, th.FlagColor)
+        Icons.drawSpriteOr(cell, "flag", 0.84, function(p) Icons.drawFlagVector(p, th.FlagColor) end)
     elseif isHint then
         cell.BackgroundColor3 = th.CellHint
         addStroke(cell, UITheme.ColorGreen, 1.8, 0.05)
@@ -1631,7 +1568,7 @@ rebuildBoard = function(preserveScroll)
 
     for i = 1, n - 1 do
         local vLine = Instance.new("Frame")
-        vLine.Size = UDim2.new(0, 1, 1, 0)
+        vLine.Size = UDim2.new(0, 1.5, 1, 0)
         vLine.Position = UDim2.new(0, i * cs, 0, 0)
         vLine.BackgroundColor3 = th.GridLine
         vLine.BorderSizePixel = 0
@@ -1639,7 +1576,7 @@ rebuildBoard = function(preserveScroll)
         vLine.Parent = GridLayer
 
         local hLine = Instance.new("Frame")
-        hLine.Size = UDim2.new(1, 0, 0, 1)
+        hLine.Size = UDim2.new(1, 0, 0, 1.5)
         hLine.Position = UDim2.new(0, 0, 0, i * cs)
         hLine.BackgroundColor3 = th.GridLine
         hLine.BorderSizePixel = 0
@@ -1648,16 +1585,13 @@ rebuildBoard = function(preserveScroll)
     end
 
     for r = 1, n do
-        for c = 1, n do
-            renderCell(r, c)
-        end
+        for c = 1, n do renderCell(r, c) end
     end
-
     if not preserveScroll then centerBoardScroll() end
 end
 
 -- ========================================================================
--- [PHẦN 09] CẬP NHẬT TRẠNG THÁI, XỬ LÝ MỞ Ô, CẮM CỜ, GỢI Ý & HỒI SINH
+-- [PHẦN 10] CẬP NHẬT TRẠNG THÁI, MỞ Ô, CẮM CỜ, GỢI Ý & HỒI SINH
 -- ========================================================================
 showTempAlert = function(msg)
     UI.AlertStrip.Text = msg
@@ -1671,13 +1605,23 @@ showTempAlert = function(msg)
     end)
 end
 
-showBanner = function(titleText, subText, accent, allowRevive)
+showBanner = function(isWin, titleText, subText)
+    for _, ch in ipairs(UI.BannerIconWrap:GetChildren()) do ch:Destroy() end
+    if isWin then
+        UI.WinBanner.BackgroundColor3 = Color3.fromRGB(20, 62, 146)
+        UI.BannerStroke.Color = UITheme.RimBlue
+        UI.BannerTitle.TextColor3 = UITheme.ColorGold
+        Icons.drawSpriteOr(UI.BannerIconWrap, "trophy", 0.96, nil)
+    else
+        UI.WinBanner.BackgroundColor3 = Color3.fromRGB(134, 24, 34)
+        UI.BannerStroke.Color = Color3.fromRGB(206, 86, 86)
+        UI.BannerTitle.TextColor3 = UITheme.TextPrimary
+        Icons.drawSpriteOr(UI.BannerIconWrap, "bomb", 0.96, Icons.drawMineVector)
+    end
     UI.BannerTitle.Text = titleText
-    UI.BannerTitle.TextColor3 = accent or UITheme.ColorGold
-    UI.BannerStroke.Color = accent or UITheme.ColorGold
     UI.BannerSub.Text = subText
-    UI.ReviveBtn.Visible = allowRevive
-    UI.ViewBtn.Visible = not allowRevive
+    UI.ReviveBtn.Visible = not isWin
+    UI.ViewBtn.Visible = isWin
     UI.WinBanner.Visible = true
 end
 
@@ -1690,21 +1634,21 @@ updateHomeUI = function()
 
     for idx, pack in pairs(UI.HomeStageBtns) do
         local active = (Config.StageIndex == idx)
-        pack.card.BackgroundColor3 = active and UITheme.BgActive or UITheme.BgCard
-        pack.stroke.Color = active and UITheme.AccentCyan or UITheme.StrokeSubtle
-        pack.t1.TextColor3 = active and UITheme.AccentCyan or UITheme.TextPrimary
+        pack.card.BackgroundColor3 = active and UITheme.BtnBlue or UITheme.BgButton
+        pack.stroke.Color = active and UITheme.ColorGold or UITheme.StrokeSubtle
+        pack.t1.TextColor3 = active and UITheme.ColorGold or UITheme.TextPrimary
     end
 
     for key, pack in pairs(UI.HomeThemeBtns) do
         local active = (Config.ThemeKey == key)
-        pack.btn.BackgroundColor3 = active and UITheme.BgActive or UITheme.BgButton
+        pack.btn.BackgroundColor3 = active and UITheme.BtnBlue or UITheme.BgButton
         pack.btn.TextColor3 = active and UITheme.TextPrimary or UITheme.TextSecondary
-        pack.stroke.Color = active and UITheme.ColorGreen or UITheme.StrokeSubtle
+        pack.stroke.Color = active and UITheme.RimBlue or UITheme.StrokeSubtle
     end
 
     UI.HomeChordBtn.Text = Config.QuickChord and "Mở nhanh ô số: Bật" or "Mở nhanh ô số: Tắt"
     UI.HomeChordBtn.TextColor3 = Config.QuickChord and UITheme.AccentCyan or UITheme.TextSecondary
-    UI.HomeChordStroke.Color = Config.QuickChord and UITheme.AccentCyan or UITheme.StrokeSubtle
+    UI.HomeChordStroke.Color = Config.QuickChord and UITheme.RimBlue or UITheme.StrokeSubtle
 
     UI.HomeSoundBtn.Text = Config.SoundEnabled and "Âm thanh: Bật" or "Âm thanh: Tắt"
     UI.HomeSoundBtn.TextColor3 = Config.SoundEnabled and UITheme.ColorGreen or UITheme.TextSecondary
@@ -1713,13 +1657,12 @@ end
 
 updateTopStatus = function()
     local stg = getStage()
-    local safeTotal = stg.size * stg.size - stg.mines
     local remMines = stg.mines - State.FlagsPlaced
-
     UI.StageLabel.Text = stg.title .. "  " .. stg.size .. "x" .. stg.size
     UI.ClockLabel.Text = "Thời gian: " .. formatTime(State.Elapsed)
-    UI.StatusLabel.Text = string.format("Mìn còn: %d  |  Mở: %d/%d", remMines, State.RevealedCount, safeTotal)
-    UI.StatusStroke.Color = (State.TouchMode == "FLAG") and UITheme.ColorRed or UITheme.AccentCyan
+    UI.StatusFlagLbl.Text = "Cờ: " .. State.FlagsPlaced
+    UI.StatusMineLbl.Text = "Mìn: " .. remMines
+    UI.StatusStroke.Color = (State.TouchMode == "FLAG") and UITheme.BtnRed or UITheme.RimBlue
 
     if UI.GameXuLabel then UI.GameXuLabel.Text = tostring(Stats.Xu) .. " Xu" end
     if UI.HomeXuLabel then UI.HomeXuLabel.Text = tostring(Stats.Xu) .. " Xu" end
@@ -1727,25 +1670,19 @@ end
 
 updateControlsUI = function()
     local isDig = (State.TouchMode == "DIG")
-    UI.DigBtn.BackgroundColor3 = isDig and UITheme.BgActive or UITheme.BgButton
-    UI.DigBtn.TextColor3 = isDig and UITheme.AccentCyan or UITheme.TextSecondary
-    UI.DigStroke.Color = isDig and UITheme.AccentCyan or UITheme.StrokeSubtle
+    UI.DigFace.BackgroundColor3 = isDig and UITheme.BtnBlue or UITheme.BgButton
+    UI.DigBtn.BackgroundColor3 = isDig and UITheme.BtnBlueDark or UITheme.BgPanelDark
+    UI.DigLbl.TextColor3 = isDig and UITheme.TextPrimary or UITheme.TextSecondary
 
-    UI.FlagBtn.BackgroundColor3 = (not isDig) and Color3.fromRGB(64, 30, 36) or UITheme.BgButton
-    UI.FlagBtn.TextColor3 = (not isDig) and UITheme.ColorRed or UITheme.TextSecondary
-    UI.FlagStroke.Color = (not isDig) and UITheme.ColorRed or UITheme.StrokeSubtle
+    UI.FlagFace.BackgroundColor3 = (not isDig) and UITheme.BtnRed or UITheme.BgButton
+    UI.FlagBtn.BackgroundColor3 = (not isDig) and UITheme.BtnRedDark or UITheme.BgPanelDark
+    UI.FlagLbl.TextColor3 = (not isDig) and UITheme.TextPrimary or UITheme.TextSecondary
 
-    UI.ChordBtn.Text = Config.QuickChord and "Mở nhanh ô số: Bật" or "Mở nhanh ô số: Tắt"
-    UI.ChordBtn.TextColor3 = Config.QuickChord and UITheme.AccentCyan or UITheme.TextSecondary
-    UI.ChordStroke.Color = Config.QuickChord and UITheme.AccentCyan or UITheme.StrokeSubtle
+    UI.ChordLbl.Text = Config.QuickChord and "Mở nhanh ô số: Bật" or "Mở nhanh ô số: Tắt"
+    UI.ChordLbl.TextColor3 = Config.QuickChord and UITheme.AccentCyan or UITheme.TextSecondary
 
-    UI.SoundBtn.Text = Config.SoundEnabled and "Âm thanh: Bật" or "Âm thanh: Tắt"
-    UI.SoundBtn.TextColor3 = Config.SoundEnabled and UITheme.AccentCyan or UITheme.TextSecondary
-    UI.SoundStroke.Color = Config.SoundEnabled and UITheme.StrokeStrong or UITheme.StrokeSubtle
-
-    local oldIcon = UI.SoundBtn:FindFirstChild("SpeakerIcon")
-    if oldIcon then oldIcon:Destroy() end
-    Icons.drawSpeaker(UI.SoundBtn, not Config.SoundEnabled, Config.SoundEnabled and UITheme.AccentCyan or UITheme.TextMuted)
+    UI.SoundLbl.Text = Config.SoundEnabled and "Âm thanh: Bật" or "Âm thanh: Tắt"
+    UI.SoundLbl.TextColor3 = Config.SoundEnabled and UITheme.ColorGreen or UITheme.TextSecondary
     updateTopStatus()
 end
 
@@ -1760,7 +1697,6 @@ local function checkVictory()
         saveStats()
         sfxWin()
 
-        -- Tự động cắm cờ các mìn còn lại
         local n = stg.size
         for r = 1, n do
             for c = 1, n do
@@ -1771,9 +1707,8 @@ local function checkVictory()
                 end
             end
         end
-
         updateTopStatus()
-        showBanner("CHIẾN THẮNG!", string.format("+%d Xu  |  Thời gian: %s", stg.reward, formatTime(State.Elapsed)), UITheme.ColorGreen, false)
+        showBanner(true, "CHIẾN THẮNG!", string.format("+%d Xu  |  Thời gian: %s", stg.reward, formatTime(State.Elapsed)))
         return true
     end
     return false
@@ -1789,9 +1724,7 @@ local function floodReveal(startR, startC)
         if inBounds(r, c) and not State.Revealed[r][c] and not State.Flagged[r][c] and not State.Mines[r][c] then
             State.Revealed[r][c] = true
             State.RevealedCount = State.RevealedCount + 1
-            if State.HintCell and State.HintCell.r == r and State.HintCell.c == c then
-                State.HintCell = nil
-            end
+            if State.HintCell and State.HintCell.r == r and State.HintCell.c == c then State.HintCell = nil end
             renderCell(r, c)
             if State.Counts[r][c] == 0 then
                 for dr = -1, 1 do
@@ -1820,23 +1753,17 @@ local function triggerMineHit(r, c)
     local n = getStage().size
     for rr = 1, n do
         for cc = 1, n do
-            if State.Mines[rr][cc] then
-                renderCell(rr, cc)
-            end
+            if State.Mines[rr][cc] then renderCell(rr, cc) end
         end
     end
     updateTopStatus()
-    showBanner("ĐẠP TRÚNG MÌN!", "Bạn có thể dùng 30 Xu để gỡ mìn và chơi tiếp", UITheme.ColorRed, true)
+    showBanner(false, "BẠN ĐÃ NỔ BOM!", "Dùng 30 Xu để gỡ quả mìn này và chơi tiếp")
 end
 
 handleDig = function(r, c)
     if State.GameOver or State.Flagged[r][c] then return end
+    if not State.Generated then generateMines(r, c) end
 
-    if not State.Generated then
-        generateMines(r, c)
-    end
-
-    -- Mở nhanh ô số nếu đã cắm đủ số cờ xung quanh
     if State.Revealed[r][c] then
         if not Config.QuickChord then return end
         local need = State.Counts[r][c]
@@ -1855,30 +1782,17 @@ handleDig = function(r, c)
                 for dc = -1, 1 do
                     local nr, nc = r + dr, c + dc
                     if not (dr == 0 and dc == 0) and inBounds(nr, nc) and not State.Revealed[nr][nc] and not State.Flagged[nr][nc] then
-                        if State.Mines[nr][nc] then
-                            triggerMineHit(nr, nc)
-                            return
-                        else
-                            floodReveal(nr, nc)
-                            openedAny = true
-                        end
+                        if State.Mines[nr][nc] then triggerMineHit(nr, nc); return
+                        else floodReveal(nr, nc); openedAny = true end
                     end
                 end
             end
-            if openedAny then
-                sfxDig()
-                updateTopStatus()
-                checkVictory()
-            end
+            if openedAny then sfxDig(); updateTopStatus(); checkVictory() end
         end
         return
     end
 
-    if State.Mines[r][c] then
-        triggerMineHit(r, c)
-        return
-    end
-
+    if State.Mines[r][c] then triggerMineHit(r, c); return end
     floodReveal(r, c)
     sfxDig()
     updateTopStatus()
@@ -1901,7 +1815,6 @@ useHint = function()
         showTempAlert("Không đủ Xu! Cần 10 Xu để Gợi ý")
         return
     end
-
     local n = getStage().size
     if not State.Generated then
         local mid = math.floor((n + 1) / 2)
@@ -1910,8 +1823,6 @@ useHint = function()
         handleDig(mid, mid)
         return
     end
-
-    -- Ưu tiên chọn ô an toàn giáp ranh vùng đã mở
     local frontier, fallback = {}, {}
     for r = 1, n do
         for c = 1, n do
@@ -1919,26 +1830,17 @@ useHint = function()
                 local nearOpen = false
                 for dr = -1, 1 do
                     for dc = -1, 1 do
-                        if inBounds(r + dr, c + dc) and State.Revealed[r + dr][c + dc] then
-                            nearOpen = true
-                            break
-                        end
+                        if inBounds(r + dr, c + dc) and State.Revealed[r + dr][c + dc] then nearOpen = true; break end
                     end
                     if nearOpen then break end
                 end
-                if nearOpen then
-                    table.insert(frontier, { r, c })
-                else
-                    table.insert(fallback, { r, c })
-                end
+                table.insert(nearOpen and frontier or fallback, { r, c })
             end
         end
     end
-
     local pool = (#frontier > 0) and frontier or fallback
     if #pool == 0 then return end
     local pick = pool[math.random(1, #pool)]
-
     Stats.Xu = Stats.Xu - 10
     saveStats()
     floodReveal(pick[1], pick[2])
@@ -1954,11 +1856,9 @@ reviveFromMine = function()
         showTempAlert("Không đủ Xu! Cần 30 Xu để Hồi sinh")
         return
     end
-
     Stats.Xu = Stats.Xu - 30
     Stats.Losses = math.max(0, Stats.Losses - 1)
     saveStats()
-
     local mr, mc = State.HitMineCell.r, State.HitMineCell.c
     State.GameOver = false
     State.HitMineCell = nil
@@ -1968,14 +1868,10 @@ reviveFromMine = function()
     end
     hideBanner()
     sfxClick()
-
-    -- Ẩn lại tất cả mìn chưa mở
     local n = getStage().size
     for r = 1, n do
         for c = 1, n do
-            if State.Mines[r][c] then
-                renderCell(r, c)
-            end
+            if State.Mines[r][c] then renderCell(r, c) end
         end
     end
     updateTopStatus()
@@ -2018,13 +1914,11 @@ startNewGame = function(forceResize)
         local fit = math.floor(math.min(availW, availH) / stg.size)
         Config.CellSize = math.clamp(fit, (stg.size >= 25 and 24 or 22), 44)
     end
-
     rebuildBoard(false)
     updateControlsUI()
     updateTopStatus()
 end
 
--- Bộ đếm thời gian trận đấu
 task.spawn(function()
     while not State.Destroyed do
         task.wait(0.5)
@@ -2036,7 +1930,7 @@ task.spawn(function()
 end)
 
 -- ========================================================================
--- [PHẦN 10] PHÍM TẮT PC & DỌN DẸP TOÀN BỘ SCRIPT
+-- [PHẦN 11] PHÍM TẮT PC & DỌN DẸP TOÀN BỘ SCRIPT
 -- ========================================================================
 trackConn(UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed or State.Destroyed then return end
