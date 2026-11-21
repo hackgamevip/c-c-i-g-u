@@ -1,5 +1,5 @@
 -- ============================================================================
--- DAU TRUONG CHIEN DAU PRO (v2.4) - Full-Screen Action RPG Combat Game
+-- DAU TRUONG CHIEN DAU PRO (v2.5) - Full-Screen Action RPG Combat Game
 -- Menu Full Man Hinh 100% | 8 Tuong | 5 Boss | 6 Loai Quai | Minimap Radar
 -- Chon Nang Cap Trong Tran | Nhiem Vu | Len Cap | Trang Thai | Cai Dat
 -- Code doc lap 100%, toi uu cho Mobile (cam ung tuc thi, chu matte) & PC.
@@ -80,12 +80,17 @@ local FONT_BODY  = Enum.Font.GothamMedium
 -- 2. DU LIEU GAME (8 TUONG, 5 MAN CHOI, 3 DO KHO, 5 BOSS, 6 QUAI, NHIEM VU)
 -- ============================================================================
 local CFG = {
-    VERSION = "v2.4",
+    VERSION = "v2.5",
     GUI_NAME = "ArenaChienDau_Standalone",
     SAVE_PREFIX = "arena_chien_dau_v2_",
     ARENA_W = 1100,
     ARENA_H = 660,
     PLAYER_R = 20,
+    -- Tuy chon: Dan rbxassetid:// vao day neu ban tai anh sprite len Roblox (de trong = dung do hoa chibi tich hop san)
+    CUSTOM_SPRITE_IDS = {
+        chienbinh = "", satthu = "", phapsu = "", cungthu = "",
+        thankiem = "", dausi = "", kiemsu = "", maphapsu = "",
+    },
 }
 
 -- 8 Nhan Vat tham khao tu bang Sprite
@@ -93,8 +98,8 @@ CFG.HEROES = {
     {
         id = "chienbinh", name = "Chiến Binh", role = "Cận chiến Hỏa Kiếm",
         costCoin = 0, costGem = 0,
-        hair = Color3.fromRGB(192, 56, 56), armor = Color3.fromRGB(68, 40, 46),
-        trim = Color3.fromRGB(202, 134, 62), fx = Color3.fromRGB(202, 84, 64),
+        hair = Color3.fromRGB(40, 38, 46), armor = Color3.fromRGB(58, 52, 62),
+        cape = Color3.fromRGB(186, 46, 48), trim = Color3.fromRGB(196, 152, 68), fx = Color3.fromRGB(204, 68, 68),
         weapon = "sword", attackType = "melee", status = "burn",
         hp = 160, mp = 100, atk = 28, spd = 250, crit = 0.14, range = 104, cd = 0.28,
         s1Name = "Hỏa Trảm", s1Cost = 20, s1Cd = 4.2,
@@ -105,8 +110,8 @@ CFG.HEROES = {
     {
         id = "satthu", name = "Sát Thủ", role = "Tốc độ & Bóng Đêm",
         costCoin = 350, costGem = 0,
-        hair = Color3.fromRGB(174, 166, 192), armor = Color3.fromRGB(58, 42, 82),
-        trim = Color3.fromRGB(154, 102, 198), fx = Color3.fromRGB(154, 92, 198),
+        hair = Color3.fromRGB(56, 44, 78), armor = Color3.fromRGB(46, 36, 68),
+        hood = true, cape = Color3.fromRGB(128, 72, 186), trim = Color3.fromRGB(154, 102, 198), fx = Color3.fromRGB(154, 88, 202),
         weapon = "daggers", attackType = "melee", status = "poison",
         hp = 122, mp = 110, atk = 26, spd = 315, crit = 0.28, range = 90, cd = 0.19,
         s1Name = "Ảnh Kích", s1Cost = 18, s1Cd = 3.5,
@@ -117,8 +122,8 @@ CFG.HEROES = {
     {
         id = "phapsu", name = "Pháp Sư", role = "Băng Thuật Khống Chế",
         costCoin = 550, costGem = 0,
-        hair = Color3.fromRGB(190, 198, 208), armor = Color3.fromRGB(44, 86, 152),
-        trim = Color3.fromRGB(108, 178, 204), fx = Color3.fromRGB(88, 158, 204),
+        hair = Color3.fromRGB(134, 186, 208), armor = Color3.fromRGB(42, 82, 158),
+        cape = Color3.fromRGB(34, 64, 132), trim = Color3.fromRGB(198, 168, 78), fx = Color3.fromRGB(86, 172, 208),
         weapon = "staff", attackType = "ranged", status = "freeze",
         hp = 115, mp = 150, atk = 25, spd = 255, crit = 0.18, range = 380, cd = 0.26,
         s1Name = "Cầu Băng", s1Cost = 22, s1Cd = 4.0,
@@ -129,8 +134,8 @@ CFG.HEROES = {
     {
         id = "cungthu", name = "Cung Thủ", role = "Xạ kích Xuyên Thấu",
         costCoin = 750, costGem = 0,
-        hair = Color3.fromRGB(142, 112, 74), armor = Color3.fromRGB(44, 108, 66),
-        trim = Color3.fromRGB(112, 186, 126), fx = Color3.fromRGB(92, 182, 114),
+        hair = Color3.fromRGB(46, 118, 64), armor = Color3.fromRGB(44, 104, 62),
+        hood = true, cape = Color3.fromRGB(38, 92, 52), trim = Color3.fromRGB(168, 126, 68), fx = Color3.fromRGB(84, 192, 112),
         weapon = "bow", attackType = "ranged", status = "poison",
         hp = 118, mp = 120, atk = 24, spd = 278, crit = 0.24, range = 410, cd = 0.22,
         s1Name = "Mưa Tên", s1Cost = 20, s1Cd = 3.8,
@@ -153,8 +158,8 @@ CFG.HEROES = {
     {
         id = "dausi", name = "Đấu Sĩ", role = "Quyền Cước Hỏa Lực",
         costCoin = 1200, costGem = 20,
-        hair = Color3.fromRGB(118, 76, 52), armor = Color3.fromRGB(76, 48, 42),
-        trim = Color3.fromRGB(194, 86, 62), fx = Color3.fromRGB(202, 138, 62),
+        hair = Color3.fromRGB(114, 72, 48), armor = Color3.fromRGB(52, 46, 54),
+        trim = Color3.fromRGB(202, 82, 48), fx = Color3.fromRGB(204, 128, 52),
         weapon = "gauntlets", attackType = "melee", status = "stun",
         hp = 200, mp = 100, atk = 34, spd = 265, crit = 0.18, range = 94, cd = 0.24,
         s1Name = "Hỏa Quyền", s1Cost = 20, s1Cd = 3.8,
@@ -165,8 +170,8 @@ CFG.HEROES = {
     {
         id = "kiemsu", name = "Kiếm Sư", role = "Thương Kiếm Lôi Điện",
         costCoin = 1500, costGem = 30,
-        hair = Color3.fromRGB(76, 68, 118), armor = Color3.fromRGB(48, 56, 94),
-        trim = Color3.fromRGB(102, 166, 204), fx = Color3.fromRGB(84, 152, 206),
+        hair = Color3.fromRGB(38, 46, 68), armor = Color3.fromRGB(56, 68, 96),
+        cape = Color3.fromRGB(42, 62, 112), trim = Color3.fromRGB(158, 176, 198), fx = Color3.fromRGB(76, 182, 208),
         weapon = "spear", attackType = "melee", status = "stun",
         hp = 165, mp = 130, atk = 35, spd = 280, crit = 0.24, range = 124, cd = 0.25,
         s1Name = "Lôi Thương", s1Cost = 24, s1Cd = 4.0,
@@ -587,6 +592,22 @@ local function buildChibiHero(container, hero, zBase, hideWeapon)
     root.ZIndex = zBase
     root.Parent = container
 
+    -- Neu nguoi dung dan rbxassetid rieng cho tuong -> hien thi truc tiep
+    local customId = CFG.CUSTOM_SPRITE_IDS and CFG.CUSTOM_SPRITE_IDS[hero.id]
+    if type(customId) == "string" and #customId > 5 then
+        local img = Instance.new("ImageLabel")
+        img.Name = "CustomSprite"
+        img.Size = UDim2.new(1.15, 0, 1.15, 0)
+        img.Position = UDim2.new(0.5, 0, 0.5, 0)
+        img.AnchorPoint = Vector2.new(0.5, 0.5)
+        img.BackgroundTransparency = 1
+        img.Image = customId
+        img.ScaleType = Enum.ScaleType.Fit
+        img.ZIndex = zBase + 2
+        img.Parent = root
+        return root, nil
+    end
+
     -- Bong do
     local sh = Instance.new("Frame")
     sh.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -618,6 +639,22 @@ local function buildChibiHero(container, hero, zBase, hideWeapon)
                 addStroke(wing, C.TXT_DARK, 1)
             end
         end
+    end
+
+    -- Ao choang / Khan choang rieng cua tung class (rung rinh khi chay)
+    if hero.cape and not hideWeapon then
+        local cape = Instance.new("Frame")
+        cape.Name = "ClassCape"
+        cape.AnchorPoint = Vector2.new(0.5, 0)
+        cape.Position = UDim2.new(0.42, 0, 0.52, 0)
+        cape.Size = UDim2.new(0.76, 0, 0.50, 0)
+        cape.Rotation = 8
+        cape.BackgroundColor3 = hero.cape
+        cape.BorderSizePixel = 0
+        cape.ZIndex = zBase
+        cape.Parent = root
+        addCorner(cape, 6)
+        addStroke(cape, C.TXT_DARK, 1.2)
     end
 
     -- Than giap
@@ -3238,18 +3275,50 @@ do
         local dmg = math.floor(S.atk * ((S.comboStep == 3) and 1.35 or 1.0))
         local deg = math.deg(math.atan2(ay, ax))
         if h.attackType == "ranged" then
-            spawnProj("player", S.px + ax * 22, S.py + ay * 22, ax * 580, ay * 580, dmg, 9, h.fx, (S.comboStep == 3) and 2 or 0, h.status)
-            spawnRing(S.px + ax * 22, S.py + ay * 22, 22, h.fx, 0.12)
+            spawnProj("player", S.px + ax * 22, S.py + ay * 22, ax * 600, ay * 600, dmg, 9, h.fx, (S.comboStep == 3) and 2 or 0, h.status)
+            if h.id == "cungthu" then
+                spawnSlash(S.px + ax * 26, S.py + ay * 26, deg, 44, h.fx, 0.12)
+            elseif h.id == "phapsu" then
+                spawnRing(S.px + ax * 24, S.py + ay * 24, 34, h.fx, 0.18)
+                spawnSparks(S.px + ax * 24, S.py + ay * 24, C.TXT_CYAN, 4)
+            else
+                spawnRing(S.px + ax * 22, S.py + ay * 22, 24, h.fx, 0.12)
+            end
         else
             local hx, hy = S.px + ax * (h.range * 0.48), S.py + ay * (h.range * 0.48)
-            local hr = h.range * ((S.comboStep == 3) and 0.72 or 0.58)
-            spawnSlash(hx, hy, deg, math.floor(hr * 1.18), S.comboStep == 3 and C.TXT_GOLD or h.fx, 0.14)
-            spawnRing(hx, hy, hr * 0.82, h.fx, 0.14)
+            local hr = h.range * ((S.comboStep == 3) and 0.76 or 0.60)
+            if h.id == "chienbinh" then
+                -- Warrior: Wide crimson double-crescent slash
+                spawnSlash(hx, hy, deg, math.floor(hr * 1.35), h.fx, 0.16)
+                if S.comboStep == 3 then
+                    spawnSlash(hx + ax * 12, hy + ay * 12, deg + 18, math.floor(hr * 1.45), C.TXT_GOLD, 0.18)
+                end
+            elseif h.id == "satthu" then
+                -- Assassin: Twin rapid purple X-slashes
+                spawnSlash(hx, hy, deg - 28, math.floor(hr * 1.05), h.fx, 0.12)
+                spawnSlash(hx, hy, deg + 28, math.floor(hr * 1.05), C.TXT_GEM, 0.12)
+            elseif h.id == "kiemsu" or h.id == "thankiem" then
+                -- Swordsman: Fast cyan sword-energy slash + launches energy wave on 3rd hit
+                spawnSlash(hx, hy, deg, math.floor(hr * 1.25), h.fx, 0.14)
+                if S.comboStep == 3 then
+                    spawnProj("player", hx, hy, ax * 520, ay * 520, math.floor(dmg * 0.85), 11, h.fx, 2, h.status)
+                end
+            elseif h.id == "dausi" then
+                -- Fighter: Blazing orange fist burst & fiery kick arc on 3rd hit
+                spawnRing(hx, hy, hr * 0.90, h.fx, 0.16)
+                spawnSparks(hx, hy, C.TXT_GOLD, S.comboStep == 3 and 8 or 5)
+                if S.comboStep == 3 then
+                    spawnSlash(hx, hy, deg, math.floor(hr * 1.28), C.TXT_ORANGE, 0.16)
+                end
+            else
+                spawnSlash(hx, hy, deg, math.floor(hr * 1.18), S.comboStep == 3 and C.TXT_GOLD or h.fx, 0.14)
+            end
+            spawnRing(hx, hy, hr * 0.80, h.fx, 0.14)
             for _, e in ipairs(S.enemies) do
                 if e.hp > 0 then
                     local dx, dy = e.x - hx, e.y - hy
                     if math.sqrt(dx * dx + dy * dy) <= (hr + e.r) then
-                        local push = (S.comboStep == 3) and 36 or 16
+                        local push = (S.comboStep == 3) and 38 or 16
                         damageEnemy(e, dmg, ax * push, ay * push, S.comboStep == 3 and h.status or nil)
                     end
                 end
@@ -3704,8 +3773,12 @@ do
             if S.shakeTimer <= 0 then S.shakePower = 0; UI.Arena.Position = UDim2.new(0, 6, 0, 6) end
         end
 
-        -- Cap nhat vi tri nhan vat, vu khi, Minimap & HUD TopBar
-        UI.PlayerNode.Position = toPos(S.px, S.py)
+        -- Cap nhat vi tri nhan vat, chuyen dong buoc chan (walk bobbing), vu khi & Minimap
+        local isMoving = S.joyActive or S.keys.W or S.keys.A or S.keys.S or S.keys.D or (S.dashTime > 0)
+        local bobY = isMoving and (math.sin(S.matchTime * 18) * 2.6) or (math.sin(S.matchTime * 4) * 1.0)
+        local tiltRot = isMoving and (math.sin(S.matchTime * 18) * 5) or 0
+        UI.PlayerNode.Position = UDim2.new(S.px / CFG.ARENA_W, 0, S.py / CFG.ARENA_H, bobY)
+        UI.PlayerSprite.Rotation = tiltRot
         UI.MiniPlayerDot.Position = UDim2.new(S.px / CFG.ARENA_W, 0, S.py / CFG.ARENA_H, 0)
         if UI.WeaponPivot then
             local baseDeg = math.deg(math.atan2(S.dirY, S.dirX))
