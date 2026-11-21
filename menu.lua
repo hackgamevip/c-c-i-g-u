@@ -1,5 +1,5 @@
 -- ============================================================================
--- DAU TRUONG CHIEN DAU PRO (v2.3) - Full-Screen Action RPG Combat Game
+-- DAU TRUONG CHIEN DAU PRO (v2.4) - Full-Screen Action RPG Combat Game
 -- Menu Full Man Hinh 100% | 8 Tuong | 5 Boss | 6 Loai Quai | Minimap Radar
 -- Chon Nang Cap Trong Tran | Nhiem Vu | Len Cap | Trang Thai | Cai Dat
 -- Code doc lap 100%, toi uu cho Mobile (cam ung tuc thi, chu matte) & PC.
@@ -80,7 +80,7 @@ local FONT_BODY  = Enum.Font.GothamMedium
 -- 2. DU LIEU GAME (8 TUONG, 5 MAN CHOI, 3 DO KHO, 5 BOSS, 6 QUAI, NHIEM VU)
 -- ============================================================================
 local CFG = {
-    VERSION = "v2.3",
+    VERSION = "v2.4",
     GUI_NAME = "ArenaChienDau_Standalone",
     SAVE_PREFIX = "arena_chien_dau_v2_",
     ARENA_W = 1100,
@@ -2265,8 +2265,7 @@ refreshAllUI = function()
     if UI.GearHeroPreview then
         buildChibiHero(UI.GearHeroPreview, st.hero, 6, false)
         UI.GearStatsLbl.Text = string.format(
-            "HP: %d   |   ATK: %d
-DEF: %d   |   SPD: %d",
+            "HP: %d   |   ATK: %d\nDEF: %d   |   SPD: %d",
             st.maxHp, st.atk, st.def, st.spd
         )
         for _, sl in ipairs(CFG.GEAR_SLOTS) do
@@ -2280,8 +2279,7 @@ DEF: %d   |   SPD: %d",
                 pack.stroke.Color = rar.color
                 pack.stroke.Thickness = 2
             else
-                pack.btn.Text = sl.label .. "
-(Trống)"
+                pack.btn.Text = sl.label .. "\n(Trống)"
                 pack.btn.TextColor3 = C.TXT_SUB
                 pack.stroke.Color = C.BORDER
                 pack.stroke.Thickness = 1
@@ -2306,9 +2304,7 @@ DEF: %d   |   SPD: %d",
                 local isSel = (UI.SelectedGearUid == it.uid)
                 local isEq = GEAR.IsEquipped(it.uid)
                 local ib = makeBtn(UI.BagScroll, {
-                    text = d.name .. ((it.lv or 0) > 0 and (" +" .. it.lv) or "") .. (isEq and "
-[Đang dùng]" or ("
-[" .. rar.name .. "]")),
+                    text = d.name .. ((it.lv or 0) > 0 and (" +" .. it.lv) or "") .. (isEq and "\n[Đang dùng]" or ("\n[" .. rar.name .. "]")),
                     bg = isSel and C.BG_CARD_ALT or C.BG_CARD,
                     color = C.TXT_MAIN,
                     size = 10,
@@ -3408,8 +3404,7 @@ do
             if #DATA.inventory < 60 then
                 local minR = (S.diff.id == "hell") and "legend" or ((S.diff.id == "hard") and "epic" or "rare")
                 local _, dropDef = GEAR.AddRandom(minR)
-                lootNote = "
-Nhặt trang bị: " .. dropDef.name
+                lootNote = "\nNhặt trang bị: " .. dropDef.name
             end
             S.coinsEarned = S.coinsEarned + math.floor(S.stage.rewardCoin * S.diff.rewardMult)
             S.gemsEarned = S.gemsEarned + math.floor(S.stage.rewardGem * S.diff.rewardMult)
