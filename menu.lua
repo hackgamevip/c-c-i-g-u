@@ -1,14 +1,13 @@
 --[[
     ========================================================================
-    CỜ CARO PRO - STANDALONE v2.0
+    CỜ CARO PRO - STANDALONE v3.0
     Game Cờ Caro (Gomoku) 2D Toàn Màn Hình cho Roblox Mobile & PC
-    Nâng cấp v2.0:
-    - 4 chủ đề bàn cờ: Tối Hiện Đại / Gỗ Cổ Điển / Xanh Ngọc / Vở Ô Ly
-    - 4 cấp độ AI: Dễ / Vừa / Khó / Siêu Khó (tính thế 2 bước + bắt bẫy 4-3)
-    - Tọa độ bàn cờ (A-S, 1-19), đường gạch nối 5 quân thắng, tùy chọn số nước
-    - Đồng hồ trận đấu & hẹn giờ mỗi lượt (Tắt / 15s / 30s) kèm thanh tiến trình
-    - Bảng điều khiển 2 tab gọn gàng (CHƠI | CÀI ĐẶT), không che bàn cờ
-    - Hệ thống Cấp bậc Kỳ thủ, Xu thưởng, Chuỗi thắng & Lưu dữ liệu tự động
+    Nâng cấp v3.0:
+    - Sảnh Chính (Main Menu) thiết kế mới: chọn chế độ, màn chơi, độ khó, giao diện
+    - Xóa hoàn toàn số/chữ cái tọa độ (1 2 3 / A B C) để bàn cờ sạch, thoáng mắt
+    - Thêm 8 màn chơi: 3x3 (3 ô), 5x5 (4 ô), 9x9, 12x12, 15x15, 20x20, 35x35, 50x50
+    - Công nghệ vẽ lưới tối ưu cho bàn cờ lớn 35x35 & 50x50 chạy mượt 60 FPS mobile
+    - AI tự thích nghi luật thắng 3 ô / 4 ô / 5 ô + 4 cấp độ (Dễ -> Siêu Khó)
     ========================================================================
 ]]
 
@@ -26,18 +25,18 @@ local CoreGui = game:GetService("CoreGui")
 local LocalPlayer = Players.LocalPlayer
 
 -- ========================================================================
--- [PHẦN 01] CẤU HÌNH, 4 CHỦ ĐỀ BÀN CỜ MATTE & TRẠNG THÁI GAME
+-- [PHẦN 01] CẤU HÌNH, DANH SÁCH MÀN CHƠI, 4 CHỦ ĐỀ MATTE & TRẠNG THÁI
 -- ========================================================================
-local VERSION = "v2.0"
-local SAVE_FILE = "CoCaroPro_Stats_v2.json"
+local VERSION = "v3.0"
+local SAVE_FILE = "CoCaroPro_Stats_v3.json"
 
 -- Bảng màu giao diện chung (mọi kênh RGB của chữ đều <= 215 để chống chói mobile)
 local UITheme = {
-    BgMain        = Color3.fromRGB(16, 20, 28),
-    BgPanel       = Color3.fromRGB(24, 29, 40),
-    BgCard        = Color3.fromRGB(32, 39, 53),
-    BgButton      = Color3.fromRGB(39, 47, 63),
-    BgActive      = Color3.fromRGB(50, 72, 96),
+    BgMain        = Color3.fromRGB(15, 19, 27),
+    BgPanel       = Color3.fromRGB(23, 28, 39),
+    BgCard        = Color3.fromRGB(31, 38, 52),
+    BgButton      = Color3.fromRGB(38, 46, 62),
+    BgActive      = Color3.fromRGB(48, 70, 94),
     StrokeSubtle  = Color3.fromRGB(54, 64, 84),
     StrokeStrong  = Color3.fromRGB(82, 96, 122),
 
@@ -52,20 +51,18 @@ local UITheme = {
     ColorDanger   = Color3.fromRGB(186, 84, 84),
 }
 
--- 4 Chủ đề bàn cờ (tất cả màu chữ/tọa độ/quân cờ đều matte <= 215)
+-- 4 Chủ đề bàn cờ (tất cả màu matte <= 215)
 local BoardThemes = {
     Dark = {
         Name        = "Tối",
-        BoardOuter  = Color3.fromRGB(20, 24, 33),
-        BoardBg     = Color3.fromRGB(16, 20, 28),
-        CellEven    = Color3.fromRGB(34, 41, 54),
-        CellOdd     = Color3.fromRGB(30, 36, 48),
-        CellBorder  = Color3.fromRGB(46, 55, 72),
-        CellLast    = Color3.fromRGB(52, 60, 78),
-        CellWin     = Color3.fromRGB(70, 62, 38),
-        CellHint    = Color3.fromRGB(44, 68, 56),
-        CellPending = Color3.fromRGB(64, 54, 40),
-        CoordText   = Color3.fromRGB(134, 144, 162),
+        BoardOuter  = Color3.fromRGB(19, 23, 32),
+        BoardBg     = Color3.fromRGB(31, 37, 50),
+        GridLine    = Color3.fromRGB(48, 57, 75),
+        CellLast    = Color3.fromRGB(54, 63, 82),
+        CellWin     = Color3.fromRGB(72, 64, 38),
+        CellHint    = Color3.fromRGB(44, 70, 56),
+        CellPending = Color3.fromRGB(66, 56, 40),
+        CenterDot   = Color3.fromRGB(122, 134, 154),
         PieceX      = Color3.fromRGB(204, 94, 94),
         PieceO      = Color3.fromRGB(86, 174, 198),
         WinLine     = Color3.fromRGB(206, 172, 86),
@@ -74,15 +71,13 @@ local BoardThemes = {
     Wood = {
         Name        = "Gỗ",
         BoardOuter  = Color3.fromRGB(42, 31, 23),
-        BoardBg     = Color3.fromRGB(58, 43, 30),
-        CellEven    = Color3.fromRGB(148, 118, 84),
-        CellOdd     = Color3.fromRGB(140, 110, 77),
-        CellBorder  = Color3.fromRGB(98, 74, 48),
-        CellLast    = Color3.fromRGB(168, 138, 94),
-        CellWin     = Color3.fromRGB(178, 152, 88),
-        CellHint    = Color3.fromRGB(116, 142, 98),
-        CellPending = Color3.fromRGB(166, 126, 82),
-        CoordText   = Color3.fromRGB(192, 168, 134),
+        BoardBg     = Color3.fromRGB(144, 114, 80),
+        GridLine    = Color3.fromRGB(94, 70, 44),
+        CellLast    = Color3.fromRGB(168, 138, 92),
+        CellWin     = Color3.fromRGB(180, 154, 86),
+        CellHint    = Color3.fromRGB(112, 142, 94),
+        CellPending = Color3.fromRGB(164, 122, 78),
+        CenterDot   = Color3.fromRGB(82, 58, 36),
         PieceX      = Color3.fromRGB(152, 36, 36),
         PieceO      = Color3.fromRGB(26, 74, 118),
         WinLine     = Color3.fromRGB(196, 154, 52),
@@ -90,16 +85,14 @@ local BoardThemes = {
     },
     Emerald = {
         Name        = "Ngọc",
-        BoardOuter  = Color3.fromRGB(16, 32, 28),
-        BoardBg     = Color3.fromRGB(14, 28, 24),
-        CellEven    = Color3.fromRGB(28, 54, 46),
-        CellOdd     = Color3.fromRGB(24, 48, 41),
-        CellBorder  = Color3.fromRGB(42, 74, 64),
-        CellLast    = Color3.fromRGB(44, 78, 66),
-        CellWin     = Color3.fromRGB(76, 74, 38),
-        CellHint    = Color3.fromRGB(48, 88, 68),
+        BoardOuter  = Color3.fromRGB(15, 30, 26),
+        BoardBg     = Color3.fromRGB(26, 51, 44),
+        GridLine    = Color3.fromRGB(44, 78, 67),
+        CellLast    = Color3.fromRGB(44, 80, 68),
+        CellWin     = Color3.fromRGB(78, 76, 38),
+        CellHint    = Color3.fromRGB(48, 92, 70),
         CellPending = Color3.fromRGB(68, 62, 40),
-        CoordText   = Color3.fromRGB(132, 168, 154),
+        CenterDot   = Color3.fromRGB(124, 162, 148),
         PieceX      = Color3.fromRGB(204, 102, 96),
         PieceO      = Color3.fromRGB(108, 188, 198),
         WinLine     = Color3.fromRGB(206, 176, 92),
@@ -107,16 +100,14 @@ local BoardThemes = {
     },
     Paper = {
         Name        = "Vở Ô Ly",
-        BoardOuter  = Color3.fromRGB(156, 152, 142),
-        BoardBg     = Color3.fromRGB(170, 166, 156),
-        CellEven    = Color3.fromRGB(198, 194, 184),
-        CellOdd     = Color3.fromRGB(192, 188, 178),
-        CellBorder  = Color3.fromRGB(142, 154, 168),
-        CellLast    = Color3.fromRGB(182, 178, 154),
-        CellWin     = Color3.fromRGB(196, 182, 128),
-        CellHint    = Color3.fromRGB(158, 184, 160),
-        CellPending = Color3.fromRGB(194, 172, 144),
-        CoordText   = Color3.fromRGB(62, 68, 80),
+        BoardOuter  = Color3.fromRGB(154, 150, 140),
+        BoardBg     = Color3.fromRGB(195, 191, 181),
+        GridLine    = Color3.fromRGB(138, 152, 168),
+        CellLast    = Color3.fromRGB(180, 176, 150),
+        CellWin     = Color3.fromRGB(196, 182, 126),
+        CellHint    = Color3.fromRGB(156, 184, 158),
+        CellPending = Color3.fromRGB(192, 170, 140),
+        CenterDot   = Color3.fromRGB(92, 104, 120),
         PieceX      = Color3.fromRGB(172, 48, 52),
         PieceO      = Color3.fromRGB(36, 92, 154),
         WinLine     = Color3.fromRGB(178, 128, 34),
@@ -125,41 +116,52 @@ local BoardThemes = {
 }
 
 local THEME_ORDER = { "Dark", "Wood", "Emerald", "Paper" }
-local COL_LETTERS = { "A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S" }
+
+-- 8 Màn chơi từ nhỏ gọn đến siêu rộng
+local STAGES = {
+    { size = 3,  winLen = 3, title = "3x3",   sub = "3 ô thắng" },
+    { size = 5,  winLen = 4, title = "5x5",   sub = "4 ô thắng" },
+    { size = 9,  winLen = 5, title = "9x9",   sub = "Nhanh 5 ô" },
+    { size = 12, winLen = 5, title = "12x12", sub = "Gọn 5 ô" },
+    { size = 15, winLen = 5, title = "15x15", sub = "Chuẩn 5 ô" },
+    { size = 20, winLen = 5, title = "20x20", sub = "Lớn 5 ô" },
+    { size = 35, winLen = 5, title = "35x35", sub = "Siêu rộng" },
+    { size = 50, winLen = 5, title = "50x50", sub = "Đại chiến" },
+}
 
 local FONT_MAIN = Enum.Font.GothamSemibold
 local FONT_BODY = Enum.Font.GothamMedium
 
 local Config = {
-    BoardSize       = 15,         -- 13, 15, 19
-    Mode            = "AI",       -- "AI" hoặc "PVP"
-    Difficulty      = "Medium",   -- "Easy", "Medium", "Hard", "Master"
-    BlockTwoEnds    = true,       -- Luật chặn 2 đầu (Caro VN)
-    PlayerSide      = 1,          -- 1 = X (đi trước), 2 = O (đi sau)
-    ThemeKey        = "Dark",     -- "Dark", "Wood", "Emerald", "Paper"
-    TurnTimeLimit   = 0,          -- 0 = Tắt, 15 = 15s, 30 = 30s
-    ConfirmTwoTap   = false,      -- 2 chạm xác nhận trên mobile
-    ShowCoords      = true,       -- Hiện tọa độ A-O, 1-15
-    ShowMoveNumbers = false,      -- Hiện số thứ tự trên từng quân cờ
-    SoundEnabled    = true,       -- Âm thanh khi đánh cờ
-    CellSize        = 30,         -- Kích thước ô (20..44)
+    BoardSize       = 15,
+    Mode            = "AI",       -- "AI" | "PVP"
+    Difficulty      = "Medium",   -- "Easy" | "Medium" | "Hard" | "Master"
+    BlockTwoEnds    = true,       -- Áp dụng cho màn 5 ô thắng
+    PlayerSide      = 1,          -- 1 = X, 2 = O
+    ThemeKey        = "Dark",
+    TurnTimeLimit   = 0,          -- 0 | 15 | 30
+    ConfirmTwoTap   = false,
+    ShowMoveNumbers = false,
+    SoundEnabled    = true,
+    CellSize        = 30,
 }
 
 local State = {
+    Screen          = "HOME",     -- "HOME" (Sảnh chính) | "GAME" (Trong trận)
     Grid            = {},
     CurrentTurn     = 1,
     GameOver        = false,
     Winner          = 0,
     IsDraw          = false,
     AIThinking      = false,
-    History         = {},         -- { r, c, p }
-    WinCells        = {},         -- { {r, c}, ... }
+    History         = {},
+    WinCells        = {},
     HintCell        = nil,
     PendingCell     = nil,
     Minimized       = false,
     Destroyed       = false,
     ActiveMatchId   = 0,
-    ActiveTab       = "PLAY",     -- "PLAY" | "SETTINGS"
+    ActiveTab       = "PLAY",
     MatchElapsed    = 0,
     TurnTimeLeft    = 0,
     SessionX        = 0,
@@ -169,24 +171,42 @@ local State = {
 }
 
 local Stats = {
-    Wins   = 0,
-    Losses = 0,
-    Draws  = 0,
-    Streak = 0,
+    Wins       = 0,
+    Losses     = 0,
+    Draws      = 0,
+    Streak     = 0,
     BestStreak = 0,
-    Xu     = 0,
+    Xu         = 0,
 }
 
 local UI = {
-    Cells = {},
+    PieceNodes = {},
     Connections = {},
 }
 
 -- ========================================================================
--- [PHẦN 02] LƯU DỮ LIỆU, CẤP BẬC KỲ THỦ, ÂM THANH & TIỆN ÍCH GUI
+-- [PHẦN 02] TIỆN ÍCH LƯU DỮ LIỆU, CẤP BẬC, ÂM THANH & GUI
 -- ========================================================================
 local function getTheme()
     return BoardThemes[Config.ThemeKey] or BoardThemes.Dark
+end
+
+local function getWinLength(boardSize)
+    if boardSize <= 3 then
+        return 3
+    elseif boardSize <= 5 then
+        return 4
+    else
+        return 5
+    end
+end
+
+local function isBlockTwoEndsActive()
+    return Config.BlockTwoEnds and getWinLength(Config.BoardSize) >= 5
+end
+
+local function cellKey(r, c)
+    return r * 1000 + c
 end
 
 local function getRankInfo(wins)
@@ -248,26 +268,16 @@ end
 local function getGuiParent()
     if type(gethui) == "function" then
         local ok, hui = pcall(gethui)
-        if ok and hui then
-            return hui
-        end
+        if ok and hui then return hui end
     end
-    local okCore = pcall(function()
-        return CoreGui.Name
-    end)
-    if okCore then
-        return CoreGui
-    end
-    if LocalPlayer then
-        return LocalPlayer:WaitForChild("PlayerGui")
-    end
+    local okCore = pcall(function() return CoreGui.Name end)
+    if okCore then return CoreGui end
+    if LocalPlayer then return LocalPlayer:WaitForChild("PlayerGui") end
     return CoreGui
 end
 
 local function trackConn(conn)
-    if conn then
-        table.insert(UI.Connections, conn)
-    end
+    if conn then table.insert(UI.Connections, conn) end
     return conn
 end
 
@@ -288,7 +298,7 @@ local function addStroke(parent, color, thickness, transparency)
     return s
 end
 
--- Cảm ứng tức thì cho mobile & PC (lọc cử chỉ vuốt/cuộn > 14px để không bấm nhầm)
+-- Cảm ứng tức thì cho mobile & PC (lọc cử chỉ vuốt/cuộn > 14px)
 local function bindInstantTap(button, callback)
     local pressPos = nil
     local lastFire = 0
@@ -300,16 +310,14 @@ local function bindInstantTap(button, callback)
     end))
 
     trackConn(button.InputEnded:Connect(function(input)
-        if not pressPos then
-            return
-        end
+        if not pressPos then return end
         if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
             local delta = (input.Position - pressPos).Magnitude
             pressPos = nil
             local now = os.clock()
             if delta <= 14 and (now - lastFire) >= 0.08 then
                 lastFire = now
-                callback()
+                callback(input.Position)
             end
         end
     end))
@@ -317,9 +325,7 @@ end
 
 local SoundFolder = nil
 local function playSfx(soundId, volume, pitch)
-    if not Config.SoundEnabled or State.Destroyed or not SoundFolder then
-        return
-    end
+    if not Config.SoundEnabled or State.Destroyed or not SoundFolder then return end
     pcall(function()
         local snd = Instance.new("Sound")
         snd.SoundId = soundId
@@ -328,9 +334,7 @@ local function playSfx(soundId, volume, pitch)
         snd.Parent = SoundFolder
         snd:Play()
         task.delay(1.2, function()
-            if snd and snd.Parent then
-                snd:Destroy()
-            end
+            if snd and snd.Parent then snd:Destroy() end
         end)
     end)
 end
@@ -338,18 +342,9 @@ end
 local function sfxPlace(player)
     playSfx("rbxassetid://421058925", 0.34, (player == 1) and 1.15 or 0.92)
 end
-
-local function sfxWin()
-    playSfx("rbxassetid://4590662766", 0.45, 1.0)
-end
-
-local function sfxWarn()
-    playSfx("rbxassetid://421058925", 0.38, 0.72)
-end
-
-local function sfxClick()
-    playSfx("rbxassetid://421058925", 0.22, 1.35)
-end
+local function sfxWin()  playSfx("rbxassetid://4590662766", 0.45, 1.0) end
+local function sfxWarn() playSfx("rbxassetid://421058925", 0.38, 0.72) end
+local function sfxClick() playSfx("rbxassetid://421058925", 0.22, 1.35) end
 
 local function formatTime(sec)
     local s = math.max(0, math.floor(sec))
@@ -357,7 +352,7 @@ local function formatTime(sec)
 end
 
 -- ========================================================================
--- [PHẦN 03] LOGIC BÀN CỜ, KIỂM TRA THẮNG & CẢNH BÁO CHIẾU 4
+-- [PHẦN 03] LOGIC BÀN CỜ (TỰ THÍCH NGHI 3 Ô / 4 Ô / 5 Ô THẮNG)
 -- ========================================================================
 local DIRS = {
     { 0, 1 },
@@ -383,10 +378,11 @@ local function initGrid()
     end
 end
 
--- Kiểm tra nước (r, c) của p có thắng không (trả về danh sách ô thắng đã sắp xếp theo đường thẳng)
 local function checkWinAt(r, c, p)
     local grid = State.Grid
     local opp = (p == 1) and 2 or 1
+    local winLen = getWinLength(Config.BoardSize)
+    local blockRule = isBlockTwoEndsActive()
 
     for _, d in ipairs(DIRS) do
         local dr, dc = d[1], d[2]
@@ -418,9 +414,9 @@ local function checkWinAt(r, c, p)
         end
 
         local count = #line
-        if count >= 5 then
-            if Config.BlockTwoEnds then
-                if count > 5 or not (blockedPos and blockedNeg) then
+        if count >= winLen then
+            if blockRule then
+                if count > winLen or not (blockedPos and blockedNeg) then
                     return line
                 end
             else
@@ -432,19 +428,17 @@ local function checkWinAt(r, c, p)
     return nil
 end
 
--- Kiểm tra nước vừa đánh có tạo thế nguy hiểm (4 quân mở hoặc 4 quân 1 đầu) không
 local function detectThreatAfterMove(r, c, p)
+    local winLen = getWinLength(Config.BoardSize)
+    if winLen < 5 then return "" end
+
     local grid = State.Grid
-    local opp = (p == 1) and 2 or 1
-    local open3 = 0
-    local open4 = 0
-    local half4 = 0
+    local open3, open4, half4 = 0, 0, 0
 
     for _, d in ipairs(DIRS) do
         local dr, dc = d[1], d[2]
         local count = 1
         local openEnds = 0
-        local oppBlocks = 0
 
         local nr, nc = r + dr, c + dc
         while inBounds(nr, nc) and grid[nr][nc] == p do
@@ -452,10 +446,7 @@ local function detectThreatAfterMove(r, c, p)
             nr = nr + dr
             nc = nc + dc
         end
-        if inBounds(nr, nc) then
-            if grid[nr][nc] == 0 then openEnds = openEnds + 1
-            elseif grid[nr][nc] == opp then oppBlocks = oppBlocks + 1 end
-        end
+        if inBounds(nr, nc) and grid[nr][nc] == 0 then openEnds = openEnds + 1 end
 
         local pr, pc = r - dr, c - dc
         while inBounds(pr, pc) and grid[pr][pc] == p do
@@ -463,19 +454,11 @@ local function detectThreatAfterMove(r, c, p)
             pr = pr - dr
             pc = pc - dc
         end
-        if inBounds(pr, pc) then
-            if grid[pr][pc] == 0 then openEnds = openEnds + 1
-            elseif grid[pr][pc] == opp then oppBlocks = oppBlocks + 1 end
-        end
+        if inBounds(pr, pc) and grid[pr][pc] == 0 then openEnds = openEnds + 1 end
 
         if count == 4 then
-            if openEnds == 2 then
-                open4 = open4 + 1
-            elseif openEnds == 1 and (not Config.BlockTwoEnds or oppBlocks == 0) then
-                half4 = half4 + 1
-            elseif openEnds == 1 then
-                half4 = half4 + 1
-            end
+            if openEnds == 2 then open4 = open4 + 1
+            elseif openEnds == 1 then half4 = half4 + 1 end
         elseif count == 3 and openEnds == 2 then
             open3 = open3 + 1
         end
@@ -499,13 +482,15 @@ local function isBoardFull()
 end
 
 -- ========================================================================
--- [PHẦN 04] AI 4 CẤP ĐỘ (DỄ / VỪA / KHÓ / SIÊU KHÓ)
+-- [PHẦN 04] AI 4 CẤP ĐỘ THÍCH NGHI MỌI KÍCH THƯỚC (3x3 ĐẾN 50x50)
 -- ========================================================================
 local AI = {}
 
 function AI.scoreLine(r, c, dr, dc, p)
     local grid = State.Grid
     local opp = (p == 1) and 2 or 1
+    local winLen = getWinLength(Config.BoardSize)
+    local blockRule = isBlockTwoEndsActive()
 
     local count = 1
     local openEnds = 0
@@ -561,28 +546,27 @@ function AI.scoreLine(r, c, dr, dc, p)
         end
     end
 
-    if count >= 5 then
-        if not Config.BlockTwoEnds or count > 5 or blockedByOpp < 2 then
+    if count >= winLen then
+        if not blockRule or count > winLen or blockedByOpp < 2 then
             return 10000000, "WIN"
         else
             return 60, "BLOCKED5"
         end
     end
 
+    local need = winLen - count
     local score = 0
     local tag = "NONE"
 
-    if count == 4 then
+    if need == 1 then
         if openEnds == 2 then
             score = 1350000
             tag = "OPEN4"
         elseif openEnds == 1 then
-            -- Nếu bị chặn 1 đầu theo luật Chặn 2 đầu, đối phương chỉ cần chặn đầu kia là hết đường,
-            -- nhưng vẫn phải chặn ngay nên giá trị vẫn là HALF4 ép buộc
-            score = (Config.BlockTwoEnds and blockedByOpp == 1) and 135000 or 165000
+            score = 155000
             tag = "HALF4"
         end
-    elseif count == 3 then
+    elseif need == 2 then
         if openEnds == 2 then
             score = 54000
             tag = "OPEN3"
@@ -590,14 +574,14 @@ function AI.scoreLine(r, c, dr, dc, p)
             score = 4800
             tag = "HALF3"
         end
-    elseif count == 2 then
+    elseif need == 3 then
         if openEnds == 2 then
             score = 1500
             tag = "OPEN2"
         elseif openEnds == 1 then
             score = 240
         end
-    elseif count == 1 then
+    else
         if openEnds == 2 then
             score = 65
         elseif openEnds == 1 then
@@ -609,19 +593,19 @@ function AI.scoreLine(r, c, dr, dc, p)
     if bestGap > 0 then
         local totalSpan = count + bestGap
         local spanOpen = (bestGap == gapPosCount and gapPosOpen) or (bestGap == gapNegCount and gapNegOpen)
-        if totalSpan >= 4 then
+        if totalSpan >= winLen - 1 then
             local gapScore = 125000
             if gapScore > score then
                 score = gapScore
                 tag = "HALF4"
             end
-        elseif totalSpan == 3 and openEnds >= 1 and spanOpen then
+        elseif totalSpan == winLen - 2 and openEnds >= 1 and spanOpen then
             local gapScore = 40000
             if gapScore > score then
                 score = gapScore
                 tag = "OPEN3"
             end
-        elseif totalSpan == 2 and openEnds >= 1 and spanOpen then
+        elseif totalSpan >= 2 and openEnds >= 1 and spanOpen then
             score = score + 850
         end
     end
@@ -667,6 +651,18 @@ function AI.getCandidates()
         return { { r = mid, c = mid } }
     end
 
+    -- Với bàn nhỏ <= 5x5 lấy toàn bộ ô trống
+    if n <= 5 then
+        for r = 1, n do
+            for c = 1, n do
+                if grid[r][c] == 0 then
+                    table.insert(candidates, { r = r, c = c })
+                end
+            end
+        end
+        return candidates
+    end
+
     local mark = {}
     for _, mv in ipairs(State.History) do
         local mr, mc = mv.r, mv.c
@@ -676,7 +672,7 @@ function AI.getCandidates()
                 for dc = -2, 2 do
                     local c = mc + dc
                     if c >= 1 and c <= n and grid[r][c] == 0 then
-                        local key = r * 100 + c
+                        local key = cellKey(r, c)
                         if not mark[key] then
                             mark[key] = true
                             table.insert(candidates, { r = r, c = c })
@@ -700,13 +696,9 @@ function AI.chooseMove(side, difficulty)
     if #candidates == 1 then return candidates[1].r, candidates[1].c end
 
     local defWeight = 1.06
-    if difficulty == "Easy" then
-        defWeight = 0.76
-    elseif difficulty == "Hard" then
-        defWeight = 1.12
-    elseif difficulty == "Master" then
-        defWeight = 1.16
-    end
+    if difficulty == "Easy" then defWeight = 0.76
+    elseif difficulty == "Hard" then defWeight = 1.12
+    elseif difficulty == "Master" then defWeight = 1.16 end
 
     local scored = {}
     for _, cand in ipairs(candidates) do
@@ -732,9 +724,7 @@ function AI.chooseMove(side, difficulty)
         table.insert(scored, { r = r, c = c, score = combined, atk = atk, def = def })
     end
 
-    table.sort(scored, function(a, b)
-        return a.score > b.score
-    end)
+    table.sort(scored, function(a, b) return a.score > b.score end)
 
     if scored[1].score >= 30000000 then
         return scored[1].r, scored[1].c
@@ -757,7 +747,6 @@ function AI.chooseMove(side, difficulty)
         return pick.r, pick.c
     end
 
-    -- Khó (top 8) & Siêu Khó (top 14, nhìn sâu 2 bước + kiểm tra phản công mạnh nhất)
     local topK = (difficulty == "Master") and math.min(14, #scored) or math.min(8, #scored)
     local checkPool = (difficulty == "Master") and math.min(18, #scored) or math.min(12, #scored)
     local bestMove = scored[1]
@@ -778,7 +767,6 @@ function AI.chooseMove(side, difficulty)
                 if grid[c2.r][c2.c] == 0 then
                     local oScore = AI.evaluatePointFor(c2.r, c2.c, opp)
                     if oScore > oppBest then oppBest = oScore end
-
                     local sScore = AI.evaluatePointFor(c2.r, c2.c, side)
                     if sScore > sideFollowUp then sideFollowUp = sScore end
                     if sScore >= 120000 then sideThreats = sideThreats + 1 end
@@ -789,9 +777,7 @@ function AI.chooseMove(side, difficulty)
         grid[mv.r][mv.c] = 0
 
         local evalVal = mv.score + sideFollowUp * 0.34 - oppBest * 0.46
-        if sideThreats >= 2 then
-            evalVal = evalVal + 950000
-        end
+        if sideThreats >= 2 then evalVal = evalVal + 950000 end
         if oppBest >= 10000000 then
             evalVal = evalVal - 20000000
         elseif oppBest >= 1000000 and mv.atk < 1000000 then
@@ -808,16 +794,14 @@ function AI.chooseMove(side, difficulty)
 end
 
 -- ========================================================================
--- [PHẦN 05] KHỞI TẠO GIAO DIỆN TOÀN MÀN HÌNH & NÚT THU GỌN NỔI
+-- [PHẦN 05] KHỞI TẠO SCREEN GUI & NÚT THU GỌN NỔI
 -- ========================================================================
 loadStats()
 
 local guiParent = getGuiParent()
 do
     local old = guiParent:FindFirstChild("CoCaroPro_Standalone")
-    if old then
-        pcall(function() old:Destroy() end)
-    end
+    if old then pcall(function() old:Destroy() end) end
 end
 
 local ScreenGui = Instance.new("ScreenGui")
@@ -840,7 +824,7 @@ Root.BorderSizePixel = 0
 Root.Active = true
 Root.Parent = ScreenGui
 
--- Nút nổi khi thu gọn (đặt dưới topbar mobile để không bị che)
+-- Nút nổi khi thu gọn (đặt dưới topbar mobile)
 local FloatBtn = Instance.new("TextButton")
 FloatBtn.Name = "FloatingReopen"
 FloatBtn.Size = UDim2.new(0, 102, 0, 38)
@@ -894,37 +878,489 @@ do
 end
 
 -- Khai báo trước các hàm cốt lõi
-local rebuildBoard, refreshBoardVisuals, updateTopStatus, updateControlsUI, switchSideTab
+local openHomeScreen, enterGameScreen, rebuildBoard, refreshBoardVisuals, updateTopStatus
+local updateControlsUI, updateHomeUI, switchSideTab
 local startNewGame, performMove, undoMove, showHint, surrenderGame, showWinBanner, hideWinBanner, drawWinLine
 
 -- ========================================================================
--- [PHẦN 06] THANH TIÊU ĐỀ (TOP BAR) KÈM ĐỒNG HỒ & THANH ĐẾM NGƯỢC
+-- [PHẦN 06] GIAO DIỆN CHÍNH / SẢNH CHÍNH (HOME SCREEN)
 -- ========================================================================
+local HomeScreen = Instance.new("Frame")
+HomeScreen.Name = "HomeScreen"
+HomeScreen.Size = UDim2.new(1, 0, 1, 0)
+HomeScreen.BackgroundColor3 = UITheme.BgMain
+HomeScreen.BorderSizePixel = 0
+HomeScreen.Visible = true
+HomeScreen.Parent = Root
+UI.HomeScreen = HomeScreen
+
+do
+    -- Thanh trên của Sảnh Chính
+    local HomeTop = Instance.new("Frame")
+    HomeTop.Size = UDim2.new(1, 0, 0, 48)
+    HomeTop.BackgroundColor3 = UITheme.BgPanel
+    HomeTop.BorderSizePixel = 0
+    HomeTop.Parent = HomeScreen
+    addStroke(HomeTop, UITheme.StrokeSubtle, 1, 0.35)
+
+    local HomeBrand = Instance.new("TextLabel")
+    HomeBrand.Size = UDim2.new(0, 220, 1, 0)
+    HomeBrand.Position = UDim2.new(0, 16, 0, 0)
+    HomeBrand.BackgroundTransparency = 1
+    HomeBrand.Text = "CỜ CARO PRO " .. VERSION
+    HomeBrand.Font = FONT_MAIN
+    HomeBrand.TextSize = 16
+    HomeBrand.TextColor3 = UITheme.TextPrimary
+    HomeBrand.TextXAlignment = Enum.TextXAlignment.Left
+    HomeBrand.Parent = HomeTop
+
+    local HomeStatsPill = Instance.new("TextLabel")
+    HomeStatsPill.Size = UDim2.new(0, 290, 0, 30)
+    HomeStatsPill.AnchorPoint = Vector2.new(0.5, 0.5)
+    HomeStatsPill.Position = UDim2.new(0.5, 0, 0.5, 0)
+    HomeStatsPill.BackgroundColor3 = UITheme.BgCard
+    HomeStatsPill.BorderSizePixel = 0
+    HomeStatsPill.Text = "Tập Sự  |  0 Thắng  |  0 Xu"
+    HomeStatsPill.Font = FONT_MAIN
+    HomeStatsPill.TextSize = 12
+    HomeStatsPill.TextColor3 = UITheme.ColorGold
+    HomeStatsPill.Parent = HomeTop
+    addCorner(HomeStatsPill, 8)
+    addStroke(HomeStatsPill, UITheme.StrokeSubtle, 1, 0.3)
+    UI.HomeStatsPill = HomeStatsPill
+
+    local HomeRight = Instance.new("Frame")
+    HomeRight.Size = UDim2.new(0, 148, 0, 32)
+    HomeRight.AnchorPoint = Vector2.new(1, 0.5)
+    HomeRight.Position = UDim2.new(1, -12, 0.5, 0)
+    HomeRight.BackgroundTransparency = 1
+    HomeRight.Parent = HomeTop
+
+    local HomeMinBtn = Instance.new("TextButton")
+    HomeMinBtn.Size = UDim2.new(0, 74, 1, 0)
+    HomeMinBtn.BackgroundColor3 = UITheme.BgButton
+    HomeMinBtn.BorderSizePixel = 0
+    HomeMinBtn.AutoButtonColor = false
+    HomeMinBtn.Text = "Thu gọn"
+    HomeMinBtn.Font = FONT_BODY
+    HomeMinBtn.TextSize = 12
+    HomeMinBtn.TextColor3 = UITheme.TextPrimary
+    HomeMinBtn.Parent = HomeRight
+    addCorner(HomeMinBtn, 7)
+    addStroke(HomeMinBtn, UITheme.StrokeSubtle, 1, 0.3)
+    bindInstantTap(HomeMinBtn, function()
+        State.Minimized = true
+        Root.Visible = false
+        FloatBtn.Visible = true
+        sfxClick()
+    end)
+
+    local HomeCloseBtn = Instance.new("TextButton")
+    HomeCloseBtn.Size = UDim2.new(0, 66, 1, 0)
+    HomeCloseBtn.Position = UDim2.new(0, 82, 0, 0)
+    HomeCloseBtn.BackgroundColor3 = Color3.fromRGB(68, 34, 38)
+    HomeCloseBtn.BorderSizePixel = 0
+    HomeCloseBtn.AutoButtonColor = false
+    HomeCloseBtn.Text = "Đóng"
+    HomeCloseBtn.Font = FONT_MAIN
+    HomeCloseBtn.TextSize = 12
+    HomeCloseBtn.TextColor3 = UITheme.ColorX
+    HomeCloseBtn.Parent = HomeRight
+    addCorner(HomeCloseBtn, 7)
+    addStroke(HomeCloseBtn, UITheme.ColorDanger, 1, 0.35)
+    bindInstantTap(HomeCloseBtn, function()
+        if _G.CoCaroProCleanup then _G.CoCaroProCleanup() end
+    end)
+
+    -- Thân Sảnh Chính chia 2 cột cân đối (Trái: Logo + Bắt đầu chơi | Phải: Chọn màn chơi & Cài đặt nhanh)
+    local HomeBody = Instance.new("Frame")
+    HomeBody.Size = UDim2.new(1, -24, 1, -64)
+    HomeBody.Position = UDim2.new(0, 12, 0, 56)
+    HomeBody.BackgroundTransparency = 1
+    HomeBody.Parent = HomeScreen
+
+    -- CỘT TRÁI: Thẻ Hero + 2 nút vào trận lớn
+    local LeftCard = Instance.new("Frame")
+    LeftCard.Size = UDim2.new(0.40, -8, 1, 0)
+    LeftCard.BackgroundColor3 = UITheme.BgPanel
+    LeftCard.BorderSizePixel = 0
+    LeftCard.Parent = HomeBody
+    addCorner(LeftCard, 12)
+    addStroke(LeftCard, UITheme.StrokeSubtle, 1, 0.25)
+
+    -- Biểu tượng X O vector lớn ở đầu thẻ trái
+    local LogoWrap = Instance.new("Frame")
+    LogoWrap.Size = UDim2.new(0, 118, 0, 56)
+    LogoWrap.AnchorPoint = Vector2.new(0.5, 0)
+    LogoWrap.Position = UDim2.new(0.5, 0, 0, 18)
+    LogoWrap.BackgroundColor3 = UITheme.BgCard
+    LogoWrap.BorderSizePixel = 0
+    LogoWrap.Parent = LeftCard
+    addCorner(LogoWrap, 12)
+    addStroke(LogoWrap, UITheme.StrokeStrong, 1, 0.3)
+
+    -- Vector X trái
+    local lx = Instance.new("Frame")
+    lx.Size = UDim2.new(0, 34, 0, 34)
+    lx.Position = UDim2.new(0, 16, 0.5, -17)
+    lx.BackgroundTransparency = 1
+    lx.Parent = LogoWrap
+    for _, rot in ipairs({ 45, -45 }) do
+        local b = Instance.new("Frame")
+        b.Size = UDim2.new(1, 0, 0, 6)
+        b.AnchorPoint = Vector2.new(0.5, 0.5)
+        b.Position = UDim2.new(0.5, 0, 0.5, 0)
+        b.Rotation = rot
+        b.BackgroundColor3 = UITheme.ColorX
+        b.BorderSizePixel = 0
+        b.Parent = lx
+        addCorner(b, 3)
+    end
+
+    -- Vector O phải
+    local lo = Instance.new("Frame")
+    lo.Size = UDim2.new(0, 30, 0, 30)
+    lo.Position = UDim2.new(1, -46, 0.5, -15)
+    lo.BackgroundTransparency = 1
+    lo.Parent = LogoWrap
+    addCorner(lo, 20)
+    addStroke(lo, UITheme.ColorO, 4.5, 0)
+
+    local HeroTitle = Instance.new("TextLabel")
+    HeroTitle.Size = UDim2.new(1, -20, 0, 28)
+    HeroTitle.Position = UDim2.new(0, 10, 0, 82)
+    HeroTitle.BackgroundTransparency = 1
+    HeroTitle.Text = "CỜ CARO PRO"
+    HeroTitle.Font = FONT_MAIN
+    HeroTitle.TextSize = 22
+    HeroTitle.TextColor3 = UITheme.TextPrimary
+    HeroTitle.Parent = LeftCard
+
+    local HeroSummary = Instance.new("TextLabel")
+    HeroSummary.Size = UDim2.new(1, -24, 0, 36)
+    HeroSummary.Position = UDim2.new(0, 12, 0, 112)
+    HeroSummary.BackgroundTransparency = 1
+    HeroSummary.Text = "Màn 15x15 (5 ô thắng)  |  AI: Vừa\nGiao diện: Tối  |  Chặn 2 đầu"
+    HeroSummary.Font = FONT_BODY
+    HeroSummary.TextSize = 12
+    HeroSummary.TextColor3 = UITheme.TextSecondary
+    HeroSummary.TextWrapped = true
+    HeroSummary.Parent = LeftCard
+    UI.HeroSummary = HeroSummary
+
+    -- 2 nút vào trận chính
+    local PlayAIBtn = Instance.new("TextButton")
+    PlayAIBtn.Size = UDim2.new(1, -28, 0, 44)
+    PlayAIBtn.Position = UDim2.new(0, 14, 1, -110)
+    PlayAIBtn.BackgroundColor3 = Color3.fromRGB(38, 72, 56)
+    PlayAIBtn.BorderSizePixel = 0
+    PlayAIBtn.AutoButtonColor = false
+    PlayAIBtn.Text = "VÀO TRẬN ĐẤU MÁY (AI)"
+    PlayAIBtn.Font = FONT_MAIN
+    PlayAIBtn.TextSize = 14
+    PlayAIBtn.TextColor3 = UITheme.ColorGreen
+    PlayAIBtn.Parent = LeftCard
+    addCorner(PlayAIBtn, 9)
+    addStroke(PlayAIBtn, UITheme.ColorGreen, 1.5, 0.25)
+    bindInstantTap(PlayAIBtn, function()
+        Config.Mode = "AI"
+        sfxClick()
+        enterGameScreen()
+    end)
+
+    local PlayPVPBtn = Instance.new("TextButton")
+    PlayPVPBtn.Size = UDim2.new(1, -28, 0, 40)
+    PlayPVPBtn.Position = UDim2.new(0, 14, 1, -56)
+    PlayPVPBtn.BackgroundColor3 = UITheme.BgActive
+    PlayPVPBtn.BorderSizePixel = 0
+    PlayPVPBtn.AutoButtonColor = false
+    PlayPVPBtn.Text = "CHƠI 2 NGƯỜI CÙNG MÁY"
+    PlayPVPBtn.Font = FONT_MAIN
+    PlayPVPBtn.TextSize = 13
+    PlayPVPBtn.TextColor3 = UITheme.ColorO
+    PlayPVPBtn.Parent = LeftCard
+    addCorner(PlayPVPBtn, 9)
+    addStroke(PlayPVPBtn, UITheme.ColorO, 1.2, 0.3)
+    bindInstantTap(PlayPVPBtn, function()
+        Config.Mode = "PVP"
+        sfxClick()
+        enterGameScreen()
+    end)
+
+    -- CỘT PHẢI: Chọn màn chơi (8 kích thước) + Độ khó AI + Giao diện + Tùy chọn nhanh
+    local RightCard = Instance.new("ScrollingFrame")
+    RightCard.Size = UDim2.new(0.60, -4, 1, 0)
+    RightCard.Position = UDim2.new(0.40, 4, 0, 0)
+    RightCard.BackgroundColor3 = UITheme.BgPanel
+    RightCard.BorderSizePixel = 0
+    RightCard.ScrollBarThickness = 4
+    RightCard.ScrollBarImageColor3 = UITheme.StrokeStrong
+    RightCard.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    RightCard.CanvasSize = UDim2.new(0, 0, 0, 0)
+    RightCard.Parent = HomeBody
+    addCorner(RightCard, 12)
+    addStroke(RightCard, UITheme.StrokeSubtle, 1, 0.25)
+
+    local rPad = Instance.new("UIPadding")
+    rPad.PaddingTop = UDim.new(0, 12)
+    rPad.PaddingBottom = UDim.new(0, 12)
+    rPad.PaddingLeft = UDim.new(0, 14)
+    rPad.PaddingRight = UDim.new(0, 14)
+    rPad.Parent = RightCard
+
+    local rList = Instance.new("UIListLayout")
+    rList.SortOrder = Enum.SortOrder.LayoutOrder
+    rList.Padding = UDim.new(0, 8)
+    rList.Parent = RightCard
+
+    local function makeHomeHeader(text, order)
+        local lbl = Instance.new("TextLabel")
+        lbl.LayoutOrder = order
+        lbl.Size = UDim2.new(1, 0, 0, 18)
+        lbl.BackgroundTransparency = 1
+        lbl.Text = text
+        lbl.Font = FONT_MAIN
+        lbl.TextSize = 11
+        lbl.TextColor3 = UITheme.TextMuted
+        lbl.TextXAlignment = Enum.TextXAlignment.Left
+        lbl.Parent = RightCard
+        return lbl
+    end
+
+    -- 1. Lưới chọn 8 màn chơi (4 cột x 2 hàng)
+    makeHomeHeader("CHỌN MÀN CHƠI (KÍCH THƯỚC BÀN CỜ)", 1)
+
+    local StageGridHolder = Instance.new("Frame")
+    StageGridHolder.LayoutOrder = 2
+    StageGridHolder.Size = UDim2.new(1, 0, 0, 108)
+    StageGridHolder.BackgroundTransparency = 1
+    StageGridHolder.Parent = RightCard
+
+    UI.HomeStageBtns = {}
+    for idx, stg in ipairs(STAGES) do
+        local col = (idx - 1) % 4
+        local row = math.floor((idx - 1) / 4)
+        local card = Instance.new("TextButton")
+        card.Size = UDim2.new(0.238, 0, 0, 50)
+        card.Position = UDim2.new(col * 0.254, 0, 0, row * 56)
+        card.BackgroundColor3 = UITheme.BgCard
+        card.BorderSizePixel = 0
+        card.AutoButtonColor = false
+        card.Text = ""
+        card.Parent = StageGridHolder
+        addCorner(card, 8)
+        local st = addStroke(card, UITheme.StrokeSubtle, 1.2, 0.3)
+
+        local t1 = Instance.new("TextLabel")
+        t1.Size = UDim2.new(1, 0, 0, 24)
+        t1.Position = UDim2.new(0, 0, 0, 5)
+        t1.BackgroundTransparency = 1
+        t1.Text = stg.title
+        t1.Font = FONT_MAIN
+        t1.TextSize = 14
+        t1.TextColor3 = UITheme.TextPrimary
+        t1.Parent = card
+
+        local t2 = Instance.new("TextLabel")
+        t2.Size = UDim2.new(1, 0, 0, 16)
+        t2.Position = UDim2.new(0, 0, 0, 29)
+        t2.BackgroundTransparency = 1
+        t2.Text = stg.sub
+        t2.Font = FONT_BODY
+        t2.TextSize = 10
+        t2.TextColor3 = UITheme.TextSecondary
+        t2.Parent = card
+
+        local szVal = stg.size
+        bindInstantTap(card, function()
+            Config.BoardSize = szVal
+            sfxClick()
+            updateHomeUI()
+        end)
+
+        UI.HomeStageBtns[szVal] = { card = card, stroke = st, t1 = t1 }
+    end
+
+    -- 2. Độ khó AI trên sảnh
+    makeHomeHeader("ĐỘ KHÓ MÁY (AI)", 3)
+
+    local HomeDiffRow = Instance.new("Frame")
+    HomeDiffRow.LayoutOrder = 4
+    HomeDiffRow.Size = UDim2.new(1, 0, 0, 32)
+    HomeDiffRow.BackgroundTransparency = 1
+    HomeDiffRow.Parent = RightCard
+
+    UI.HomeDiffBtns = {}
+    local homeDiffs = {
+        { key = "Easy",   label = "Dễ" },
+        { key = "Medium", label = "Vừa" },
+        { key = "Hard",   label = "Khó" },
+        { key = "Master", label = "Siêu Khó" },
+    }
+    for idx, d in ipairs(homeDiffs) do
+        local b = Instance.new("TextButton")
+        b.Size = UDim2.new(0.238, 0, 1, 0)
+        b.Position = UDim2.new((idx - 1) * 0.254, 0, 0, 0)
+        b.BackgroundColor3 = UITheme.BgButton
+        b.BorderSizePixel = 0
+        b.AutoButtonColor = false
+        b.Text = d.label
+        b.Font = FONT_MAIN
+        b.TextSize = 12
+        b.TextColor3 = UITheme.TextSecondary
+        b.Parent = HomeDiffRow
+        addCorner(b, 7)
+        local st = addStroke(b, UITheme.StrokeSubtle, 1, 0.35)
+        bindInstantTap(b, function()
+            Config.Difficulty = d.key
+            sfxClick()
+            updateHomeUI()
+        end)
+        UI.HomeDiffBtns[d.key] = { btn = b, stroke = st }
+    end
+
+    -- 3. Giao diện bàn cờ trên sảnh
+    makeHomeHeader("GIAO DIỆN BÀN CỜ", 5)
+
+    local HomeThemeRow = Instance.new("Frame")
+    HomeThemeRow.LayoutOrder = 6
+    HomeThemeRow.Size = UDim2.new(1, 0, 0, 32)
+    HomeThemeRow.BackgroundTransparency = 1
+    HomeThemeRow.Parent = RightCard
+
+    UI.HomeThemeBtns = {}
+    for idx, key in ipairs(THEME_ORDER) do
+        local b = Instance.new("TextButton")
+        b.Size = UDim2.new(0.238, 0, 1, 0)
+        b.Position = UDim2.new((idx - 1) * 0.254, 0, 0, 0)
+        b.BackgroundColor3 = UITheme.BgButton
+        b.BorderSizePixel = 0
+        b.AutoButtonColor = false
+        b.Text = BoardThemes[key].Name
+        b.Font = FONT_MAIN
+        b.TextSize = 12
+        b.TextColor3 = UITheme.TextSecondary
+        b.Parent = HomeThemeRow
+        addCorner(b, 7)
+        local st = addStroke(b, UITheme.StrokeSubtle, 1, 0.35)
+        bindInstantTap(b, function()
+            Config.ThemeKey = key
+            saveStats()
+            sfxClick()
+            updateHomeUI()
+        end)
+        UI.HomeThemeBtns[key] = { btn = b, stroke = st }
+    end
+
+    -- 4. Tùy chọn nhanh (Quân X/O + Luật Chặn 2 đầu + Hẹn giờ)
+    makeHomeHeader("TÙY CHỌN NHANH", 7)
+
+    local HomeOptRow = Instance.new("Frame")
+    HomeOptRow.LayoutOrder = 8
+    HomeOptRow.Size = UDim2.new(1, 0, 0, 32)
+    HomeOptRow.BackgroundTransparency = 1
+    HomeOptRow.Parent = RightCard
+
+    local function makeHomeOptBtn(xScale, wScale, text, onTap)
+        local b = Instance.new("TextButton")
+        b.Size = UDim2.new(wScale, 0, 1, 0)
+        b.Position = UDim2.new(xScale, 0, 0, 0)
+        b.BackgroundColor3 = UITheme.BgButton
+        b.BorderSizePixel = 0
+        b.AutoButtonColor = false
+        b.Text = text
+        b.Font = FONT_MAIN
+        b.TextSize = 11
+        b.TextColor3 = UITheme.TextPrimary
+        b.Parent = HomeOptRow
+        addCorner(b, 7)
+        local st = addStroke(b, UITheme.StrokeSubtle, 1, 0.35)
+        bindInstantTap(b, onTap)
+        return b, st
+    end
+
+    UI.HomeSideBtn, UI.HomeSideStroke = makeHomeOptBtn(0, 0.32, "Quân: X (Trước)", function()
+        Config.PlayerSide = (Config.PlayerSide == 1) and 2 or 1
+        sfxClick()
+        updateHomeUI()
+    end)
+
+    UI.HomeRuleBtn, UI.HomeRuleStroke = makeHomeOptBtn(0.34, 0.32, "Chặn 2 đầu: Bật", function()
+        Config.BlockTwoEnds = not Config.BlockTwoEnds
+        sfxClick()
+        updateHomeUI()
+    end)
+
+    UI.HomeTimeBtn, UI.HomeTimeStroke = makeHomeOptBtn(0.68, 0.32, "Lượt: Không giới hạn", function()
+        if Config.TurnTimeLimit == 0 then
+            Config.TurnTimeLimit = 15
+        elseif Config.TurnTimeLimit == 15 then
+            Config.TurnTimeLimit = 30
+        else
+            Config.TurnTimeLimit = 0
+        end
+        sfxClick()
+        updateHomeUI()
+    end)
+end
+
+-- ========================================================================
+-- [PHẦN 07] MÀN HÌNH CHƠI GAME (GAME SCREEN)
+-- ========================================================================
+local GameScreen = Instance.new("Frame")
+GameScreen.Name = "GameScreen"
+GameScreen.Size = UDim2.new(1, 0, 1, 0)
+GameScreen.BackgroundColor3 = UITheme.BgMain
+GameScreen.BorderSizePixel = 0
+GameScreen.Visible = false
+GameScreen.Parent = Root
+UI.GameScreen = GameScreen
+
+-- Top Bar trong trận (có nút về Sảnh Chính)
 do
     local TopBar = Instance.new("Frame")
     TopBar.Name = "TopBar"
     TopBar.Size = UDim2.new(1, 0, 0, 48)
     TopBar.BackgroundColor3 = UITheme.BgPanel
     TopBar.BorderSizePixel = 0
-    TopBar.Parent = Root
+    TopBar.Parent = GameScreen
     addStroke(TopBar, UITheme.StrokeSubtle, 1, 0.35)
 
-    local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Size = UDim2.new(0, 175, 0, 22)
-    TitleLabel.Position = UDim2.new(0, 14, 0, 5)
-    TitleLabel.BackgroundTransparency = 1
-    TitleLabel.Text = "CỜ CARO PRO " .. VERSION
-    TitleLabel.Font = FONT_MAIN
-    TitleLabel.TextSize = 14
-    TitleLabel.TextColor3 = UITheme.TextPrimary
-    TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    TitleLabel.Parent = TopBar
+    local HomeBackBtn = Instance.new("TextButton")
+    HomeBackBtn.Size = UDim2.new(0, 86, 0, 32)
+    HomeBackBtn.Position = UDim2.new(0, 10, 0.5, -16)
+    HomeBackBtn.BackgroundColor3 = UITheme.BgButton
+    HomeBackBtn.BorderSizePixel = 0
+    HomeBackBtn.AutoButtonColor = false
+    HomeBackBtn.Text = "Sảnh chính"
+    HomeBackBtn.Font = FONT_MAIN
+    HomeBackBtn.TextSize = 12
+    HomeBackBtn.TextColor3 = UITheme.ColorGold
+    HomeBackBtn.Parent = TopBar
+    addCorner(HomeBackBtn, 7)
+    addStroke(HomeBackBtn, UITheme.ColorGold, 1, 0.35)
+    bindInstantTap(HomeBackBtn, function()
+        sfxClick()
+        openHomeScreen()
+    end)
+
+    local StageInfoLabel = Instance.new("TextLabel")
+    StageInfoLabel.Size = UDim2.new(0, 160, 0, 18)
+    StageInfoLabel.Position = UDim2.new(0, 104, 0, 6)
+    StageInfoLabel.BackgroundTransparency = 1
+    StageInfoLabel.Text = "Màn 15x15 (5 ô)"
+    StageInfoLabel.Font = FONT_MAIN
+    StageInfoLabel.TextSize = 12
+    StageInfoLabel.TextColor3 = UITheme.TextPrimary
+    StageInfoLabel.TextXAlignment = Enum.TextXAlignment.Left
+    StageInfoLabel.Parent = TopBar
+    UI.StageInfoLabel = StageInfoLabel
 
     local ClockLabel = Instance.new("TextLabel")
     ClockLabel.Size = UDim2.new(0, 175, 0, 16)
-    ClockLabel.Position = UDim2.new(0, 14, 0, 27)
+    ClockLabel.Position = UDim2.new(0, 104, 0, 26)
     ClockLabel.BackgroundTransparency = 1
-    ClockLabel.Text = "Thời gian: 00:00  |  Tỷ số 0 - 0"
+    ClockLabel.Text = "00:00  |  X 0 - 0 O"
     ClockLabel.Font = FONT_BODY
     ClockLabel.TextSize = 11
     ClockLabel.TextColor3 = UITheme.TextSecondary
@@ -932,11 +1368,10 @@ do
     ClockLabel.Parent = TopBar
     UI.ClockLabel = ClockLabel
 
-    -- Hộp trạng thái lượt ở giữa + thanh tiến trình đếm ngược lượt
     local TurnPill = Instance.new("Frame")
-    TurnPill.Size = UDim2.new(0, 240, 0, 34)
+    TurnPill.Size = UDim2.new(0, 232, 0, 34)
     TurnPill.AnchorPoint = Vector2.new(0.5, 0.5)
-    TurnPill.Position = UDim2.new(0.5, 0, 0.5, 0)
+    TurnPill.Position = UDim2.new(0.5, 16, 0.5, 0)
     TurnPill.BackgroundColor3 = UITheme.BgCard
     TurnPill.BorderSizePixel = 0
     TurnPill.ClipsDescendants = true
@@ -971,16 +1406,15 @@ do
     TimerBarFill.Parent = TimerBarBg
     UI.TimerBarFill = TimerBarFill
 
-    -- Cụm nút bên phải TopBar
     local RightGroup = Instance.new("Frame")
-    RightGroup.Size = UDim2.new(0, 148, 0, 32)
+    RightGroup.Size = UDim2.new(0, 144, 0, 32)
     RightGroup.AnchorPoint = Vector2.new(1, 0.5)
     RightGroup.Position = UDim2.new(1, -10, 0.5, 0)
     RightGroup.BackgroundTransparency = 1
     RightGroup.Parent = TopBar
 
     local MinBtn = Instance.new("TextButton")
-    MinBtn.Size = UDim2.new(0, 74, 1, 0)
+    MinBtn.Size = UDim2.new(0, 72, 1, 0)
     MinBtn.BackgroundColor3 = UITheme.BgButton
     MinBtn.BorderSizePixel = 0
     MinBtn.AutoButtonColor = false
@@ -999,8 +1433,8 @@ do
     end)
 
     local CloseBtn = Instance.new("TextButton")
-    CloseBtn.Size = UDim2.new(0, 66, 1, 0)
-    CloseBtn.Position = UDim2.new(0, 82, 0, 0)
+    CloseBtn.Size = UDim2.new(0, 64, 1, 0)
+    CloseBtn.Position = UDim2.new(0, 80, 0, 0)
     CloseBtn.BackgroundColor3 = Color3.fromRGB(68, 34, 38)
     CloseBtn.BorderSizePixel = 0
     CloseBtn.AutoButtonColor = false
@@ -1012,24 +1446,18 @@ do
     addCorner(CloseBtn, 7)
     addStroke(CloseBtn, UITheme.ColorDanger, 1, 0.35)
     bindInstantTap(CloseBtn, function()
-        if _G.CoCaroProCleanup then
-            _G.CoCaroProCleanup()
-        end
+        if _G.CoCaroProCleanup then _G.CoCaroProCleanup() end
     end)
 end
 
--- ========================================================================
--- [PHẦN 07] KHU VỰC BÀN CỜ (TRÁI) - KHÔNG BỊ CHE BỞI THANH ZOOM
--- ========================================================================
+-- Khu vực Bàn cờ (trái) & Bảng điều khiển 2 tab (phải)
 local MainArea = Instance.new("Frame")
-MainArea.Name = "MainArea"
 MainArea.Size = UDim2.new(1, -16, 1, -56)
 MainArea.Position = UDim2.new(0, 8, 0, 52)
 MainArea.BackgroundTransparency = 1
-MainArea.Parent = Root
+MainArea.Parent = GameScreen
 
 local BoardContainer = Instance.new("Frame")
-BoardContainer.Name = "BoardContainer"
 BoardContainer.Size = UDim2.new(1, -244, 1, 0)
 BoardContainer.BackgroundColor3 = getTheme().BoardOuter
 BoardContainer.BorderSizePixel = 0
@@ -1039,9 +1467,7 @@ addCorner(BoardContainer, 10)
 addStroke(BoardContainer, UITheme.StrokeSubtle, 1, 0.25)
 UI.BoardContainer = BoardContainer
 
--- Thanh cảnh báo chiếu 4 / thế 3 đôi mỏng ở đỉnh khung bàn cờ (tự ẩn khi không có)
 local AlertStrip = Instance.new("TextLabel")
-AlertStrip.Name = "AlertStrip"
 AlertStrip.Size = UDim2.new(0, 260, 0, 22)
 AlertStrip.AnchorPoint = Vector2.new(0.5, 0)
 AlertStrip.Position = UDim2.new(0.5, 0, 0, 6)
@@ -1060,7 +1486,6 @@ addStroke(AlertStrip, UITheme.ColorGold, 1, 0.3)
 UI.AlertStrip = AlertStrip
 
 local BoardScroll = Instance.new("ScrollingFrame")
-BoardScroll.Name = "BoardScroll"
 BoardScroll.Size = UDim2.new(1, -8, 1, -8)
 BoardScroll.Position = UDim2.new(0, 4, 0, 4)
 BoardScroll.BackgroundTransparency = 1
@@ -1073,38 +1498,79 @@ BoardScroll.CanvasSize = UDim2.new(0, 500, 0, 500)
 BoardScroll.Parent = BoardContainer
 UI.BoardScroll = BoardScroll
 
--- Khung bao gồm cả tọa độ + bàn cờ
-local BoardWrap = Instance.new("Frame")
-BoardWrap.Name = "BoardWrap"
-BoardWrap.Size = UDim2.new(0, 480, 0, 480)
-BoardWrap.BackgroundTransparency = 1
-BoardWrap.Parent = BoardScroll
-UI.BoardWrap = BoardWrap
-
+-- Bàn cờ tối ưu (không có tọa độ A B C / 1 2 3, vẽ bằng đường lưới siêu nhẹ)
 local BoardFrame = Instance.new("Frame")
 BoardFrame.Name = "BoardFrame"
 BoardFrame.Size = UDim2.new(0, 450, 0, 450)
-BoardFrame.Position = UDim2.new(0, 20, 0, 20)
 BoardFrame.BackgroundColor3 = getTheme().BoardBg
 BoardFrame.BorderSizePixel = 0
-BoardFrame.Parent = BoardWrap
+BoardFrame.ClipsDescendants = true
+BoardFrame.Parent = BoardScroll
 addCorner(BoardFrame, 4)
 addStroke(BoardFrame, UITheme.StrokeStrong, 1.5, 0.25)
 UI.BoardFrame = BoardFrame
 
--- Lớp phủ vẽ đường gạch thắng 5 quân
+local GridLayer = Instance.new("Frame")
+GridLayer.Size = UDim2.new(1, 0, 1, 0)
+GridLayer.BackgroundTransparency = 1
+GridLayer.ZIndex = 2
+GridLayer.Parent = BoardFrame
+
+local HighlightLayer = Instance.new("Frame")
+HighlightLayer.Size = UDim2.new(1, 0, 1, 0)
+HighlightLayer.BackgroundTransparency = 1
+HighlightLayer.ZIndex = 3
+HighlightLayer.Parent = BoardFrame
+
+local PiecesLayer = Instance.new("Frame")
+PiecesLayer.Size = UDim2.new(1, 0, 1, 0)
+PiecesLayer.BackgroundTransparency = 1
+PiecesLayer.ZIndex = 5
+PiecesLayer.Parent = BoardFrame
+
 local WinLineLayer = Instance.new("Frame")
-WinLineLayer.Name = "WinLineLayer"
 WinLineLayer.Size = UDim2.new(1, 0, 1, 0)
 WinLineLayer.BackgroundTransparency = 1
 WinLineLayer.ZIndex = 12
 WinLineLayer.Parent = BoardFrame
-UI.WinLineLayer = WinLineLayer
+
+-- 1 nút phủ trong suốt duy nhất bắt tọa độ chạm (giúp 50x50 chạy 60 FPS trên mobile!)
+local InputOverlay = Instance.new("TextButton")
+InputOverlay.Name = "InputOverlay"
+InputOverlay.Size = UDim2.new(1, 0, 1, 0)
+InputOverlay.BackgroundTransparency = 1
+InputOverlay.Text = ""
+InputOverlay.AutoButtonColor = false
+InputOverlay.ZIndex = 15
+InputOverlay.Parent = BoardFrame
+
+bindInstantTap(InputOverlay, function(screenPos)
+    if State.GameOver or State.AIThinking then return end
+    if Config.Mode == "AI" and State.CurrentTurn ~= Config.PlayerSide then return end
+
+    local absPos = BoardFrame.AbsolutePosition
+    local cs = Config.CellSize
+    local c = math.floor((screenPos.X - absPos.X) / cs) + 1
+    local r = math.floor((screenPos.Y - absPos.Y) / cs) + 1
+    if not inBounds(r, c) or State.Grid[r][c] ~= 0 then return end
+
+    if Config.ConfirmTwoTap then
+        if State.PendingCell and State.PendingCell.r == r and State.PendingCell.c == c then
+            State.PendingCell = nil
+            performMove(r, c)
+        else
+            State.PendingCell = { r = r, c = c }
+            sfxClick()
+            refreshBoardVisuals()
+        end
+    else
+        performMove(r, c)
+    end
+end)
 
 -- Banner kết quả trận đấu
 do
     local Banner = Instance.new("Frame")
-    Banner.Name = "WinBanner"
     Banner.Size = UDim2.new(0, 304, 0, 152)
     Banner.AnchorPoint = Vector2.new(0.5, 0.5)
     Banner.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -1133,7 +1599,7 @@ do
     BannerSub.Size = UDim2.new(1, -20, 0, 36)
     BannerSub.Position = UDim2.new(0, 10, 0, 52)
     BannerSub.BackgroundTransparency = 1
-    BannerSub.Text = "+50 Xu  |  Chuỗi thắng: 1"
+    BannerSub.Text = ""
     BannerSub.Font = FONT_BODY
     BannerSub.TextSize = 13
     BannerSub.TextColor3 = UITheme.TextSecondary
@@ -1182,11 +1648,10 @@ do
 end
 
 -- ========================================================================
--- [PHẦN 08] BẢNG ĐIỀU KHIỂN 2 TAB (CHƠI | CÀI ĐẶT) - KHÔNG BỊ CẮT NÚT
+-- [PHẦN 08] BẢNG ĐIỀU KHIỂN 2 TAB TRONG TRẬN (CHƠI | CÀI ĐẶT)
 -- ========================================================================
 do
     local SideContainer = Instance.new("Frame")
-    SideContainer.Name = "SideContainer"
     SideContainer.Size = UDim2.new(0, 236, 1, 0)
     SideContainer.Position = UDim2.new(1, -236, 0, 0)
     SideContainer.BackgroundColor3 = UITheme.BgPanel
@@ -1195,7 +1660,6 @@ do
     addCorner(SideContainer, 10)
     addStroke(SideContainer, UITheme.StrokeSubtle, 1, 0.25)
 
-    -- Thanh chuyển 2 Tab ở đầu SideContainer
     local TabBar = Instance.new("Frame")
     TabBar.Size = UDim2.new(1, -16, 0, 32)
     TabBar.Position = UDim2.new(0, 8, 0, 8)
@@ -1296,7 +1760,7 @@ do
     -- ==================== TAB 1: CHƠI ====================
     local StatsCard = Instance.new("Frame")
     StatsCard.LayoutOrder = 1
-    StatsCard.Size = UDim2.new(1, 0, 0, 76)
+    StatsCard.Size = UDim2.new(1, 0, 0, 74)
     StatsCard.BackgroundColor3 = UITheme.BgCard
     StatsCard.BorderSizePixel = 0
     StatsCard.Parent = PlayPage
@@ -1304,7 +1768,7 @@ do
     addStroke(StatsCard, UITheme.StrokeSubtle, 1, 0.35)
 
     local RankLabel = Instance.new("TextLabel")
-    RankLabel.Size = UDim2.new(1, -14, 0, 22)
+    RankLabel.Size = UDim2.new(1, -14, 0, 20)
     RankLabel.Position = UDim2.new(0, 7, 0, 5)
     RankLabel.BackgroundTransparency = 1
     RankLabel.Text = "Cấp bậc: Tập Sự"
@@ -1316,7 +1780,7 @@ do
 
     local StatsLine1 = Instance.new("TextLabel")
     StatsLine1.Size = UDim2.new(1, -14, 0, 20)
-    StatsLine1.Position = UDim2.new(0, 7, 0, 28)
+    StatsLine1.Position = UDim2.new(0, 7, 0, 27)
     StatsLine1.BackgroundTransparency = 1
     StatsLine1.Text = "Thắng: 0  |  Thua: 0  |  Hòa: 0"
     StatsLine1.Font = FONT_BODY
@@ -1327,7 +1791,7 @@ do
 
     local StatsLine2 = Instance.new("TextLabel")
     StatsLine2.Size = UDim2.new(1, -14, 0, 20)
-    StatsLine2.Position = UDim2.new(0, 7, 0, 50)
+    StatsLine2.Position = UDim2.new(0, 7, 0, 49)
     StatsLine2.BackgroundTransparency = 1
     StatsLine2.Text = "Xu: 0 Xu  |  Chuỗi: 0"
     StatsLine2.Font = FONT_MAIN
@@ -1425,7 +1889,6 @@ do
         UI.DiffBtns[d.key] = { btn = btn, stroke = st }
     end
 
-    -- Thanh thu phóng bàn cờ đặt gọn trong bảng điều khiển (không bao giờ đè lên bàn cờ)
     makeSectionLabel(PlayPage, "THU PHÓNG BÀN CỜ", 10)
 
     local ZoomRow = Instance.new("Frame")
@@ -1435,38 +1898,63 @@ do
     ZoomRow.Parent = PlayPage
 
     makeBtn(ZoomRow, "Thu nhỏ (-)", UDim2.new(0.32, 0, 1, 0), UDim2.new(0, 0, 0, 0), UITheme.BgButton, UITheme.TextPrimary, function()
-        Config.CellSize = math.max(20, Config.CellSize - 4)
+        Config.CellSize = math.max(18, Config.CellSize - 4)
         sfxClick()
         rebuildBoard(true)
     end).TextSize = 11
 
     makeBtn(ZoomRow, "Vừa màn", UDim2.new(0.32, 0, 1, 0), UDim2.new(0.34, 0, 0, 0), UITheme.BgButton, UITheme.ColorO, function()
-        local coordPad = Config.ShowCoords and 24 or 4
-        local availW = math.max(180, BoardScroll.AbsoluteSize.X - coordPad - 16)
-        local availH = math.max(180, BoardScroll.AbsoluteSize.Y - coordPad - 16)
+        local availW = math.max(180, BoardScroll.AbsoluteSize.X - 18)
+        local availH = math.max(180, BoardScroll.AbsoluteSize.Y - 18)
+        local maxFit = (Config.BoardSize <= 3 and 92) or (Config.BoardSize <= 5 and 64) or 44
+        local minFit = (Config.BoardSize >= 35 and 24) or 20
         local fit = math.floor(math.min(availW, availH) / Config.BoardSize)
-        Config.CellSize = math.clamp(fit, 20, 44)
+        Config.CellSize = math.clamp(fit, minFit, maxFit)
         sfxClick()
         rebuildBoard(false)
     end).TextSize = 11
 
     makeBtn(ZoomRow, "Phóng (+)", UDim2.new(0.32, 0, 1, 0), UDim2.new(0.68, 0, 0, 0), UITheme.BgButton, UITheme.TextPrimary, function()
-        Config.CellSize = math.min(44, Config.CellSize + 4)
+        local maxZoom = (Config.BoardSize <= 5) and 96 or 48
+        Config.CellSize = math.min(maxZoom, Config.CellSize + 4)
         sfxClick()
         rebuildBoard(true)
     end).TextSize = 11
 
     -- ==================== TAB 2: CÀI ĐẶT ====================
-    makeSectionLabel(SettingsPage, "GIAO DIỆN BÀN CỜ", 1)
+    makeSectionLabel(SettingsPage, "ĐỔI MÀN CHƠI", 1)
+
+    local SizeGrid = Instance.new("Frame")
+    SizeGrid.LayoutOrder = 2
+    SizeGrid.Size = UDim2.new(1, 0, 0, 62)
+    SizeGrid.BackgroundTransparency = 1
+    SizeGrid.Parent = SettingsPage
+
+    UI.SizeBtns = {}
+    for idx, stg in ipairs(STAGES) do
+        local col = (idx - 1) % 4
+        local row = math.floor((idx - 1) / 4)
+        local btn, st = makeBtn(SizeGrid, stg.title, UDim2.new(0.235, 0, 0, 28), UDim2.new(col * 0.255, 0, 0, row * 34), UITheme.BgButton, UITheme.TextSecondary, function()
+            if Config.BoardSize ~= stg.size then
+                Config.BoardSize = stg.size
+                sfxClick()
+                startNewGame(true)
+            end
+        end)
+        btn.TextSize = 10
+        UI.SizeBtns[stg.size] = { btn = btn, stroke = st }
+    end
+
+    makeSectionLabel(SettingsPage, "GIAO DIỆN BÀN CỜ", 3)
 
     local ThemeRow1 = Instance.new("Frame")
-    ThemeRow1.LayoutOrder = 2
+    ThemeRow1.LayoutOrder = 4
     ThemeRow1.Size = UDim2.new(1, 0, 0, 28)
     ThemeRow1.BackgroundTransparency = 1
     ThemeRow1.Parent = SettingsPage
 
     local ThemeRow2 = Instance.new("Frame")
-    ThemeRow2.LayoutOrder = 3
+    ThemeRow2.LayoutOrder = 5
     ThemeRow2.Size = UDim2.new(1, 0, 0, 28)
     ThemeRow2.BackgroundTransparency = 1
     ThemeRow2.Parent = SettingsPage
@@ -1485,10 +1973,10 @@ do
         UI.ThemeBtns[key] = { btn = btn, stroke = st }
     end
 
-    makeSectionLabel(SettingsPage, "QUÂN CỦA BẠN (ĐẤU MÁY)", 4)
+    makeSectionLabel(SettingsPage, "QUÂN CỦA BẠN (ĐẤU MÁY)", 6)
 
     local SideRow = Instance.new("Frame")
-    SideRow.LayoutOrder = 5
+    SideRow.LayoutOrder = 7
     SideRow.Size = UDim2.new(1, 0, 0, 28)
     SideRow.BackgroundTransparency = 1
     SideRow.Parent = SettingsPage
@@ -1511,26 +1999,6 @@ do
     end)
     UI.BtnSideO.TextSize = 11
 
-    makeSectionLabel(SettingsPage, "KÍCH THƯỚC BÀN CỜ", 6)
-
-    local SizeRow = Instance.new("Frame")
-    SizeRow.LayoutOrder = 7
-    SizeRow.Size = UDim2.new(1, 0, 0, 28)
-    SizeRow.BackgroundTransparency = 1
-    SizeRow.Parent = SettingsPage
-
-    UI.SizeBtns = {}
-    for idx, sz in ipairs({ 13, 15, 19 }) do
-        local btn, st = makeBtn(SizeRow, sz .. "x" .. sz, UDim2.new(0.31, 0, 1, 0), UDim2.new((idx - 1) * 0.345, 0, 0, 0), UITheme.BgButton, UITheme.TextSecondary, function()
-            if Config.BoardSize ~= sz then
-                Config.BoardSize = sz
-                sfxClick()
-                startNewGame(true)
-            end
-        end)
-        UI.SizeBtns[sz] = { btn = btn, stroke = st }
-    end
-
     makeSectionLabel(SettingsPage, "GIỚI HẠN MỖI LƯỢT", 8)
 
     local TimeRow = Instance.new("Frame")
@@ -1540,12 +2008,7 @@ do
     TimeRow.Parent = SettingsPage
 
     UI.TimeBtns = {}
-    local timeOpts = {
-        { val = 0,  label = "Tắt" },
-        { val = 15, label = "15 giây" },
-        { val = 30, label = "30 giây" },
-    }
-    for idx, t in ipairs(timeOpts) do
+    for idx, t in ipairs({ { val = 0, label = "Tắt" }, { val = 15, label = "15 giây" }, { val = 30, label = "30 giây" } }) do
         local btn, st = makeBtn(TimeRow, t.label, UDim2.new(0.31, 0, 1, 0), UDim2.new((idx - 1) * 0.345, 0, 0, 0), UITheme.BgButton, UITheme.TextSecondary, function()
             Config.TurnTimeLimit = t.val
             State.TurnTimeLeft = t.val
@@ -1579,27 +2042,20 @@ do
         refreshBoardVisuals()
     end)
 
-    UI.CoordsBtn, UI.CoordsStroke = makeToggle(13, "Tọa độ (A-O / 1-15): Bật", function()
-        Config.ShowCoords = not Config.ShowCoords
-        sfxClick()
-        updateControlsUI()
-        rebuildBoard(true)
-    end)
-
-    UI.NumBtn, UI.NumStroke = makeToggle(14, "Số thứ tự nước đi: Tắt", function()
+    UI.NumBtn, UI.NumStroke = makeToggle(13, "Số thứ tự nước đi: Tắt", function()
         Config.ShowMoveNumbers = not Config.ShowMoveNumbers
         sfxClick()
         updateControlsUI()
         refreshBoardVisuals()
     end)
 
-    UI.SoundBtn, UI.SoundStroke = makeToggle(15, "Âm thanh: Bật", function()
+    UI.SoundBtn, UI.SoundStroke = makeToggle(14, "Âm thanh: Bật", function()
         Config.SoundEnabled = not Config.SoundEnabled
         if Config.SoundEnabled then sfxClick() end
         updateControlsUI()
     end)
 
-    UI.ResetStatsBtn, UI.ResetStatsStroke = makeToggle(16, "Đặt lại thống kê", function()
+    UI.ResetStatsBtn, UI.ResetStatsStroke = makeToggle(15, "Đặt lại thống kê", function()
         local now = os.clock()
         if (now - State.ResetConfirmAt) <= 3.0 then
             State.ResetConfirmAt = 0
@@ -1638,74 +2094,89 @@ switchSideTab = function(tabKey)
 end
 
 -- ========================================================================
--- [PHẦN 09] VẼ QUÂN CỜ VECTOR, TỌA ĐỘ, ĐƯỜNG THẮNG & XÂY DỰNG BÀN CỜ
+-- [PHẦN 09] VẼ BÀN CỜ TỐI ƯU (LƯỚI SIÊU NHẸ + TẠO QUÂN THEO YÊU CẦU)
 -- ========================================================================
-local function createPieceX(parent, color)
+local function createPieceNode(r, c, side, animate)
+    local th = getTheme()
+    local cs = Config.CellSize
     local holder = Instance.new("Frame")
-    holder.Name = "PieceX"
-    holder.Size = UDim2.new(0.70, 0, 0.70, 0)
-    holder.AnchorPoint = Vector2.new(0.5, 0.5)
-    holder.Position = UDim2.new(0.5, 0, 0.5, 0)
+    holder.Name = "P_" .. r .. "_" .. c
+    holder.Size = UDim2.new(0, cs, 0, cs)
+    holder.Position = UDim2.new(0, (c - 1) * cs, 0, (r - 1) * cs)
     holder.BackgroundTransparency = 1
-    holder.Visible = false
-    holder.ZIndex = 4
-    holder.Parent = parent
+    holder.ZIndex = 6
+    holder.Parent = PiecesLayer
 
-    local bar1 = Instance.new("Frame")
-    bar1.Size = UDim2.new(0.95, 0, 0.19, 0)
-    bar1.AnchorPoint = Vector2.new(0.5, 0.5)
-    bar1.Position = UDim2.new(0.5, 0, 0.5, 0)
-    bar1.Rotation = 45
-    bar1.BackgroundColor3 = color
-    bar1.BorderSizePixel = 0
-    bar1.ZIndex = 4
-    bar1.Parent = holder
-    addCorner(bar1, 4)
+    local targetVisual
+    if side == 1 then
+        local xWrap = Instance.new("Frame")
+        xWrap.Size = UDim2.new(0.68, 0, 0.68, 0)
+        xWrap.AnchorPoint = Vector2.new(0.5, 0.5)
+        xWrap.Position = UDim2.new(0.5, 0, 0.5, 0)
+        xWrap.BackgroundTransparency = 1
+        xWrap.ZIndex = 6
+        xWrap.Parent = holder
 
-    local bar2 = Instance.new("Frame")
-    bar2.Size = UDim2.new(0.95, 0, 0.19, 0)
-    bar2.AnchorPoint = Vector2.new(0.5, 0.5)
-    bar2.Position = UDim2.new(0.5, 0, 0.5, 0)
-    bar2.Rotation = -45
-    bar2.BackgroundColor3 = color
-    bar2.BorderSizePixel = 0
-    bar2.ZIndex = 4
-    bar2.Parent = holder
-    addCorner(bar2, 4)
+        for _, rot in ipairs({ 45, -45 }) do
+            local bar = Instance.new("Frame")
+            bar.Size = UDim2.new(0.95, 0, 0.19, 0)
+            bar.AnchorPoint = Vector2.new(0.5, 0.5)
+            bar.Position = UDim2.new(0.5, 0, 0.5, 0)
+            bar.Rotation = rot
+            bar.BackgroundColor3 = th.PieceX
+            bar.BorderSizePixel = 0
+            bar.ZIndex = 6
+            bar.Parent = xWrap
+            addCorner(bar, 4)
+        end
+        targetVisual = xWrap
+    else
+        local ring = Instance.new("Frame")
+        ring.Size = UDim2.new(0.60, 0, 0.60, 0)
+        ring.AnchorPoint = Vector2.new(0.5, 0.5)
+        ring.Position = UDim2.new(0.5, 0, 0.5, 0)
+        ring.BackgroundTransparency = 1
+        ring.ZIndex = 6
+        ring.Parent = holder
+        addCorner(ring, 40)
+        local strokeW = math.clamp(cs * 0.085, 2.2, 5)
+        addStroke(ring, th.PieceO, strokeW, 0)
+        targetVisual = ring
+    end
 
-    return holder
-end
+    local numLbl = Instance.new("TextLabel")
+    numLbl.Name = "MoveNum"
+    numLbl.Size = UDim2.new(1, -2, 0, 10)
+    numLbl.Position = UDim2.new(0, 1, 1, -10)
+    numLbl.BackgroundTransparency = 1
+    numLbl.Text = ""
+    numLbl.Font = FONT_BODY
+    numLbl.TextSize = 8
+    numLbl.TextColor3 = th.NumText
+    numLbl.TextXAlignment = Enum.TextXAlignment.Right
+    numLbl.Visible = false
+    numLbl.ZIndex = 8
+    numLbl.Parent = holder
 
-local function createPieceO(parent, color)
-    local ring = Instance.new("Frame")
-    ring.Name = "PieceO"
-    ring.Size = UDim2.new(0.62, 0, 0.62, 0)
-    ring.AnchorPoint = Vector2.new(0.5, 0.5)
-    ring.Position = UDim2.new(0.5, 0, 0.5, 0)
-    ring.BackgroundTransparency = 1
-    ring.Visible = false
-    ring.ZIndex = 4
-    ring.Parent = parent
+    if animate and targetVisual then
+        local finalSize = targetVisual.Size
+        targetVisual.Size = UDim2.new(0.24, 0, 0.24, 0)
+        TweenService:Create(
+            targetVisual,
+            TweenInfo.new(0.14, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+            { Size = finalSize }
+        ):Play()
+    end
 
-    local c = Instance.new("UICorner")
-    c.CornerRadius = UDim.new(1, 0)
-    c.Parent = ring
-
-    local st = Instance.new("UIStroke")
-    st.Color = color
-    st.Thickness = 2.6
-    st.Parent = ring
-
-    return ring
+    return { holder = holder, numLbl = numLbl }
 end
 
 drawWinLine = function()
     for _, child in ipairs(WinLineLayer:GetChildren()) do
         child:Destroy()
     end
-    if #State.WinCells < 2 then
-        return
-    end
+    if #State.WinCells < 2 then return end
+
     local first = State.WinCells[1]
     local last = State.WinCells[#State.WinCells]
     local cs = Config.CellSize
@@ -1720,8 +2191,7 @@ drawWinLine = function()
     local angle = math.deg(math.atan2(dy, dx))
 
     local line = Instance.new("Frame")
-    line.Name = "WinStrike"
-    line.Size = UDim2.new(0, 0, 0, 4)
+    line.Size = UDim2.new(0, 0, 0, math.clamp(cs * 0.12, 3.5, 6))
     line.AnchorPoint = Vector2.new(0.5, 0.5)
     line.Position = UDim2.new(0, (x1 + x2) / 2, 0, (y1 + y2) / 2)
     line.Rotation = angle
@@ -1734,7 +2204,7 @@ drawWinLine = function()
     TweenService:Create(
         line,
         TweenInfo.new(0.28, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-        { Size = UDim2.new(0, len, 0, 4) }
+        { Size = UDim2.new(0, len, 0, line.Size.Y.Offset) }
     ):Play()
 end
 
@@ -1757,153 +2227,66 @@ rebuildBoard = function(preserveScroll)
     BoardContainer.BackgroundColor3 = th.BoardOuter
     BoardFrame.BackgroundColor3 = th.BoardBg
 
-    -- Xóa tọa độ cũ & ô cũ
-    for _, child in ipairs(BoardWrap:GetChildren()) do
-        if child ~= BoardFrame then
-            child:Destroy()
-        end
-    end
-    for _, child in ipairs(BoardFrame:GetChildren()) do
-        if child ~= WinLineLayer then
-            child:Destroy()
-        end
-    end
-    for _, child in ipairs(WinLineLayer:GetChildren()) do
-        child:Destroy()
-    end
-    UI.Cells = {}
+    for _, child in ipairs(GridLayer:GetChildren()) do child:Destroy() end
+    for _, child in ipairs(HighlightLayer:GetChildren()) do child:Destroy() end
+    for _, child in ipairs(PiecesLayer:GetChildren()) do child:Destroy() end
+    for _, child in ipairs(WinLineLayer:GetChildren()) do child:Destroy() end
+    UI.PieceNodes = {}
 
     local n = Config.BoardSize
     local cs = Config.CellSize
     local totalPx = n * cs
-    local coordOffset = Config.ShowCoords and 20 or 0
 
-    BoardWrap.Size = UDim2.new(0, totalPx + coordOffset, 0, totalPx + coordOffset)
     BoardFrame.Size = UDim2.new(0, totalPx, 0, totalPx)
-    BoardFrame.Position = UDim2.new(0, coordOffset, 0, coordOffset)
-
     local vw = math.max(180, BoardScroll.AbsoluteSize.X)
     local vh = math.max(180, BoardScroll.AbsoluteSize.Y)
-    local padX = math.max(12, math.floor((vw - (totalPx + coordOffset)) / 2))
-    local padY = math.max(12, math.floor((vh - (totalPx + coordOffset)) / 2))
+    local padX = math.max(14, math.floor((vw - totalPx) / 2))
+    local padY = math.max(14, math.floor((vh - totalPx) / 2))
 
-    BoardWrap.Position = UDim2.new(0, padX, 0, padY)
-    BoardScroll.CanvasSize = UDim2.new(0, totalPx + coordOffset + padX * 2, 0, totalPx + coordOffset + padY * 2)
+    BoardFrame.Position = UDim2.new(0, padX, 0, padY)
+    BoardScroll.CanvasSize = UDim2.new(0, totalPx + padX * 2, 0, totalPx + padY * 2)
 
-    -- Vẽ nhãn tọa độ A-S & 1-19
-    if Config.ShowCoords then
-        for i = 1, n do
-            local colLbl = Instance.new("TextLabel")
-            colLbl.Size = UDim2.new(0, cs, 0, 18)
-            colLbl.Position = UDim2.new(0, coordOffset + (i - 1) * cs, 0, 0)
-            colLbl.BackgroundTransparency = 1
-            colLbl.Text = COL_LETTERS[i] or tostring(i)
-            colLbl.Font = FONT_BODY
-            colLbl.TextSize = 10
-            colLbl.TextColor3 = th.CoordText
-            colLbl.Parent = BoardWrap
+    -- Vẽ đường lưới dọc & ngang (chỉ 2*(n-1) frame => cực nhẹ kể cả 50x50!)
+    for i = 1, n - 1 do
+        local vLine = Instance.new("Frame")
+        vLine.Size = UDim2.new(0, 1, 1, 0)
+        vLine.Position = UDim2.new(0, i * cs, 0, 0)
+        vLine.BackgroundColor3 = th.GridLine
+        vLine.BorderSizePixel = 0
+        vLine.ZIndex = 2
+        vLine.Parent = GridLayer
 
-            local rowLbl = Instance.new("TextLabel")
-            rowLbl.Size = UDim2.new(0, 18, 0, cs)
-            rowLbl.Position = UDim2.new(0, 0, 0, coordOffset + (i - 1) * cs)
-            rowLbl.BackgroundTransparency = 1
-            rowLbl.Text = tostring(i)
-            rowLbl.Font = FONT_BODY
-            rowLbl.TextSize = 10
-            rowLbl.TextColor3 = th.CoordText
-            rowLbl.Parent = BoardWrap
-        end
+        local hLine = Instance.new("Frame")
+        hLine.Size = UDim2.new(1, 0, 0, 1)
+        hLine.Position = UDim2.new(0, 0, 0, i * cs)
+        hLine.BackgroundColor3 = th.GridLine
+        hLine.BorderSizePixel = 0
+        hLine.ZIndex = 2
+        hLine.Parent = GridLayer
     end
 
-    local mid = math.floor((n + 1) / 2)
+    -- Chấm tâm bàn cờ (cho bàn lẻ >= 9)
+    if n >= 9 and n % 2 == 1 then
+        local mid = math.floor((n + 1) / 2)
+        local dot = Instance.new("Frame")
+        dot.Size = UDim2.new(0, 6, 0, 6)
+        dot.AnchorPoint = Vector2.new(0.5, 0.5)
+        dot.Position = UDim2.new(0, (mid - 0.5) * cs, 0, (mid - 0.5) * cs)
+        dot.BackgroundColor3 = th.CenterDot
+        dot.BorderSizePixel = 0
+        dot.ZIndex = 2
+        dot.Parent = GridLayer
+        addCorner(dot, 4)
+    end
 
-    for r = 1, n do
-        UI.Cells[r] = {}
-        for c = 1, n do
-            local btn = Instance.new("TextButton")
-            btn.Name = "C_" .. r .. "_" .. c
-            btn.Size = UDim2.new(0, cs, 0, cs)
-            btn.Position = UDim2.new(0, (c - 1) * cs, 0, (r - 1) * cs)
-            btn.BackgroundColor3 = ((r + c) % 2 == 0) and th.CellEven or th.CellOdd
-            btn.BorderColor3 = th.CellBorder
-            btn.BorderSizePixel = 1
-            btn.AutoButtonColor = false
-            btn.Text = ""
-            btn.ZIndex = 2
-            btn.Parent = BoardFrame
-
-            local centerDot = nil
-            if r == mid and c == mid then
-                centerDot = Instance.new("Frame")
-                centerDot.Size = UDim2.new(0, 5, 0, 5)
-                centerDot.AnchorPoint = Vector2.new(0.5, 0.5)
-                centerDot.Position = UDim2.new(0.5, 0, 0.5, 0)
-                centerDot.BackgroundColor3 = th.CoordText
-                centerDot.BorderSizePixel = 0
-                centerDot.ZIndex = 3
-                centerDot.Parent = btn
-                addCorner(centerDot, 4)
-            end
-
-            -- Khung viền đánh dấu nước vừa đi (gọn gàng không đè lên vòng O)
-            local lastFrame = Instance.new("Frame")
-            lastFrame.Size = UDim2.new(1, -2, 1, -2)
-            lastFrame.Position = UDim2.new(0, 1, 0, 1)
-            lastFrame.BackgroundTransparency = 1
-            lastFrame.Visible = false
-            lastFrame.ZIndex = 6
-            lastFrame.Parent = btn
-            addStroke(lastFrame, th.WinLine, 1.8, 0.05)
-
-            local numLbl = Instance.new("TextLabel")
-            numLbl.Size = UDim2.new(1, -2, 0, 10)
-            numLbl.Position = UDim2.new(0, 1, 1, -10)
-            numLbl.BackgroundTransparency = 1
-            numLbl.Text = ""
-            numLbl.Font = FONT_BODY
-            numLbl.TextSize = 8
-            numLbl.TextColor3 = th.NumText
-            numLbl.TextXAlignment = Enum.TextXAlignment.Right
-            numLbl.Visible = false
-            numLbl.ZIndex = 7
-            numLbl.Parent = btn
-
-            local pieceX = createPieceX(btn, th.PieceX)
-            local pieceO = createPieceO(btn, th.PieceO)
-
-            UI.Cells[r][c] = {
-                btn = btn,
-                pieceX = pieceX,
-                pieceO = pieceO,
-                lastFrame = lastFrame,
-                numLbl = numLbl,
-                centerDot = centerDot,
-            }
-
-            local rowIdx, colIdx = r, c
-            bindInstantTap(btn, function()
-                if State.GameOver or State.AIThinking then return end
-                if Config.Mode == "AI" and State.CurrentTurn ~= Config.PlayerSide then return end
-                if State.Grid[rowIdx][colIdx] ~= 0 then return end
-
-                if Config.ConfirmTwoTap then
-                    if State.PendingCell and State.PendingCell.r == rowIdx and State.PendingCell.c == colIdx then
-                        State.PendingCell = nil
-                        performMove(rowIdx, colIdx)
-                    else
-                        State.PendingCell = { r = rowIdx, c = colIdx }
-                        sfxClick()
-                        refreshBoardVisuals()
-                    end
-                else
-                    performMove(rowIdx, colIdx)
-                end
-            end)
-        end
+    -- Dựng lại toàn bộ quân cờ hiện có trên bàn
+    for _, mv in ipairs(State.History) do
+        local key = cellKey(mv.r, mv.c)
+        UI.PieceNodes[key] = createPieceNode(mv.r, mv.c, mv.p, false)
     end
 
     refreshBoardVisuals()
-    if State.GameOver and #State.WinCells >= 5 then
+    if State.GameOver and #State.WinCells >= 2 then
         drawWinLine()
     end
     if not preserveScroll then
@@ -1911,73 +2294,141 @@ rebuildBoard = function(preserveScroll)
     end
 end
 
--- ========================================================================
--- [PHẦN 10] CẬP NHẬT GIAO DIỆN, TRẠNG THÁI & BỘ ĐẾM THỜI GIAN
--- ========================================================================
 refreshBoardVisuals = function()
     local th = getTheme()
-    local n = Config.BoardSize
-    local lastMove = State.History[#State.History]
+    local cs = Config.CellSize
 
-    local winMap = {}
-    for _, cell in ipairs(State.WinCells) do
-        winMap[cell[1] * 100 + cell[2]] = true
+    for _, child in ipairs(HighlightLayer:GetChildren()) do
+        child:Destroy()
     end
 
-    local moveNumMap = {}
-    if Config.ShowMoveNumbers then
-        for idx, mv in ipairs(State.History) do
-            moveNumMap[mv.r * 100 + mv.c] = idx
+    local function placeHighlight(r, c, color, borderStroke)
+        local f = Instance.new("Frame")
+        f.Size = UDim2.new(0, cs - 1, 0, cs - 1)
+        f.Position = UDim2.new(0, (c - 1) * cs + 1, 0, (r - 1) * cs + 1)
+        f.BackgroundColor3 = color
+        f.BorderSizePixel = 0
+        f.ZIndex = 3
+        f.Parent = HighlightLayer
+        if borderStroke then
+            addStroke(f, borderStroke, 1.8, 0.05)
         end
     end
 
-    for r = 1, n do
-        local rowUI = UI.Cells[r]
-        local rowGrid = State.Grid[r]
-        if rowUI and rowGrid then
-            for c = 1, n do
-                local cell = rowUI[c]
-                local val = rowGrid[c]
-                local key = r * 100 + c
-                local isLast = lastMove and lastMove.r == r and lastMove.c == c
-                local isWin = winMap[key] == true
-                local isHint = State.HintCell and State.HintCell.r == r and State.HintCell.c == c and val == 0
-                local isPending = State.PendingCell and State.PendingCell.r == r and State.PendingCell.c == c and val == 0
+    -- Ô gợi ý
+    if State.HintCell and State.Grid[State.HintCell.r] and State.Grid[State.HintCell.r][State.HintCell.c] == 0 then
+        placeHighlight(State.HintCell.r, State.HintCell.c, th.CellHint, UITheme.ColorGreen)
+    end
 
-                cell.pieceX.Visible = (val == 1)
-                cell.pieceO.Visible = (val == 2)
-                cell.lastFrame.Visible = isLast and not isWin
+    -- Ô chờ xác nhận 2 chạm
+    if State.PendingCell and State.Grid[State.PendingCell.r] and State.Grid[State.PendingCell.r][State.PendingCell.c] == 0 then
+        placeHighlight(State.PendingCell.r, State.PendingCell.c, th.CellPending, UITheme.ColorGold)
+    end
 
-                if cell.centerDot then
-                    cell.centerDot.Visible = (val == 0)
-                end
+    -- Ô nước vừa đi
+    local lastMove = State.History[#State.History]
+    if lastMove and not State.GameOver then
+        placeHighlight(lastMove.r, lastMove.c, th.CellLast, th.WinLine)
+    end
 
-                local mNum = moveNumMap[key]
-                if mNum then
-                    cell.numLbl.Text = tostring(mNum)
-                    cell.numLbl.Visible = true
-                else
-                    cell.numLbl.Visible = false
-                end
+    -- Các ô thắng
+    for _, cell in ipairs(State.WinCells) do
+        placeHighlight(cell[1], cell[2], th.CellWin, nil)
+    end
 
-                if isWin then
-                    cell.btn.BackgroundColor3 = th.CellWin
-                elseif isPending then
-                    cell.btn.BackgroundColor3 = th.CellPending
-                elseif isHint then
-                    cell.btn.BackgroundColor3 = th.CellHint
-                elseif isLast then
-                    cell.btn.BackgroundColor3 = th.CellLast
-                else
-                    cell.btn.BackgroundColor3 = ((r + c) % 2 == 0) and th.CellEven or th.CellOdd
-                end
+    -- Cập nhật số thứ tự nước đi trên quân cờ
+    for idx, mv in ipairs(State.History) do
+        local node = UI.PieceNodes[cellKey(mv.r, mv.c)]
+        if node then
+            if Config.ShowMoveNumbers then
+                node.numLbl.Text = tostring(idx)
+                node.numLbl.Visible = true
+            else
+                node.numLbl.Visible = false
             end
         end
     end
 end
 
+-- ========================================================================
+-- [PHẦN 10] CẬP NHẬT SẢNH CHÍNH, TRẠNG THÁI TRONG TRẬN & CHUYỂN MÀN HÌNH
+-- ========================================================================
+updateHomeUI = function()
+    local rankName, rankColor = getRankInfo(Stats.Wins)
+    UI.HomeStatsPill.Text = string.format("%s  |  %d Thắng  |  %d Xu", rankName, Stats.Wins, Stats.Xu)
+    UI.HomeStatsPill.TextColor3 = rankColor
+
+    for sz, pack in pairs(UI.HomeStageBtns) do
+        local active = (Config.BoardSize == sz)
+        pack.card.BackgroundColor3 = active and UITheme.BgActive or UITheme.BgCard
+        pack.stroke.Color = active and UITheme.ColorGold or UITheme.StrokeSubtle
+        pack.t1.TextColor3 = active and UITheme.ColorGold or UITheme.TextPrimary
+    end
+
+    for key, pack in pairs(UI.HomeDiffBtns) do
+        local active = (Config.Difficulty == key)
+        pack.btn.BackgroundColor3 = active and UITheme.BgActive or UITheme.BgButton
+        pack.btn.TextColor3 = active and UITheme.TextPrimary or UITheme.TextSecondary
+        pack.stroke.Color = active and UITheme.ColorGold or UITheme.StrokeSubtle
+    end
+
+    for key, pack in pairs(UI.HomeThemeBtns) do
+        local active = (Config.ThemeKey == key)
+        pack.btn.BackgroundColor3 = active and UITheme.BgActive or UITheme.BgButton
+        pack.btn.TextColor3 = active and UITheme.TextPrimary or UITheme.TextSecondary
+        pack.stroke.Color = active and UITheme.ColorGreen or UITheme.StrokeSubtle
+    end
+
+    UI.HomeSideBtn.Text = (Config.PlayerSide == 1) and "Quân: X (Trước)" or "Quân: O (Sau)"
+    UI.HomeSideBtn.TextColor3 = (Config.PlayerSide == 1) and UITheme.ColorX or UITheme.ColorO
+
+    local ruleAllowed = getWinLength(Config.BoardSize) >= 5
+    if ruleAllowed then
+        UI.HomeRuleBtn.Text = Config.BlockTwoEnds and "Chặn 2 đầu: Bật" or "Chặn 2 đầu: Tắt"
+        UI.HomeRuleBtn.TextColor3 = Config.BlockTwoEnds and UITheme.ColorGold or UITheme.TextSecondary
+    else
+        UI.HomeRuleBtn.Text = "Màn nhỏ: Tự do"
+        UI.HomeRuleBtn.TextColor3 = UITheme.TextMuted
+    end
+
+    UI.HomeTimeBtn.Text = (Config.TurnTimeLimit == 0) and "Lượt: Không giới hạn" or ("Lượt: " .. Config.TurnTimeLimit .. " giây")
+    UI.HomeTimeBtn.TextColor3 = (Config.TurnTimeLimit > 0) and UITheme.ColorO or UITheme.TextPrimary
+
+    local diffNames = { Easy = "Dễ", Medium = "Vừa", Hard = "Khó", Master = "Siêu Khó" }
+    local winLen = getWinLength(Config.BoardSize)
+    local ruleTxt = ruleAllowed and (Config.BlockTwoEnds and "Chặn 2 đầu" or "Tự do 5 ô") or (winLen .. " ô liên tiếp")
+    UI.HeroSummary.Text = string.format(
+        "Màn %dx%d (%d ô thắng)  |  AI: %s\nGiao diện: %s  |  %s",
+        Config.BoardSize, Config.BoardSize, winLen, diffNames[Config.Difficulty] or "Vừa", getTheme().Name, ruleTxt
+    )
+end
+
+openHomeScreen = function()
+    State.Screen = "HOME"
+    State.ActiveMatchId = State.ActiveMatchId + 1
+    State.AIThinking = false
+    HomeScreen.Visible = true
+    GameScreen.Visible = false
+    updateHomeUI()
+end
+
+enterGameScreen = function()
+    State.Screen = "GAME"
+    HomeScreen.Visible = false
+    GameScreen.Visible = true
+    switchSideTab("PLAY")
+    task.defer(function()
+        if not State.Destroyed then
+            startNewGame(true)
+        end
+    end)
+end
+
 updateTopStatus = function()
     local moves = #State.History
+    local winLen = getWinLength(Config.BoardSize)
+    UI.StageInfoLabel.Text = string.format("Màn %dx%d (%d ô thắng)", Config.BoardSize, Config.BoardSize, winLen)
+
     if State.GameOver then
         if State.IsDraw then
             UI.TurnLabel.Text = "HÒA CỜ!  |  Nước: " .. moves
@@ -2005,7 +2456,7 @@ updateTopStatus = function()
         UI.TurnStroke.Color = (State.CurrentTurn == 1) and UITheme.ColorX or UITheme.ColorO
     end
 
-    UI.ClockLabel.Text = string.format("Thời gian: %s  |  Tỷ số X %d - %d O", formatTime(State.MatchElapsed), State.SessionX, State.SessionO)
+    UI.ClockLabel.Text = string.format("%s  |  X %d - %d O", formatTime(State.MatchElapsed), State.SessionX, State.SessionO)
 
     local rankName, rankColor = getRankInfo(Stats.Wins)
     UI.RankLabel.Text = "Cấp bậc: " .. rankName
@@ -2074,9 +2525,6 @@ updateControlsUI = function()
     UI.TwoTapBtn.TextColor3 = Config.ConfirmTwoTap and UITheme.ColorGreen or UITheme.TextSecondary
     UI.TwoTapStroke.Color = Config.ConfirmTwoTap and UITheme.ColorGreen or UITheme.StrokeSubtle
 
-    UI.CoordsBtn.Text = Config.ShowCoords and "Tọa độ (A-O / 1-15): Bật" or "Tọa độ (A-O / 1-15): Tắt"
-    UI.CoordsBtn.TextColor3 = Config.ShowCoords and UITheme.TextPrimary or UITheme.TextSecondary
-
     UI.NumBtn.Text = Config.ShowMoveNumbers and "Số thứ tự nước đi: Bật" or "Số thứ tự nước đi: Tắt"
     UI.NumBtn.TextColor3 = Config.ShowMoveNumbers and UITheme.ColorO or UITheme.TextSecondary
 
@@ -2105,11 +2553,8 @@ local function finishMatch(winnerSide, reasonText)
     State.ThreatAlert = ""
     UI.TimerBarBg.Visible = false
 
-    if winnerSide == 1 then
-        State.SessionX = State.SessionX + 1
-    elseif winnerSide == 2 then
-        State.SessionO = State.SessionO + 1
-    end
+    if winnerSide == 1 then State.SessionX = State.SessionX + 1
+    elseif winnerSide == 2 then State.SessionO = State.SessionO + 1 end
 
     local titleText, subText, accent
     if Config.Mode == "AI" then
@@ -2120,9 +2565,7 @@ local function finishMatch(winnerSide, reasonText)
                 or 20
             Stats.Wins = Stats.Wins + 1
             Stats.Streak = Stats.Streak + 1
-            if Stats.Streak > Stats.BestStreak then
-                Stats.BestStreak = Stats.Streak
-            end
+            if Stats.Streak > Stats.BestStreak then Stats.BestStreak = Stats.Streak end
             Stats.Xu = Stats.Xu + reward
             saveStats()
             titleText = "BẠN ĐÃ THẮNG!"
@@ -2144,15 +2587,13 @@ local function finishMatch(winnerSide, reasonText)
     end
 
     refreshBoardVisuals()
-    if #State.WinCells >= 5 then
-        drawWinLine()
-    end
+    if #State.WinCells >= 2 then drawWinLine() end
     updateTopStatus()
     showWinBanner(titleText, subText, accent)
 end
 
 local function triggerAITurn()
-    if State.GameOver or State.Destroyed or Config.Mode ~= "AI" then return end
+    if State.GameOver or State.Destroyed or State.Screen ~= "GAME" or Config.Mode ~= "AI" then return end
     local aiSide = (Config.PlayerSide == 1) and 2 or 1
     if State.CurrentTurn ~= aiSide then return end
 
@@ -2183,17 +2624,7 @@ performMove = function(r, c)
     State.TurnTimeLeft = Config.TurnTimeLimit
     sfxPlace(p)
 
-    local cellUI = UI.Cells[r] and UI.Cells[r][c]
-    if cellUI then
-        local targetPiece = (p == 1) and cellUI.pieceX or cellUI.pieceO
-        targetPiece.Size = UDim2.new(0.28, 0, 0.28, 0)
-        local finalScale = (p == 1) and 0.70 or 0.62
-        TweenService:Create(
-            targetPiece,
-            TweenInfo.new(0.14, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-            { Size = UDim2.new(finalScale, 0, finalScale, 0) }
-        ):Play()
-    end
+    UI.PieceNodes[cellKey(r, c)] = createPieceNode(r, c, p, true)
 
     local winLine = checkWinAt(r, c, p)
     if winLine then
@@ -2219,9 +2650,7 @@ performMove = function(r, c)
     end
 
     State.ThreatAlert = detectThreatAfterMove(r, c, p)
-    if State.ThreatAlert ~= "" then
-        sfxWarn()
-    end
+    if State.ThreatAlert ~= "" then sfxWarn() end
 
     State.CurrentTurn = (p == 1) and 2 or 1
     refreshBoardVisuals()
@@ -2257,6 +2686,11 @@ undoMove = function()
         if last then
             State.Grid[last.r][last.c] = 0
             State.CurrentTurn = last.p
+            local key = cellKey(last.r, last.c)
+            if UI.PieceNodes[key] then
+                UI.PieceNodes[key].holder:Destroy()
+                UI.PieceNodes[key] = nil
+            end
         end
     end
 
@@ -2268,9 +2702,7 @@ undoMove = function()
     State.PendingCell = nil
     State.ThreatAlert = ""
     State.TurnTimeLeft = Config.TurnTimeLimit
-    for _, child in ipairs(WinLineLayer:GetChildren()) do
-        child:Destroy()
-    end
+    for _, child in ipairs(WinLineLayer:GetChildren()) do child:Destroy() end
     hideWinBanner()
 
     refreshBoardVisuals()
@@ -2301,25 +2733,25 @@ startNewGame = function(forceRebuild)
     State.ThreatAlert = ""
     State.MatchElapsed = 0
     State.TurnTimeLeft = Config.TurnTimeLimit
-    for _, child in ipairs(WinLineLayer:GetChildren()) do
-        child:Destroy()
-    end
     hideWinBanner()
 
     initGrid()
-    if forceRebuild or #UI.Cells ~= Config.BoardSize then
-        local coordPad = Config.ShowCoords and 24 or 4
-        local availW = math.max(180, BoardScroll.AbsoluteSize.X - coordPad - 16)
-        local availH = math.max(180, BoardScroll.AbsoluteSize.Y - coordPad - 16)
-        if availW > 180 and availH > 180 then
-            local fit = math.floor(math.min(availW, availH) / Config.BoardSize)
-            Config.CellSize = math.clamp(fit, 20, 38)
-        end
-        rebuildBoard(false)
+
+    -- Tính kích thước ô tối ưu cho từng màn chơi (3x3 phóng to đẹp, 35x35 & 50x50 đủ rộng để chạm dễ)
+    local availW = math.max(180, BoardScroll.AbsoluteSize.X - 20)
+    local availH = math.max(180, BoardScroll.AbsoluteSize.Y - 20)
+    if Config.BoardSize <= 3 then
+        Config.CellSize = math.clamp(math.floor(math.min(availW, availH) / 3.4), 56, 92)
+    elseif Config.BoardSize <= 5 then
+        Config.CellSize = math.clamp(math.floor(math.min(availW, availH) / 5.4), 42, 64)
+    elseif Config.BoardSize <= 15 then
+        Config.CellSize = math.clamp(math.floor(math.min(availW, availH) / Config.BoardSize), 22, 38)
     else
-        refreshBoardVisuals()
+        -- Màn lớn 20x20, 35x35, 50x50: giữ ô 26px để chạm chính xác & cuộn mượt
+        Config.CellSize = 26
     end
 
+    rebuildBoard(not forceRebuild)
     updateControlsUI()
     updateTopStatus()
 
@@ -2328,11 +2760,11 @@ startNewGame = function(forceRebuild)
     end
 end
 
--- Vòng lặp đồng hồ trận đấu & giới hạn thời gian mỗi lượt (0.25s/lần, rất nhẹ)
+-- Vòng lặp đồng hồ trận đấu & hẹn giờ lượt
 task.spawn(function()
     while not State.Destroyed do
         task.wait(0.25)
-        if not State.Destroyed and not State.GameOver and not State.Minimized and #State.History > 0 then
+        if not State.Destroyed and State.Screen == "GAME" and not State.GameOver and not State.Minimized and #State.History > 0 then
             State.MatchElapsed = State.MatchElapsed + 0.25
             if Config.TurnTimeLimit > 0 and not State.AIThinking then
                 State.TurnTimeLeft = math.max(0, State.TurnTimeLeft - 0.25)
@@ -2348,7 +2780,7 @@ task.spawn(function()
                     updateTopStatus()
                 end
             else
-                UI.ClockLabel.Text = string.format("Thời gian: %s  |  Tỷ số X %d - %d O", formatTime(State.MatchElapsed), State.SessionX, State.SessionO)
+                UI.ClockLabel.Text = string.format("%s  |  X %d - %d O", formatTime(State.MatchElapsed), State.SessionX, State.SessionO)
             end
         end
     end
@@ -2359,13 +2791,16 @@ end)
 -- ========================================================================
 trackConn(UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed or State.Destroyed then return end
-    if input.KeyCode == Enum.KeyCode.Z and Root.Visible then
-        undoMove()
-    elseif input.KeyCode == Enum.KeyCode.R and Root.Visible then
-        startNewGame()
-    elseif input.KeyCode == Enum.KeyCode.H and Root.Visible then
-        showHint()
-    elseif input.KeyCode == Enum.KeyCode.M then
+    if State.Screen == "GAME" and Root.Visible then
+        if input.KeyCode == Enum.KeyCode.Z then
+            undoMove()
+        elseif input.KeyCode == Enum.KeyCode.R then
+            startNewGame()
+        elseif input.KeyCode == Enum.KeyCode.H then
+            showHint()
+        end
+    end
+    if input.KeyCode == Enum.KeyCode.M then
         State.Minimized = not State.Minimized
         Root.Visible = not State.Minimized
         FloatBtn.Visible = State.Minimized
@@ -2385,9 +2820,5 @@ _G.CoCaroProCleanup = function()
     _G.CoCaroProCleanup = nil
 end
 
-task.defer(function()
-    if not State.Destroyed then
-        switchSideTab("PLAY")
-        startNewGame(true)
-    end
-end)
+-- Khởi động vào Sảnh Chính (Main Menu)
+openHomeScreen()
