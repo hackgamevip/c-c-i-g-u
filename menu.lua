@@ -1,5 +1,5 @@
 -- ============================================================================
--- DAU TRUONG CHIEN DAU PRO (v2.6) - Full-Screen Action RPG Combat Game
+-- DAU TRUONG CHIEN DAU PRO (v2.7) - Full-Screen Action RPG Combat Game
 -- Menu Full Man Hinh 100% | 8 Tuong | 5 Boss | 6 Loai Quai | Minimap Radar
 -- Chon Nang Cap Trong Tran | Nhiem Vu | Len Cap | Trang Thai | Cai Dat
 -- Code doc lap 100%, toi uu cho Mobile (cam ung tuc thi, chu matte) & PC.
@@ -80,7 +80,7 @@ local FONT_BODY  = Enum.Font.GothamMedium
 -- 2. DU LIEU GAME (8 TUONG, 5 MAN CHOI, 3 DO KHO, 5 BOSS, 6 QUAI, NHIEM VU)
 -- ============================================================================
 local CFG = {
-    VERSION = "v2.6",
+    VERSION = "v2.7",
     GUI_NAME = "ArenaChienDau_Standalone",
     SAVE_PREFIX = "arena_chien_dau_v2_",
     ARENA_W = 1100,
@@ -472,6 +472,62 @@ function GEAR.AddRandom(minRarity)
 end
 
 
+local function computeStats()
+    local h = getHeroById(DATA.selectedHero)
+    local u = DATA.upgrades
+    local lvBonus = 1 + (DATA.level - 1) * 0.08
+    local gHp, gAtk, gDef, gSpd = 0, 0, 0, 0
+    local wingCol, weapCol = nil, nil
+    for slot, uid in pairs(DATA.equipped or {}) do
+        local it = GEAR.FindByUid(uid)
+        if it then
+            local st = GEAR.GetItemStats(it)
+            gHp = gHp + st.hp
+            gAtk = gAtk + st.atk
+            gDef = gDef + st.arm
+            gSpd = gSpd + st.spd
+            if slot == "wings" then wingCol = st.def.col end
+            if slot == "weapon" then weapCol = st.def.col end
+        end
+    end
+    local maxHp = math.floor(h.hp * lvBonus * (1 + (u.hp or 0) * 0.16)) + gHp
+    local maxMp = math.floor(h.mp * (1 + (u.mp or 0) * 0.15))
+    local atk   = math.floor(h.atk * lvBonus * (1 + (u.atk or 0) * 0.12)) + gAtk
+    local def   = math.floor(10 + (DATA.level - 1) * 2) + gDef
+    local spd   = math.floor(h.spd * (1 + (u.spd or 0) * 0.04)) + gSpd
+    local crit  = math.min(0.75, h.crit + (u.crit or 0) * 0.03)
+    local mpReg = 8 + (u.mp or 0) * 1.5
+    local power = math.floor(maxHp * 0.8 + atk * 18 + def * 12 + spd * 0.6 + crit * 500 + maxMp * 1.2)
+    return {
+        hero = h, maxHp = maxHp, maxMp = maxMp, atk = atk, def = def, spd = spd,
+        crit = crit, mpRegen = mpReg, power = power, wingCol = wingCol, weapCol = weapCol,
+    }
+end
+
+local function addCorner(inst, px)
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, px or 8)
+    c.Parent = inst
+    return c
+end
+
+local function addStroke(inst, color, thick)
+    local s = Instance.new("UIStroke")
+    s.Color = color or C.BORDER
+    s.Thickness = thick or 1
+    s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    s.Parent = inst
+    return s
+end
+
+local function addGrad(inst, c1, c2, rot)
+    local g = Instance.new("UIGradient")
+    g.Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, c1), ColorSequenceKeypoint.new(1, c2) })
+    g.Rotation = rot or 90
+    g.Parent = inst
+    return g
+end
+
 -- Ve bieu tuong do hoa cho tung loai trang bi (Vu Khi, Ao Giap, Mu, Giay, Phu Kien, Canh)
 local function buildGearIcon(parent, d, zBase)
     for _, ch in ipairs(parent:GetChildren()) do
@@ -702,61 +758,6 @@ local function buildGearIcon(parent, d, zBase)
     return box
 end
 
-local function computeStats()
-    local h = getHeroById(DATA.selectedHero)
-    local u = DATA.upgrades
-    local lvBonus = 1 + (DATA.level - 1) * 0.08
-    local gHp, gAtk, gDef, gSpd = 0, 0, 0, 0
-    local wingCol, weapCol = nil, nil
-    for slot, uid in pairs(DATA.equipped or {}) do
-        local it = GEAR.FindByUid(uid)
-        if it then
-            local st = GEAR.GetItemStats(it)
-            gHp = gHp + st.hp
-            gAtk = gAtk + st.atk
-            gDef = gDef + st.arm
-            gSpd = gSpd + st.spd
-            if slot == "wings" then wingCol = st.def.col end
-            if slot == "weapon" then weapCol = st.def.col end
-        end
-    end
-    local maxHp = math.floor(h.hp * lvBonus * (1 + (u.hp or 0) * 0.16)) + gHp
-    local maxMp = math.floor(h.mp * (1 + (u.mp or 0) * 0.15))
-    local atk   = math.floor(h.atk * lvBonus * (1 + (u.atk or 0) * 0.12)) + gAtk
-    local def   = math.floor(10 + (DATA.level - 1) * 2) + gDef
-    local spd   = math.floor(h.spd * (1 + (u.spd or 0) * 0.04)) + gSpd
-    local crit  = math.min(0.75, h.crit + (u.crit or 0) * 0.03)
-    local mpReg = 8 + (u.mp or 0) * 1.5
-    local power = math.floor(maxHp * 0.8 + atk * 18 + def * 12 + spd * 0.6 + crit * 500 + maxMp * 1.2)
-    return {
-        hero = h, maxHp = maxHp, maxMp = maxMp, atk = atk, def = def, spd = spd,
-        crit = crit, mpRegen = mpReg, power = power, wingCol = wingCol, weapCol = weapCol,
-    }
-end
-
-local function addCorner(inst, px)
-    local c = Instance.new("UICorner")
-    c.CornerRadius = UDim.new(0, px or 8)
-    c.Parent = inst
-    return c
-end
-
-local function addStroke(inst, color, thick)
-    local s = Instance.new("UIStroke")
-    s.Color = color or C.BORDER
-    s.Thickness = thick or 1
-    s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    s.Parent = inst
-    return s
-end
-
-local function addGrad(inst, c1, c2, rot)
-    local g = Instance.new("UIGradient")
-    g.Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, c1), ColorSequenceKeypoint.new(1, c2) })
-    g.Rotation = rot or 90
-    g.Parent = inst
-    return g
-end
 
 local function makeLabel(parent, p)
     local l = Instance.new("TextLabel")
