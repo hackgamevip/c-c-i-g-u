@@ -1,5 +1,5 @@
 -- ============================================================================
--- DAU TRUONG CHIEN DAU PRO (v2.7) - Full-Screen Action RPG Combat Game
+-- DAU TRUONG CHIEN DAU PRO (v2.9) - Full-Screen Action RPG Combat Game
 -- Menu Full Man Hinh 100% | 8 Tuong | 5 Boss | 6 Loai Quai | Minimap Radar
 -- Chon Nang Cap Trong Tran | Nhiem Vu | Len Cap | Trang Thai | Cai Dat
 -- Code doc lap 100%, toi uu cho Mobile (cam ung tuc thi, chu matte) & PC.
@@ -80,7 +80,7 @@ local FONT_BODY  = Enum.Font.GothamMedium
 -- 2. DU LIEU GAME (8 TUONG, 5 MAN CHOI, 3 DO KHO, 5 BOSS, 6 QUAI, NHIEM VU)
 -- ============================================================================
 local CFG = {
-    VERSION = "v2.7",
+    VERSION = "v2.9",
     GUI_NAME = "ArenaChienDau_Standalone",
     SAVE_PREFIX = "arena_chien_dau_v2_",
     ARENA_W = 1100,
@@ -396,6 +396,19 @@ function SAVE.Write()
     if type(writefile) == "function" then
         pcall(function() writefile(getSaveFileName(), HttpService:JSONEncode(DATA)) end)
     end
+end
+
+function SAVE.Reset()
+    DATA = getDefaultData()
+    local env = (type(getgenv) == "function" and getgenv()) or _G
+    env.ArenaChienDauV2_Save = DATA
+    if type(delfile) == "function" and type(isfile) == "function" then
+        pcall(function()
+            local fn = getSaveFileName()
+            if isfile(fn) then delfile(fn) end
+        end)
+    end
+    SAVE.Write()
 end
 
 SAVE.Load()
@@ -809,7 +822,7 @@ local function bindTap(btn, cb)
     end))
 end
 
--- Ve nhan vat chibi RPG da lop (Dau + Toc + Mat + Giap Than + Vu Khi rieng)
+-- Ve nhan vat full-body da lop (theo mau WarriorSkin: bong, chan, giay, ao choang, giap gradient, dai lung, vai, tay, gang, co, dau, toc, mat, mu, vu khi)
 local function buildChibiHero(container, hero, zBase, hideWeapon)
     for _, ch in ipairs(container:GetChildren()) do
         if ch.Name == "HeroArt" then ch:Destroy() end
@@ -840,196 +853,146 @@ local function buildChibiHero(container, hero, zBase, hideWeapon)
         return root, nil
     end
 
-    -- Bong do
-    local sh = Instance.new("Frame")
-    sh.AnchorPoint = Vector2.new(0.5, 0.5)
-    sh.Position = UDim2.new(0.5, 0, 0.96, 0)
-    sh.Size = UDim2.new(0.85, 0, 0.30, 0)
-    sh.BackgroundColor3 = C.SHADOW
-    sh.BackgroundTransparency = 0.45
-    sh.BorderSizePixel = 0
-    sh.ZIndex = zBase
-    sh.Parent = root
-    addCorner(sh, 99)
+    -- Helper tao tung bo phan theo ty le chuan 300x340 tu mau WarriorSkin
+    local outlineCol = Color3.fromRGB(24, 20, 26)
+    local function part(name, sx, sy, px, py, col, rad, rot, zOff)
+        local f = Instance.new("Frame")
+        f.Name = name
+        f.Size = UDim2.new(sx / 300, 0, sy / 340, 0)
+        f.Position = UDim2.new(px / 300, 0, py / 340, 0)
+        f.AnchorPoint = Vector2.new(0.5, 0.5)
+        f.BackgroundColor3 = col
+        f.BorderSizePixel = 0
+        f.Rotation = rot or 0
+        f.ZIndex = zBase + (zOff or 1)
+        f.Parent = root
+        addCorner(f, rad or 3)
+        addStroke(f, outlineCol, 1.1)
+        return f
+    end
 
-    -- Canh / Ao choang trang bi (neu co)
+    -- Bang mau rieng theo tung tuong (Chien Binh dung chuan bang mau WarriorSkin cua ban)
+    local black   = Color3.fromRGB(30, 25, 32)
+    local skinCol = Color3.fromRGB(208, 174, 138)
+    local steel   = Color3.fromRGB(178, 188, 202)
+    local mainCol = (hero.id == "chienbinh") and Color3.fromRGB(184, 42, 46) or hero.armor
+    local darkCol = (hero.id == "chienbinh") and Color3.fromRGB(112, 24, 30) or (hero.cape or hero.armor)
+    local trimCol = (hero.id == "chienbinh") and Color3.fromRGB(204, 162, 56) or hero.trim
+    local hairCol = (hero.id == "chienbinh") and black or hero.hair
+
+    -- Canh trang bi (hien sau lung neu da mac Canh trong tab Trang Bi)
     if not hideWeapon and DATA and DATA.equipped and DATA.equipped.wings then
         local wIt = GEAR.FindByUid(DATA.equipped.wings)
         if wIt then
             local wd = GEAR.GetDef(wIt.id)
-            for _, side in ipairs({ -1, 1 }) do
-                local wing = Instance.new("Frame")
-                wing.AnchorPoint = Vector2.new(0.5, 0.5)
-                wing.Position = UDim2.new(0.5 + side * 0.58, 0, 0.58, 0)
-                wing.Size = UDim2.new(0.54, 0, 0.58, 0)
-                wing.Rotation = side * 22
-                wing.BackgroundColor3 = wd.col
-                wing.BorderSizePixel = 0
-                wing.ZIndex = zBase
-                wing.Parent = root
-                addCorner(wing, 8)
-                addStroke(wing, C.TXT_DARK, 1)
-            end
+            part("WingL", 88, 108, 66, 172, wd.col, 8, -22, 0)
+            part("WingR", 88, 108, 234, 172, wd.col, 8, 22, 0)
         end
     end
 
-    -- Ao choang / Khan choang rieng cua tung class (rung rinh khi chay)
-    if hero.cape and not hideWeapon then
-        local cape = Instance.new("Frame")
-        cape.Name = "ClassCape"
-        cape.AnchorPoint = Vector2.new(0.5, 0)
-        cape.Position = UDim2.new(0.42, 0, 0.52, 0)
-        cape.Size = UDim2.new(0.76, 0, 0.50, 0)
-        cape.Rotation = 8
-        cape.BackgroundColor3 = hero.cape
-        cape.BorderSizePixel = 0
-        cape.ZIndex = zBase
-        cape.Parent = root
-        addCorner(cape, 6)
-        addStroke(cape, C.TXT_DARK, 1.2)
+    -- Bong duoi chan
+    local sh = part("Shadow", 104, 24, 150, 286, Color3.fromRGB(20, 18, 26), 10, 0, 0)
+    sh.BackgroundTransparency = 0.45
+
+    -- Chan & Giay
+    part("LeftLeg",   26, 50, 128, 242, darkCol, 3, 0, 1)
+    part("RightLeg",  26, 50, 172, 242, darkCol, 3, 0, 1)
+    part("LeftBoot",  32, 20, 124, 268, black,   3, 0, 2)
+    part("RightBoot", 32, 20, 176, 268, black,   3, 0, 2)
+
+    -- Ao choang sau lung
+    if not hideWeapon then
+        part("Cape", 96, 106, 150, 182, darkCol, 6, 0, 1)
     end
 
-    -- Than giap
-    local body = Instance.new("Frame")
-    body.AnchorPoint = Vector2.new(0.5, 0.5)
-    body.Position = UDim2.new(0.5, 0, 0.72, 0)
-    body.Size = UDim2.new(0.56, 0, 0.44, 0)
-    body.BackgroundColor3 = hero.armor
-    body.BorderSizePixel = 0
-    body.ZIndex = zBase + 1
-    body.Parent = root
-    addCorner(body, 6)
-    addStroke(body, hero.trim, 1.3)
+    -- Than giap + UIGradient chieu sau
+    local body = part("ArmorBody", 68, 86, 150, 186, mainCol, 5, 0, 2)
+    local topTone = Color3.new(
+        math.min(1, mainCol.R * 1.25),
+        math.min(1, mainCol.G * 1.25),
+        math.min(1, mainCol.B * 1.25)
+    )
+    local botTone = Color3.new(mainCol.R * 0.62, mainCol.G * 0.62, mainCol.B * 0.62)
+    addGrad(body, topTone, botTone, 90)
 
-    -- Dau & khuon mat chibi
-    local head = Instance.new("Frame")
-    head.AnchorPoint = Vector2.new(0.5, 0.5)
-    head.Position = UDim2.new(0.5, 0, 0.34, 0)
-    head.Size = UDim2.new(0.66, 0, 0.56, 0)
-    head.BackgroundColor3 = Color3.fromRGB(204, 174, 152)
-    head.BorderSizePixel = 0
-    head.ZIndex = zBase + 2
-    head.Parent = root
-    addCorner(head, 99)
-    addStroke(head, C.TXT_DARK, 1.2)
+    -- Dai lung & Khoa vang
+    part("Belt",       70, 14, 150, 216, black,   2, 0, 3)
+    part("BeltBuckle", 18, 18, 150, 216, trimCol, 2, 0, 4)
 
-    -- Toc / Mu trum
-    local hair = Instance.new("Frame")
-    hair.AnchorPoint = Vector2.new(0.5, 0)
-    hair.Position = UDim2.new(0.5, 0, -0.08, 0)
-    hair.Size = UDim2.new(1.12, 0, 0.58, 0)
-    hair.BackgroundColor3 = hero.hair
-    hair.BorderSizePixel = 0
-    hair.ZIndex = zBase + 4
-    hair.Parent = head
-    addCorner(hair, 8)
-    addStroke(hair, C.TXT_DARK, 1)
+    -- Vai giap & Tay & Gang tay
+    part("LeftShoulder",  32, 36, 108, 156, trimCol, 5, 0, 4)
+    part("RightShoulder", 32, 36, 192, 156, trimCol, 5, 0, 4)
+    part("LeftArm",       24, 54, 104, 192, mainCol, 4, 0, 3)
+    part("RightArm",      24, 54, 196, 192, mainCol, 4, 0, 3)
+    local gloveCol = (hero.id == "dausi") and trimCol or black
+    local gloveSz  = (hero.id == "dausi") and 34 or 26
+    part("LeftGlove",  gloveSz, gloveSz, 104, 222, gloveCol, 5, 0, 4)
+    part("RightGlove", gloveSz, gloveSz, 196, 222, gloveCol, 5, 0, 4)
 
-    -- Doi mat anime
-    for _, ex in ipairs({ 0.36, 0.68 }) do
-        local eye = Instance.new("Frame")
-        eye.AnchorPoint = Vector2.new(0.5, 0.5)
-        eye.Position = UDim2.new(ex, 0, 0.62, 0)
-        eye.Size = UDim2.new(0.16, 0, 0.24, 0)
-        eye.BackgroundColor3 = hero.fx
-        eye.BorderSizePixel = 0
-        eye.ZIndex = zBase + 3
-        eye.Parent = head
-        addCorner(eye, 3)
+    -- Co, Dau, Toc, Mat
+    part("Neck",     26, 20, 150, 126, skinCol, 3, 0, 3)
+    part("Head",     74, 76, 150, 100, skinCol, 9, 0, 4)
+    part("Hair",     80, 34, 150, 70,  hairCol, 6, 0, 5)
+    part("LeftEye",  10, 11, 134, 106, black,   4, 0, 5)
+    part("RightEye", 10, 11, 166, 106, black,   4, 0, 5)
+
+    -- Mu giap / Mu trum tuy class
+    if hero.id == "chienbinh" or hero.id == "kiemsu" or hero.id == "thankiem" then
+        part("Helmet",       88, 28, 150, 56, steel,   5, 0, 6)
+        part("HelmetCenter", 16, 32, 150, 56, trimCol, 3, 0, 7)
+    elseif hero.hood then
+        part("HoodTop", 90, 38, 150, 60, mainCol, 8, 0, 6)
     end
 
     if hideWeapon then return root, nil end
 
-    -- Khop vu khi xoay theo huong danh
+    -- Mau luoi vu khi theo trang bi dang mac (neu co)
+    local weapCol = steel
+    if DATA and DATA.equipped and DATA.equipped.weapon then
+        local eqW = GEAR.FindByUid(DATA.equipped.weapon)
+        if eqW then weapCol = GEAR.GetDef(eqW.id).col end
+    end
+
+    -- Khop vu khi (xoay & vung trong chien dau)
     local wp = Instance.new("Frame")
     wp.Name = "WeaponPivot"
     wp.AnchorPoint = Vector2.new(0.5, 0.5)
-    wp.Position = UDim2.new(0.55, 0, 0.62, 0)
+    wp.Position = UDim2.new(196 / 300, 0, 195 / 340, 0)
     wp.Size = UDim2.new(1, 0, 1, 0)
     wp.BackgroundTransparency = 1
-    wp.ZIndex = zBase + 5
+    wp.ZIndex = zBase + 6
     wp.Parent = root
 
+    local function wPart(name, sx, sy, px, py, col, rad, rot, zOff)
+        local f = Instance.new("Frame")
+        f.Name = name
+        f.Size = UDim2.new(sx / 300, 0, sy / 340, 0)
+        f.Position = UDim2.new(px / 300, 0, py / 340, 0)
+        f.AnchorPoint = Vector2.new(0.5, 0.5)
+        f.BackgroundColor3 = col
+        f.BorderSizePixel = 0
+        f.Rotation = rot or 0
+        f.ZIndex = zBase + (zOff or 6)
+        f.Parent = wp
+        addCorner(f, rad or 3)
+        addStroke(f, outlineCol, 1.1)
+        return f
+    end
+
     if hero.weapon == "sword" or hero.weapon == "katana" or hero.weapon == "spear" then
-        local len = (hero.weapon == "spear") and 1.15 or 0.92
-        local blade = Instance.new("Frame")
-        blade.AnchorPoint = Vector2.new(0, 0.5)
-        blade.Position = UDim2.new(0.62, 0, 0.5, 0)
-        blade.Size = UDim2.new(len, 0, 0.16, 0)
-        blade.BackgroundColor3 = (hero.weapon == "katana") and hero.fx or C.METAL
-        blade.BorderSizePixel = 0
-        blade.ZIndex = zBase + 5
-        blade.Parent = wp
-        addCorner(blade, 3)
-        addStroke(blade, hero.fx, 1)
-
-        local guard = Instance.new("Frame")
-        guard.AnchorPoint = Vector2.new(0.5, 0.5)
-        guard.Position = UDim2.new(0.64, 0, 0.5, 0)
-        guard.Size = UDim2.new(0.12, 0, 0.42, 0)
-        guard.BackgroundColor3 = hero.trim
-        guard.BorderSizePixel = 0
-        guard.ZIndex = zBase + 6
-        guard.Parent = wp
-        addCorner(guard, 2)
+        local len = (hero.weapon == "spear") and 126 or 108
+        wPart("SwordBlade",  18, len, 185, 118, weapCol, 3, 35, 6)
+        wPart("SwordGuard",  40, 12,  156, 160, trimCol, 2, 35, 7)
+        wPart("SwordHandle", 13, 34,  144, 178, darkCol, 2, 35, 6)
     elseif hero.weapon == "daggers" then
-        for _, yOff in ipairs({ 0.28, 0.74 }) do
-            local dg = Instance.new("Frame")
-            dg.AnchorPoint = Vector2.new(0, 0.5)
-            dg.Position = UDim2.new(0.62, 0, yOff, 0)
-            dg.Size = UDim2.new(0.62, 0, 0.13, 0)
-            dg.BackgroundColor3 = hero.fx
-            dg.BorderSizePixel = 0
-            dg.ZIndex = zBase + 5
-            dg.Parent = wp
-            addCorner(dg, 2)
-        end
+        wPart("DaggerBlade", 14, 72, 178, 134, hero.fx, 3, 38, 6)
+        wPart("DaggerGuard", 28, 10, 156, 164, trimCol, 2, 38, 7)
     elseif hero.weapon == "staff" or hero.weapon == "orb" then
-        local rod = Instance.new("Frame")
-        rod.AnchorPoint = Vector2.new(0, 0.5)
-        rod.Position = UDim2.new(0.56, 0, 0.5, 0)
-        rod.Size = UDim2.new(0.86, 0, 0.11, 0)
-        rod.BackgroundColor3 = C.STONE_LIGHT
-        rod.BorderSizePixel = 0
-        rod.ZIndex = zBase + 5
-        rod.Parent = wp
-
-        local gem = Instance.new("Frame")
-        gem.AnchorPoint = Vector2.new(0.5, 0.5)
-        gem.Position = UDim2.new(1.42, 0, 0.5, 0)
-        gem.Size = UDim2.new(0.30, 0, 0.30, 0)
-        gem.BackgroundColor3 = hero.fx
-        gem.BorderSizePixel = 0
-        gem.ZIndex = zBase + 6
-        gem.Parent = wp
-        addCorner(gem, 99)
-        addStroke(gem, C.TXT_MAIN, 1)
+        wPart("StaffRod", 12, 118, 176, 126, steel,   2, 26, 6)
+        wPart("StaffOrb", 30, 30,  200, 74,  hero.fx, 15, 0, 7)
     elseif hero.weapon == "bow" then
-        local bow = Instance.new("Frame")
-        bow.AnchorPoint = Vector2.new(0.5, 0.5)
-        bow.Position = UDim2.new(0.95, 0, 0.5, 0)
-        bow.Size = UDim2.new(0.24, 0, 0.78, 0)
-        bow.BackgroundColor3 = hero.trim
-        bow.BackgroundTransparency = 0.2
-        bow.BorderSizePixel = 0
-        bow.ZIndex = zBase + 5
-        bow.Parent = wp
-        addCorner(bow, 99)
-        addStroke(bow, hero.fx, 1.5)
-    else
-        -- Dau Si: Gang tay lua
-        for _, yOff in ipairs({ 0.25, 0.75 }) do
-            local fist = Instance.new("Frame")
-            fist.AnchorPoint = Vector2.new(0.5, 0.5)
-            fist.Position = UDim2.new(0.88, 0, yOff, 0)
-            fist.Size = UDim2.new(0.32, 0, 0.30, 0)
-            fist.BackgroundColor3 = hero.trim
-            fist.BorderSizePixel = 0
-            fist.ZIndex = zBase + 6
-            fist.Parent = wp
-            addCorner(fist, 6)
-            addStroke(fist, C.TXT_GOLD, 1)
-        end
+        wPart("BowArc", 26, 98, 184, 146, trimCol, 12, 10, 6)
+        wPart("BowGem", 16, 16, 196, 146, hero.fx, 8,  0,  7)
     end
 
     return root, wp
@@ -1290,6 +1253,8 @@ local S = {
     joyX = 0,
     joyY = 0,
     holdAttack = false,
+    autoBattle = false,
+    dustT = 0,
 
     -- Thuc the dong
     enemies = {},
@@ -1467,8 +1432,25 @@ do
 
     UI.TopPowerLbl = makeLabel(topBar, {
         text = "Lực Chiến: 0", font = FONT_TITLE, color = C.TXT_GOLD, size = 11,
-        dim = UDim2.new(0, 165, 0, 16), pos = UDim2.new(0, 66, 0, 38), z = 12,
+        dim = UDim2.new(0, 165, 0, 14), pos = UDim2.new(0, 66, 0, 36), z = 12,
     })
+
+    local expWrap = Instance.new("Frame")
+    expWrap.Position = UDim2.new(0, 66, 0, 51)
+    expWrap.Size = UDim2.new(0, 152, 0, 4)
+    expWrap.BackgroundColor3 = C.BG_FULL
+    expWrap.BorderSizePixel = 0
+    expWrap.ZIndex = 12
+    expWrap.Parent = topBar
+    addCorner(expWrap, 2)
+
+    UI.TopExpFill = Instance.new("Frame")
+    UI.TopExpFill.Size = UDim2.new(0, 0, 1, 0)
+    UI.TopExpFill.BackgroundColor3 = C.EXP_BAR
+    UI.TopExpFill.BorderSizePixel = 0
+    UI.TopExpFill.ZIndex = 13
+    UI.TopExpFill.Parent = expWrap
+    addCorner(UI.TopExpFill, 2)
 
     -- Vien thuoc Xu & KC o giua TopBar
     local coinPill = Instance.new("Frame")
@@ -1780,7 +1762,7 @@ do
         UI.LobbyHeroPreview = Instance.new("Frame")
         UI.LobbyHeroPreview.AnchorPoint = Vector2.new(0.5, 0.5)
         UI.LobbyHeroPreview.Position = UDim2.new(0.5, 0, 0.52, 0)
-        UI.LobbyHeroPreview.Size = UDim2.new(0, 42, 0, 42)
+        UI.LobbyHeroPreview.Size = UDim2.new(0, 56, 0, 64)
         UI.LobbyHeroPreview.BackgroundTransparency = 1
         UI.LobbyHeroPreview.ZIndex = 7
         UI.LobbyHeroPreview.Parent = pBg
@@ -1835,7 +1817,7 @@ do
         UI.GearHeroPreview = Instance.new("Frame")
         UI.GearHeroPreview.AnchorPoint = Vector2.new(0.5, 0.5)
         UI.GearHeroPreview.Position = UDim2.new(0.5, 0, 0.5, 0)
-        UI.GearHeroPreview.Size = UDim2.new(0, 54, 0, 54)
+        UI.GearHeroPreview.Size = UDim2.new(0, 76, 0, 86)
         UI.GearHeroPreview.BackgroundTransparency = 1
         UI.GearHeroPreview.ZIndex = 6
         UI.GearHeroPreview.Parent = stageRing
@@ -1981,11 +1963,34 @@ do
         al.Padding = UDim.new(0, 6)
         al.Parent = actRow
 
-        local eqBtn = makeBtn(actRow, { text = "Trang Bị", bg = C.BTN_BLUE, color = C.TXT_MAIN, size = 11, dim = UDim2.new(0.19, -3, 1, 0), radius = 8, z = 6 })
-        local upBtn = makeBtn(actRow, { text = "Nâng Cấp", bg = C.BTN_GREEN, color = C.TXT_MAIN, size = 11, dim = UDim2.new(0.19, -3, 1, 0), radius = 8, z = 6 })
-        local unBtn = makeBtn(actRow, { text = "Gỡ",       bg = C.BTN_RED, color = C.TXT_MAIN, size = 11, dim = UDim2.new(0.14, -3, 1, 0), radius = 8, z = 6 })
-        local slBtn = makeBtn(actRow, { text = "Bán",      bg = C.BTN_GOLD, color = C.TXT_DARK, size = 11, dim = UDim2.new(0.15, -3, 1, 0), radius = 8, z = 6 })
-        local chBtn = makeBtn(actRow, { text = "Rương 150Xu", bg = C.BTN_PURPLE, color = C.TXT_GOLD, size = 11, dim = UDim2.new(0.32, -4, 1, 0), radius = 8, z = 6 })
+        local eqBtn = makeBtn(actRow, { text = "Trang Bị", bg = C.BTN_BLUE, color = C.TXT_MAIN, size = 10, dim = UDim2.new(0.16, -3, 1, 0), radius = 8, z = 6 })
+        local upBtn = makeBtn(actRow, { text = "Nâng Cấp", bg = C.BTN_GREEN, color = C.TXT_MAIN, size = 10, dim = UDim2.new(0.16, -3, 1, 0), radius = 8, z = 6 })
+        local unBtn = makeBtn(actRow, { text = "Gỡ",       bg = C.BTN_RED, color = C.TXT_MAIN, size = 10, dim = UDim2.new(0.10, -3, 1, 0), radius = 8, z = 6 })
+        local slBtn = makeBtn(actRow, { text = "Bán",      bg = C.BTN_GOLD, color = C.TXT_DARK, size = 10, dim = UDim2.new(0.11, -3, 1, 0), radius = 8, z = 6 })
+        local qsBtn = makeBtn(actRow, { text = "Bán Nhanh", bg = C.BTN_DARK, color = C.TXT_GOLD, size = 10, dim = UDim2.new(0.20, -3, 1, 0), radius = 8, strokeColor = C.BORDER_GOLD, z = 6 })
+        local chBtn = makeBtn(actRow, { text = "Rương 150Xu", bg = C.BTN_PURPLE, color = C.TXT_GOLD, size = 10, dim = UDim2.new(0.26, -3, 1, 0), radius = 8, z = 6 })
+
+        bindTap(qsBtn, function()
+            local sold, totalXu = 0, 0
+            for i = #DATA.inventory, 1, -1 do
+                local it = DATA.inventory[i]
+                local d = GEAR.GetDef(it.id)
+                if not GEAR.IsEquipped(it.uid) and (d.rarity == "common" or d.rarity == "rare") then
+                    local r = CFG.RARITIES[d.rarity] or CFG.RARITIES.common
+                    totalXu = totalXu + r.sell + (it.lv or 0) * 30
+                    sold = sold + 1
+                    if UI.SelectedGearUid == it.uid then UI.SelectedGearUid = nil end
+                    table.remove(DATA.inventory, i)
+                end
+            end
+            if sold > 0 then
+                DATA.coins = DATA.coins + totalXu
+                SAVE.Write(); refreshAllUI()
+                showToast("Bán nhanh " .. sold .. " món nhận +" .. totalXu .. " Xu", C.TXT_GOLD)
+            else
+                showToast("Không có đồ Thường/Hiếm chưa mặc để bán!", C.TXT_SUB)
+            end
+        end)
 
         bindTap(eqBtn, function()
             local it = GEAR.FindByUid(UI.SelectedGearUid)
@@ -2307,7 +2312,7 @@ do
         local pg = UI.LobbyPages.settings
 
         local setCard = Instance.new("Frame")
-        setCard.Size = UDim2.new(1, 0, 0, 174)
+        setCard.Size = UDim2.new(1, 0, 0, 206)
         setCard.BackgroundColor3 = C.BG_PANEL
         setCard.ZIndex = 4
         setCard.Parent = pg
@@ -2343,8 +2348,63 @@ do
             end)
         end
 
+        -- Nut Xoa Het Du Lieu (Reset) co hop thoai xac nhan an toan
+        local resetBtn = makeBtn(setCard, {
+            text = "RESET DỮ LIỆU (XÓA HẾT DỮ LIỆU)", bg = C.BTN_RED, color = C.TXT_MAIN, size = 12,
+            dim = UDim2.new(0.96, 0, 0, 36), pos = UDim2.new(0.02, 0, 0, 156), radius = 8,
+            strokeColor = C.TXT_RED, strokeWidth = 1.4, z = 5,
+        })
+
+        local resetOv = Instance.new("Frame")
+        resetOv.Size = UDim2.new(1, 0, 1, 0)
+        resetOv.BackgroundColor3 = C.SHADOW
+        resetOv.BackgroundTransparency = 0.25
+        resetOv.Visible = false
+        resetOv.ZIndex = 65
+        resetOv.Parent = UI.MainFrame
+
+        local rCard = Instance.new("Frame")
+        rCard.AnchorPoint = Vector2.new(0.5, 0.5)
+        rCard.Position = UDim2.new(0.5, 0, 0.5, 0)
+        rCard.Size = UDim2.new(0, 340, 0, 176)
+        rCard.BackgroundColor3 = C.BG_PANEL
+        rCard.ZIndex = 66
+        rCard.Parent = resetOv
+        addCorner(rCard, 12)
+        addStroke(rCard, C.TXT_RED, 2)
+
+        makeLabel(rCard, {
+            text = "XÁC NHẬN XÓA TOÀN BỘ DỮ LIỆU?", font = FONT_TITLE, color = C.TXT_RED, size = 15,
+            xAlign = Enum.TextXAlignment.Center, dim = UDim2.new(1, -20, 0, 28), pos = UDim2.new(0, 10, 0, 14), z = 67,
+        })
+        makeLabel(rCard, {
+            text = "Toàn bộ Xu, KC, Cấp độ, Tướng, Trang Bị, Nhiệm Vụ và Mã Quà sẽ bị xóa sạch và đặt lại từ đầu!",
+            font = FONT_BODY, color = C.TXT_MAIN, size = 12, wrap = true,
+            xAlign = Enum.TextXAlignment.Center, dim = UDim2.new(1, -28, 0, 56), pos = UDim2.new(0, 14, 0, 46), z = 67,
+        })
+
+        local cancelR = makeBtn(rCard, {
+            text = "HỦY BỎ", bg = C.BTN_DARK, color = C.TXT_MAIN, size = 13,
+            dim = UDim2.new(0.44, 0, 0, 38), pos = UDim2.new(0.05, 0, 1, -52), radius = 8, z = 67,
+        })
+        local confirmR = makeBtn(rCard, {
+            text = "XÁC NHẬN XÓA", bg = C.BTN_RED, color = C.TXT_MAIN, size = 13,
+            dim = UDim2.new(0.44, 0, 0, 38), pos = UDim2.new(0.51, 0, 1, -52), radius = 8, z = 67,
+        })
+
+        bindTap(resetBtn, function() resetOv.Visible = true end)
+        bindTap(cancelR, function() resetOv.Visible = false end)
+        bindTap(confirmR, function()
+            resetOv.Visible = false
+            UI.SelectedGearUid = nil
+            SAVE.Reset()
+            refreshAllUI()
+            showToast("Đã xóa toàn bộ dữ liệu và đặt lại từ đầu!", C.TXT_GOLD)
+        end)
+
+
         local codeCard = Instance.new("Frame")
-        codeCard.Position = UDim2.new(0, 0, 0, 186)
+        codeCard.Position = UDim2.new(0, 0, 0, 216)
         codeCard.Size = UDim2.new(1, 0, 0, 118)
         codeCard.BackgroundColor3 = C.BG_PANEL
         codeCard.ZIndex = 4
@@ -2460,6 +2520,7 @@ refreshAllUI = function()
     UI.TopHpLbl.Text = string.format("HP %d/%d", S.inMatch and math.floor(S.hp) or st.maxHp, S.inMatch and S.maxHp or st.maxHp)
     UI.TopMpLbl.Text = string.format("MP %d/%d", S.inMatch and math.floor(S.mp) or st.maxMp, S.inMatch and S.maxMp or st.maxMp)
     UI.TopPowerLbl.Text = "Lực Chiến: " .. tostring(st.power)
+    if UI.TopExpFill then UI.TopExpFill.Size = UDim2.new(math.clamp((DATA.exp or 0) / math.max(1, getExpNeeded(DATA.level)), 0, 1), 0, 1, 0) end
     UI.TopCoinLbl.Text = tostring(DATA.coins) .. " Xu"
     UI.TopGemLbl.Text = tostring(DATA.gems) .. " KC"
 
@@ -2798,7 +2859,7 @@ do
     -- Nhan vat nguoi choi
     local pNode = Instance.new("Frame")
     pNode.AnchorPoint = Vector2.new(0.5, 0.5)
-    pNode.Size = UDim2.new(0, 44, 0, 44)
+    pNode.Size = UDim2.new(0, 50, 0, 56)
     pNode.BackgroundTransparency = 1
     pNode.ZIndex = 10
     pNode.Parent = arena
@@ -2884,8 +2945,20 @@ do
     UI.HudComboLbl = makeLabel(arena, {
         text = "", font = FONT_TITLE, color = C.TXT_GOLD, size = 15,
         xAlign = Enum.TextXAlignment.Right, dim = UDim2.new(0, 150, 0, 26),
-        pos = UDim2.new(1, -68, 0, 12), z = 22,
+        pos = UDim2.new(1, -296, 0, 12), z = 22,
     })
+
+    UI.AutoBtn = makeBtn(arena, {
+        text = "AUTO: TẮT", bg = C.BG_TOPBAR, color = C.TXT_SUB, size = 11,
+        dim = UDim2.new(0, 82, 0, 34), pos = UDim2.new(1, -138, 0, 10), radius = 10,
+        strokeColor = C.BORDER, z = 22,
+    })
+    bindTap(UI.AutoBtn, function()
+        S.autoBattle = not S.autoBattle
+        UI.AutoBtn.Text = S.autoBattle and "AUTO: BẬT" or "AUTO: TẮT"
+        UI.AutoBtn.BackgroundColor3 = S.autoBattle and C.BTN_GREEN or C.BG_TOPBAR
+        UI.AutoBtn.TextColor3 = S.autoBattle and C.TXT_MAIN or C.TXT_SUB
+    end)
 
     local pauseBtn = makeBtn(arena, {
         text = "||", bg = C.BG_TOPBAR, color = C.TXT_MAIN, size = 14,
@@ -3921,12 +3994,39 @@ do
             if S.keys.W then my = my - 1 end
             if S.keys.S then my = my + 1 end
             if S.joyActive then mx, my = S.joyX, S.joyY end
+            -- Tu dong chien dau (Auto-Battle) khi bat
+            if S.autoBattle and not S.joyActive and mx == 0 and my == 0 then
+                local tgt = findNearest(9999)
+                if tgt then
+                    local dx, dy = tgt.x - S.px, tgt.y - S.py
+                    local d = math.sqrt(dx * dx + dy * dy)
+                    local wantD = (S.hero.attackType == "ranged") and 220 or (S.hero.range * 0.65)
+                    if d > wantD then
+                        mx, my = dx / math.max(1, d), dy / math.max(1, d)
+                    elseif S.hero.attackType == "ranged" and d < 130 then
+                        mx, my = -dx / math.max(1, d), -dy / math.max(1, d)
+                    end
+                    if d <= (S.hero.attackType == "ranged" and 390 or (S.hero.range + tgt.r + 18)) then
+                        if S.fury >= 100 then GAME.TryUlt()
+                        elseif S.s2Cd <= 0 and S.mp >= S.hero.s2Cost then GAME.TrySkill2()
+                        elseif S.s1Cd <= 0 and S.mp >= S.hero.s1Cost then GAME.TrySkill1()
+                        elseif S.attackCd <= 0 then GAME.TryAttack() end
+                    end
+                end
+            end
+
             local len = math.sqrt(mx * mx + my * my)
             if len > 0.05 then
                 local nx, ny = mx / math.max(1, len), my / math.max(1, len)
                 S.px = math.clamp(S.px + nx * S.spd * dt, CFG.PLAYER_R, CFG.ARENA_W - CFG.PLAYER_R)
                 S.py = math.clamp(S.py + ny * S.spd * dt, CFG.PLAYER_R, CFG.ARENA_H - CFG.PLAYER_R)
                 S.dirX, S.dirY = mx / len, my / len
+                -- Bui buoc chan khi chay
+                S.dustT = S.dustT - dt
+                if S.dustT <= 0 and DATA.settings.particles then
+                    S.dustT = 0.14
+                    spawnGhost(S.px - nx * 10, S.py + 14, C.STONE_LIGHT)
+                end
             end
         end
 
@@ -3951,7 +4051,7 @@ do
                 alive = alive + 1
                 if e.flashT > 0 then
                     e.flashT = e.flashT - dt
-                    e.ui.BackgroundColor3 = (e.flashT > 0) and C.TXT_MAIN or e.baseCol
+                    e.ui.BackgroundColor3 = (e.flashT > 0) and C.TXT_MAIN or ((e.slowT > 0) and C.TXT_CYAN or e.baseCol)
                 end
                 if e.burnT > 0 then
                     e.burnT = e.burnT - dt
