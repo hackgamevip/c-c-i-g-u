@@ -1,5 +1,5 @@
 -- ============================================================================
--- DAU TRUONG CHIEN DAU PRO (v2.9) - Full-Screen Action RPG Combat Game
+-- DAU TRUONG CHIEN DAU PRO (v3.0) - Full-Screen Action RPG Combat Game
 -- Menu Full Man Hinh 100% | 8 Tuong | 5 Boss | 6 Loai Quai | Minimap Radar
 -- Chon Nang Cap Trong Tran | Nhiem Vu | Len Cap | Trang Thai | Cai Dat
 -- Code doc lap 100%, toi uu cho Mobile (cam ung tuc thi, chu matte) & PC.
@@ -80,7 +80,7 @@ local FONT_BODY  = Enum.Font.GothamMedium
 -- 2. DU LIEU GAME (8 TUONG, 5 MAN CHOI, 3 DO KHO, 5 BOSS, 6 QUAI, NHIEM VU)
 -- ============================================================================
 local CFG = {
-    VERSION = "v2.9",
+    VERSION = "v3.0",
     GUI_NAME = "ArenaChienDau_Standalone",
     SAVE_PREFIX = "arena_chien_dau_v2_",
     ARENA_W = 1100,
@@ -89,107 +89,107 @@ local CFG = {
     -- Tuy chon: Dan rbxassetid:// vao day neu ban tai anh sprite len Roblox (de trong = dung do hoa chibi tich hop san)
     CUSTOM_SPRITE_IDS = {
         chienbinh = "", satthu = "", phapsu = "", cungthu = "",
-        thankiem = "", dausi = "", kiemsu = "", maphapsu = "",
+        kiemsu = "", dausi = "", hotro = "", maanh = "",
     },
 }
 
--- 8 Nhan Vat tham khao tu bang Sprite
+-- 8 Nhan Vat voi Trang Bi Dac Trung & Bo 3 Chieu Rieng Biet
 CFG.HEROES = {
     {
-        id = "chienbinh", name = "Chiến Binh", role = "Cận chiến Hỏa Kiếm",
+        id = "chienbinh", name = "Chiến Binh", role = "Kiếm + Khiên",
         costCoin = 0, costGem = 0,
-        hair = Color3.fromRGB(40, 38, 46), armor = Color3.fromRGB(58, 52, 62),
-        cape = Color3.fromRGB(186, 46, 48), trim = Color3.fromRGB(196, 152, 68), fx = Color3.fromRGB(204, 68, 68),
-        weapon = "sword", attackType = "melee", status = "burn",
-        hp = 160, mp = 100, atk = 28, spd = 250, crit = 0.14, range = 104, cd = 0.28,
-        s1Name = "Hỏa Trảm", s1Cost = 20, s1Cd = 4.2,
-        s2Name = "Xoáy Lửa", s2Cost = 35, s2Cd = 6.5,
-        ultName = "Liệt Hỏa Kiếm Trận",
-        desc = "Kiếm sĩ tóc đỏ thiêu đốt kẻ địch bằng những nhát chém lửa rộng.",
+        hair = Color3.fromRGB(40, 38, 46), armor = Color3.fromRGB(184, 42, 46),
+        cape = Color3.fromRGB(112, 24, 30), trim = Color3.fromRGB(204, 162, 56), fx = Color3.fromRGB(204, 68, 68),
+        weapon = "sword_shield", attackType = "melee", status = "burn",
+        hp = 175, mp = 100, atk = 30, spd = 250, crit = 0.15, range = 108, cd = 0.28,
+        s1Name = "Chém Mạnh", s1Cost = 18, s1Cd = 5.0,
+        s2Name = "Xoay Kiếm", s2Cost = 30, s2Cd = 9.0,
+        ultName = "Địa Chấn",
+        desc = "Kiếm + Khiên: Chém Mạnh, Xoay Kiếm 360 độ và Địa Chấn làm choáng diện rộng.",
     },
     {
-        id = "satthu", name = "Sát Thủ", role = "Tốc độ & Bóng Đêm",
+        id = "satthu", name = "Sát Thủ", role = "Song Dao",
         costCoin = 350, costGem = 0,
         hair = Color3.fromRGB(56, 44, 78), armor = Color3.fromRGB(46, 36, 68),
         hood = true, cape = Color3.fromRGB(128, 72, 186), trim = Color3.fromRGB(154, 102, 198), fx = Color3.fromRGB(154, 88, 202),
         weapon = "daggers", attackType = "melee", status = "poison",
-        hp = 122, mp = 110, atk = 26, spd = 315, crit = 0.28, range = 90, cd = 0.19,
-        s1Name = "Ảnh Kích", s1Cost = 18, s1Cd = 3.5,
-        s2Name = "Độc Vũ", s2Cost = 30, s2Cd = 5.5,
-        ultName = "Bão Dao Bóng Đêm",
-        desc = "Mũ trùm tím ẩn thân, đánh cực nhanh kèm độc và tỷ lệ chí mạng cao.",
+        hp = 125, mp = 110, atk = 28, spd = 320, crit = 0.28, range = 92, cd = 0.19,
+        s1Name = "Lướt Bóng", s1Cost = 16, s1Cd = 4.0,
+        s2Name = "Phi Dao",   s2Cost = 26, s2Cd = 7.0,
+        ultName = "Ám Sát",
+        desc = "Song Dao: Lướt Bóng xuyên quái, Phi Dao 5 lưỡi và Ám Sát bùng nổ.",
     },
     {
-        id = "phapsu", name = "Pháp Sư", role = "Băng Thuật Khống Chế",
+        id = "phapsu", name = "Pháp Sư", role = "Trượng Phép",
         costCoin = 550, costGem = 0,
         hair = Color3.fromRGB(134, 186, 208), armor = Color3.fromRGB(42, 82, 158),
         cape = Color3.fromRGB(34, 64, 132), trim = Color3.fromRGB(198, 168, 78), fx = Color3.fromRGB(86, 172, 208),
         weapon = "staff", attackType = "ranged", status = "freeze",
-        hp = 115, mp = 150, atk = 25, spd = 255, crit = 0.18, range = 380, cd = 0.26,
-        s1Name = "Cầu Băng", s1Cost = 22, s1Cd = 4.0,
-        s2Name = "Vòng Băng Giá", s2Cost = 38, s2Cd = 6.2,
-        ultName = "Bão Tuyết Vĩnh Cửu",
-        desc = "Trượng băng bắn cầu năng lượng làm chậm và đóng băng diện rộng.",
+        hp = 118, mp = 155, atk = 27, spd = 255, crit = 0.18, range = 385, cd = 0.26,
+        s1Name = "Cầu Phép",   s1Cost = 18, s1Cd = 4.0,
+        s2Name = "Băng Nổ",    s2Cost = 32, s2Cd = 8.0,
+        ultName = "Thiên Thạch",
+        desc = "Trượng Phép: Cầu Phép băng, Băng Nổ đóng băng và gọi Mưa Thiên Thạch.",
     },
     {
-        id = "cungthu", name = "Cung Thủ", role = "Xạ kích Xuyên Thấu",
+        id = "cungthu", name = "Cung Thủ", role = "Cung",
         costCoin = 750, costGem = 0,
         hair = Color3.fromRGB(46, 118, 64), armor = Color3.fromRGB(44, 104, 62),
         hood = true, cape = Color3.fromRGB(38, 92, 52), trim = Color3.fromRGB(168, 126, 68), fx = Color3.fromRGB(84, 192, 112),
         weapon = "bow", attackType = "ranged", status = "poison",
-        hp = 118, mp = 120, atk = 24, spd = 278, crit = 0.24, range = 410, cd = 0.22,
-        s1Name = "Mưa Tên", s1Cost = 20, s1Cd = 3.8,
-        s2Name = "Tiễn Xuyên", s2Cost = 32, s2Cd = 5.8,
-        ultName = "Vạn Tiễn Quy Tông",
-        desc = "Mũ trùm xanh lá bắn tên liên hoàn xuyên nhiều mục tiêu cùng lúc.",
+        hp = 120, mp = 120, atk = 26, spd = 280, crit = 0.24, range = 415, cd = 0.22,
+        s1Name = "Bắn 3 Tên", s1Cost = 16, s1Cd = 4.0,
+        s2Name = "Tên Xuyên", s2Cost = 28, s2Cd = 8.0,
+        ultName = "Mưa Tên",
+        desc = "Cung: Bắn 3 Tên tỏa rộng, Tên Xuyên thấu cực mạnh và Mưa Tên toàn sân.",
     },
     {
-        id = "thankiem", name = "Thần Kiếm", role = "Kiếm Khí Băng Thanh",
+        id = "kiemsu", name = "Kiếm Sư", role = "Đại Kiếm",
         costCoin = 1000, costGem = 15,
-        hair = Color3.fromRGB(196, 202, 210), armor = Color3.fromRGB(52, 78, 132),
-        trim = Color3.fromRGB(116, 178, 206), fx = Color3.fromRGB(98, 174, 206),
-        weapon = "katana", attackType = "melee", status = "freeze",
-        hp = 152, mp = 125, atk = 32, spd = 285, crit = 0.22, range = 114, cd = 0.24,
-        s1Name = "Kiếm Khí", s1Cost = 22, s1Cd = 3.8,
-        s2Name = "Liên Hoàn Trảm", s2Cost = 35, s2Cd = 6.0,
-        ultName = "Thiên Kiếm Hàng Lâm",
-        desc = "Tóc trắng vung trường kiếm phóng sóng kiếm khí xanh lam tầm trung.",
-    },
-    {
-        id = "dausi", name = "Đấu Sĩ", role = "Quyền Cước Hỏa Lực",
-        costCoin = 1200, costGem = 20,
-        hair = Color3.fromRGB(114, 72, 48), armor = Color3.fromRGB(52, 46, 54),
-        trim = Color3.fromRGB(202, 82, 48), fx = Color3.fromRGB(204, 128, 52),
-        weapon = "gauntlets", attackType = "melee", status = "stun",
-        hp = 200, mp = 100, atk = 34, spd = 265, crit = 0.18, range = 94, cd = 0.24,
-        s1Name = "Hỏa Quyền", s1Cost = 20, s1Cd = 3.8,
-        s2Name = "Chấn Động", s2Cost = 32, s2Cd = 5.8,
-        ultName = "Nộ Long Quyền Pháp",
-        desc = "Găng tay lửa cực trâu bò, đấm choáng kẻ địch và đẩy lùi cực mạnh.",
-    },
-    {
-        id = "kiemsu", name = "Kiếm Sư", role = "Thương Kiếm Lôi Điện",
-        costCoin = 1500, costGem = 30,
         hair = Color3.fromRGB(38, 46, 68), armor = Color3.fromRGB(56, 68, 96),
         cape = Color3.fromRGB(42, 62, 112), trim = Color3.fromRGB(158, 176, 198), fx = Color3.fromRGB(76, 182, 208),
-        weapon = "spear", attackType = "melee", status = "stun",
-        hp = 165, mp = 130, atk = 35, spd = 280, crit = 0.24, range = 124, cd = 0.25,
-        s1Name = "Lôi Thương", s1Cost = 24, s1Cd = 4.0,
-        s2Name = "Xoáy Lam", s2Cost = 36, s2Cd = 6.0,
-        ultName = "Thương Long Xuất Hải",
-        desc = "Đòn đánh tầm dài kèm hiệu ứng choáng, cân bằng công thủ hoàn hảo.",
+        weapon = "greatsword", attackType = "melee", status = "freeze",
+        hp = 165, mp = 130, atk = 36, spd = 278, crit = 0.22, range = 126, cd = 0.25,
+        s1Name = "Kiếm Khí", s1Cost = 20, s1Cd = 5.0,
+        s2Name = "Ngũ Kiếm", s2Cost = 34, s2Cd = 9.0,
+        ultName = "Băng Kiếm",
+        desc = "Đại Kiếm: Phóng Kiếm Khí tầm xa, Ngũ Kiếm liên hoàn và Băng Kiếm hủy diệt.",
     },
     {
-        id = "maphapsu", name = "Ma Pháp Sư", role = "Hắc Ám Hủy Diệt",
-        costCoin = 2000, costGem = 45,
-        hair = Color3.fromRGB(186, 88, 166), armor = Color3.fromRGB(72, 42, 92),
-        trim = Color3.fromRGB(194, 108, 186), fx = Color3.fromRGB(182, 92, 188),
-        weapon = "orb", attackType = "ranged", status = "burn",
-        hp = 135, mp = 175, atk = 38, spd = 270, crit = 0.26, range = 400, cd = 0.23,
-        s1Name = "Tia Ma Lực", s1Cost = 24, s1Cd = 3.6,
-        s2Name = "Hắc Động", s2Cost = 42, s2Cd = 6.5,
-        ultName = "Thiên Phạt Ma Pháp",
-        desc = "Tóc hồng cầm trượng ma pháp, dồn sát thương nổ diện rộng khủng khiếp.",
+        id = "dausi", name = "Đấu Sĩ", role = "Găng Tay",
+        costCoin = 1200, costGem = 20,
+        hair = Color3.fromRGB(114, 72, 48), armor = Color3.fromRGB(52, 46, 54),
+        cape = Color3.fromRGB(162, 48, 42), trim = Color3.fromRGB(202, 82, 48), fx = Color3.fromRGB(204, 128, 52),
+        weapon = "gauntlets", attackType = "melee", status = "stun",
+        hp = 205, mp = 105, atk = 35, spd = 270, crit = 0.18, range = 96, cd = 0.23,
+        s1Name = "Đấm Mạnh",  s1Cost = 16, s1Cd = 4.0,
+        s2Name = "Lao Tới",   s2Cost = 28, s2Cd = 8.0,
+        ultName = "Chấn Động",
+        desc = "Găng Tay: Đấm Mạnh gây choáng, Lao Tới húc tung quái và Chấn Động lốc lửa.",
+    },
+    {
+        id = "hotro", name = "Hỗ Trợ", role = "Trượng Hồi Phục",
+        costCoin = 1400, costGem = 25,
+        hair = Color3.fromRGB(194, 188, 174), armor = Color3.fromRGB(54, 128, 76),
+        cape = Color3.fromRGB(186, 192, 182), trim = Color3.fromRGB(198, 168, 74), fx = Color3.fromRGB(92, 196, 118),
+        weapon = "healstaff", attackType = "ranged", status = "freeze",
+        hp = 165, mp = 170, atk = 24, spd = 265, crit = 0.16, range = 365, cd = 0.27,
+        s1Name = "Hồi Máu",  s1Cost = 22, s1Cd = 6.0,
+        s2Name = "Lá Chắn",  s2Cost = 30, s2Cd = 10.0,
+        ultName = "Hồi Sinh",
+        desc = "Trượng Hồi Phục: Hồi Máu liên tục, tạo Lá Chắn chắn đòn và Hồi Sinh đầy cây.",
+    },
+    {
+        id = "maanh", name = "Ma Ảnh", role = "Trượng Bóng Tối",
+        costCoin = 1800, costGem = 40,
+        hair = Color3.fromRGB(48, 38, 76), armor = Color3.fromRGB(52, 34, 82),
+        cape = Color3.fromRGB(92, 46, 146), trim = Color3.fromRGB(168, 92, 202), fx = Color3.fromRGB(146, 72, 198),
+        weapon = "darkstaff", attackType = "ranged", status = "burn",
+        hp = 140, mp = 175, atk = 39, spd = 272, crit = 0.26, range = 405, cd = 0.23,
+        s1Name = "Cầu Bóng",   s1Cost = 20, s1Cd = 5.0,
+        s2Name = "Lưỡi Bóng",  s2Cost = 34, s2Cd = 9.0,
+        ultName = "Hố Tử Thần",
+        desc = "Trượng Bóng Tối: Cầu Bóng nổ, Lưỡi Bóng cắt xuyên và Hố Tử Thần hủy diệt.",
     },
 }
 
@@ -979,20 +979,34 @@ local function buildChibiHero(container, hero, zBase, hideWeapon)
         return f
     end
 
-    if hero.weapon == "sword" or hero.weapon == "katana" or hero.weapon == "spear" then
-        local len = (hero.weapon == "spear") and 126 or 108
-        wPart("SwordBlade",  18, len, 185, 118, weapCol, 3, 35, 6)
+    if hero.weapon == "sword_shield" then
+        -- Chien Binh: Kiem + Khien dac trung
+        part("WarriorShield", 46, 62, 76, 206, steel, 8, -8, 6)
+        part("ShieldCross",   14, 42, 76, 206, trimCol, 3, -8, 7)
+        wPart("SwordBlade",  18, 108, 185, 118, weapCol, 3, 35, 6)
         wPart("SwordGuard",  40, 12,  156, 160, trimCol, 2, 35, 7)
         wPart("SwordHandle", 13, 34,  144, 178, darkCol, 2, 35, 6)
+    elseif hero.weapon == "greatsword" then
+        -- Kiem Su: Dai Kiem khong lo
+        wPart("GreatBlade",  26, 140, 192, 104, weapCol, 4, 34, 6)
+        wPart("GreatCore",   10, 112, 192, 104, hero.fx, 3, 34, 7)
+        wPart("GreatGuard",  52, 14,  156, 160, trimCol, 3, 34, 7)
+        wPart("GreatHandle", 14, 38,  142, 180, darkCol, 2, 34, 6)
     elseif hero.weapon == "daggers" then
-        wPart("DaggerBlade", 14, 72, 178, 134, hero.fx, 3, 38, 6)
+        -- Sat Thu: Song Dao 2 tay
+        part("LeftDagger",   13, 66, 78, 212, hero.fx, 3, -42, 6)
+        wPart("DaggerBlade", 14, 74, 178, 134, hero.fx, 3, 38, 6)
         wPart("DaggerGuard", 28, 10, 156, 164, trimCol, 2, 38, 7)
-    elseif hero.weapon == "staff" or hero.weapon == "orb" then
-        wPart("StaffRod", 12, 118, 176, 126, steel,   2, 26, 6)
-        wPart("StaffOrb", 30, 30,  200, 74,  hero.fx, 15, 0, 7)
+    elseif hero.weapon == "staff" or hero.weapon == "healstaff" or hero.weapon == "darkstaff" then
+        -- Truong Phep / Truong Hoi Phuc / Truong Bong Toi
+        local rodCol = (hero.weapon == "healstaff") and Color3.fromRGB(132, 92, 54) or ((hero.weapon == "darkstaff") and Color3.fromRGB(64, 46, 88) or steel)
+        wPart("StaffRod",  12, 124, 176, 126, rodCol,  2, 26, 6)
+        wPart("StaffRing", 38, 38,  202, 72,  trimCol, 19, 0, 6)
+        wPart("StaffOrb",  26, 26,  202, 72,  hero.fx, 13, 0, 7)
     elseif hero.weapon == "bow" then
-        wPart("BowArc", 26, 98, 184, 146, trimCol, 12, 10, 6)
-        wPart("BowGem", 16, 16, 196, 146, hero.fx, 8,  0,  7)
+        -- Cung Thu: Cung + day cung
+        wPart("BowArc", 28, 106, 186, 146, trimCol, 14, 10, 6)
+        wPart("BowGem", 16, 16,  198, 146, hero.fx, 8,  0,  7)
     end
 
     return root, wp
@@ -3086,6 +3100,7 @@ do
         strokeColor = C.TXT_GOLD, strokeWidth = 1.5, z = 24,
     })
     UI.S1Btn.BackgroundTransparency = 0.16
+    UI.S1Btn.TextWrapped = true
     bindTap(UI.S1Btn, function() GAME.TrySkill1() end)
 
     UI.S2Btn = makeBtn(arena, {
@@ -3094,6 +3109,7 @@ do
         strokeColor = C.TXT_RED, strokeWidth = 1.5, z = 24,
     })
     UI.S2Btn.BackgroundTransparency = 0.16
+    UI.S2Btn.TextWrapped = true
     bindTap(UI.S2Btn, function() GAME.TrySkill2() end)
 
     UI.UltBtn = makeBtn(arena, {
@@ -3102,6 +3118,7 @@ do
         radius = 30, strokeColor = C.BORDER_GOLD, strokeWidth = 1.8, z = 24,
     })
     UI.UltBtn.BackgroundTransparency = 0.14
+    UI.UltBtn.TextWrapped = true
     bindTap(UI.UltBtn, function() GAME.TryUlt() end)
 
     -- ---- POPUP CHON 1 TRONG 3 NANG CAP GIUA TRAN (ROGUELIKE NHU ANH 3) ----
@@ -3765,24 +3782,47 @@ do
         S.s1Cd = h.s1Cd
         S.swingT = 0.22
         addShake(5.5, 0.14)
-        spawnFloat(S.px, S.py - 30, h.s1Name, h.fx, 13)
+        spawnFloat(S.px, S.py - 32, h.s1Name, h.fx, 13)
+        local deg = math.deg(math.atan2(S.dirY, S.dirX))
+        local ba = math.atan2(S.dirY, S.dirX)
 
-        if h.attackType == "ranged" then
-            local ba = math.atan2(S.dirY, S.dirX)
-            for i = -2, 2 do
-                local a = ba + i * 0.16
-                spawnProj("player", S.px, S.py, math.cos(a) * 600, math.sin(a) * 600, math.floor(S.atk * 1.55), 10, h.fx, 2, h.status)
+        if h.id == "hotro" then
+            -- Ho Tro: Hoi Mau +35% MaxHP + vong hoi phuc xanh
+            local heal = math.floor(S.maxHp * 0.35)
+            S.hp = math.min(S.maxHp, S.hp + heal)
+            spawnRing(S.px, S.py, 130, C.TXT_GREEN, 0.34)
+            spawnSparks(S.px, S.py, C.TXT_GREEN, 10)
+            spawnFloat(S.px, S.py - 50, "+" .. tostring(heal) .. " HP", C.TXT_GREEN, 15)
+        elseif h.id == "satthu" then
+            -- Sat Thu: Luot Bong xuyen quai
+            S.dashTime = 0.22
+            S.dashGhostT = 0
+            S.invulnTime = math.max(S.invulnTime, 0.36)
+            S.dashVx, S.dashVy = S.dirX * 880, S.dirY * 880
+            spawnSlash(S.px, S.py, deg, 125, h.fx, 0.22)
+            for _, e in ipairs(S.enemies) do
+                if e.hp > 0 and math.sqrt((e.x - (S.px + S.dirX * 70)) ^ 2 + (e.y - (S.py + S.dirY * 70)) ^ 2) <= 135 + e.r then
+                    damageEnemy(e, math.floor(S.atk * 2.1), S.dirX * 30, S.dirY * 30, "poison")
+                end
             end
+        elseif h.id == "cungthu" or h.id == "phapsu" or h.id == "maanh" or h.id == "kiemsu" then
+            -- Ban 3 Ten / Cau Phep / Cau Bong / Kiem Khi (3 tia toa)
+            for i = -1, 1 do
+                local a = ba + i * 0.20
+                spawnProj("player", S.px, S.py, math.cos(a) * 610, math.sin(a) * 610, math.floor(S.atk * 1.65), 11, h.fx, 2, h.status)
+            end
+            if h.id == "kiemsu" then spawnSlash(S.px, S.py, deg, 145, h.fx, 0.22) end
         else
-            spawnRing(S.px, S.py, 155, h.fx, 0.28)
-            spawnWhirlSlash(S.px, S.py, 155, h.fx, 0.28)
+            -- Chien Binh (Chem Manh) / Dau Si (Dam Manh)
+            spawnSlash(S.px, S.py, deg, 155, h.fx, 0.24)
+            spawnRing(S.px + S.dirX * 45, S.py + S.dirY * 45, 130, h.fx, 0.24)
             for _, e in ipairs(S.enemies) do
                 if e.hp > 0 then
-                    local dx, dy = e.x - S.px, e.y - S.py
+                    local dx, dy = e.x - (S.px + S.dirX * 45), e.y - (S.py + S.dirY * 45)
                     local d = math.sqrt(dx * dx + dy * dy)
-                    if d <= 155 + e.r then
+                    if d <= 145 + e.r then
                         local nx, ny = (d > 1 and dx / d or 1), (d > 1 and dy / d or 0)
-                        damageEnemy(e, math.floor(S.atk * 2.1), nx * 58, ny * 58, h.status)
+                        damageEnemy(e, math.floor(S.atk * 2.3), nx * 62, ny * 62, h.status)
                     end
                 end
             end
@@ -3797,17 +3837,59 @@ do
         S.s2Cd = h.s2Cd
         S.invulnTime = math.max(S.invulnTime, 0.35)
         addShake(7.5, 0.18)
-        spawnFloat(S.px, S.py - 32, h.s2Name, C.TXT_GOLD, 14)
-        spawnRing(S.px, S.py, 200, h.fx, 0.34)
-        spawnWhirlSlash(S.px, S.py, 195, C.TXT_GOLD, 0.32)
-        spawnRing(S.px, S.py, 135, C.TXT_GOLD, 0.24)
-        for _, e in ipairs(S.enemies) do
-            if e.hp > 0 then
-                local dx, dy = e.x - S.px, e.y - S.py
-                local d = math.sqrt(dx * dx + dy * dy)
-                if d <= 200 + e.r then
-                    local nx, ny = (d > 1 and dx / d or 1), (d > 1 and dy / d or 0)
-                    damageEnemy(e, math.floor(S.atk * 2.7), nx * 65, ny * 65, h.status)
+        spawnFloat(S.px, S.py - 34, h.s2Name, C.TXT_GOLD, 14)
+        local deg = math.deg(math.atan2(S.dirY, S.dirX))
+        local ba = math.atan2(S.dirY, S.dirX)
+
+        if h.id == "hotro" then
+            -- Ho Tro: La Chan +35% HP giap ao + day lui quai
+            local sh = math.floor(S.maxHp * 0.35)
+            S.shield = (S.shield or 0) + sh
+            spawnRing(S.px, S.py, 175, C.TXT_CYAN, 0.36)
+            spawnFloat(S.px, S.py - 52, "+" .. tostring(sh) .. " KHIÊN", C.TXT_CYAN, 15)
+            for _, e in ipairs(S.enemies) do
+                if e.hp > 0 then
+                    local dx, dy = e.x - S.px, e.y - S.py
+                    local d = math.sqrt(dx * dx + dy * dy)
+                    if d <= 185 + e.r then
+                        local nx, ny = (d > 1 and dx / d or 1), (d > 1 and dy / d or 0)
+                        damageEnemy(e, math.floor(S.atk * 1.4), nx * 85, ny * 85, "freeze")
+                    end
+                end
+            end
+        elseif h.id == "satthu" then
+            -- Sat Thu: Phi Dao 5 luoi
+            for i = -2, 2 do
+                local a = ba + i * 0.16
+                spawnProj("player", S.px, S.py, math.cos(a) * 660, math.sin(a) * 660, math.floor(S.atk * 1.75), 9, h.fx, 2, "poison")
+            end
+        elseif h.id == "cungthu" then
+            -- Cung Thu: Ten Xuyen sieu to khong lo xuyen 8 quai
+            spawnProj("player", S.px, S.py, math.cos(ba) * 740, math.sin(ba) * 740, math.floor(S.atk * 3.1), 16, C.TXT_GREEN, 8, "poison")
+            spawnSlash(S.px, S.py, deg, 120, C.TXT_GREEN, 0.22)
+        elseif h.id == "dausi" then
+            -- Dau Si: Lao Toi huc tung quai + choang
+            S.dashTime = 0.24
+            S.dashGhostT = 0
+            S.dashVx, S.dashVy = S.dirX * 860, S.dirY * 860
+            spawnRing(S.px + S.dirX * 70, S.py + S.dirY * 70, 165, h.fx, 0.30)
+            for _, e in ipairs(S.enemies) do
+                if e.hp > 0 and math.sqrt((e.x - (S.px + S.dirX * 75)) ^ 2 + (e.y - (S.py + S.dirY * 75)) ^ 2) <= 170 + e.r then
+                    damageEnemy(e, math.floor(S.atk * 2.6), S.dirX * 75, S.dirY * 75, "stun")
+                end
+            end
+        else
+            -- Xoay Kiem / Bang No / Ngu Kiem / Luoi Bong (AoE xoay 360)
+            spawnRing(S.px, S.py, 205, h.fx, 0.34)
+            spawnWhirlSlash(S.px, S.py, 195, h.fx, 0.32)
+            for _, e in ipairs(S.enemies) do
+                if e.hp > 0 then
+                    local dx, dy = e.x - S.px, e.y - S.py
+                    local d = math.sqrt(dx * dx + dy * dy)
+                    if d <= 205 + e.r then
+                        local nx, ny = (d > 1 and dx / d or 1), (d > 1 and dy / d or 0)
+                        damageEnemy(e, math.floor(S.atk * 2.8), nx * 65, ny * 65, h.status)
+                    end
                 end
             end
         end
@@ -3817,26 +3899,36 @@ do
         if not S.inMatch or S.paused or S.pickingBuff or S.gameOver then return end
         if S.fury < 100 then showToast("Chưa đủ 100% Nộ!", C.TXT_GEM); return end
         S.fury = 0
-        S.invulnTime = math.max(S.invulnTime, 0.80)
-        addShake(13, 0.36)
-        spawnRing(S.px, S.py, 290, S.hero.fx, 0.46)
-        spawnWhirlSlash(S.px, S.py, 250, S.hero.fx, 0.38)
-        spawnWhirlSlash(S.px, S.py, 175, C.TXT_GOLD, 0.34)
-        spawnRing(S.px, S.py, 195, C.TXT_GOLD, 0.34)
-        spawnFloat(S.px, S.py - 36, S.hero.ultName, C.TXT_GOLD, 16)
+        S.invulnTime = math.max(S.invulnTime, 0.90)
+        addShake(14, 0.38)
+        local h = S.hero
+        spawnFloat(S.px, S.py - 38, h.ultName, C.TXT_GOLD, 16)
+        spawnRing(S.px, S.py, 295, h.fx, 0.46)
+        spawnRing(S.px, S.py, 205, C.TXT_GOLD, 0.34)
+        spawnWhirlSlash(S.px, S.py, 255, h.fx, 0.38)
+        spawnWhirlSlash(S.px, S.py, 180, C.TXT_GOLD, 0.34)
+
+        if h.id == "hotro" then
+            -- Ho Tro: Hoi Sinh - hoi 100% HP + 50% Shield + day vang quai
+            S.hp = S.maxHp
+            S.shield = (S.shield or 0) + math.floor(S.maxHp * 0.50)
+            spawnFloat(S.px, S.py - 56, "HỒI ĐẦY HP & KHIÊN!", C.TXT_GREEN, 16)
+        end
+
+        local ultMult = (h.id == "hotro") and 2.5 or 4.6
         for _, e in ipairs(S.enemies) do
             if e.hp > 0 then
                 local dx, dy = e.x - S.px, e.y - S.py
                 local d = math.sqrt(dx * dx + dy * dy)
-                if d <= 290 + e.r then
+                if d <= 300 + e.r then
                     local nx, ny = (d > 1 and dx / d or 1), (d > 1 and dy / d or 0)
-                    damageEnemy(e, math.floor(S.atk * 4.5), nx * 75, ny * 75, S.hero.status)
+                    damageEnemy(e, math.floor(S.atk * ultMult), nx * 80, ny * 80, h.status)
                 end
             end
         end
         for i = 1, 12 do
             local a = (i / 12) * math.pi * 2
-            spawnProj("player", S.px, S.py, math.cos(a) * 540, math.sin(a) * 540, math.floor(S.atk * 1.6), 10, C.TXT_GOLD, 2, S.hero.status)
+            spawnProj("player", S.px, S.py, math.cos(a) * 560, math.sin(a) * 560, math.floor(S.atk * 1.7), 11, h.fx, 2, h.status)
         end
     end
 
@@ -4257,9 +4349,9 @@ do
         UI.HudComboLbl.Text = (S.combo >= 2) and ("COMBO x" .. tostring(S.combo)) or ""
 
         UI.DashBtn.Text = (S.dashCd > 0) and string.format("%.1fs", S.dashCd) or "LƯỚT"
-        UI.S1Btn.Text = (S.s1Cd > 0) and string.format("%.1fs", S.s1Cd) or "CHIÊU 1"
-        UI.S2Btn.Text = (S.s2Cd > 0) and string.format("%.1fs", S.s2Cd) or "CHIÊU 2"
-        UI.UltBtn.Text = (S.fury >= 100) and "TUYỆT CHIÊU" or (tostring(math.floor(S.fury)) .. "% NỘ")
+        UI.S1Btn.Text = (S.s1Cd > 0) and string.format("%.1fs", S.s1Cd) or S.hero.s1Name
+        UI.S2Btn.Text = (S.s2Cd > 0) and string.format("%.1fs", S.s2Cd) or S.hero.s2Name
+        UI.UltBtn.Text = (S.fury >= 100) and S.hero.ultName or (tostring(math.floor(S.fury)) .. "% NỘ")
     end))
 end
 
@@ -4276,9 +4368,9 @@ do
         elseif kc == Enum.KeyCode.D or kc == Enum.KeyCode.Right then S.keys.D = true
         elseif kc == Enum.KeyCode.J or kc == Enum.KeyCode.Space then S.holdAttack = true; GAME.TryAttack()
         elseif kc == Enum.KeyCode.K or kc == Enum.KeyCode.LeftShift then GAME.TryDash()
-        elseif kc == Enum.KeyCode.L or kc == Enum.KeyCode.Q then GAME.TrySkill1()
-        elseif kc == Enum.KeyCode.I or kc == Enum.KeyCode.R then GAME.TrySkill2()
-        elseif kc == Enum.KeyCode.U or kc == Enum.KeyCode.E then GAME.TryUlt() end
+        elseif kc == Enum.KeyCode.One or kc == Enum.KeyCode.L or kc == Enum.KeyCode.Q then GAME.TrySkill1()
+        elseif kc == Enum.KeyCode.Two or kc == Enum.KeyCode.I or kc == Enum.KeyCode.R then GAME.TrySkill2()
+        elseif kc == Enum.KeyCode.Three or kc == Enum.KeyCode.U or kc == Enum.KeyCode.E then GAME.TryUlt() end
     end))
 
     trackConn(UserInputService.InputEnded:Connect(function(inp)
