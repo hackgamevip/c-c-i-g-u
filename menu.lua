@@ -1,6 +1,6 @@
 --[[
     ========================================================================
-    CỜ CARO - STANDALONE v3.4
+    CỜ CARO - STANDALONE v3.5
     Game Cờ Caro 2D Toàn Màn Hình cho Roblox Mobile & PC
     - Đồ họa Cyber-Navy & Cyan-Teal matte đồng bộ theo bộ icon vector
     - Sảnh Chính tinh gọn: xóa thanh cấp bậc trên đỉnh, 5 ô thắng cho mọi màn >=12x12
@@ -658,11 +658,11 @@ local function isBoardFull()
 end
 
 -- ========================================================================
--- [PHẦN 04] AI 4 CẤP ĐỘ THÍCH NGHI MỌI KÍCH THƯỚC (3x3 ĐẾN 100x100)
+-- [PHẦN 04] AI 4 CẤP ĐỘ CÂN BẰNG RÕ RỆT (DỄ / VỪA / KHÓ / SIÊU KHÓ)
 -- ========================================================================
 local AI = {}
 
-function AI.scoreLine(r, c, dr, dc, p)
+function AI.scoreLine(r, c, dr, dc, p, useGaps)
     local grid = State.Grid
     local opp = (p == 1) and 2 or 1
     local winLen = getWinLength(Config.BoardSize)
@@ -680,13 +680,15 @@ function AI.scoreLine(r, c, dr, dc, p)
     if inBounds(nr, nc) then
         if grid[nr][nc] == 0 then
             openEnds = openEnds + 1
-            local gr, gc = nr + dr, nc + dc
-            while inBounds(gr, gc) and grid[gr][gc] == p do
-                gapPosCount = gapPosCount + 1
-                gr = gr + dr
-                gc = gc + dc
+            if useGaps then
+                local gr, gc = nr + dr, nc + dc
+                while inBounds(gr, gc) and grid[gr][gc] == p do
+                    gapPosCount = gapPosCount + 1
+                    gr = gr + dr
+                    gc = gc + dc
+                end
+                if gapPosCount > 0 and inBounds(gr, gc) and grid[gr][gc] == 0 then gapPosOpen = true end
             end
-            if gapPosCount > 0 and inBounds(gr, gc) and grid[gr][gc] == 0 then gapPosOpen = true end
         elseif grid[nr][nc] == opp then
             blockedByOpp = blockedByOpp + 1
         end
@@ -702,13 +704,15 @@ function AI.scoreLine(r, c, dr, dc, p)
     if inBounds(pr, pc) then
         if grid[pr][pc] == 0 then
             openEnds = openEnds + 1
-            local gr, gc = pr - dr, pc - dc
-            while inBounds(gr, gc) and grid[gr][gc] == p do
-                gapNegCount = gapNegCount + 1
-                gr = gr - dr
-                gc = gc - dc
+            if useGaps then
+                local gr, gc = pr - dr, pc - dc
+                while inBounds(gr, gc) and grid[gr][gc] == p do
+                    gapNegCount = gapNegCount + 1
+                    gr = gr - dr
+                    gc = gc - dc
+                end
+                if gapNegCount > 0 and inBounds(gr, gc) and grid[gr][gc] == 0 then gapNegOpen = true end
             end
-            if gapNegCount > 0 and inBounds(gr, gc) and grid[gr][gc] == 0 then gapNegOpen = true end
         elseif grid[pr][pc] == opp then
             blockedByOpp = blockedByOpp + 1
         end
@@ -727,7 +731,7 @@ function AI.scoreLine(r, c, dr, dc, p)
 
     if need == 1 then
         if openEnds == 2 then score = 1350000; tag = "OPEN4"
-        elseif openEnds == 1 then score = 155000; tag = "HALF4" end
+        elseif openEnds == 1 then score = 160000; tag = "HALF4" end
     elseif need == 2 then
         if openEnds == 2 then score = 54000; tag = "OPEN3"
         elseif openEnds == 1 then score = 4800; tag = "HALF3" end
@@ -738,38 +742,44 @@ function AI.scoreLine(r, c, dr, dc, p)
         if openEnds == 2 then score = 65 elseif openEnds == 1 then score = 18 end
     end
 
-    local bestGap = math.max(gapPosCount, gapNegCount)
-    if bestGap > 0 then
-        local totalSpan = count + bestGap
-        local spanOpen = (bestGap == gapPosCount and gapPosOpen) or (bestGap == gapNegCount and gapNegOpen)
-        if totalSpan >= winLen - 1 then
-            if 125000 > score then score = 125000; tag = "HALF4" end
-        elseif totalSpan == winLen - 2 and openEnds >= 1 and spanOpen then
-            if 40000 > score then score = 40000; tag = "OPEN3" end
-        elseif totalSpan >= 2 and openEnds >= 1 and spanOpen then
-            score = score + 850
+    if useGaps then
+        local bestGap = math.max(gapPosCount, gapNegCount)
+        if bestGap > 0 then
+            local totalSpan = count + bestGap
+            local spanOpen = (bestGap == gapPosCount and gapPosOpen) or (bestGap == gapNegCount and gapNegOpen)
+            if totalSpan >= winLen - 1 then
+                if 130000 > score then score = 130000; tag = "HALF4" end
+            elseif totalSpan == winLen - 2 and openEnds >= 1 and spanOpen then
+                if 42000 > score then score = 42000; tag = "OPEN3" end
+            elseif totalSpan >= 2 and openEnds >= 1 and spanOpen then
+                score = score + 850
+            end
         end
     end
 
     return score, tag
 end
 
-function AI.evaluatePointFor(r, c, p)
+function AI.evaluatePointFor(r, c, p, forkMult, useGaps)
     local total, half4Count, open3Count = 0, 0, 0
+    local fMult = (forkMult ~= nil) and forkMult or 1.0
+    local gaps = (useGaps ~= false)
     for _, d in ipairs(DIRS) do
-        local s, tag = AI.scoreLine(r, c, d[1], d[2], p)
+        local s, tag = AI.scoreLine(r, c, d[1], d[2], p, gaps)
         total = total + s
         if tag == "WIN" then return 10000000
         elseif tag == "HALF4" then half4Count = half4Count + 1
         elseif tag == "OPEN3" then open3Count = open3Count + 1 end
     end
-    if half4Count >= 2 then total = total + 1100000
-    elseif half4Count >= 1 and open3Count >= 1 then total = total + 880000
-    elseif open3Count >= 2 then total = total + 620000 end
+    if fMult > 0 then
+        if half4Count >= 2 then total = total + math.floor(1100000 * fMult)
+        elseif half4Count >= 1 and open3Count >= 1 then total = total + math.floor(900000 * fMult)
+        elseif open3Count >= 2 then total = total + math.floor(620000 * fMult) end
+    end
     return total
 end
 
-function AI.getCandidates()
+function AI.getCandidates(radius)
     local n = Config.BoardSize
     local grid = State.Grid
     local candidates = {}
@@ -788,13 +798,14 @@ function AI.getCandidates()
         return candidates
     end
 
+    local rad = radius or 2
     local mark = {}
     for _, mv in ipairs(State.History) do
         local mr, mc = mv.r, mv.c
-        for dr = -2, 2 do
+        for dr = -rad, rad do
             local r = mr + dr
             if r >= 1 and r <= n then
-                for dc = -2, 2 do
+                for dc = -rad, rad do
                     local c = mc + dc
                     if c >= 1 and c <= n and grid[r][c] == 0 then
                         local key = cellKey(r, c)
@@ -810,85 +821,232 @@ function AI.getCandidates()
     return candidates
 end
 
+-- Khai cuộc chuẩn cho cấp Khó / Siêu Khó khi máy đi nước thứ 2
+function AI.pickOpeningReply()
+    local mv = State.History[1]
+    if not mv then return nil end
+    local diagOffsets = { { -1, -1 }, { -1, 1 }, { 1, -1 }, { 1, 1 } }
+    local valid = {}
+    for _, off in ipairs(diagOffsets) do
+        local nr, nc = mv.r + off[1], mv.c + off[2]
+        if inBounds(nr, nc) and State.Grid[nr][nc] == 0 then
+            table.insert(valid, { nr, nc })
+        end
+    end
+    if #valid > 0 then
+        local pick = valid[math.random(1, #valid)]
+        return pick[1], pick[2]
+    end
+    return nil
+end
+
+-- Chấm điểm nhanh top nước cho một bên trên danh sách ứng viên sẵn có
+function AI.rankOnPool(pool, side, defWeight, forkMult, useGaps)
+    local opp = (side == 1) and 2 or 1
+    local grid = State.Grid
+    local n = Config.BoardSize
+    local mid = (n + 1) / 2
+    local ranked = {}
+
+    for _, cand in ipairs(pool) do
+        local r, c = cand.r, cand.c
+        if grid[r][c] == 0 then
+            local atk = AI.evaluatePointFor(r, c, side, forkMult, useGaps)
+            local def = AI.evaluatePointFor(r, c, opp, forkMult, useGaps)
+            local combined
+            if atk >= 10000000 then
+                combined = 60000000
+            elseif def >= 10000000 then
+                combined = 35000000 + atk
+            else
+                local dist = math.abs(r - mid) + math.abs(c - mid)
+                combined = atk + def * defWeight + math.max(0, (n - dist)) * 6
+            end
+            table.insert(ranked, { r = r, c = c, score = combined, atk = atk, def = def })
+        end
+    end
+
+    table.sort(ranked, function(a, b) return a.score > b.score end)
+    return ranked
+end
+
 function AI.chooseMove(side, difficulty)
     local opp = (side == 1) and 2 or 1
     local n = Config.BoardSize
-    local mid = (n + 1) / 2
-    local candidates = AI.getCandidates()
+    local candidates = AI.getCandidates(difficulty == "Easy" and 1 or 2)
 
-    if #candidates == 0 then return nil end
+    if #candidates == 0 then
+        candidates = AI.getCandidates(2)
+        if #candidates == 0 then return nil end
+    end
     if #candidates == 1 then return candidates[1].r, candidates[1].c end
 
-    local defWeight = (difficulty == "Easy" and 0.76)
-        or (difficulty == "Hard" and 1.12)
-        or (difficulty == "Master" and 1.16)
-        or 1.06
-
-    local scored = {}
-    for _, cand in ipairs(candidates) do
-        local r, c = cand.r, cand.c
-        local atk = AI.evaluatePointFor(r, c, side)
-        local def = AI.evaluatePointFor(r, c, opp)
-        local combined
-        if atk >= 10000000 then
-            combined = 60000000
-        elseif def >= 10000000 then
-            combined = (difficulty == "Easy" and math.random() < 0.25) and (def * 0.4 + atk) or (35000000 + atk)
-        else
-            local dist = math.abs(r - mid) + math.abs(c - mid)
-            combined = atk + def * defWeight + math.max(0, (n - dist)) * 7
-        end
-        table.insert(scored, { r = r, c = c, score = combined, atk = atk, def = def })
+    -- Khai cuộc chéo chuẩn cho Khó & Siêu Khó khi bàn >= 12x12 và mới có 1 quân
+    if #State.History == 1 and n >= 12 and (difficulty == "Hard" or difficulty == "Master") then
+        local orow, ocol = AI.pickOpeningReply()
+        if orow and ocol then return orow, ocol end
     end
 
-    table.sort(scored, function(a, b) return a.score > b.score end)
-    if scored[1].score >= 30000000 then return scored[1].r, scored[1].c end
-
+    -- ====================================================================
+    -- 1. CẤP DỄ (+100 Xu): Chơi thoáng, dễ thắng, thỉnh thoảng bỏ lỡ bẫy
+    -- ====================================================================
     if difficulty == "Easy" then
-        local pick = scored[math.random(1, math.min(4, #scored))]
+        local ranked = AI.rankOnPool(candidates, side, 0.55, 0, false)
+        if #ranked == 0 then return nil end
+        -- Thắng ngay 75% cơ hội, chặn thắng ngay 65% cơ hội
+        if ranked[1].atk >= 10000000 and math.random() < 0.75 then
+            return ranked[1].r, ranked[1].c
+        end
+        if ranked[1].def >= 10000000 and math.random() < 0.65 then
+            return ranked[1].r, ranked[1].c
+        end
+        local limit = math.min(6, #ranked)
+        local pick = ranked[math.random(1, limit)]
         return pick.r, pick.c
     end
 
+    -- ====================================================================
+    -- 2. CẤP VỪA (+200 Xu): Biết chặn 4 & tấn công ổn, có thể thắng bằng bẫy kép
+    -- ====================================================================
     if difficulty == "Medium" then
-        local topScore = scored[1].score
-        local pool = { scored[1] }
-        for i = 2, math.min(3, #scored) do
-            if scored[i].score >= topScore * 0.93 then table.insert(pool, scored[i]) end
+        local ranked = AI.rankOnPool(candidates, side, 0.94, 0.45, true)
+        if #ranked == 0 then return nil end
+        if ranked[1].atk >= 10000000 or ranked[1].def >= 10000000 or ranked[1].def >= 1200000 then
+            return ranked[1].r, ranked[1].c
+        end
+        local topScore = ranked[1].score
+        local pool = { ranked[1] }
+        for i = 2, math.min(4, #ranked) do
+            if ranked[i].score >= topScore * 0.78 then
+                table.insert(pool, ranked[i])
+            end
         end
         local pick = pool[math.random(1, #pool)]
         return pick.r, pick.c
     end
 
-    local topK = (difficulty == "Master") and math.min(14, #scored) or math.min(8, #scored)
-    local checkPool = (difficulty == "Master") and math.min(18, #scored) or math.min(12, #scored)
-    local bestMove, bestEval = scored[1], -1e15
-    local grid = State.Grid
+    -- ====================================================================
+    -- 3. CẤP KHÓ (+500 Xu): Đọc bẫy 4-3 & 3 đôi + tính trước 2 bước
+    -- ====================================================================
+    if difficulty == "Hard" then
+        local ranked = AI.rankOnPool(candidates, side, 1.12, 1.0, true)
+        if #ranked == 0 then return nil end
+        if ranked[1].score >= 30000000 then
+            return ranked[1].r, ranked[1].c
+        end
 
-    for i = 1, topK do
-        local mv = scored[i]
-        grid[mv.r][mv.c] = side
-        local oppBest, sideFollowUp, sideThreats = 0, 0, 0
-        for j = 1, checkPool do
-            if j ~= i then
-                local c2 = scored[j]
-                if grid[c2.r][c2.c] == 0 then
-                    local oScore = AI.evaluatePointFor(c2.r, c2.c, opp)
-                    if oScore > oppBest then oppBest = oScore end
-                    local sScore = AI.evaluatePointFor(c2.r, c2.c, side)
-                    if sScore > sideFollowUp then sideFollowUp = sScore end
-                    if sScore >= 120000 then sideThreats = sideThreats + 1 end
+        local topK = math.min(10, #ranked)
+        local checkPool = math.min(14, #ranked)
+        local bestMove, bestEval = ranked[1], -1e15
+        local grid = State.Grid
+
+        for i = 1, topK do
+            local mv = ranked[i]
+            grid[mv.r][mv.c] = side
+            local oppBest, sideFollowUp, sideThreats = 0, 0, 0
+            for j = 1, checkPool do
+                if j ~= i then
+                    local c2 = ranked[j]
+                    if grid[c2.r][c2.c] == 0 then
+                        local oScore = AI.evaluatePointFor(c2.r, c2.c, opp, 1.0, true)
+                        if oScore > oppBest then oppBest = oScore end
+                        local sScore = AI.evaluatePointFor(c2.r, c2.c, side, 1.0, true)
+                        if sScore > sideFollowUp then sideFollowUp = sScore end
+                        if sScore >= 130000 then sideThreats = sideThreats + 1 end
+                    end
+                end
+            end
+            grid[mv.r][mv.c] = 0
+
+            local evalVal = mv.score + sideFollowUp * 0.34 - oppBest * 0.50
+            if sideThreats >= 2 then evalVal = evalVal + 950000 end
+            if oppBest >= 10000000 then evalVal = evalVal - 22000000
+            elseif oppBest >= 1200000 and mv.atk < 1200000 then evalVal = evalVal - 4000000 end
+
+            if evalVal > bestEval then bestEval = evalVal; bestMove = mv end
+        end
+        return bestMove.r, bestMove.c
+    end
+
+    -- ====================================================================
+    -- 4. CẤP SIÊU KHÓ (+1999 Xu): Tính sâu 3 bước (Minimax 3-ply) & ép chiếu
+    -- ====================================================================
+    local ranked = AI.rankOnPool(candidates, side, 1.18, 1.15, true)
+    if #ranked == 0 then return nil end
+    if ranked[1].score >= 30000000 then
+        return ranked[1].r, ranked[1].c
+    end
+
+    local grid = State.Grid
+    local top1 = math.min(10, #ranked)
+    local subPool = {}
+    for i = 1, math.min(16, #ranked) do
+        table.insert(subPool, { r = ranked[i].r, c = ranked[i].c })
+    end
+
+    local bestMove = ranked[1]
+    local bestVal = -1e15
+
+    for i = 1, top1 do
+        local m1 = ranked[i]
+        grid[m1.r][m1.c] = side
+
+        -- Tìm top 5 nước phản công mạnh nhất của đối thủ (Ply 2)
+        local oppReplies = AI.rankOnPool(subPool, opp, 1.10, 1.1, true)
+        local worstForAI = 1e15
+
+        if #oppReplies == 0 then
+            worstForAI = m1.score
+        else
+            local top2 = math.min(5, #oppReplies)
+            for j = 1, top2 do
+                local m2 = oppReplies[j]
+                local branchVal
+                if m2.atk >= 10000000 then
+                    -- Đối thủ thắng ngay ở bước 2
+                    branchVal = -40000000
+                else
+                    grid[m2.r][m2.c] = opp
+                    -- Kiểm tra đòn kết liễu / phản đòn của Máy ở bước 3 (Ply 3)
+                    local aiBest3, oppBest3 = 0, 0
+                    for k = 1, #subPool do
+                        local c3 = subPool[k]
+                        if grid[c3.r][c3.c] == 0 then
+                            local s3 = AI.evaluatePointFor(c3.r, c3.c, side, 1.15, true)
+                            if s3 > aiBest3 then aiBest3 = s3 end
+                            local o3 = AI.evaluatePointFor(c3.r, c3.c, opp, 1.15, true)
+                            if o3 > oppBest3 then oppBest3 = o3 end
+                        end
+                    end
+                    grid[m2.r][m2.c] = 0
+
+                    if aiBest3 >= 10000000 then
+                        branchVal = 25000000 + m1.score * 0.1
+                    elseif oppBest3 >= 10000000 and aiBest3 < 1300000 then
+                        branchVal = -18000000
+                    else
+                        branchVal = m1.score * 0.55 + aiBest3 * 0.55 - m2.atk * 0.65 - oppBest3 * 0.35
+                    end
+                end
+
+                if branchVal < worstForAI then
+                    worstForAI = branchVal
+                end
+                -- Cắt tỉa Alpha-Beta: nhánh này đã tệ hơn nước tốt nhất hiện có
+                if worstForAI <= bestVal then
+                    break
                 end
             end
         end
-        grid[mv.r][mv.c] = 0
 
-        local evalVal = mv.score + sideFollowUp * 0.34 - oppBest * 0.46
-        if sideThreats >= 2 then evalVal = evalVal + 950000 end
-        if oppBest >= 10000000 then evalVal = evalVal - 20000000
-        elseif oppBest >= 1000000 and mv.atk < 1000000 then evalVal = evalVal - 3500000 end
+        grid[m1.r][m1.c] = 0
 
-        if evalVal > bestEval then bestEval = evalVal; bestMove = mv end
+        if worstForAI > bestVal then
+            bestVal = worstForAI
+            bestMove = m1
+        end
     end
+
     return bestMove.r, bestMove.c
 end
 
