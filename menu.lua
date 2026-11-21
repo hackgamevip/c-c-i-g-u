@@ -1,6 +1,6 @@
 --[[
     ========================================================================
-    DÒ MÌN - STANDALONE v2.1 (ĐỒ HỌA HOẠT HÌNH 3D ROYAL BLUE)
+    DÒ MÌN - STANDALONE v2.2 (ĐỒ HỌA HOẠT HÌNH 3D ROYAL BLUE)
     Game Dò Mìn 2D Toàn Màn Hình cho Roblox Mobile & PC
     - Nâng cấp đồ họa 3D Arcade Royal Blue: Logo Dò Mìn, Bom, Cờ, Cúp Vàng, Nổ Bom
     - Tích hợp sẵn ảnh sprite từ bộ đồ họa (writefile + getcustomasset) có dự phòng vector
@@ -31,6 +31,9 @@ do
         flag   = "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",
         trophy = "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",
         boom   = "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",
+        shovel   = "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",
+        flag_btn = "iVBORw0KGgoAAAANSUhEUgAAAFgAAABUCAMAAAAxiQB9AAAB/lBMVEVWW2idn6/kQT4mKDJtcYciICuwMC6tWVjR0NMoMFianbLw8PBUKypmL0BcSlZ7ga3nHiP9foHxq601Nlc3U2GzQD6lpcx4fqrKbm/q6uooJjgGBQo3Nk0XGSmFibOQlLuXm8IAAADwAwKkqMyzt9n6FgpJSGpCQ1YlJzBMJDTn6vssLUH29vx2e6ZYW4FINUlTVXp9gqxsGCZRGyvT1u1laZGdocXGyeU6O1o9PllvJjQQERuwBAfj4+UyODqQChIvBQhxdZvOAwPyODYeIDFFRk5ra4buKCgtGinRFRkuExhLLkKMJS3SJCe9wOFnaHGyFByNGCRyBArRR0YaGiyvGCFOFRm6vuD6hYkZJiizJybVOTc8SUlUAwe9wNzOHCL2RkTzVlT7Z2j4d3mNERyUODY/X3/W5OYYGxsnKDRyOTmwRkTd3fs3OFM+QFVaWmpdYYjLVVLAw97e4fk5PGE9QWl0FR5hY3uTR0b+JRkyNFQ9XV1WVlj7mJkdJCt1c3YAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACXImMzAAAAgHRSTlMhE/8lFf///xoG9s3//+3X////pR7/B9T/rv///v7+/v4A//79//j/GP/9/vv//f/5/v///P7+/NEL////EhP///7///8WE///////////Ff////8R/////xT//xX/+f////////8IEw8l//8JMP8U+//3/////////5wIFP8k/5vcdXoAAAmISURBVHjardkJQ9rYFgDgaPeZztLO8t7LzcISkIhg2OQZqAihRRQsiPtS9zdWu2jtYqfT9q+/c+7NTrB1pkdBRPg8nHtyc5NwYRpTz7mpxFQiMTWF3xDsMbtjz2Cs4dea+SCxeHS0uLi2trYIcXR0xKBrCSZy9P4v7k749oMrxx/wDYEP/niGj28/CIdNmcKT3K/cf8a+PkbZfX+Mjf503ZQRfsiFh74fG8t/XRTxNiCeVKV/ceGnCQZzzB0thiZCgSHLsvnj8pBCmpgOQc7PpxB+SV38IE9CUTsmJvDmj9Cg/xyS8U5K8vxp6CfIeTHMgXv7e7NeSshxPd7lrv2xNDHJJ9OSNATVgDrcdsYhKjsvu3pk+DoPIaTTz8NPuc3fR53xLcT/dgiiKFKXFwvR76CBJx8U85b7TogL3pibG5/DEL4YPCmJInXlsejph8fc5LPivGLmK8T5kh0EYtoOYgb9i/lX+I0+QdgbIGWRuq+q6cnH3OazfDGE8jnkKxJ3gLe1UKksbG255IHBZPG7MSWUsuBoVBnNF6grWp+MV9Vspd07O7nVM5qVbDaXy/FOJFm4nhGZDK4cqmoAPwR4IjqhSMwdwYEYGRkfH9f17d2LWczl7i2j2W3p+ty4EyMYniJTmbpuOBrNaDy6LMbH59Ts9i4MyI/VzzcIOd6pdbu67rE9ahK+IC++iK4J34Yam7D4woZVvbM7Sz5DK+aL1RI5NmpLrVYL7QA5mTRzRljGUtwBeMgFm64ACXeNY/IZJ7H8ilIokbP3sWaz06X2Dz7YLLgbNkvhgwWA9aUe4UdHGZwRyPKt3tnujrHdWUIbaWhxjxsAz9Mapy0YXguVaJ+Qz/lz2NrzipJ5wxpKvTjbMdrM1lVVha1nXHCaxA2/5B7+np8PRSecjAUTPiTVIs6+SlQpxEukoquIz/54ttNo2jSE1YA8hVdMmOMecsUVCpsZC4KdsRZVVhTocelNnEw39u/fv38Lcf5i12iWu106lG7bV4rHAMPsm2IwKxvUuAM1zqRwCs28iY+ThYixv/rx48fVW9DapeOz4QYOZTeLW45lU1gCmcKTHliw4a6hkngqXSikX8fjhJQju6v7+zsxY+/ev48hbfVkx4jVygddtEFH2g1zCM/bsNVAsN21msOECIV0WtPA3arF9lb3V41IJAL2/gVNuwd2s1wuVyCQnjFhNniejB1Y1buN3+DdvMDXRTJdRnh1L8Li/e5eT8c2uXvR29kZNiDaBzkfvPkyMGNVb3UaJ1BmTXjzhsH3VndQjUFA2ru7J8usCW/wUIbDRteG5YI2+VcwDG0BcrNHbpyPyqk4hfdX92NUZYH23tmFOmvOmodLWROWGBxYY1blbWiM87FQBuHI+/3VXbdLk9/Zw1ZZ3d/YIq22CUsWfL2owIJiEJwfk0343moj4nUjkVqtBs81awuEbHQ88ENuaigIhrngBzpd2HADhs7vUjtSK1cI+W37bW6GzLjgycevFJhC+2HdgmmNIwb0WoAbYe5hAxrOhqsIbwIs+2GcFVV9adgN78UGuFCHYwMbeYbU++EJN4x7JmiLpQ0brkUMO2Evy9wybNmw5dV9pfDBdJc3p+udDVJHWAM4ZrwPdregDsztg4te+IU11esdA+FQhsIBLrAVWBacNJgLsGjCceyKR17YmuoRHiaiDfvdGrKQrtqLVZiLGc8jLDGYZgzbN4PtqZ5l7IddKmWhDE3LxYznnYwnWcYhlrG9WoDdqb5EYdkFOypj9eFGuWu5Pnjz0SuacSrt2jV54JQNO+rCNGNruEZy9iDuUmw+euKUwlnd0D5mpUilTZgOF8hUnT00Gs0Kpqvyl8KeXRODDzZIqejAwNqqvmE0ysA66fYPnidj18pY1SttBp9SGFlaWKLfhGTLB9YeyQVDjTN+2De7AZytGAhPpApkOhKDZLFpiUrVCtuL8p4IgOV+WM1lK41pYsER3HTJbGvDVPvZwFL0wzzP4CdjUYRrWNrlm0asUzF3ymqf2wcrbJHhgZN03Q2wQmGCLCRbORioMlj5EgwL+pwbJrPI+lXPkp7WWPlCjfFlDlwVSQs2hbds1eM9XPDBK1bGkwC/6suYt+BZC25HKq7xQq/vIMSssSvjoj9j9rJczoJTIllvHliu6fW7fvg6W704MHuVyjKOmnDEnhQGun0Z+wbPccuNZYCVQoon641YeYHKSacO+OCyDcQLW+7CktE7JGSCweTu4Uajk8WOSLrrwX81zFg12zFO6ApeNmGcIjbaB3av9dXB6goP7NTYcrd7Ki5iRywYDpJxdwErP9cA+sfO3cebNkwzNuuQXeqVyIgkxXlyWgydphGFQ0SCCzQqB4wcuAhHM04fK1EvrOYOjFlSCMlVAQ9W2YG7KMTTsABvQ50DK1EXvfBUf8ZY4JuklJLl6BNZEyATXhjRCoVTTSiRVtNqugDXXYop7+CZjfazTnghLuVH59l5IFnKFDQ8hUKWf67kAiYg5roHj8JRG07SCh/AhgH9oUkFSBRDG+HFEqtKu5wNgEXRn7GvxgyGpRXAQjXzAg6+6ZvwiEAUSyKrxSC3r8YuOInw9jqZEZJCqvqCzsz4Tnr2pERr0Z+x+BUwzXhbJyVBiGcKghfGzJe3/XBdDIA/BMG5pTb2F5TYhutmPQhZ7/gGz+W6avwhYcGyq4+z7XU04BAvaW7j9kmodSjxzMwA1wX/zwuXrImt2X4bcJ5qutVowpGGBxa/ChbtKfNgu73+dtl1Tmx6+WYb93qX5Ev7OHpJxnTvka10ms12u72OAT9jTVxP5C51S6QeAKc0kTjyTC6X21pYgKPvMjsKX1h4m8v5yuBz8exaPxwqpN4Rl8zPoA2xjMEeDuxfM186e6csOEHhUFXU8u9IibheOTMz6wpIVrwsmJuXUlKGwWvXYXYDV7yB8j8K6qYyZsaL15UoumKdFPLv4FjBOql3hXiB275A3QzKdANZfKSsVNmnuSEHXYIIDNelCxrn5+ejo8wFOY1weCgKbl3EIZaU6JXCPG9vnb2XUjQymkAHbwhPg9chRC0kDYhMxvOLGSm89QWek/klnOCehp/HYe9Q50VB+puRkVz/ANzXv4SnPnGJhCmLVfmqoBOOG0++/jM8lTjiwgkzZ23QNYor/Q/q3sELLOHw4icqa6fpQaG5fmiXBnUTnxbZRazEZPhXTRO+SWC+146sy25QZ+7H/36T+DO8SF3zQuGaednwG8Qi1sGGw2tP7cuX/zCurTHx/6z+zpLf0xAQAAAAAElFTkSuQmCC",
+        hint_btn = "iVBORw0KGgoAAAANSUhEUgAAAFgAAABWCAMAAAB8QaF2AAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAAB/lBMVEXuzF7gpSyhYBTao0eWlpYREV19fX2olQzuxCQnJTQyMUFvb3V4eY6JiYn8+cckGyQwLj8zNkVsLwB/cgtgYF9VVap8fpaCg5inqLaqqv/tuov52pjMzMw2NUaHiKR2eJOXmbEUFBspKjj76BQGBgpKRU5VVm42MzsYGSQeIS5URDjo6O5zVjL4uAW3uM7Y2er4+PlFPDnzqARBPkj62Ar5xQalprn89DBlTDGMZCsAAAD77CtnaISBgp6PWBGVZxTRlwtnVEOqWAjKiA4yJQi0hQ1jZHaoqsHSpwpNOAaGWyaOSQkkGwuxZguteRBvOgdsRw7Gx9meoLj992z/9RVYRQVMS2I+QU1wWAtHKwRcUk2UdgnZ2dp+gJ3mmQv66E38+I61lAnFaQzQdgv89kx9YDovLkA7OU/e4PDoqU5VVVWjcSH79qclJSkwMEG/v7/Wtw/jlC/jpWWIPgC6li2/wM/LdyzLzeDutEr92if86GTh4d7///9fYHthT0J5ZQoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABRecOJAAAAgHRSTlP/////JQgS///gl0eZSv8cqWP///8DwJXUA///Bf7//////////v///v7//v////7+///////+////AP/+/v////////////7///////////////////////////v////////////+0f//A///FagE///////+////////Af///yoLPFEAAAmLSURBVHjarZmJY9pGFsZx0iTtttvdbffeFSAxGIElQELctiRLyOY2GNvBR3wmaa7t5mjubvuv73szkpA4nDTx5wQQiB8f37w3GolIDfTf2s2j/MrKSj4Pt3m8y+fZxm9X/u+12k1gRij3i5W8ywvrE8Avt/9a+/kGBVPuSjZ+JYoRbvOb2j8QzLi53NWQk6LIxf9W+0st8u/a15Sby5WuwrAopkUu+k3ti0jt9y43l/tsbBQMp+FPXP5TLTLh5oYffuu2d789/yVOBKXB9NeRo7yLzT0Ybix/hvY4UBq5oriWW4tkPb8PXtKXPlkiAYlUa/nNvUgpO2Tc7B63x4lpIS26Xwf+YWJpYb7SwleiJ9xV5HmRd7nD1WSktB1/jeDsXiHJ8R9S90M7ADeeH0YRXIrGh5S7dxm3C2qg8MGl5Hj+KOqCo9HscJmjXGE2u0JByVBVmNhGRlEK/i4pKg7DIBvg1wPH4dEe4ybn6WAdde9elemehJsHk9cLXLJQKHAFJJNYNro2cRyPLi8Li7jr65Ik3Wsj8/FjxoYn1te91+E7oeC7pRg4OgFHEUx43+JB0C5QgeWYcpFKVu3HaNtDFwqZTDKZSWIyE/DeLBhIeltan9gFbL9ZlJuH491Wa3dsOM2i6qBrSsYBkDodiL4QdAzg7TD4YL396p/XLWn9F9cuYNXi2S5PJmo5styn6CQOqmQ9f25J4DscxQQsFtBi9fxfp6NnVpsOEXLN4lkDaI3d72+dnd06HONG97Bo0qgp9+Ho9A2QF4LR8brUi4wS5btLQEZVq6q8Swj/a1PbcaU1DWC3mqpRpbtYz0b1xOiZXsksAPMU3L4+qtfr5RPbqiLWkJtdQn4tJoLS5ENI5kxGctu6OCnDG96dI1i8BLwEuyH5oldFrgkhNBOJk9NRkKw1W0AGz1Xj/IS9wZ52HA9H0e7J5XId/t5eGFWj2YQvXdTqT+DIehokF4sQULNpGOdf0r3Lx5bveG1exgdSxzqu032LPcMuNpB7Qg/Z3wbTgIJukYZs95buot263RlkfPBa2DGNIvmLpF+70NC01uvJY9KVtTpbC4wSYbLcJWO5h4bL2gVylVSo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",
     }
 
     local B64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
@@ -75,7 +78,12 @@ do
         for name, b64 in pairs(RAW_B64) do
             pcall(function()
                 local fpath = "DoMin_Assets_v2/" .. name .. ".png"
-                if type(isfile) ~= "function" or not isfile(fpath) then
+                local needWrite = true
+                if type(isfile) == "function" and isfile(fpath) and type(readfile) == "function" then
+                    local okR, cur = pcall(readfile, fpath)
+                    if okR and type(cur) == "string" and #cur > 100 then needWrite = false end
+                end
+                if needWrite then
                     writefile(fpath, decodeBase64(b64))
                 end
                 local id = getcustomasset(fpath)
@@ -1377,9 +1385,10 @@ do
     rBtn.ZIndex = 36
     UI.ReviveBtn = rBtn
 
-    local vBtn = make3DButton(Banner, "Xem bàn cờ", UDim2.new(0, 146, 0, 38), UDim2.new(1, -160, 1, -50), UITheme.BtnBlue, UITheme.BtnBlueDark, UITheme.TextPrimary, 13, function()
+    local vBtn = make3DButton(Banner, "Trang chủ", UDim2.new(0, 146, 0, 38), UDim2.new(1, -160, 1, -50), UITheme.BtnBlue, UITheme.BtnBlueDark, UITheme.TextPrimary, 13, function()
         sfxClick()
         hideBanner()
+        openHomeScreen()
     end)
     vBtn.ZIndex = 36
     vBtn.Visible = false
@@ -1387,7 +1396,7 @@ do
 end
 
 -- ========================================================================
--- [PHẦN 08] BẢNG ĐIỀU KHIỂN PHẢI (NÚT 3D BÓNG ĐẸP + PHÓNG TO / THU NHỎ)
+-- [PHẦN 08] BẢNG ĐIỀU KHIỂN PHẢI (GỘP MỞ Ô/CẮM CỜ + GỢI Ý ĐỒ HỌA + THU PHÓNG)
 -- ========================================================================
 do
     local SidePanel = Instance.new("ScrollingFrame")
@@ -1405,7 +1414,7 @@ do
     addGradient(SidePanel, UITheme.BgCard, UITheme.BgPanelDark, 135)
 
     local pad = Instance.new("UIPadding")
-    pad.PaddingTop = UDim.new(0, 10)
+    pad.PaddingTop = UDim.new(0, 12)
     pad.PaddingBottom = UDim.new(0, 10)
     pad.PaddingLeft = UDim.new(0, 10)
     pad.PaddingRight = UDim.new(0, 10)
@@ -1413,99 +1422,103 @@ do
 
     local layout = Instance.new("UIListLayout")
     layout.SortOrder = Enum.SortOrder.LayoutOrder
-    layout.Padding = UDim.new(0, 8)
+    layout.Padding = UDim.new(0, 10)
     layout.Parent = SidePanel
 
-    local function makeHeader(text, order)
-        local lbl = Instance.new("TextLabel")
-        lbl.LayoutOrder = order
-        lbl.Size = UDim2.new(1, 0, 0, 16)
-        lbl.BackgroundTransparency = 1
-        lbl.Text = text
-        lbl.Font = FONT_MAIN
-        lbl.TextSize = 11
-        lbl.TextColor3 = UITheme.TextSecondary
-        lbl.TextXAlignment = Enum.TextXAlignment.Left
-        lbl.Parent = SidePanel
-        return lbl
+    -- Hàng 1: 2 nút đồ họa lớn (Gộp Mở ô / Cắm cờ thành 1 ô + Nút Gợi ý bóng đèn 10 Xu)
+    local GraphicRow = Instance.new("Frame")
+    GraphicRow.LayoutOrder = 1
+    GraphicRow.Size = UDim2.new(1, 0, 0, 106)
+    GraphicRow.BackgroundTransparency = 1
+    GraphicRow.Parent = SidePanel
+
+    local function makeGraphicActionCard(xScale, badgeText, badgeColor, onTap)
+        local card = Instance.new("TextButton")
+        card.Size = UDim2.new(0.48, 0, 1, 0)
+        card.Position = UDim2.new(xScale, 0, 0, 0)
+        card.BackgroundColor3 = UITheme.BgPanelDark
+        card.BorderSizePixel = 0
+        card.AutoButtonColor = false
+        card.Text = ""
+        card.Parent = GraphicRow
+        addCorner(card, 12)
+        local st = addStroke(card, UITheme.RimBlue, 1.8, 0.1)
+
+        local iconHolder = Instance.new("Frame")
+        iconHolder.Size = UDim2.new(0, 74, 0, 74)
+        iconHolder.AnchorPoint = Vector2.new(0.5, 0)
+        iconHolder.Position = UDim2.new(0.5, 0, 0, 6)
+        iconHolder.BackgroundTransparency = 1
+        iconHolder.ZIndex = 4
+        iconHolder.Parent = card
+
+        local badge = Instance.new("TextLabel")
+        badge.Size = UDim2.new(1, -8, 0, 20)
+        badge.Position = UDim2.new(0, 4, 1, -23)
+        badge.BackgroundTransparency = 1
+        badge.Text = badgeText
+        badge.Font = FONT_MAIN
+        badge.TextSize = 12
+        badge.TextColor3 = badgeColor or UITheme.TextPrimary
+        badge.ZIndex = 5
+        badge.Parent = card
+
+        bindInstantTap(card, onTap)
+        return card, iconHolder, badge, st
     end
 
-    makeHeader("CHẾ ĐỘ CHẠM", 1)
-
-    local TouchRow = Instance.new("Frame")
-    TouchRow.LayoutOrder = 2
-    TouchRow.Size = UDim2.new(1, 0, 0, 38)
-    TouchRow.BackgroundTransparency = 1
-    TouchRow.Parent = SidePanel
-
-    UI.DigBtn, UI.DigFace, UI.DigLbl = make3DButton(TouchRow, "Mở ô", UDim2.new(0.48, 0, 1, 0), UDim2.new(0, 0, 0, 0), UITheme.BtnBlue, UITheme.BtnBlueDark, UITheme.TextPrimary, 13, function()
-        State.TouchMode = "DIG"
+    -- Ô gộp Mở ô (Xẻng) <-> Cắm cờ (Cờ đỏ)
+    UI.ModeCard, UI.ModeIconHolder, UI.ModeBadge, UI.ModeStroke = makeGraphicActionCard(0, "Mở ô", UITheme.ColorGold, function()
+        State.TouchMode = (State.TouchMode == "DIG") and "FLAG" or "DIG"
         sfxClick()
         updateControlsUI()
     end)
 
-    UI.FlagBtn, UI.FlagFace, UI.FlagLbl = make3DButton(TouchRow, "Cắm cờ", UDim2.new(0.48, 0, 1, 0), UDim2.new(0.52, 0, 0, 0), UITheme.BgButton, UITheme.BgPanelDark, UITheme.TextSecondary, 13, function()
-        State.TouchMode = "FLAG"
-        sfxClick()
-        updateControlsUI()
+    -- Ô Gợi ý (Bóng đèn sáng) + 10 Xu
+    UI.HintCard, UI.HintIconHolder, UI.HintBadge, UI.HintStroke = makeGraphicActionCard(0.52, "10 Xu", UITheme.ColorGold, function()
+        useHint()
+    end)
+    UI.HintStroke.Color = UITheme.ColorGold
+    Icons.drawSpriteOr(UI.HintIconHolder, "hint_btn", 0.96, function(p)
+        local lbl = Instance.new("TextLabel")
+        lbl.Size = UDim2.new(1, 0, 1, 0)
+        lbl.BackgroundTransparency = 1
+        lbl.Text = "Gợi ý"
+        lbl.Font = FONT_MAIN
+        lbl.TextSize = 14
+        lbl.TextColor3 = UITheme.ColorGold
+        lbl.Parent = p
     end)
 
-    makeHeader("THAO TÁC NHANH", 3)
-
-    local ActRow = Instance.new("Frame")
-    ActRow.LayoutOrder = 4
-    ActRow.Size = UDim2.new(1, 0, 0, 38)
-    ActRow.BackgroundTransparency = 1
-    ActRow.Parent = SidePanel
-
-    make3DButton(ActRow, "Ván mới", UDim2.new(0.48, 0, 1, 0), UDim2.new(0, 0, 0, 0), UITheme.BtnGreen, UITheme.BtnGreenDark, UITheme.TextPrimary, 13, function()
+    -- Hàng 2: Ván mới
+    local newBtn = make3DButton(SidePanel, "Ván mới", UDim2.new(1, 0, 0, 38), UDim2.new(0, 0, 0, 0), UITheme.BtnGreen, UITheme.BtnGreenDark, UITheme.TextPrimary, 13, function()
         sfxClick()
         startNewGame()
     end)
+    newBtn.LayoutOrder = 2
 
-    make3DButton(ActRow, "Gợi ý 10 Xu", UDim2.new(0.48, 0, 1, 0), UDim2.new(0.52, 0, 0, 0), UITheme.BtnPurple, UITheme.BtnPurpleDark, UITheme.TextPrimary, 12, function()
-        useHint()
-    end)
-
-    makeHeader("TIỆN ÍCH", 5)
-
-    local function makeToggle(order, initText, mainCol, darkCol, onTap)
-        local b, face, lbl = make3DButton(SidePanel, initText, UDim2.new(1, 0, 0, 34), UDim2.new(0, 0, 0, 0), mainCol, darkCol, UITheme.TextPrimary, 12, onTap)
-        b.LayoutOrder = order
-        return b, face, lbl
-    end
-
-    UI.SoundBtn, UI.SoundFace, UI.SoundLbl = makeToggle(7, "Âm thanh: Bật", UITheme.BgButton, UITheme.BgPanelDark, function()
+    -- Hàng 3: Âm thanh
+    UI.SoundBtn, UI.SoundFace, UI.SoundLbl = make3DButton(SidePanel, "Âm thanh: Bật", UDim2.new(1, 0, 0, 36), UDim2.new(0, 0, 0, 0), UITheme.BgButton, UITheme.BgPanelDark, UITheme.ColorGreen, 12, function()
         Config.SoundEnabled = not Config.SoundEnabled
         if Config.SoundEnabled then sfxClick() end
         updateControlsUI()
     end)
+    UI.SoundBtn.LayoutOrder = 3
 
-    UI.ResetBtn, UI.ResetFace, UI.ResetLbl = makeToggle(8, "Đặt lại thống kê", UITheme.BtnRed, UITheme.BtnRedDark, function()
-        local now = os.clock()
-        if (now - State.ResetConfirmAt) <= 3.0 then
-            State.ResetConfirmAt = 0
-            Stats.Wins, Stats.Losses, Stats.Xu = 0, 0, 0
-            saveStats()
-            sfxClick()
-            UI.ResetLbl.Text = "Đặt lại thống kê"
-            updateTopStatus()
-        else
-            State.ResetConfirmAt = now
-            sfxFlag()
-            UI.ResetLbl.Text = "Chạm lần nữa để xóa!"
-            task.delay(3.1, function()
-                if not State.Destroyed and State.ResetConfirmAt == now then
-                    UI.ResetLbl.Text = "Đặt lại thống kê"
-                end
-            end)
-        end
-    end)
-
-    makeHeader("PHÓNG TO / THU NHỎ", 9)
+    -- Hàng 4: Phóng to / Thu nhỏ
+    local zHdr = Instance.new("TextLabel")
+    zHdr.LayoutOrder = 4
+    zHdr.Size = UDim2.new(1, 0, 0, 16)
+    zHdr.BackgroundTransparency = 1
+    zHdr.Text = "PHÓNG TO / THU NHỎ"
+    zHdr.Font = FONT_MAIN
+    zHdr.TextSize = 11
+    zHdr.TextColor3 = UITheme.TextSecondary
+    zHdr.TextXAlignment = Enum.TextXAlignment.Left
+    zHdr.Parent = SidePanel
 
     local ZoomRow = Instance.new("Frame")
-    ZoomRow.LayoutOrder = 10
+    ZoomRow.LayoutOrder = 5
     ZoomRow.Size = UDim2.new(1, 0, 0, 36)
     ZoomRow.BackgroundTransparency = 1
     ZoomRow.Parent = SidePanel
@@ -1724,13 +1737,27 @@ end
 
 updateControlsUI = function()
     local isDig = (State.TouchMode == "DIG")
-    UI.DigFace.BackgroundColor3 = isDig and UITheme.BtnBlue or UITheme.BgButton
-    UI.DigBtn.BackgroundColor3 = isDig and UITheme.BtnBlueDark or UITheme.BgPanelDark
-    UI.DigLbl.TextColor3 = isDig and UITheme.TextPrimary or UITheme.TextSecondary
-
-    UI.FlagFace.BackgroundColor3 = (not isDig) and UITheme.BtnRed or UITheme.BgButton
-    UI.FlagBtn.BackgroundColor3 = (not isDig) and UITheme.BtnRedDark or UITheme.BgPanelDark
-    UI.FlagLbl.TextColor3 = (not isDig) and UITheme.TextPrimary or UITheme.TextSecondary
+    for _, ch in ipairs(UI.ModeIconHolder:GetChildren()) do ch:Destroy() end
+    if isDig then
+        UI.ModeBadge.Text = "Mở ô"
+        UI.ModeBadge.TextColor3 = UITheme.ColorGold
+        UI.ModeStroke.Color = UITheme.ColorGold
+        Icons.drawSpriteOr(UI.ModeIconHolder, "shovel", 0.96, function(p)
+            local lbl = Instance.new("TextLabel")
+            lbl.Size = UDim2.new(1, 0, 1, 0)
+            lbl.BackgroundTransparency = 1
+            lbl.Text = "Mở"
+            lbl.Font = FONT_MAIN
+            lbl.TextSize = 15
+            lbl.TextColor3 = UITheme.ColorGold
+            lbl.Parent = p
+        end)
+    else
+        UI.ModeBadge.Text = "Cắm cờ"
+        UI.ModeBadge.TextColor3 = UITheme.ColorRed
+        UI.ModeStroke.Color = UITheme.BtnRed
+        Icons.drawSpriteOr(UI.ModeIconHolder, "flag_btn", 0.96, Icons.drawFlagVector)
+    end
 
     UI.SoundLbl.Text = Config.SoundEnabled and "Âm thanh: Bật" or "Âm thanh: Tắt"
     UI.SoundLbl.TextColor3 = Config.SoundEnabled and UITheme.ColorGreen or UITheme.TextSecondary
