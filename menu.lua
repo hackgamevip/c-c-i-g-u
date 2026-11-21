@@ -1,5 +1,5 @@
 -- ============================================================================
--- DAU TRUONG CHIEN DAU PRO (v2.0) - Full-Screen Action RPG Combat Game
+-- DAU TRUONG CHIEN DAU PRO (v2.2) - Full-Screen Action RPG Combat Game
 -- Menu Full Man Hinh 100% | 8 Tuong | 5 Boss | 6 Loai Quai | Minimap Radar
 -- Chon Nang Cap Trong Tran | Nhiem Vu | Len Cap | Trang Thai | Cai Dat
 -- Code doc lap 100%, toi uu cho Mobile (cam ung tuc thi, chu matte) & PC.
@@ -32,9 +32,9 @@ local C = {
     BG_PANEL_HI  = Color3.fromRGB(34, 39, 58),
     BG_CARD      = Color3.fromRGB(30, 35, 52),
     BG_CARD_ALT  = Color3.fromRGB(40, 46, 68),
-    BG_ARENA     = Color3.fromRGB(24, 29, 40),
-    BG_ARENA_MID = Color3.fromRGB(31, 37, 52),
-    BG_ARENA_G   = Color3.fromRGB(40, 47, 64),
+    BG_ARENA     = Color3.fromRGB(38, 46, 62),
+    BG_ARENA_MID = Color3.fromRGB(46, 55, 74),
+    BG_ARENA_G   = Color3.fromRGB(58, 68, 90),
     GRASS_DARK   = Color3.fromRGB(32, 68, 46),
     GRASS_LIGHT  = Color3.fromRGB(44, 92, 58),
     STONE_DARK   = Color3.fromRGB(46, 52, 68),
@@ -80,7 +80,7 @@ local FONT_BODY  = Enum.Font.GothamMedium
 -- 2. DU LIEU GAME (8 TUONG, 5 MAN CHOI, 3 DO KHO, 5 BOSS, 6 QUAI, NHIEM VU)
 -- ============================================================================
 local CFG = {
-    VERSION = "v2.0",
+    VERSION = "v2.2",
     GUI_NAME = "ArenaChienDau_Standalone",
     SAVE_PREFIX = "arena_chien_dau_v2_",
     ARENA_W = 1100,
@@ -236,6 +236,61 @@ CFG.CODES = {
     ["FULLSCREEN"]   = { coins = 600,  gems = 30, msg = "Nhận 600 Xu + 30 KC" },
 }
 
+-- He thong Do Hiem & Kho Trang Bi (6 O: Vu Khi, Mu, Giay, Ao Giap, Phu Kien, Canh)
+CFG.RARITIES = {
+    common = { name = "Thường",     color = Color3.fromRGB(152, 160, 174), mult = 1.0, sell = 45 },
+    rare   = { name = "Hiếm",       color = Color3.fromRGB(86, 154, 204),  mult = 1.45, sell = 95 },
+    epic   = { name = "Sử Thi",     color = Color3.fromRGB(156, 102, 202), mult = 2.0, sell = 180 },
+    legend = { name = "Huyền Thoại", color = Color3.fromRGB(204, 168, 76),  mult = 2.8, sell = 340 },
+    mythic = { name = "Thần Thoại", color = Color3.fromRGB(198, 86, 118),  mult = 3.8, sell = 600 },
+}
+
+CFG.GEAR_SLOTS = {
+    { id = "weapon", label = "Vũ Khí",   cat = "weapon" },
+    { id = "helm",   label = "Mũ / Nón", cat = "armor"  },
+    { id = "boots",  label = "Giày",     cat = "armor"  },
+    { id = "armor",  label = "Áo Giáp",  cat = "armor"  },
+    { id = "neck",   label = "Phụ Kiện", cat = "acc"    },
+    { id = "wings",  label = "Cánh",     cat = "wings"  },
+}
+
+CFG.GEAR_POOL = {
+    -- Vu Khi
+    { id = "w_iron",   slot = "weapon", name = "Kiếm Sắt",         rarity = "common", atk = 10, hp = 0,   def = 0,  spd = 0,  col = Color3.fromRGB(162, 170, 182) },
+    { id = "w_frost",  slot = "weapon", name = "Băng Kiếm",        rarity = "rare",   atk = 20, hp = 15,  def = 0,  spd = 4,  col = Color3.fromRGB(84, 162, 204) },
+    { id = "w_flame",  slot = "weapon", name = "Hỏa Long Kiếm",    rarity = "epic",   atk = 34, hp = 25,  def = 4,  spd = 6,  col = Color3.fromRGB(198, 78, 62) },
+    { id = "w_gold",   slot = "weapon", name = "Thánh Kiếm Hoàng Kim", rarity = "legend", atk = 52, hp = 40, def = 8, spd = 10, col = Color3.fromRGB(204, 168, 72) },
+    { id = "w_void",   slot = "weapon", name = "Ma Kiếm Hư Không", rarity = "mythic", atk = 78, hp = 60,  def = 12, spd = 14, col = Color3.fromRGB(168, 86, 202) },
+    -- Ao Giap
+    { id = "a_iron",   slot = "armor",  name = "Giáp Tân Thủ",     rarity = "common", atk = 0,  hp = 35,  def = 8,  spd = 0,  col = Color3.fromRGB(142, 148, 162) },
+    { id = "a_frost",  slot = "armor",  name = "Giáp Băng Lam",    rarity = "rare",   atk = 4,  hp = 75,  def = 16, spd = 2,  col = Color3.fromRGB(72, 134, 192) },
+    { id = "a_flame",  slot = "armor",  name = "Giáp Huyết Long",  rarity = "epic",   atk = 8,  hp = 130, def = 26, spd = 4,  col = Color3.fromRGB(182, 64, 62) },
+    { id = "a_gold",   slot = "armor",  name = "Giáp Hoàng Đế",    rarity = "legend", atk = 14, hp = 210, def = 40, spd = 6,  col = Color3.fromRGB(198, 158, 66) },
+    { id = "a_void",   slot = "armor",  name = "Giáp Hắc Ám",      rarity = "mythic", atk = 22, hp = 320, def = 58, spd = 10, col = Color3.fromRGB(132, 74, 186) },
+    -- Mu / Non
+    { id = "h_iron",   slot = "helm",   name = "Mũ Hiệp Sĩ",       rarity = "common", atk = 2,  hp = 25,  def = 6,  spd = 0,  col = Color3.fromRGB(148, 156, 168) },
+    { id = "h_frost",  slot = "helm",   name = "Mũ Băng Giá",      rarity = "rare",   atk = 5,  hp = 55,  def = 12, spd = 3,  col = Color3.fromRGB(78, 148, 196) },
+    { id = "h_horn",   slot = "helm",   name = "Mũ Sừng Ma Vương", rarity = "epic",   atk = 12, hp = 90,  def = 20, spd = 5,  col = Color3.fromRGB(178, 62, 66) },
+    { id = "h_crown",  slot = "helm",   name = "Vương Miện Vàng",  rarity = "legend", atk = 20, hp = 150, def = 30, spd = 8,  col = Color3.fromRGB(204, 170, 74) },
+    -- Giay
+    { id = "b_leather", slot = "boots", name = "Giày Da Chiến",    rarity = "common", atk = 0,  hp = 18,  def = 4,  spd = 12, col = Color3.fromRGB(138, 96, 68) },
+    { id = "b_wind",    slot = "boots", name = "Giày Phong Hành",  rarity = "rare",   atk = 4,  hp = 36,  def = 8,  spd = 24, col = Color3.fromRGB(76, 146, 196) },
+    { id = "b_flame",   slot = "boots", name = "Giày Hỏa Tốc",     rarity = "epic",   atk = 8,  hp = 65,  def = 14, spd = 38, col = Color3.fromRGB(186, 72, 64) },
+    { id = "b_void",    slot = "boots", name = "Giày Ảnh Bộ",      rarity = "legend", atk = 14, hp = 110, def = 22, spd = 52, col = Color3.fromRGB(148, 86, 194) },
+    -- Phu Kien (Day chuyen / Nhan)
+    { id = "n_ring",   slot = "neck",   name = "Nhẫn Bạc",         rarity = "common", atk = 6,  hp = 20,  def = 4,  spd = 4,  col = Color3.fromRGB(168, 174, 184) },
+    { id = "n_sapph",  slot = "neck",   name = "Dây Chuyền Lam Ngọc", rarity = "rare", atk = 12, hp = 45,  def = 10, spd = 8,  col = Color3.fromRGB(82, 158, 204) },
+    { id = "n_ruby",   slot = "neck",   name = "Dây Chuyền Hồng Ngọc", rarity = "epic", atk = 22, hp = 80, def = 16, spd = 12, col = Color3.fromRGB(194, 74, 78) },
+    { id = "n_void",   slot = "neck",   name = "Hồn Ngọc Tối Thượng", rarity = "mythic", atk = 40, hp = 145, def = 28, spd = 20, col = Color3.fromRGB(166, 92, 204) },
+    -- Canh / Ao Choang (Hien thi truc tiep tren nhan vat!)
+    { id = "c_cape",   slot = "wings",  name = "Áo Choàng Đỏ",     rarity = "common", atk = 4,  hp = 30,  def = 6,  spd = 8,  col = Color3.fromRGB(178, 56, 56) },
+    { id = "c_angel",  slot = "wings",  name = "Cánh Thiên Thần",  rarity = "rare",   atk = 10, hp = 70,  def = 14, spd = 16, col = Color3.fromRGB(192, 198, 206) },
+    { id = "c_bat",    slot = "wings",  name = "Cánh Dơi Huyết Nguyệt", rarity = "epic", atk = 20, hp = 115, def = 22, spd = 24, col = Color3.fromRGB(176, 54, 62) },
+    { id = "c_ice",    slot = "wings",  name = "Cánh Băng Tinh",   rarity = "legend", atk = 32, hp = 180, def = 34, spd = 32, col = Color3.fromRGB(88, 172, 206) },
+    { id = "c_shadow", slot = "wings",  name = "Cánh Bóng Đêm Thần Thoại", rarity = "mythic", atk = 48, hp = 260, def = 46, spd = 42, col = Color3.fromRGB(142, 78, 198) },
+}
+
+
 -- ============================================================================
 -- 3. LUU TRU 2 LOP (FILE JSON + _G FALLBACK)
 -- ============================================================================
@@ -265,6 +320,18 @@ local function getDefaultData()
             particles = true,
             minimap = true,
             autoAim = true,
+        },
+        nextUid = 5,
+        inventory = {
+            { uid = 1, id = "w_iron",   lv = 0 },
+            { uid = 2, id = "a_iron",   lv = 0 },
+            { uid = 3, id = "c_cape",   lv = 0 },
+            { uid = 4, id = "n_ring",   lv = 0 },
+        },
+        equipped = {
+            weapon = 1,
+            armor = 2,
+            wings = 3,
         },
     }
 end
@@ -303,6 +370,9 @@ function SAVE.Load()
         for k, v in pairs(def.settings) do if loaded.settings[k] == nil then loaded.settings[k] = v end end
         if type(loaded.claimedQuests) ~= "table" then loaded.claimedQuests = {} end
         if type(loaded.usedCodes) ~= "table" then loaded.usedCodes = {} end
+        if type(loaded.inventory) ~= "table" then loaded.inventory = def.inventory end
+        if type(loaded.equipped) ~= "table" then loaded.equipped = def.equipped end
+        if type(loaded.nextUid) ~= "number" then loaded.nextUid = 10 end
         DATA = loaded
     else
         DATA = def
@@ -348,18 +418,79 @@ local function getExpNeeded(lv)
     return 100 + (lv - 1) * 65
 end
 
+local GEAR = {}
+function GEAR.GetDef(id)
+    for _, g in ipairs(CFG.GEAR_POOL) do if g.id == id then return g end end
+    return CFG.GEAR_POOL[1]
+end
+function GEAR.FindByUid(uid)
+    if not uid then return nil, nil end
+    for idx, it in ipairs(DATA.inventory) do
+        if it.uid == uid then return it, idx end
+    end
+    return nil, nil
+end
+function GEAR.IsEquipped(uid)
+    for _, eqUid in pairs(DATA.equipped) do
+        if eqUid == uid then return true end
+    end
+    return false
+end
+function GEAR.GetItemStats(it)
+    local d = GEAR.GetDef(it.id)
+    local mult = 1 + (it.lv or 0) * 0.15
+    return {
+        def = d,
+        atk = math.floor(d.atk * mult),
+        hp  = math.floor(d.hp * mult),
+        arm = math.floor(d.def * mult),
+        spd = math.floor(d.spd * mult),
+    }
+end
+function GEAR.AddRandom(minRarity)
+    local pool = {}
+    local rank = { common = 1, rare = 2, epic = 3, legend = 4, mythic = 5 }
+    local minR = rank[minRarity or "common"] or 1
+    for _, g in ipairs(CFG.GEAR_POOL) do
+        if (rank[g.rarity] or 1) >= minR then table.insert(pool, g) end
+    end
+    local pick = pool[RNG:NextInteger(1, #pool)]
+    DATA.nextUid = (DATA.nextUid or 10) + 1
+    local newItem = { uid = DATA.nextUid, id = pick.id, lv = 0 }
+    table.insert(DATA.inventory, newItem)
+    return newItem, pick
+end
+
 local function computeStats()
     local h = getHeroById(DATA.selectedHero)
     local u = DATA.upgrades
     local lvBonus = 1 + (DATA.level - 1) * 0.08
-    local maxHp = math.floor(h.hp * lvBonus * (1 + (u.hp or 0) * 0.16))
+    local gHp, gAtk, gDef, gSpd = 0, 0, 0, 0
+    local wingCol, weapCol = nil, nil
+    for slot, uid in pairs(DATA.equipped or {}) do
+        local it = GEAR.FindByUid(uid)
+        if it then
+            local st = GEAR.GetItemStats(it)
+            gHp = gHp + st.hp
+            gAtk = gAtk + st.atk
+            gDef = gDef + st.arm
+            gSpd = gSpd + st.spd
+            if slot == "wings" then wingCol = st.def.col end
+            if slot == "weapon" then weapCol = st.def.col end
+        end
+    end
+    local maxHp = math.floor(h.hp * lvBonus * (1 + (u.hp or 0) * 0.16)) + gHp
     local maxMp = math.floor(h.mp * (1 + (u.mp or 0) * 0.15))
-    local atk   = math.floor(h.atk * lvBonus * (1 + (u.atk or 0) * 0.12))
-    local spd   = math.floor(h.spd * (1 + (u.spd or 0) * 0.04))
+    local atk   = math.floor(h.atk * lvBonus * (1 + (u.atk or 0) * 0.12)) + gAtk
+    local def   = math.floor(10 + (DATA.level - 1) * 2) + gDef
+    local spd   = math.floor(h.spd * (1 + (u.spd or 0) * 0.04)) + gSpd
     local crit  = math.min(0.75, h.crit + (u.crit or 0) * 0.03)
     local mpReg = 8 + (u.mp or 0) * 1.5
-    local power = math.floor(maxHp * 0.8 + atk * 18 + spd * 0.6 + crit * 500 + maxMp * 1.2)
-    return { hero = h, maxHp = maxHp, maxMp = maxMp, atk = atk, spd = spd, crit = crit, mpRegen = mpReg, power = power }
+    local power = math.floor(maxHp * 0.8 + atk * 18 + def * 12 + spd * 0.6 + crit * 500 + maxMp * 1.2)
+    return {
+        hero = h, maxHp = maxHp, maxMp = maxMp, atk = atk, def = def, spd = spd,
+        crit = crit, mpRegen = mpReg, power = power, wingCol = wingCol, weapCol = weapCol,
+    }
 end
 
 local function addCorner(inst, px)
@@ -437,7 +568,7 @@ local function bindTap(btn, cb)
 end
 
 -- Ve nhan vat chibi RPG da lop (Dau + Toc + Mat + Giap Than + Vu Khi rieng)
-local function buildChibiHero(container, hero, zBase)
+local function buildChibiHero(container, hero, zBase, hideWeapon)
     for _, ch in ipairs(container:GetChildren()) do
         if ch.Name == "HeroArt" then ch:Destroy() end
     end
@@ -462,6 +593,27 @@ local function buildChibiHero(container, hero, zBase)
     sh.ZIndex = zBase
     sh.Parent = root
     addCorner(sh, 99)
+
+    -- Canh / Ao choang trang bi (neu co)
+    if not hideWeapon and DATA and DATA.equipped and DATA.equipped.wings then
+        local wIt = GEAR.FindByUid(DATA.equipped.wings)
+        if wIt then
+            local wd = GEAR.GetDef(wIt.id)
+            for _, side in ipairs({ -1, 1 }) do
+                local wing = Instance.new("Frame")
+                wing.AnchorPoint = Vector2.new(0.5, 0.5)
+                wing.Position = UDim2.new(0.5 + side * 0.58, 0, 0.58, 0)
+                wing.Size = UDim2.new(0.54, 0, 0.58, 0)
+                wing.Rotation = side * 22
+                wing.BackgroundColor3 = wd.col
+                wing.BorderSizePixel = 0
+                wing.ZIndex = zBase
+                wing.Parent = root
+                addCorner(wing, 8)
+                addStroke(wing, C.TXT_DARK, 1)
+            end
+        end
+    end
 
     -- Than giap
     local body = Instance.new("Frame")
@@ -511,6 +663,8 @@ local function buildChibiHero(container, hero, zBase)
         eye.Parent = head
         addCorner(eye, 3)
     end
+
+    if hideWeapon then return root, nil end
 
     -- Khop vu khi xoay theo huong danh
     local wp = Instance.new("Frame")
@@ -835,6 +989,7 @@ local S = {
     mpRegen = 8,
     shield = 0,
     atk = 28,
+    def = 10,
     spd = 250,
     crit = 0.14,
     lifesteal = 0,
@@ -962,6 +1117,7 @@ do
     avaBox.Position = UDim2.new(0, 12, 0.5, -23)
     avaBox.Size = UDim2.new(0, 46, 0, 46)
     avaBox.BackgroundColor3 = C.BG_ARENA
+    avaBox.ClipsDescendants = true
     avaBox.ZIndex = 11
     avaBox.Parent = topBar
     addCorner(avaBox, 23)
@@ -1183,10 +1339,11 @@ do
     contentArea.Parent = lobby
 
     local tabs = {
-        { id = "play",    label = "VÀO TRẬN" },
-        { id = "heroes",  label = "TƯỚNG (8)" },
-        { id = "upgrade", label = "NÂNG CẤP" },
-        { id = "quests",  label = "NHIỆM VỤ" },
+        { id = "play",     label = "VÀO TRẬN" },
+        { id = "gear",     label = "TRANG BỊ" },
+        { id = "heroes",   label = "TƯỚNG (8)" },
+        { id = "upgrade",  label = "NÂNG CẤP" },
+        { id = "quests",   label = "NHIỆM VỤ" },
         { id = "settings", label = "CÀI ĐẶT & CODE" },
     }
     UI.SideBtns = {}
@@ -1369,6 +1526,244 @@ do
         bindTap(startBtn, function() GAME.StartMatch() end)
     end
 
+
+    -- ---- PAGE GEAR: NHAN VAT (6 O TRANG BI) + TUI DO (LOC / TRANG BI / NANG CAP / GO / BAN / MO RUONG) ----
+    do
+        local pg = UI.LobbyPages.gear
+        UI.SelectedGearUid = nil
+        UI.GearFilter = "all"
+
+        -- Cot trai: Khung Nhan Vat + 6 O Trang Bi + Chi So HP/ATK/DEF/SPD
+        local left = Instance.new("Frame")
+        left.Size = UDim2.new(0.42, -6, 1, 0)
+        left.BackgroundColor3 = C.BG_PANEL
+        left.ZIndex = 4
+        left.Parent = pg
+        addCorner(left, 12)
+        addStroke(left, C.BORDER_ACT, 1.5)
+
+        makeLabel(left, {
+            text = "NHÂN VẬT & TRANG BỊ", font = FONT_TITLE, color = C.TXT_GOLD, size = 13,
+            dim = UDim2.new(1, -24, 0, 22), pos = UDim2.new(0, 12, 0, 8), z = 5,
+        })
+
+        -- Vong phap tran & Chibi o giua
+        local stageRing = Instance.new("Frame")
+        stageRing.AnchorPoint = Vector2.new(0.5, 0.5)
+        stageRing.Position = UDim2.new(0.5, 0, 0.44, 0)
+        stageRing.Size = UDim2.new(0, 96, 0, 96)
+        stageRing.BackgroundColor3 = C.BG_ARENA
+        stageRing.ZIndex = 5
+        stageRing.Parent = left
+        addCorner(stageRing, 48)
+        addStroke(stageRing, C.BORDER_ACT, 2)
+
+        UI.GearHeroPreview = Instance.new("Frame")
+        UI.GearHeroPreview.AnchorPoint = Vector2.new(0.5, 0.5)
+        UI.GearHeroPreview.Position = UDim2.new(0.5, 0, 0.5, 0)
+        UI.GearHeroPreview.Size = UDim2.new(0, 54, 0, 54)
+        UI.GearHeroPreview.BackgroundTransparency = 1
+        UI.GearHeroPreview.ZIndex = 6
+        UI.GearHeroPreview.Parent = stageRing
+
+        -- 6 O trang bi (3 ben trai, 3 ben phai giong anh tham khao)
+        UI.GearSlotBtns = {}
+        local slotCoords = {
+            { id = "weapon", x = 0.04, y = 0.14 },
+            { id = "helm",   x = 0.04, y = 0.36 },
+            { id = "boots",  x = 0.04, y = 0.58 },
+            { id = "armor",  x = 0.72, y = 0.14 },
+            { id = "neck",   x = 0.72, y = 0.36 },
+            { id = "wings",  x = 0.72, y = 0.58 },
+        }
+        for _, sc in ipairs(slotCoords) do
+            local sb = makeBtn(left, {
+                text = "", bg = C.BG_CARD, color = C.TXT_SUB, size = 10,
+                dim = UDim2.new(0.24, 0, 0.19, 0), pos = UDim2.new(sc.x, 0, sc.y, 0), radius = 8, z = 6,
+            })
+            sb.TextWrapped = true
+            UI.GearSlotBtns[sc.id] = { btn = sb, stroke = sb:FindFirstChildOfClass("UIStroke") }
+            bindTap(sb, function()
+                local eqUid = DATA.equipped[sc.id]
+                if eqUid then
+                    UI.SelectedGearUid = eqUid
+                    refreshAllUI()
+                else
+                    showToast("Ô này chưa trang bị vật phẩm!", C.TXT_SUB)
+                end
+            end)
+        end
+
+        -- Hop chi so HP / ATK / DEF / SPD duoi cung cot trai
+        local statBox = Instance.new("Frame")
+        statBox.Position = UDim2.new(0, 10, 1, -68)
+        statBox.Size = UDim2.new(1, -20, 0, 58)
+        statBox.BackgroundColor3 = C.BG_CARD
+        statBox.ZIndex = 5
+        statBox.Parent = left
+        addCorner(statBox, 9)
+        addStroke(statBox, C.BORDER, 1)
+
+        UI.GearStatsLbl = makeLabel(statBox, {
+            text = "", font = FONT_TITLE, color = C.TXT_MAIN, size = 12, wrap = true,
+            xAlign = Enum.TextXAlignment.Center, dim = UDim2.new(1, -12, 1, -8), pos = UDim2.new(0, 6, 0, 4), z = 6,
+        })
+
+        -- Cot phai: Bo loc + Luoi Tui Do + Thong tin vat pham + 4 nut Hanh Dong + Mo Ruong
+        local right = Instance.new("Frame")
+        right.Position = UDim2.new(0.42, 6, 0, 0)
+        right.Size = UDim2.new(0.58, -6, 1, 0)
+        right.BackgroundColor3 = C.BG_PANEL
+        right.ZIndex = 4
+        right.Parent = pg
+        addCorner(right, 12)
+        addStroke(right, C.BORDER, 1.2)
+
+        -- Thanh loc danh muc
+        local fBar = Instance.new("Frame")
+        fBar.Position = UDim2.new(0, 10, 0, 8)
+        fBar.Size = UDim2.new(1, -20, 0, 30)
+        fBar.BackgroundTransparency = 1
+        fBar.ZIndex = 5
+        fBar.Parent = right
+        local fl = Instance.new("UIListLayout")
+        fl.FillDirection = Enum.FillDirection.Horizontal
+        fl.Padding = UDim.new(0, 5)
+        fl.Parent = fBar
+
+        local filters = {
+            { id = "all",    label = "Tất cả" },
+            { id = "weapon", label = "Vũ Khí" },
+            { id = "armor",  label = "Áo Giáp" },
+            { id = "acc",    label = "Phụ Kiện" },
+            { id = "wings",  label = "Cánh" },
+        }
+        UI.GearFilterBtns = {}
+        for _, f in ipairs(filters) do
+            local fb = makeBtn(fBar, {
+                text = f.label, bg = C.BG_CARD, color = C.TXT_SUB, size = 11,
+                dim = UDim2.new(0.195, -2, 1, 0), radius = 7, z = 6,
+            })
+            UI.GearFilterBtns[f.id] = fb
+            bindTap(fb, function()
+                UI.GearFilter = f.id
+                refreshAllUI()
+            end)
+        end
+
+        -- Luoi vat pham trong tui
+        local bagScroll = Instance.new("ScrollingFrame")
+        bagScroll.Position = UDim2.new(0, 10, 0, 44)
+        bagScroll.Size = UDim2.new(1, -20, 1, -148)
+        bagScroll.BackgroundColor3 = C.BG_FULL
+        bagScroll.BorderSizePixel = 0
+        bagScroll.ScrollBarThickness = 4
+        bagScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+        bagScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+        bagScroll.ZIndex = 5
+        bagScroll.Parent = right
+        addCorner(bagScroll, 8)
+        addStroke(bagScroll, C.BORDER, 1)
+        UI.BagScroll = bagScroll
+
+        local bPad = Instance.new("UIPadding")
+        bPad.PaddingTop = UDim.new(0, 6); bPad.PaddingLeft = UDim.new(0, 6)
+        bPad.PaddingRight = UDim.new(0, 6); bPad.PaddingBottom = UDim.new(0, 6)
+        bPad.Parent = bagScroll
+
+        local bGrid = Instance.new("UIGridLayout")
+        bGrid.CellSize = UDim2.new(0.32, -4, 0, 60)
+        bGrid.CellPadding = UDim2.new(0, 6, 0, 6)
+        bGrid.Parent = bagScroll
+
+        -- Hop chi tiet vat pham dang chon
+        UI.GearDetailLbl = makeLabel(right, {
+            text = "Chọn 1 trang bị trong túi để xem chi tiết.",
+            font = FONT_BODY, color = C.TXT_SUB, size = 11, wrap = true,
+            dim = UDim2.new(1, -20, 0, 34), pos = UDim2.new(0, 10, 1, -98), z = 5,
+        })
+
+        -- Thanh 5 nut hanh dong: Trang Bi | Nang Cap | Go | Ban | Mo Ruong (150 Xu)
+        local actRow = Instance.new("Frame")
+        actRow.Position = UDim2.new(0, 10, 1, -56)
+        actRow.Size = UDim2.new(1, -20, 0, 44)
+        actRow.BackgroundTransparency = 1
+        actRow.ZIndex = 5
+        actRow.Parent = right
+        local al = Instance.new("UIListLayout")
+        al.FillDirection = Enum.FillDirection.Horizontal
+        al.Padding = UDim.new(0, 6)
+        al.Parent = actRow
+
+        local eqBtn = makeBtn(actRow, { text = "Trang Bị", bg = C.BTN_BLUE, color = C.TXT_MAIN, size = 11, dim = UDim2.new(0.19, -3, 1, 0), radius = 8, z = 6 })
+        local upBtn = makeBtn(actRow, { text = "Nâng Cấp", bg = C.BTN_GREEN, color = C.TXT_MAIN, size = 11, dim = UDim2.new(0.19, -3, 1, 0), radius = 8, z = 6 })
+        local unBtn = makeBtn(actRow, { text = "Gỡ",       bg = C.BTN_RED, color = C.TXT_MAIN, size = 11, dim = UDim2.new(0.14, -3, 1, 0), radius = 8, z = 6 })
+        local slBtn = makeBtn(actRow, { text = "Bán",      bg = C.BTN_GOLD, color = C.TXT_DARK, size = 11, dim = UDim2.new(0.15, -3, 1, 0), radius = 8, z = 6 })
+        local chBtn = makeBtn(actRow, { text = "Rương 150Xu", bg = C.BTN_PURPLE, color = C.TXT_GOLD, size = 11, dim = UDim2.new(0.32, -4, 1, 0), radius = 8, z = 6 })
+
+        bindTap(eqBtn, function()
+            local it = GEAR.FindByUid(UI.SelectedGearUid)
+            if not it then showToast("Hãy chọn 1 món đồ trước!", C.TXT_RED); return end
+            local d = GEAR.GetDef(it.id)
+            DATA.equipped[d.slot] = it.uid
+            SAVE.Write(); refreshAllUI()
+            showToast("Đã trang bị: " .. d.name, C.TXT_GREEN)
+        end)
+
+        bindTap(upBtn, function()
+            local it = GEAR.FindByUid(UI.SelectedGearUid)
+            if not it then showToast("Hãy chọn 1 món đồ trước!", C.TXT_RED); return end
+            if (it.lv or 0) >= 10 then showToast("Trang bị đã đạt cấp +10 tối đa!", C.TXT_GOLD); return end
+            local cost = 80 + (it.lv or 0) * 65
+            if DATA.coins < cost then showToast("Cần " .. cost .. " Xu để nâng cấp!", C.TXT_RED); return end
+            DATA.coins = DATA.coins - cost
+            it.lv = (it.lv or 0) + 1
+            DATA.totalUpgrades = (DATA.totalUpgrades or 0) + 1
+            SAVE.Write(); refreshAllUI()
+            showToast("Nâng cấp thành công lên +" .. tostring(it.lv), C.TXT_GREEN)
+        end)
+
+        bindTap(unBtn, function()
+            local it = GEAR.FindByUid(UI.SelectedGearUid)
+            if not it then return end
+            local d = GEAR.GetDef(it.id)
+            if DATA.equipped[d.slot] == it.uid then
+                DATA.equipped[d.slot] = nil
+                SAVE.Write(); refreshAllUI()
+                showToast("Đã gỡ: " .. d.name, C.TXT_SUB)
+            else
+                showToast("Món đồ này chưa được trang bị!", C.TXT_SUB)
+            end
+        end)
+
+        bindTap(slBtn, function()
+            local it, idx = GEAR.FindByUid(UI.SelectedGearUid)
+            if not it then showToast("Hãy chọn món đồ để bán!", C.TXT_RED); return end
+            if GEAR.IsEquipped(it.uid) then showToast("Hãy gỡ món đồ ra trước khi bán!", C.TXT_RED); return end
+            local d = GEAR.GetDef(it.id)
+            local r = CFG.RARITIES[d.rarity] or CFG.RARITIES.common
+            local val = r.sell + (it.lv or 0) * 30
+            table.remove(DATA.inventory, idx)
+            DATA.coins = DATA.coins + val
+            UI.SelectedGearUid = nil
+            SAVE.Write(); refreshAllUI()
+            showToast("Đã bán " .. d.name .. " nhận +" .. tostring(val) .. " Xu", C.TXT_GOLD)
+        end)
+
+        bindTap(chBtn, function()
+            if #DATA.inventory >= 60 then showToast("Túi đồ đầy (tối đa 60 món)!", C.TXT_RED); return end
+            if DATA.coins < 150 then showToast("Cần 150 Xu để mở Rương Trang Bị!", C.TXT_RED); return end
+            DATA.coins = DATA.coins - 150
+            local roll = RNG:NextNumber()
+            local minR = (roll < 0.07) and "mythic" or ((roll < 0.22) and "legend" or ((roll < 0.50) and "epic" or "rare"))
+            local it, d = GEAR.AddRandom(minR)
+            UI.SelectedGearUid = it.uid
+            SAVE.Write(); refreshAllUI()
+            local r = CFG.RARITIES[d.rarity] or CFG.RARITIES.common
+            showToast("Mở rương nhận: " .. d.name .. " [" .. r.name .. "]", r.color)
+        end)
+    end
+
     -- ---- PAGE 2: 8 TUONG (HERO ROSTER) ----
     do
         local pg = UI.LobbyPages.heroes
@@ -1400,6 +1795,7 @@ do
             ava.Position = UDim2.new(0, 10, 0, 10)
             ava.Size = UDim2.new(0, 48, 0, 48)
             ava.BackgroundColor3 = C.BG_ARENA
+            ava.ClipsDescendants = true
             ava.ZIndex = 5
             ava.Parent = card
             addCorner(ava, 24)
@@ -1412,7 +1808,7 @@ do
             sp.BackgroundTransparency = 1
             sp.ZIndex = 6
             sp.Parent = ava
-            buildChibiHero(sp, h, 6)
+            buildChibiHero(sp, h, 6, true)
 
             makeLabel(card, {
                 text = h.name .. " - " .. h.role, font = FONT_TITLE, color = C.TXT_MAIN, size = 13,
@@ -1722,7 +2118,7 @@ end
 
 refreshAllUI = function()
     local st = computeStats()
-    buildChibiHero(UI.TopAvatarHolder, st.hero, 12)
+    buildChibiHero(UI.TopAvatarHolder, st.hero, 12, true)
     UI.TopLvLbl.Text = "Lv." .. tostring(DATA.level)
     UI.TopHpLbl.Text = string.format("HP %d/%d", S.inMatch and math.floor(S.hp) or st.maxHp, S.inMatch and S.maxHp or st.maxHp)
     UI.TopMpLbl.Text = string.format("MP %d/%d", S.inMatch and math.floor(S.mp) or st.maxMp, S.inMatch and S.maxMp or st.maxMp)
@@ -1808,6 +2204,88 @@ refreshAllUI = function()
     end
     UI.QuestBadge.Visible = anyClaimable
 
+
+    -- Cap nhat trang Trang Bi & Tui Do
+    if UI.GearHeroPreview then
+        buildChibiHero(UI.GearHeroPreview, st.hero, 6, false)
+        UI.GearStatsLbl.Text = string.format(
+            "HP: %d   |   ATK: %d
+DEF: %d   |   SPD: %d",
+            st.maxHp, st.atk, st.def, st.spd
+        )
+        for _, sl in ipairs(CFG.GEAR_SLOTS) do
+            local pack = UI.GearSlotBtns[sl.id]
+            local eqIt = GEAR.FindByUid(DATA.equipped[sl.id])
+            if eqIt then
+                local d = GEAR.GetDef(eqIt.id)
+                local rar = CFG.RARITIES[d.rarity] or CFG.RARITIES.common
+                pack.btn.Text = d.name .. ((eqIt.lv or 0) > 0 and (" +" .. eqIt.lv) or "")
+                pack.btn.TextColor3 = C.TXT_MAIN
+                pack.stroke.Color = rar.color
+                pack.stroke.Thickness = 2
+            else
+                pack.btn.Text = sl.label .. "
+(Trống)"
+                pack.btn.TextColor3 = C.TXT_SUB
+                pack.stroke.Color = C.BORDER
+                pack.stroke.Thickness = 1
+            end
+        end
+
+        for fid, fb in pairs(UI.GearFilterBtns) do
+            local act = (UI.GearFilter == fid)
+            fb.BackgroundColor3 = act and C.BTN_PURPLE or C.BG_CARD
+            fb.TextColor3 = act and C.TXT_MAIN or C.TXT_SUB
+        end
+
+        for _, ch in ipairs(UI.BagScroll:GetChildren()) do
+            if ch:IsA("TextButton") then ch:Destroy() end
+        end
+
+        local slotCat = { weapon = "weapon", armor = "armor", helm = "armor", boots = "armor", neck = "acc", wings = "wings" }
+        for _, it in ipairs(DATA.inventory) do
+            local d = GEAR.GetDef(it.id)
+            if UI.GearFilter == "all" or slotCat[d.slot] == UI.GearFilter then
+                local rar = CFG.RARITIES[d.rarity] or CFG.RARITIES.common
+                local isSel = (UI.SelectedGearUid == it.uid)
+                local isEq = GEAR.IsEquipped(it.uid)
+                local ib = makeBtn(UI.BagScroll, {
+                    text = d.name .. ((it.lv or 0) > 0 and (" +" .. it.lv) or "") .. (isEq and "
+[Đang dùng]" or ("
+[" .. rar.name .. "]")),
+                    bg = isSel and C.BG_CARD_ALT or C.BG_CARD,
+                    color = C.TXT_MAIN,
+                    size = 10,
+                    dim = UDim2.new(0, 100, 0, 60),
+                    radius = 7,
+                    strokeColor = isSel and C.TXT_GOLD or rar.color,
+                    strokeWidth = isSel and 2.2 or 1.4,
+                    z = 6,
+                })
+                ib.TextWrapped = true
+                bindTap(ib, function()
+                    UI.SelectedGearUid = it.uid
+                    refreshAllUI()
+                end)
+            end
+        end
+
+        local selIt = GEAR.FindByUid(UI.SelectedGearUid)
+        if selIt then
+            local ist = GEAR.GetItemStats(selIt)
+            local rar = CFG.RARITIES[ist.def.rarity] or CFG.RARITIES.common
+            local upCost = 80 + (selIt.lv or 0) * 65
+            UI.GearDetailLbl.Text = string.format(
+                "%s +%d [%s] | ATK +%d, HP +%d, DEF +%d, SPD +%d  (Nâng: %d Xu)",
+                ist.def.name, selIt.lv or 0, rar.name, ist.atk, ist.hp, ist.arm, ist.spd, upCost
+            )
+            UI.GearDetailLbl.TextColor3 = C.TXT_MAIN
+        else
+            UI.GearDetailLbl.Text = string.format("Túi đồ: %d/60 món. Chọn 1 món để Trang Bị, Nâng Cấp, Gỡ hoặc Bán.", #DATA.inventory)
+            UI.GearDetailLbl.TextColor3 = C.TXT_SUB
+        end
+    end
+
     for key, pack in pairs(UI.SettingBtns) do
         local on = DATA.settings[key] == true
         pack.btn.Text = pack.label .. (on and ": BẬT" or ": TẮT")
@@ -1841,75 +2319,111 @@ do
     arena.Parent = combat
     addCorner(arena, 12)
     addStroke(arena, C.BORDER_ACT, 2)
-    addGrad(arena, C.BG_ARENA_MID, C.BG_FULL, 135)
+    addGrad(arena, C.BG_ARENA_MID, C.BG_ARENA, 135)
     UI.Arena = arena
 
-    -- Luoi gach ham nguc + bui co trang tri
-    for i = 1, 9 do
-        local vl = Instance.new("Frame")
-        vl.Position = UDim2.new(i / 10, 0, 0, 0)
-        vl.Size = UDim2.new(0, 1, 1, 0)
-        vl.BackgroundColor3 = C.BG_ARENA_G
-        vl.BackgroundTransparency = 0.55
-        vl.BorderSizePixel = 0
-        vl.ZIndex = 2
-        vl.Parent = arena
-    end
-    for i = 1, 5 do
-        local hl = Instance.new("Frame")
-        hl.Position = UDim2.new(0, 0, i / 6, 0)
-        hl.Size = UDim2.new(1, 0, 0, 1)
-        hl.BackgroundColor3 = C.BG_ARENA_G
-        hl.BackgroundTransparency = 0.55
-        hl.BorderSizePixel = 0
-        hl.ZIndex = 2
-        hl.Parent = arena
+    -- Nen gach da xen ke kieu ham nguc (sang ro, co chieu sau)
+    local floorLayer = Instance.new("Frame")
+    floorLayer.Name = "FloorLayer"
+    floorLayer.Size = UDim2.new(1, 0, 1, 0)
+    floorLayer.BackgroundTransparency = 1
+    floorLayer.ZIndex = 2
+    floorLayer.Parent = arena
+    UI.FloorTiles = {}
+
+    local cols, rows = 10, 6
+    for r = 0, rows - 1 do
+        for c = 0, cols - 1 do
+            if (r + c) % 2 == 0 then
+                local tile = Instance.new("Frame")
+                tile.Position = UDim2.new(c / cols, 1, r / rows, 1)
+                tile.Size = UDim2.new(1 / cols, -2, 1 / rows, -2)
+                tile.BackgroundColor3 = C.BG_ARENA_G
+                tile.BackgroundTransparency = 0.52
+                tile.BorderSizePixel = 0
+                tile.ZIndex = 2
+                tile.Parent = floorLayer
+                addCorner(tile, 4)
+                table.insert(UI.FloorTiles, tile)
+            end
+        end
     end
 
-    -- Cong dich chuyen o phia tren san dau
-    local portal = Instance.new("Frame")
-    portal.AnchorPoint = Vector2.new(0.5, 0)
-    portal.Position = UDim2.new(0.5, 0, 0, 6)
-    portal.Size = UDim2.new(0, 74, 0, 22)
-    portal.BackgroundColor3 = C.BTN_BLUE
-    portal.BackgroundTransparency = 0.35
-    portal.ZIndex = 3
-    portal.Parent = arena
-    addCorner(portal, 11)
-    addStroke(portal, C.TXT_CYAN, 1.5)
+    -- Bui co / tham reu trang tri o mep san dau (khong che nut)
+    UI.EdgePatches = {}
+    local patchPos = {
+        { 0.18, 0.08, 72, 26 }, { 0.82, 0.08, 72, 26 },
+        { 0.24, 0.92, 80, 26 }, { 0.62, 0.92, 74, 24 },
+        { 0.04, 0.48, 30, 68 }, { 0.96, 0.44, 30, 68 },
+    }
+    for _, pp in ipairs(patchPos) do
+        local pt = Instance.new("Frame")
+        pt.AnchorPoint = Vector2.new(0.5, 0.5)
+        pt.Position = UDim2.new(pp[1], 0, pp[2], 0)
+        pt.Size = UDim2.new(0, pp[3], 0, pp[4])
+        pt.BackgroundColor3 = C.GRASS_DARK
+        pt.BackgroundTransparency = 0.25
+        pt.BorderSizePixel = 0
+        pt.ZIndex = 2
+        pt.Parent = floorLayer
+        addCorner(pt, 12)
+        table.insert(UI.EdgePatches, pt)
+    end
 
-    -- Vong tron chien dau trung tam
+    -- Vong tron chien dau trung tam + hoa van chu thap
     local midRing = Instance.new("Frame")
     midRing.AnchorPoint = Vector2.new(0.5, 0.5)
     midRing.Position = UDim2.new(0.5, 0, 0.5, 0)
-    midRing.Size = UDim2.new(0, 220, 0, 220)
-    midRing.BackgroundTransparency = 1
+    midRing.Size = UDim2.new(0, 226, 0, 226)
+    midRing.BackgroundColor3 = C.BG_ARENA_MID
+    midRing.BackgroundTransparency = 0.65
     midRing.ZIndex = 2
     midRing.Parent = arena
-    addCorner(midRing, 110)
-    addStroke(midRing, C.STONE_LIGHT, 1.5)
+    addCorner(midRing, 113)
+    addStroke(midRing, C.STONE_LIGHT, 2)
 
-    -- 4 Duoc lua 4 goc
-    for _, cp in ipairs({ { 0.05, 0.14 }, { 0.95, 0.14 }, { 0.05, 0.86 }, { 0.95, 0.86 } }) do
+    local innerRing = Instance.new("Frame")
+    innerRing.AnchorPoint = Vector2.new(0.5, 0.5)
+    innerRing.Position = UDim2.new(0.5, 0, 0.5, 0)
+    innerRing.Size = UDim2.new(0, 124, 0, 124)
+    innerRing.BackgroundTransparency = 1
+    innerRing.ZIndex = 2
+    innerRing.Parent = arena
+    addCorner(innerRing, 62)
+    addStroke(innerRing, C.BORDER, 1.5)
+
+    -- 4 Duoc lua dat gon quanh vong tron trung tam (hoan toan khong bi Minimap / Nut che)
+    for _, cp in ipairs({ { 0.26, 0.24 }, { 0.74, 0.24 }, { 0.26, 0.76 }, { 0.74, 0.76 } }) do
         local pil = Instance.new("Frame")
         pil.AnchorPoint = Vector2.new(0.5, 0.5)
         pil.Position = UDim2.new(cp[1], 0, cp[2], 0)
-        pil.Size = UDim2.new(0, 22, 0, 22)
+        pil.Size = UDim2.new(0, 24, 0, 24)
         pil.BackgroundColor3 = C.STONE_DARK
         pil.ZIndex = 3
         pil.Parent = arena
-        addCorner(pil, 11)
-        addStroke(pil, C.STONE_LIGHT, 1.2)
+        addCorner(pil, 12)
+        addStroke(pil, C.STONE_LIGHT, 1.5)
+
+        local glow = Instance.new("Frame")
+        glow.AnchorPoint = Vector2.new(0.5, 0.5)
+        glow.Position = UDim2.new(0.5, 0, 0.5, 0)
+        glow.Size = UDim2.new(0, 38, 0, 38)
+        glow.BackgroundColor3 = C.TXT_ORANGE
+        glow.BackgroundTransparency = 0.84
+        glow.BorderSizePixel = 0
+        glow.ZIndex = 2
+        glow.Parent = pil
+        addCorner(glow, 19)
 
         local emb = Instance.new("Frame")
         emb.AnchorPoint = Vector2.new(0.5, 0.5)
         emb.Position = UDim2.new(0.5, 0, 0.5, 0)
-        emb.Size = UDim2.new(0, 10, 0, 10)
+        emb.Size = UDim2.new(0, 11, 0, 11)
         emb.BackgroundColor3 = C.TXT_ORANGE
         emb.BorderSizePixel = 0
         emb.ZIndex = 4
         emb.Parent = pil
-        addCorner(emb, 5)
+        addCorner(emb, 6)
         table.insert(S.braziers, emb)
     end
 
@@ -1923,7 +2437,7 @@ do
     -- Nhan vat nguoi choi
     local pNode = Instance.new("Frame")
     pNode.AnchorPoint = Vector2.new(0.5, 0.5)
-    pNode.Size = UDim2.new(0, 38, 0, 38)
+    pNode.Size = UDim2.new(0, 44, 0, 44)
     pNode.BackgroundTransparency = 1
     pNode.ZIndex = 10
     pNode.Parent = arena
@@ -2105,10 +2619,10 @@ do
         end
     end))
 
-    -- ---- 5 NUT CHIEN DAU VONG CUNG GOC PHAI DUOI (NHU ANH 3) ----
+    -- ---- 5 NUT CHIEN DAU VONG CUNG GOC PHAI DUOI (GIAN CACH DEU, KHONG DE NHAU) ----
     local atkBtn = makeBtn(arena, {
         text = "ĐÁNH", bg = C.BTN_PURPLE, color = C.TXT_MAIN, size = 14,
-        dim = UDim2.new(0, 82, 0, 82), pos = UDim2.new(1, -100, 1, -100), radius = 41,
+        dim = UDim2.new(0, 78, 0, 78), pos = UDim2.new(1, -94, 1, -94), radius = 39,
         strokeColor = C.TXT_GEM, strokeWidth = 2.2, z = 24,
     })
     atkBtn.BackgroundTransparency = 0.14
@@ -2126,32 +2640,32 @@ do
 
     UI.DashBtn = makeBtn(arena, {
         text = "LƯỚT", bg = C.BTN_BLUE, color = C.TXT_MAIN, size = 11,
-        dim = UDim2.new(0, 56, 0, 56), pos = UDim2.new(1, -168, 1, -72), radius = 28,
-        strokeColor = C.TXT_CYAN, z = 24,
+        dim = UDim2.new(0, 54, 0, 54), pos = UDim2.new(1, -172, 1, -68), radius = 27,
+        strokeColor = C.TXT_CYAN, strokeWidth = 1.5, z = 24,
     })
     UI.DashBtn.BackgroundTransparency = 0.16
     bindTap(UI.DashBtn, function() GAME.TryDash() end)
 
     UI.S1Btn = makeBtn(arena, {
         text = "CHIÊU 1", bg = C.BTN_GOLD, color = C.TXT_MAIN, size = 10,
-        dim = UDim2.new(0, 58, 0, 58), pos = UDim2.new(1, -164, 1, -140), radius = 29,
-        strokeColor = C.TXT_GOLD, z = 24,
+        dim = UDim2.new(0, 56, 0, 56), pos = UDim2.new(1, -182, 1, -138), radius = 28,
+        strokeColor = C.TXT_GOLD, strokeWidth = 1.5, z = 24,
     })
     UI.S1Btn.BackgroundTransparency = 0.16
     bindTap(UI.S1Btn, function() GAME.TrySkill1() end)
 
     UI.S2Btn = makeBtn(arena, {
         text = "CHIÊU 2", bg = C.BTN_RED, color = C.TXT_MAIN, size = 10,
-        dim = UDim2.new(0, 58, 0, 58), pos = UDim2.new(1, -110, 1, -178), radius = 29,
-        strokeColor = C.TXT_RED, z = 24,
+        dim = UDim2.new(0, 56, 0, 56), pos = UDim2.new(1, -142, 1, -198), radius = 28,
+        strokeColor = C.TXT_RED, strokeWidth = 1.5, z = 24,
     })
     UI.S2Btn.BackgroundTransparency = 0.16
     bindTap(UI.S2Btn, function() GAME.TrySkill2() end)
 
     UI.UltBtn = makeBtn(arena, {
         text = "0% NỘ", bg = C.BTN_PURPLE, color = C.TXT_GOLD, size = 10,
-        dim = UDim2.new(0, 62, 0, 62), pos = UDim2.new(1, -44, 1, -184), anchor = Vector2.new(0.5, 0),
-        radius = 31, strokeColor = C.BORDER_GOLD, strokeWidth = 1.8, z = 24,
+        dim = UDim2.new(0, 60, 0, 60), pos = UDim2.new(1, -74, 1, -196),
+        radius = 30, strokeColor = C.BORDER_GOLD, strokeWidth = 1.8, z = 24,
     })
     UI.UltBtn.BackgroundTransparency = 0.14
     bindTap(UI.UltBtn, function() GAME.TryUlt() end)
@@ -2551,7 +3065,8 @@ do
 
     local function damagePlayer(amount)
         if S.invulnTime > 0 or S.gameOver then return end
-        local rem = amount
+        local reduced = math.max(1, math.floor(amount * (100 / (100 + (S.def or 0))))) 
+        local rem = reduced
         if S.shield > 0 then
             local absorb = math.min(S.shield, rem)
             S.shield = S.shield - absorb
@@ -2791,7 +3306,7 @@ do
         S.maxHp, S.hp = st.maxHp, st.maxHp
         S.maxMp, S.mp, S.mpRegen = st.maxMp, st.maxMp, st.mpRegen
         S.shield, S.lifesteal = 0, 0
-        S.atk, S.spd, S.crit = st.atk, st.spd, st.crit
+        S.atk, S.def, S.spd, S.crit = st.atk, st.def, st.spd, st.crit
         S.fury = 0
         S.px, S.py = CFG.ARENA_W * 0.5, CFG.ARENA_H * 0.5
         S.dirX, S.dirY = 1, 0
@@ -2804,6 +3319,15 @@ do
         UI.WeaponPivot = wp
         UI.PlayerRingStroke.Color = st.hero.fx
         UI.Minimap.Visible = DATA.settings.minimap == true
+        local theme = S.stage.theme
+        local patchCol = C.GRASS_DARK
+        local tileCol = C.BG_ARENA_G
+        if theme == "crypt" then patchCol = Color3.fromRGB(54, 42, 74); tileCol = Color3.fromRGB(50, 54, 72)
+        elseif theme == "ice" then patchCol = Color3.fromRGB(48, 86, 114); tileCol = Color3.fromRGB(48, 68, 92)
+        elseif theme == "lava" then patchCol = Color3.fromRGB(98, 44, 38); tileCol = Color3.fromRGB(64, 46, 48)
+        elseif theme == "void" then patchCol = Color3.fromRGB(68, 42, 98); tileCol = Color3.fromRGB(54, 46, 82) end
+        for _, pt in ipairs(UI.EdgePatches or {}) do pt.BackgroundColor3 = patchCol end
+        for _, tl in ipairs(UI.FloorTiles or {}) do tl.BackgroundColor3 = tileCol end
         UI.BossBar.Visible = false
         UI.BuffOverlay.Visible = false
         UI.PauseOverlay.Visible = false
@@ -2822,8 +3346,15 @@ do
         UI.PauseOverlay.Visible = false
         UI.BuffOverlay.Visible = false
 
+        local lootNote = ""
         if isVictory then
             DATA.totalWins = (DATA.totalWins or 0) + 1
+            if #DATA.inventory < 60 then
+                local minR = (S.diff.id == "hell") and "legend" or ((S.diff.id == "hard") and "epic" or "rare")
+                local _, dropDef = GEAR.AddRandom(minR)
+                lootNote = "
+Nhặt trang bị: " .. dropDef.name
+            end
             S.coinsEarned = S.coinsEarned + math.floor(S.stage.rewardCoin * S.diff.rewardMult)
             S.gemsEarned = S.gemsEarned + math.floor(S.stage.rewardGem * S.diff.rewardMult)
             S.expEarned = S.expEarned + math.floor(S.stage.rewardExp * S.diff.rewardMult)
@@ -2855,7 +3386,7 @@ do
         local lvNote = leveledUp and ("\nLÊN CẤP MỚI: Lv." .. tostring(DATA.level) .. " (+HP & +ATK)") or ""
         UI.EndStats.Text = string.format(
             "%s (%s)\nQuái đã hạ: %d  |  Combo tối đa: %d\nThưởng: +%d Xu  |  +%d KC  |  +%d EXP%s",
-            S.stage.name, S.diff.name, S.kills, S.maxCombo, S.coinsEarned, S.gemsEarned, S.expEarned, lvNote
+            S.stage.name, S.diff.name, S.kills, S.maxCombo, S.coinsEarned, S.gemsEarned, S.expEarned, lvNote .. lootNote
         )
         UI.EndOverlay.Visible = true
     end
