@@ -1,5 +1,5 @@
 -- ============================================================
--- THU THANH 2D (TOWER DEFENSE) v4.0 - DO HOA NANG CAP + 3 HERO + BAO TUYET + NHIEM VU SAO + 3X + CAN BANG
+-- THU THANH 2D (TOWER DEFENSE) v4.0.1 - DO HOA NANG CAP + 3 HERO + BAO TUYET + NHIEM VU SAO + 3X + CAN BANG
 -- Full-Screen Mobile & PC | Tu dong luu ky luc | Phim tat PC: RightShift
 -- ============================================================
 local _ok, _err = pcall(function()
@@ -1548,10 +1548,7 @@ function SEC.buildGameUI()
 	heroInfoLbl.Size = UDim2.new(1, -8, 0, 120)
 	heroInfoLbl.Position = UDim2.fromOffset(4, 188)
 	heroInfoLbl.BackgroundTransparency = 1
-	heroInfoLbl.Text = "Hero:
-Hiệp Sĩ
-
-Chạm đường để điều Hero!"
+	heroInfoLbl.Text = "Hero:\nHiệp Sĩ\n\nChạm đường để điều Hero!"
 	heroInfoLbl.TextColor3 = THEME.TextMuted
 	heroInfoLbl.Font = THEME.FontBody
 	heroInfoLbl.TextSize = 9
@@ -1587,8 +1584,7 @@ Chạm đường để điều Hero!"
 	dmgListLbl.Size = UDim2.new(1, -8, 1, -36)
 	dmgListLbl.Position = UDim2.fromOffset(4, 32)
 	dmgListLbl.BackgroundTransparency = 1
-	dmgListLbl.Text = "Chưa có
-sát thương"
+	dmgListLbl.Text = "Chưa có\nsát thương"
 	dmgListLbl.TextColor3 = THEME.TextMain
 	dmgListLbl.Font = THEME.FontBody
 	dmgListLbl.TextSize = 9
@@ -2181,20 +2177,16 @@ local function updateHUD()
 		UI.skillLbl.Text = "THIÊN THẠCH"
 	end
 	if TD.blizCd > 0 then
-		UI.blizLbl.Text = string.format("BÃO TUYẾT
-%.0fs", math.ceil(TD.blizCd))
+		UI.blizLbl.Text = string.format("BÃO TUYẾT\n%.0fs", math.ceil(TD.blizCd))
 	else
-		UI.blizLbl.Text = "BÃO TUYẾT
-SẴN SÀNG"
+		UI.blizLbl.Text = "BÃO TUYẾT\nSẴN SÀNG"
 	end
 	if TD.hero then
 		local hName = TD.hero.Def.SkillName or "CHIÊU HERO"
 		if TD.hero.SkillCd > 0 then
-			UI.heroSkLbl.Text = string.format("%s
-%.0fs", hName, math.ceil(TD.hero.SkillCd))
+			UI.heroSkLbl.Text = string.format("%s\n%.0fs", hName, math.ceil(TD.hero.SkillCd))
 		else
-			UI.heroSkLbl.Text = hName .. "
-SẴN SÀNG"
+			UI.heroSkLbl.Text = hName .. "\nSẴN SÀNG"
 		end
 	end
 	local ranked = {}
@@ -2205,15 +2197,11 @@ SẴN SÀNG"
 	if #ranked > 0 then
 		local lines = {}
 		for i = 1, math.min(5, #ranked) do
-			table.insert(lines, ranked[i].Name .. "
-" .. formatNum(ranked[i].Dmg))
+			table.insert(lines, ranked[i].Name .. "\n" .. formatNum(ranked[i].Dmg))
 		end
-		UI.dmgListLbl.Text = table.concat(lines, "
-
-")
+		UI.dmgListLbl.Text = table.concat(lines, "\n\n")
 	else
-		UI.dmgListLbl.Text = "Chưa có
-sát thương"
+		UI.dmgListLbl.Text = "Chưa có\nsát thương"
 	end
 
 	if TD.waveSpawning or #TD.enemies > 0 then
@@ -2720,10 +2708,7 @@ local function startNewMatch()
 	local hNode, hBody, hSword = GFX.buildHeroSprite(UI.enemyLayer, hDef, 18)
 	hNode.Position = UDim2.fromOffset(pEnd.x, pEnd.y)
 	TD.hero = { Def = hDef, X = pEnd.x, Y = pEnd.y, TX = pEnd.x, TY = pEnd.y, Cd = 0, SkillCd = 0, Node = hNode, Body = hBody, Sword = hSword }
-	UI.heroInfoLbl.Text = "Hero:
-" .. hDef.Name .. "
-
-" .. hDef.Role
+	UI.heroInfoLbl.Text = "Hero:\n" .. hDef.Name .. "\n\n" .. hDef.Role
 	updateHUD()
 end
 
@@ -3361,5 +3346,5 @@ screenGui.Destroying:Connect(function()
 end)
 end)
 if not _ok then
-	warn("[ThuThanh2D v4.0 ERROR]: " .. tostring(_err))
+	warn("[ThuThanh2D v4.0.1 ERROR]: " .. tostring(_err))
 end
