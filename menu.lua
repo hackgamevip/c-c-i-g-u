@@ -1,5 +1,5 @@
 -- ============================================================
--- THU THANH 2D (TOWER DEFENSE) v4.0.1 - DO HOA NANG CAP + 3 HERO + BAO TUYET + NHIEM VU SAO + 3X + CAN BANG
+-- THU THANH 2D (TOWER DEFENSE) v4.5 - CHUONG NGAI VAT + BAY DUONG + HERO LEN CAP + SKIN SAO + UI POLISH
 -- Full-Screen Mobile & PC | Tu dong luu ky luc | Phim tat PC: RightShift
 -- ============================================================
 local _ok, _err = pcall(function()
@@ -122,28 +122,16 @@ local TOWERS = {
 		Accent = Color3.fromRGB(214, 186, 86), Desc = "Bắn nhanh, tầm rộng, giá rẻ"
 	},
 	{
-		Id = "cannon", Name = "Đại Bác", Cost = 115, UpgradeCost = 95,
-		Damage = 62, Range = 122, FireRate = 1.30, ProjSpeed = 290, Splash = 68,
-		Kind = "Bomb", BaseCol = Color3.fromRGB(196, 82, 54), TopCol = Color3.fromRGB(58, 62, 76),
-		Accent = Color3.fromRGB(218, 128, 48), Desc = "Nổ diện rộng dọn đàn quái"
-	},
-	{
 		Id = "frost", Name = "Băng Giá", Cost = 95, UpgradeCost = 85,
 		Damage = 16, Range = 132, FireRate = 0.80, ProjSpeed = 350, Slow = 0.45, SlowDur = 2.6,
 		Kind = "Frost", BaseCol = Color3.fromRGB(54, 152, 212), TopCol = Color3.fromRGB(132, 206, 224),
 		Accent = Color3.fromRGB(182, 222, 232), Desc = "Làm chậm quái 45% tầm xa"
 	},
 	{
-		Id = "tesla", Name = "Lôi Điện", Cost = 165, UpgradeCost = 140,
-		Damage = 40, Range = 142, FireRate = 0.90, Chain = 4,
-		Kind = "Lightning", BaseCol = Color3.fromRGB(142, 72, 212), TopCol = Color3.fromRGB(214, 192, 62),
-		Accent = Color3.fromRGB(112, 204, 228), Desc = "Sét chuỗi giật lan 4 mục tiêu"
-	},
-	{
-		Id = "laser", Name = "Laze Thần", Cost = 250, UpgradeCost = 215,
-		Damage = 108, Range = 172, FireRate = 1.00,
-		Kind = "Laser", BaseCol = Color3.fromRGB(204, 58, 118), TopCol = Color3.fromRGB(224, 184, 54),
-		Accent = Color3.fromRGB(228, 92, 168), Desc = "Tia laze diệt Boss cực mạnh"
+		Id = "cannon", Name = "Đại Bác", Cost = 115, UpgradeCost = 95,
+		Damage = 62, Range = 122, FireRate = 1.30, ProjSpeed = 290, Splash = 68,
+		Kind = "Bomb", BaseCol = Color3.fromRGB(196, 82, 54), TopCol = Color3.fromRGB(58, 62, 76),
+		Accent = Color3.fromRGB(218, 128, 48), Desc = "Nổ diện rộng dọn đàn quái"
 	},
 	{
 		Id = "poison", Name = "Tháp Độc", Cost = 125, UpgradeCost = 105,
@@ -157,7 +145,40 @@ local TOWERS = {
 		Kind = "Buff", BaseCol = Color3.fromRGB(204, 156, 38), TopCol = Color3.fromRGB(226, 204, 102),
 		Accent = Color3.fromRGB(232, 212, 84), Desc = "Tăng sát thương & tốc bắn quanh nó"
 	},
+	{
+		Id = "tesla", Name = "Lôi Điện", Cost = 165, UpgradeCost = 140,
+		Damage = 40, Range = 142, FireRate = 0.90, Chain = 4,
+		Kind = "Lightning", BaseCol = Color3.fromRGB(142, 72, 212), TopCol = Color3.fromRGB(214, 192, 62),
+		Accent = Color3.fromRGB(112, 204, 228), Desc = "Sét chuỗi giật lan 4 mục tiêu"
+	},
+	{
+		Id = "laser", Name = "Laze Thần", Cost = 250, UpgradeCost = 215,
+		Damage = 108, Range = 172, FireRate = 1.00,
+		Kind = "Laser", BaseCol = Color3.fromRGB(204, 58, 118), TopCol = Color3.fromRGB(224, 184, 54),
+		Accent = Color3.fromRGB(228, 92, 168), Desc = "Tia laze diệt Boss cực mạnh"
+	},
 }
+
+-- 2 LOAI BAY DAT TREN DUONG DI
+local TRAPS = {
+	spike = { Id = "spike", Name = "Bẫy Gai", Cost = 45, Damage = 42, Uses = 6, Slow = 0.35, Color = Color3.fromRGB(168, 178, 196) },
+	mine  = { Id = "mine",  Name = "Mìn Nổ",  Cost = 75, Damage = 185, Uses = 1, Splash = 68, Color = Color3.fromRGB(224, 68, 56) },
+}
+
+-- CUA HANG SKIN HERO & HIEU UNG THAP (MUA BANG SAO)
+local TD_SKINS = {
+	{ Id = "default", Name = "Mặc Định",        Cost = 0,  Desc = "Hiệu ứng nguyên bản",                Aura = nil },
+	{ Id = "golden",  Name = "Hoàng Kim Rực Rỡ", Cost = 15, Desc = "Hào quang vàng kim cho Hero & vụ nổ", Aura = Color3.fromRGB(232, 196, 56) },
+	{ Id = "cyber",   Name = "Cyber Neon",       Cost = 25, Desc = "Hiệu ứng năng lượng xanh lam Neon",   Aura = Color3.fromRGB(72, 218, 232) },
+	{ Id = "void",    Name = "Hư Không Huyền Bí",Cost = 35, Desc = "Hào quang & sóng nổ tím Hư Không",    Aura = Color3.fromRGB(192, 82, 236) },
+}
+
+local function getTdSkin(id)
+	for _, s in ipairs(TD_SKINS) do
+		if s.Id == id then return s end
+	end
+	return TD_SKINS[1]
+end
 
 -- 3 LOP HERO CHON NGOAI SANH (CO KY NANG CHU DONG RIENG)
 local HEROES = {
@@ -209,6 +230,8 @@ local saveState = {
 	SfxOn = true,
 	SelectedMap = 1,
 	SelectedHero = "knight",
+	OwnedSkins = { default = true },
+	EquippedSkin = "default",
 	Quests = nil,
 }
 
@@ -278,6 +301,11 @@ local function loadData()
 			end
 			if type(tbl.SelectedMap) == "number" then saveState.SelectedMap = math.clamp(tbl.SelectedMap, 1, #MAPS) end
 			if type(tbl.SelectedHero) == "string" then saveState.SelectedHero = tbl.SelectedHero end
+			if type(tbl.OwnedSkins) == "table" then
+				saveState.OwnedSkins = { default = true }
+				for k, v in pairs(tbl.OwnedSkins) do if v == true then saveState.OwnedSkins[tostring(k)] = true end end
+			end
+			if type(tbl.EquippedSkin) == "string" and saveState.OwnedSkins[tbl.EquippedSkin] then saveState.EquippedSkin = tbl.EquippedSkin end
 			if type(tbl.Quests) == "table" then
 				for _, q in ipairs(saveState.Quests) do
 					for _, sq in ipairs(tbl.Quests) do
@@ -869,6 +897,171 @@ function GFX.buildEnemySprite(parent, def, kind, zBase)
 	return holder, body, hpFill, frostCoat, wingL, wingR, bodyStroke
 end
 
+function GFX.buildObstacleSprite(parent, kind, zBase)
+	local root = Instance.new("Frame")
+	root.Size = UDim2.fromOffset(CELL - 4, CELL - 4)
+	root.AnchorPoint = Vector2.new(0.5, 0.5)
+	root.Position = UDim2.fromScale(0.5, 0.5)
+	root.BackgroundTransparency = 1
+	root.ZIndex = zBase
+	root.Parent = parent
+
+	if kind == "tree" then
+		-- Than cay nau + tan la xanh 2 tang
+		local trunk = Instance.new("Frame")
+		trunk.Size = UDim2.fromOffset(8, 12)
+		trunk.Position = UDim2.fromScale(0.5, 0.78)
+		trunk.AnchorPoint = Vector2.new(0.5, 0.5)
+		trunk.BackgroundColor3 = Color3.fromRGB(118, 74, 42)
+		trunk.BorderSizePixel = 0
+		trunk.ZIndex = zBase
+		trunk.Parent = root
+		addCorner(trunk, 3)
+		addStroke(trunk, THEME.Outline, 1.4)
+
+		local leaf1 = Instance.new("Frame")
+		leaf1.Size = UDim2.fromOffset(26, 22)
+		leaf1.Position = UDim2.fromScale(0.5, 0.42)
+		leaf1.AnchorPoint = Vector2.new(0.5, 0.5)
+		leaf1.BackgroundColor3 = Color3.fromRGB(44, 148, 66)
+		leaf1.BorderSizePixel = 0
+		leaf1.ZIndex = zBase + 1
+		leaf1.Parent = root
+		addCorner(leaf1, 99)
+		addStroke(leaf1, THEME.Outline, 1.6)
+
+		local leaf2 = Instance.new("Frame")
+		leaf2.Size = UDim2.fromOffset(16, 14)
+		leaf2.Position = UDim2.fromScale(0.46, 0.34)
+		leaf2.AnchorPoint = Vector2.new(0.5, 0.5)
+		leaf2.BackgroundColor3 = Color3.fromRGB(78, 186, 86)
+		leaf2.BorderSizePixel = 0
+		leaf2.ZIndex = zBase + 2
+		leaf2.Parent = root
+		addCorner(leaf2, 99)
+	elseif kind == "house" then
+		-- Nha nho co tuong gach, mai ngoi do va cua so vang
+		local wall = Instance.new("Frame")
+		wall.Size = UDim2.fromOffset(24, 18)
+		wall.Position = UDim2.fromScale(0.5, 0.66)
+		wall.AnchorPoint = Vector2.new(0.5, 0.5)
+		wall.BackgroundColor3 = Color3.fromRGB(196, 178, 148)
+		wall.BorderSizePixel = 0
+		wall.ZIndex = zBase
+		wall.Parent = root
+		addCorner(wall, 3)
+		addStroke(wall, THEME.Outline, 1.5)
+
+		local roof = Instance.new("Frame")
+		roof.Size = UDim2.fromOffset(30, 14)
+		roof.Position = UDim2.fromScale(0.5, 0.32)
+		roof.AnchorPoint = Vector2.new(0.5, 0.5)
+		roof.BackgroundColor3 = Color3.fromRGB(186, 62, 56)
+		roof.BorderSizePixel = 0
+		roof.ZIndex = zBase + 1
+		roof.Parent = root
+		addCorner(roof, 5)
+		addStroke(roof, THEME.Outline, 1.6)
+
+		local win = Instance.new("Frame")
+		win.Size = UDim2.fromOffset(7, 7)
+		win.Position = UDim2.fromScale(0.5, 0.68)
+		win.AnchorPoint = Vector2.new(0.5, 0.5)
+		win.BackgroundColor3 = Color3.fromRGB(224, 196, 82)
+		win.BorderSizePixel = 0
+		win.ZIndex = zBase + 2
+		win.Parent = root
+		addCorner(win, 2)
+		addStroke(win, THEME.Outline, 1.1)
+	elseif kind == "crystal" then
+		-- Khoi tinh the dung nham / bang
+		local c1 = Instance.new("Frame")
+		c1.Size = UDim2.fromOffset(14, 24)
+		c1.Position = UDim2.fromScale(0.5, 0.5)
+		c1.AnchorPoint = Vector2.new(0.5, 0.5)
+		c1.Rotation = 14
+		c1.BackgroundColor3 = Color3.fromRGB(218, 84, 52)
+		c1.BorderSizePixel = 0
+		c1.ZIndex = zBase + 1
+		c1.Parent = root
+		addCorner(c1, 4)
+		addStroke(c1, THEME.Outline, 1.5)
+
+		local c2 = Instance.new("Frame")
+		c2.Size = UDim2.fromOffset(10, 18)
+		c2.Position = UDim2.fromScale(0.32, 0.58)
+		c2.AnchorPoint = Vector2.new(0.5, 0.5)
+		c2.Rotation = -22
+		c2.BackgroundColor3 = Color3.fromRGB(232, 148, 56)
+		c2.BorderSizePixel = 0
+		c2.ZIndex = zBase
+		c2.Parent = root
+		addCorner(c2, 4)
+		addStroke(c2, THEME.Outline, 1.4)
+	else
+		-- Hon da xam 3D
+		local r1 = Instance.new("Frame")
+		r1.Size = UDim2.fromOffset(26, 20)
+		r1.Position = UDim2.fromScale(0.5, 0.56)
+		r1.AnchorPoint = Vector2.new(0.5, 0.5)
+		r1.BackgroundColor3 = Color3.fromRGB(108, 114, 128)
+		r1.BorderSizePixel = 0
+		r1.ZIndex = zBase
+		r1.Parent = root
+		addCorner(r1, 8)
+		addStroke(r1, THEME.Outline, 1.6)
+
+		local r2 = Instance.new("Frame")
+		r2.Size = UDim2.fromOffset(14, 10)
+		r2.Position = UDim2.fromScale(0.42, 0.44)
+		r2.AnchorPoint = Vector2.new(0.5, 0.5)
+		r2.BackgroundColor3 = Color3.fromRGB(148, 154, 168)
+		r2.BorderSizePixel = 0
+		r2.ZIndex = zBase + 1
+		r2.Parent = root
+		addCorner(r2, 5)
+	end
+	return root
+end
+
+function GFX.buildTrapSprite(parent, kind, zBase)
+	local root = Instance.new("Frame")
+	root.Size = UDim2.fromOffset(26, 26)
+	root.AnchorPoint = Vector2.new(0.5, 0.5)
+	root.BackgroundColor3 = (kind == "mine") and Color3.fromRGB(54, 48, 56) or Color3.fromRGB(72, 78, 96)
+	root.BorderSizePixel = 0
+	root.ZIndex = zBase
+	root.Parent = parent
+	addCorner(root, (kind == "mine") and 99 or 6)
+	addStroke(root, THEME.Outline, 1.8)
+
+	if kind == "mine" then
+		local core = Instance.new("Frame")
+		core.Size = UDim2.fromOffset(12, 12)
+		core.Position = UDim2.fromScale(0.5, 0.5)
+		core.AnchorPoint = Vector2.new(0.5, 0.5)
+		core.BackgroundColor3 = Color3.fromRGB(228, 56, 56)
+		core.BorderSizePixel = 0
+		core.ZIndex = zBase + 1
+		core.Parent = root
+		addCorner(core, 99)
+	else
+		for _, pos in ipairs({{0.28,0.28},{0.72,0.28},{0.28,0.72},{0.72,0.72}}) do
+			local sp = Instance.new("Frame")
+			sp.Size = UDim2.fromOffset(6, 6)
+			sp.Position = UDim2.fromScale(pos[1], pos[2])
+			sp.AnchorPoint = Vector2.new(0.5, 0.5)
+			sp.Rotation = 45
+			sp.BackgroundColor3 = Color3.fromRGB(212, 218, 228)
+			sp.BorderSizePixel = 0
+			sp.ZIndex = zBase + 1
+			sp.Parent = root
+			addStroke(sp, THEME.Outline, 1)
+		end
+	end
+	return root
+end
+
 function GFX.buildHeroSprite(parent, heroDef, zBase)
 	heroDef = heroDef or HEROES[1]
 	local root = Instance.new("Frame")
@@ -882,13 +1075,15 @@ function GFX.buildHeroSprite(parent, heroDef, zBase)
 	aura.Size = UDim2.fromOffset(38, 38)
 	aura.Position = UDim2.fromScale(0.5, 0.5)
 	aura.AnchorPoint = Vector2.new(0.5, 0.5)
-	aura.BackgroundColor3 = heroDef.Accent
+	local sk = getTdSkin(saveState.EquippedSkin)
+	local auraCol = (sk and sk.Aura) or heroDef.Accent
+	aura.BackgroundColor3 = auraCol
 	aura.BackgroundTransparency = 0.78
 	aura.BorderSizePixel = 0
 	aura.ZIndex = zBase
 	aura.Parent = root
 	addCorner(aura, 99)
-	addStroke(aura, heroDef.Accent, 1.6)
+	addStroke(aura, auraCol, 1.8)
 
 	local body = Instance.new("Frame")
 	body.Size = UDim2.fromOffset(24, 24)
@@ -1149,7 +1344,7 @@ function SEC.buildTopBar()
 	UI.pauseBtn = pauseBtn
 	UI.pauseLbl = pauseLbl
 
-	UI.sfxBtn, UI.sfxLbl = makeArcadeBtn(top, saveState.SfxOn and "Âm" or "Tắt", UDim2.fromOffset(40, 32), UDim2.new(1, -184, 0, 8), Color3.fromRGB(54, 152, 186), Color3.fromRGB(32, 92, 134), 9, { TextSize = 10, ZIndex = 12, Depth = 3, Stroke = 1.6 })
+	UI.sfxBtn, UI.sfxLbl = makeArcadeBtn(top, saveState.SfxOn and "Âm" or "Tắt", UDim2.fromOffset(40, 32), UDim2.new(1, -126, 0, 8), Color3.fromRGB(54, 152, 186), Color3.fromRGB(32, 92, 134), 9, { TextSize = 10, ZIndex = 12, Depth = 3, Stroke = 1.6 })
 	UI.homeBtn = makeArcadeBtn(top, "Sảnh", UDim2.fromOffset(52, 32), UDim2.new(1, -138, 0, 8), Color3.fromRGB(142, 72, 208), Color3.fromRGB(88, 36, 162), 9, { TextSize = 11, ZIndex = 12, Depth = 3, Stroke = 1.6 })
 	UI.homeBtn.Visible = false
 	UI.minBtn   = makeArcadeBtn(top, "-", UDim2.fromOffset(36, 32), UDim2.new(1, -80, 0, 8), Color3.fromRGB(82, 94, 128), Color3.fromRGB(48, 56, 82), 9, { TextSize = 18, ZIndex = 12, Depth = 3, Stroke = 1.6 })
@@ -1346,14 +1541,14 @@ function SEC.buildLobby()
 		local hst = addStroke(hc, Color3.fromRGB(72, 82, 128), 1.6)
 
 		local dot = Instance.new("Frame")
-		dot.Size = UDim2.fromOffset(22, 22)
-		dot.Position = UDim2.fromOffset(7, 7)
-		dot.BackgroundColor3 = hd.Color
-		dot.BorderSizePixel = 0
+		dot.Size = UDim2.fromOffset(26, 26)
+		dot.Position = UDim2.fromOffset(5, 5)
+		dot.BackgroundTransparency = 1
 		dot.ZIndex = 7
 		dot.Parent = hc
-		addCorner(dot, 99)
-		addStroke(dot, hd.Accent, 1.8)
+		local mh = GFX.buildHeroSprite(dot, hd, 7)
+		mh.Size = UDim2.fromOffset(22, 22)
+		mh.Position = UDim2.fromScale(0.5, 0.5)
 
 		local hn = Instance.new("TextLabel")
 		hn.Size = UDim2.fromOffset(130, 16)
@@ -1544,11 +1739,21 @@ function SEC.buildGameUI()
 	UI.blizBtn = blizBtn
 	UI.blizLbl = blizLbl
 
+	local trapBtn, trapLbl = makeArcadeBtn(
+		leftHud, "CHẾ ĐỘ:\nĐIỀU HERO",
+		UDim2.fromOffset(66, 56), UDim2.fromOffset(5, 184),
+		Color3.fromRGB(134, 78, 198), Color3.fromRGB(78, 38, 146), 10,
+		{ TextSize = 8, ZIndex = 6, Depth = 3, Stroke = 1.6 }
+	)
+	trapLbl.TextWrapped = true
+	UI.trapBtn = trapBtn
+	UI.trapLbl = trapLbl
+
 	local heroInfoLbl = Instance.new("TextLabel")
-	heroInfoLbl.Size = UDim2.new(1, -8, 0, 120)
-	heroInfoLbl.Position = UDim2.fromOffset(4, 188)
+	heroInfoLbl.Size = UDim2.new(1, -8, 0, 108)
+	heroInfoLbl.Position = UDim2.fromOffset(4, 248)
 	heroInfoLbl.BackgroundTransparency = 1
-	heroInfoLbl.Text = "Hero:\nHiệp Sĩ\n\nChạm đường để điều Hero!"
+	heroInfoLbl.Text = "Hero: Cấp 1/5\nEXP: 0/80"
 	heroInfoLbl.TextColor3 = THEME.TextMuted
 	heroInfoLbl.Font = THEME.FontBody
 	heroInfoLbl.TextSize = 9
@@ -1982,6 +2187,9 @@ local TD = {
 	towers = {},
 	enemies = {},
 	projectiles = {},
+	obstacles = {},
+	traps = {},
+	trapMode = "hero",
 	autoWave = false,
 	autoTimer = 0,
 	hero = nil,
@@ -2165,7 +2373,7 @@ local function updateHUD()
 		UI.upgradePopup.Visible = false
 		UI.rangeRing.Visible = false
 		if TD.pendingCell then
-			UI.botInfoLbl.Text = "Chọn 1 trong 5 tòa tháp trên bảng để xây vào ô đất đã chọn"
+			UI.botInfoLbl.Text = "Chọn 1 trong 7 tòa tháp trên bảng để xây vào ô đất đã chọn"
 		else
 			UI.botInfoLbl.Text = "Chạm ô cỏ: xây tháp • Chạm đường: điều Hero"
 		end
@@ -2182,6 +2390,7 @@ local function updateHUD()
 		UI.blizLbl.Text = "BÃO TUYẾT\nSẴN SÀNG"
 	end
 	if TD.hero then
+		UI.heroInfoLbl.Text = TD.hero.Def.Name .. "\nCấp " .. TD.hero.Level .. "/5" .. (TD.hero.Level >= 5 and "\nMAX CẤP" or ("\nEXP: " .. TD.hero.Exp .. "/" .. TD.hero.ExpNeed))
 		local hName = TD.hero.Def.SkillName or "CHIÊU HERO"
 		if TD.hero.SkillCd > 0 then
 			UI.heroSkLbl.Text = string.format("%s\n%.0fs", hName, math.ceil(TD.hero.SkillCd))
@@ -2221,6 +2430,8 @@ local function clearMatchLayers()
 	TD.towers = {}
 	TD.enemies = {}
 	TD.projectiles = {}
+	TD.obstacles = {}
+	TD.traps = {}
 	closeBoardPopups()
 end
 
@@ -2378,10 +2589,26 @@ local function buildMapBoard(mp)
 				tile.MouseButton1Click:Connect(function()
 					local hadPopup = (TD.pendingCell ~= nil or TD.selectedTower ~= nil)
 					closeBoardPopups()
-					if not hadPopup and TD.hero then
+					if not hadPopup and not TD.over and not TD.paused then
 						local tx, ty = cellCenter(x, y)
-						TD.hero.TX, TD.hero.TY = tx, ty
-						spawnExplosionRing(tx, ty, 16, THEME.TextGold)
+						if TD.trapMode == "spike" or TD.trapMode == "mine" then
+							local trDef = TRAPS[TD.trapMode]
+							if TD.gold >= trDef.Cost then
+								TD.gold -= trDef.Cost
+								local trNode = GFX.buildTrapSprite(UI.fxLayer, trDef.Id, 12)
+								trNode.Position = UDim2.fromOffset(tx, ty)
+								table.insert(TD.traps, {
+									Def = trDef, X = tx, Y = ty, Uses = trDef.Uses, Cd = 0, Node = trNode
+								})
+								playSfx("upgrade", 1.2)
+								spawnExplosionRing(tx, ty, 18, trDef.Color)
+							else
+								showToast("Cần " .. trDef.Cost .. " Vàng để đặt " .. trDef.Name .. "!", THEME.TextRed, 2.0)
+							end
+						elseif TD.hero then
+							TD.hero.TX, TD.hero.TY = tx, ty
+							spawnExplosionRing(tx, ty, 16, THEME.TextGold)
+						end
 					end
 					updateHUD()
 				end)
@@ -2400,6 +2627,23 @@ local function buildMapBoard(mp)
 				end
 				tile.MouseButton1Click:Connect(function()
 					if TD.over or TD.paused then return end
+					local obKey = x .. "_" .. y
+					local ob = TD.obstacles[obKey]
+					if ob then
+						if TD.gold >= 35 then
+							TD.gold -= 35
+							local ocx, ocy = cellCenter(x, y)
+							spawnExplosionRing(ocx, ocy, 22, THEME.TextGold)
+							spawnFloatingText(ocx, ocy, "ĐÃ DỌN", THEME.TextGreen)
+							if ob.Node and ob.Node.Parent then ob.Node:Destroy() end
+							TD.obstacles[obKey] = nil
+							playSfx("explosion", 1.35)
+							updateHUD()
+						else
+							showToast("Cần 35 Vàng để phá chướng ngại vật này!", THEME.TextRed, 2.0)
+						end
+						return
+					end
 					local existing = getTowerAt(x, y)
 					if existing then
 						TD.pendingCell = nil
@@ -2413,6 +2657,48 @@ local function buildMapBoard(mp)
 			end
 			tile.Parent = UI.tileLayer
 		end
+	end
+
+	-- Sinh chuong ngai vat (cay coi, hon da, nha nho, tinh the) tren cac o co trong
+	local freeGrass = {}
+	for gx = 1, COLS do
+		for gy = 1, ROWS do
+			if not TD.pathCells[gx .. "_" .. gy] then
+				table.insert(freeGrass, { gx, gy })
+			end
+		end
+	end
+	local kinds = mp.BossArena and {"rock", "crystal", "rock", "crystal"} or (mp.Id == "desert" and {"rock", "crystal", "house"} or {"tree", "rock", "house", "tree"})
+	for k = 1, math.min(7, #freeGrass) do
+		local pick = table.remove(freeGrass, math.random(1, #freeGrass))
+		local ox, oy = pick[1], pick[2]
+		local oKind = kinds[((k - 1) % #kinds) + 1]
+		local ocx, ocy = cellCenter(ox, oy)
+		local obBtn = Instance.new("TextButton")
+		obBtn.Size = UDim2.fromOffset(CELL, CELL)
+		obBtn.Position = UDim2.fromOffset(ocx, ocy)
+		obBtn.AnchorPoint = Vector2.new(0.5, 0.5)
+		obBtn.BackgroundTransparency = 1
+		obBtn.Text = ""
+		obBtn.ZIndex = 9
+		obBtn.Parent = UI.towerLayer
+		GFX.buildObstacleSprite(obBtn, oKind, 9)
+		local obKey = ox .. "_" .. oy
+		TD.obstacles[obKey] = { GX = ox, GY = oy, Kind = oKind, Node = obBtn }
+		obBtn.MouseButton1Click:Connect(function()
+			if TD.over or TD.paused then return end
+			if TD.gold >= 35 then
+				TD.gold -= 35
+				spawnExplosionRing(ocx, ocy, 22, THEME.TextGold)
+				spawnFloatingText(ocx, ocy, "ĐÃ DỌN", THEME.TextGreen)
+				if obBtn and obBtn.Parent then obBtn:Destroy() end
+				TD.obstacles[obKey] = nil
+				playSfx("explosion", 1.35)
+				updateHUD()
+			else
+				showToast("Cần 35 Vàng để phá chướng ngại vật này!", THEME.TextRed, 2.0)
+			end
+		end)
 	end
 
 	-- Cong xoan do xuat phat & Thanh tri xanh-vang chi tiet
@@ -2583,6 +2869,20 @@ local function damageEnemy(e, dmg, slowFrac, slowDur, poisonDps, poisonDur, srcN
 			addQuestProg("boss", 1)
 			spawnFloatingText(e.X, e.Y - 14, "+5 Sao", THEME.TextPurple)
 		end
+		if TD.hero and TD.hero.Level < 5 then
+			local hd = math.sqrt((e.X - TD.hero.X)^2 + (e.Y - TD.hero.Y)^2)
+			if hd <= 180 or (srcName and string.sub(srcName, 1, 4) == "Hero") then
+				TD.hero.Exp += (e.Def.Boss and 45 or 14)
+				while TD.hero.Level < 5 and TD.hero.Exp >= TD.hero.ExpNeed do
+					TD.hero.Exp -= TD.hero.ExpNeed
+					TD.hero.Level += 1
+					TD.hero.ExpNeed = TD.hero.Level * 85
+					spawnExplosionRing(TD.hero.X, TD.hero.Y, 46, THEME.TextGold)
+					spawnFloatingText(TD.hero.X, TD.hero.Y - 14, "HERO CẤP " .. TD.hero.Level .. "!", THEME.TextGold)
+					playSfx("upgrade", 1.25)
+				end
+			end
+		end
 		playSfx("kill", 1.1)
 		spawnDeathParticles(e.X, e.Y, e.Def.Color)
 		spawnFloatingText(e.X, e.Y, "+" .. tostring(e.Def.Reward) .. "V", THEME.TextGold)
@@ -2698,6 +2998,7 @@ local function startNewMatch()
 	UI.bossBarBg.Visible = false
 	UI.hudGroup.Visible = true
 	UI.homeBtn.Visible = true
+	UI.sfxBtn.Position = UDim2.new(1, -184, 0, 8)
 	lobbyPage.Visible = false
 	gamePage.Visible = true
 	buildMapBoard(TD.map)
@@ -2707,8 +3008,10 @@ local function startNewMatch()
 	local hDef = getHeroDef(saveState.SelectedHero)
 	local hNode, hBody, hSword = GFX.buildHeroSprite(UI.enemyLayer, hDef, 18)
 	hNode.Position = UDim2.fromOffset(pEnd.x, pEnd.y)
-	TD.hero = { Def = hDef, X = pEnd.x, Y = pEnd.y, TX = pEnd.x, TY = pEnd.y, Cd = 0, SkillCd = 0, Node = hNode, Body = hBody, Sword = hSword }
-	UI.heroInfoLbl.Text = "Hero:\n" .. hDef.Name .. "\n\n" .. hDef.Role
+	TD.trapMode = "hero"
+	UI.trapLbl.Text = "CHẾ ĐỘ:\nĐIỀU HERO"
+	TD.hero = { Def = hDef, Level = 1, Exp = 0, ExpNeed = 80, X = pEnd.x, Y = pEnd.y, TX = pEnd.x, TY = pEnd.y, Cd = 0, SkillCd = 0, Node = hNode, Body = hBody, Sword = hSword }
+	UI.heroInfoLbl.Text = hDef.Name .. "\nCấp 1/5\nEXP: 0/80"
 	updateHUD()
 end
 
@@ -2718,6 +3021,7 @@ local function goLobby()
 	clearMatchLayers()
 	UI.hudGroup.Visible = false
 	UI.homeBtn.Visible = false
+	UI.sfxBtn.Position = UDim2.new(1, -126, 0, 8)
 	gamePage.Visible = false
 	lobbyPage.Visible = true
 	refreshLobbyStats()
@@ -2810,12 +3114,89 @@ local function openPermUpgrades()
 	for _, ch in ipairs(UI.pmList:GetChildren()) do
 		if ch:IsA("Frame") then ch:Destroy() end
 	end
-	UI.pmTitle.Text = "CÂY KỸ NĂNG VĨNH VIỄN  •  " .. formatNum(saveState.Stars) .. " Sao"
+	UI.pmTitle.Text = "CÂY KỸ NĂNG  •  " .. formatNum(saveState.Stars) .. " Sao"
+	local tabRow = Instance.new("Frame")
+	tabRow.Size = UDim2.new(1, 0, 0, 32)
+	tabRow.BackgroundTransparency = 1
+	tabRow.ZIndex = 53
+	tabRow.Parent = UI.pmList
+	local tSkinBtn = makeArcadeBtn(tabRow, "MỞ CỬA HÀNG SKIN HERO & HIỆU ỨNG", UDim2.fromOffset(290, 28), UDim2.new(0.5, -145, 0, 2), Color3.fromRGB(186, 68, 214), Color3.fromRGB(118, 32, 168), 8, { TextSize = 11, ZIndex = 54, Depth = 3 })
+	tSkinBtn.MouseButton1Click:Connect(function()
+		for _, ch in ipairs(UI.pmList:GetChildren()) do if ch:IsA("Frame") then ch:Destroy() end end
+		UI.pmTitle.Text = "CỬA HÀNG SKIN SAO  •  " .. formatNum(saveState.Stars) .. " Sao"
+		local backR = Instance.new("Frame")
+		backR.Size = UDim2.new(1, 0, 0, 32)
+		backR.BackgroundTransparency = 1
+		backR.ZIndex = 53
+		backR.Parent = UI.pmList
+		local bkBtn = makeArcadeBtn(backR, "QUAY LẠI CÂY KỸ NĂNG", UDim2.fromOffset(220, 28), UDim2.new(0.5, -110, 0, 2), Color3.fromRGB(54, 148, 212), Color3.fromRGB(30, 86, 174), 8, { TextSize = 11, ZIndex = 54, Depth = 3 })
+		bkBtn.MouseButton1Click:Connect(openPermUpgrades)
+		for _, sk in ipairs(TD_SKINS) do
+			local owned = (saveState.OwnedSkins[sk.Id] == true)
+			local eq = (saveState.EquippedSkin == sk.Id)
+			local sRow = Instance.new("Frame")
+			sRow.Size = UDim2.new(1, 0, 0, 48)
+			sRow.BackgroundColor3 = Color3.fromRGB(28, 32, 58)
+			sRow.BorderSizePixel = 0
+			sRow.ZIndex = 53
+			sRow.Parent = UI.pmList
+			addCorner(sRow, 9)
+			addStroke(sRow, eq and THEME.TextGreen or (sk.Aura or Color3.fromRGB(78, 86, 134)), eq and 2 or 1.5)
+			local sn = Instance.new("TextLabel")
+			sn.Size = UDim2.fromOffset(296, 20)
+			sn.Position = UDim2.fromOffset(10, 4)
+			sn.BackgroundTransparency = 1
+			sn.Text = sk.Name
+			sn.TextColor3 = sk.Aura or THEME.TextMain
+			sn.Font = THEME.FontHead
+			sn.TextSize = 12
+			sn.TextXAlignment = Enum.TextXAlignment.Left
+			sn.ZIndex = 54
+			sn.Parent = sRow
+			local sd = Instance.new("TextLabel")
+			sd.Size = UDim2.fromOffset(296, 18)
+			sd.Position = UDim2.fromOffset(10, 24)
+			sd.BackgroundTransparency = 1
+			sd.Text = sk.Desc
+			sd.TextColor3 = THEME.TextMuted
+			sd.Font = THEME.FontBody
+			sd.TextSize = 10
+			sd.TextXAlignment = Enum.TextXAlignment.Left
+			sd.ZIndex = 54
+			sd.Parent = sRow
+			local sBtn = makeArcadeBtn(
+				sRow, eq and "ĐANG DÙNG" or (owned and "TRANG BỊ" or (tostring(sk.Cost) .. " Sao")),
+				UDim2.fromOffset(112, 32), UDim2.new(1, -120, 0, 8),
+				eq and Color3.fromRGB(64, 194, 92) or (owned and Color3.fromRGB(54, 148, 212) or Color3.fromRGB(214, 152, 42)),
+				eq and Color3.fromRGB(28, 134, 58) or (owned and Color3.fromRGB(30, 86, 174) or Color3.fromRGB(162, 92, 18)),
+				8, { TextSize = 10, ZIndex = 54, Depth = 3 }
+			)
+			sBtn.MouseButton1Click:Connect(function()
+				if owned then
+					saveState.EquippedSkin = sk.Id
+					saveData()
+					showToast("Đã trang bị Skin: " .. sk.Name, THEME.TextGreen, 2.0)
+					openPermUpgrades()
+				elseif saveState.Stars >= sk.Cost then
+					saveState.Stars -= sk.Cost
+					saveState.OwnedSkins[sk.Id] = true
+					saveState.EquippedSkin = sk.Id
+					saveData()
+					playSfx("upgrade", 1.1)
+					refreshLobbyStats()
+					showToast("Đã mở khóa Skin: " .. sk.Name .. "!", THEME.TextGold, 2.5)
+					openPermUpgrades()
+				else
+					showToast("Cần " .. sk.Cost .. " Sao để mở Skin này!", THEME.TextRed, 2.0)
+				end
+			end)
+		end
+	end)
 	for _, u in ipairs(PERM_UPGRADES) do
 		local lv = saveState.Upgrades[u.Key] or 0
 		local cost = u.BaseCost + lv * 10
 		local row = Instance.new("Frame")
-		row.Size = UDim2.new(1, 0, 0, 56)
+		row.Size = UDim2.new(1, 0, 0, 48)
 		row.BackgroundColor3 = Color3.fromRGB(28, 32, 58)
 		row.BorderSizePixel = 0
 		row.ZIndex = 53
@@ -2940,6 +3321,22 @@ local function openStarQuests()
 	UI.pmOverlay.Visible = true
 end
 UI.questBtn.MouseButton1Click:Connect(openStarQuests)
+
+UI.trapBtn.MouseButton1Click:Connect(function()
+	if TD.trapMode == "hero" then
+		TD.trapMode = "spike"
+		UI.trapLbl.Text = "BẪY GAI\n(45V)"
+		showToast("Chạm vào đường đi để đặt Bẫy Gai (45V)", THEME.TextCyan, 2.0)
+	elseif TD.trapMode == "spike" then
+		TD.trapMode = "mine"
+		UI.trapLbl.Text = "MÌN NỔ\n(75V)"
+		showToast("Chạm vào đường đi để đặt Mìn Nổ (75V)", THEME.TextRed, 2.0)
+	else
+		TD.trapMode = "hero"
+		UI.trapLbl.Text = "CHẾ ĐỘ:\nĐIỀU HERO"
+		showToast("Đã chuyển về chế độ điều khiển Hero", THEME.TextGold, 1.8)
+	end
+end)
 
 -- Nut Ky Nang Bao Tuyet (dong bang toan ban do 4s)
 UI.blizBtn.MouseButton1Click:Connect(function()
@@ -3207,6 +3604,42 @@ track(RunService.RenderStepped:Connect(function(rawDt)
 		UI.bossBarBg.Visible = false
 	end
 
+	-- Kiem tra Bay Duong (Bay Gai & Min No) kich hoat khi quai giam len
+	for ti = #TD.traps, 1, -1 do
+		local tr = TD.traps[ti]
+		tr.Cd = math.max(0, tr.Cd - dt)
+		if tr.Cd <= 0 then
+			local triggered = false
+			for _, e in ipairs(TD.enemies) do
+				if not e.Dead and math.sqrt((e.X - tr.X)^2 + (e.Y - tr.Y)^2) <= 22 then
+					triggered = true
+					if tr.Def.Id == "mine" then
+						local mDmg = (tr.Def.Damage + TD.wave * 20) * (1 + (saveState.Upgrades.dmg or 0) * 0.08)
+						playSfx("explosion", 0.95)
+						spawnExplosionRing(tr.X, tr.Y, tr.Def.Splash or 68, tr.Def.Color)
+						for _, oe in ipairs(TD.enemies) do
+							if not oe.Dead and math.sqrt((oe.X - tr.X)^2 + (oe.Y - tr.Y)^2) <= (tr.Def.Splash or 68) then
+								damageEnemy(oe, mDmg, nil, nil, nil, nil, "Mìn Nổ")
+							end
+						end
+						tr.Uses = 0
+					else
+						local sDmg = tr.Def.Damage * (1 + (saveState.Upgrades.dmg or 0) * 0.08)
+						damageEnemy(e, sDmg, tr.Def.Slow, 1.2, nil, nil, "Bẫy Gai")
+						spawnExplosionRing(tr.X, tr.Y, 16, tr.Def.Color)
+						tr.Uses -= 1
+						tr.Cd = 0.55
+					end
+					break
+				end
+			end
+			if triggered and tr.Uses <= 0 then
+				if tr.Node and tr.Node.Parent then tr.Node:Destroy() end
+				table.remove(TD.traps, ti)
+			end
+		end
+	end
+
 	-- Cap nhat Hero di chuyen & chien dau tu dong
 	if TD.hero then
 		local h = TD.hero
@@ -3219,7 +3652,7 @@ track(RunService.RenderStepped:Connect(function(rawDt)
 			h.Node.Position = UDim2.fromOffset(h.X, h.Y)
 		end
 		h.Cd = math.max(0, h.Cd - dt)
-		local nearE, nearD = nil, h.Def.Range or 62
+		local nearE, nearD = nil, (h.Def.Range or 62) + ((h.Level or 1) - 1) * 10
 		for _, e in ipairs(TD.enemies) do
 			if not e.Dead then
 				local d = math.sqrt((e.X - h.X)^2 + (e.Y - h.Y)^2)
@@ -3228,7 +3661,7 @@ track(RunService.RenderStepped:Connect(function(rawDt)
 		end
 		if nearE and h.Cd <= 0 then
 			h.Cd = h.Def.AttackRate or 0.58
-			local hDmg = (h.Def.BaseDmg + TD.wave * 6) * (1 + (saveState.Upgrades.dmg or 0) * 0.08)
+			local hDmg = (h.Def.BaseDmg + TD.wave * 6) * (1 + ((h.Level or 1) - 1) * 0.22) * (1 + (saveState.Upgrades.dmg or 0) * 0.08)
 			if h.Def.CritChance and math.random(1, 100) <= h.Def.CritChance then
 				hDmg = hDmg * 2.0
 				spawnFloatingText(nearE.X, nearE.Y - 12, "CHÍ MẠNG!", THEME.TextGold)
@@ -3346,5 +3779,5 @@ screenGui.Destroying:Connect(function()
 end)
 end)
 if not _ok then
-	warn("[ThuThanh2D v4.0.1 ERROR]: " .. tostring(_err))
+	warn("[ThuThanh2D v4.5 ERROR]: " .. tostring(_err))
 end
