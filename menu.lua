@@ -1,5 +1,5 @@
 -- ============================================================
--- THU THANH 2D (TOWER DEFENSE) v2.2.1 - POPUP CHON 5 THAP TAI O DAT + POPUP NANG CAP TAI THAP
+-- THU THANH 2D (TOWER DEFENSE) v3.0 - HERO + 7 THAP + NHANH TIEN HOA C3 + VO TAN + CAY KY NANG + SFX
 -- Full-Screen Mobile & PC | Tu dong luu ky luc | Phim tat PC: RightShift
 -- ============================================================
 local _ok, _err = pcall(function()
@@ -103,6 +103,15 @@ local MAPS = {
 			{1, 2}, {12, 2}, {12, 5}, {2, 5}, {2, 8}, {13, 8}, {13, 6}, {14, 6}
 		},
 	},
+	{
+		Id = "endless", Name = "Vô Tận", Diff = "Vô Hạn", Waves = 999, StartGold = 320, StartLives = 20,
+		Endless = true,
+		Grass1 = Color3.fromRGB(26, 48, 66), Grass2 = Color3.fromRGB(22, 40, 56),
+		PathCol = Color3.fromRGB(72, 82, 108), PathBorder = Color3.fromRGB(98, 186, 214),
+		Waypoints = {
+			{1, 3}, {5, 3}, {5, 7}, {9, 7}, {9, 2}, {13, 2}, {13, 6}, {14, 6}
+		},
+	},
 }
 
 local TOWERS = {
@@ -136,6 +145,18 @@ local TOWERS = {
 		Kind = "Laser", BaseCol = Color3.fromRGB(204, 58, 118), TopCol = Color3.fromRGB(224, 184, 54),
 		Accent = Color3.fromRGB(228, 92, 168), Desc = "Tia laze tầm xa cực mạnh"
 	},
+	{
+		Id = "poison", Name = "Tháp Độc", Cost = 130, UpgradeCost = 110,
+		Damage = 18, Range = 132, FireRate = 0.85, ProjSpeed = 350, PoisonDps = 18, PoisonDur = 3.5,
+		Kind = "Poison", BaseCol = Color3.fromRGB(48, 168, 72), TopCol = Color3.fromRGB(32, 92, 46),
+		Accent = Color3.fromRGB(118, 224, 72), Desc = "Trúng độc rút máu liên tục"
+	},
+	{
+		Id = "buff", Name = "Tháp Buff", Cost = 150, UpgradeCost = 130,
+		Damage = 0, Range = 124, FireRate = 1.0, BuffDmg = 0.25, BuffRate = 0.20,
+		Kind = "Buff", BaseCol = Color3.fromRGB(204, 156, 38), TopCol = Color3.fromRGB(226, 204, 102),
+		Accent = Color3.fromRGB(232, 212, 84), Desc = "Tăng sát thương & tốc bắn quanh nó"
+	},
 }
 
 local ENEMIES = {
@@ -154,10 +175,20 @@ local ENEMIES = {
 -- ============================================================
 local canWriteFile = (typeof(writefile) == "function") and (typeof(readfile) == "function")
 local saveState = {
-	BestWave = { meadow = 0, desert = 0, citadel = 0, heroic_boss = 0 },
-	Wins = { meadow = 0, desert = 0, citadel = 0, heroic_boss = 0 },
+	BestWave = { meadow = 0, desert = 0, citadel = 0, heroic_boss = 0, endless = 0 },
+	Wins = { meadow = 0, desert = 0, citadel = 0, heroic_boss = 0, endless = 0 },
 	TotalKills = 0,
+	Stars = 15,
+	Upgrades = { dmg = 0, gold = 0, lives = 0, skill = 0 },
+	SfxOn = true,
 	SelectedMap = 1,
+}
+
+local PERM_UPGRADES = {
+	{ Key = "dmg",   Name = "Sát Thương Tháp",   Desc = "+8% sát thương mọi tháp mỗi cấp",   Max = 5, BaseCost = 10 },
+	{ Key = "gold",  Name = "Kho Bạc Khởi Đầu",  Desc = "+40 Vàng đầu trận mỗi cấp",         Max = 5, BaseCost = 10 },
+	{ Key = "lives", Name = "Gia Cố Thành Trì",  Desc = "+3 Máu Thành mỗi cấp",              Max = 5, BaseCost = 10 },
+	{ Key = "skill", Name = "Thiên Thạch Nhanh", Desc = "-2 giây hồi chiêu mỗi cấp",         Max = 5, BaseCost = 12 },
 }
 
 local function getCacheRoot()
@@ -199,6 +230,13 @@ local function loadData()
 				end
 			end
 			if type(tbl.TotalKills) == "number" then saveState.TotalKills = tbl.TotalKills end
+			if type(tbl.Stars) == "number" then saveState.Stars = math.max(0, math.floor(tbl.Stars)) end
+			if type(tbl.SfxOn) == "boolean" then saveState.SfxOn = tbl.SfxOn end
+			if type(tbl.Upgrades) == "table" then
+				for k, v in pairs(tbl.Upgrades) do
+					if type(v) == "number" and saveState.Upgrades[k] ~= nil then saveState.Upgrades[k] = math.clamp(math.floor(v), 0, 5) end
+				end
+			end
 			if type(tbl.SelectedMap) == "number" then saveState.SelectedMap = math.clamp(tbl.SelectedMap, 1, #MAPS) end
 		end
 	end
@@ -432,6 +470,31 @@ function GFX.buildTowerSprite(parent, towerDef, size, zBase)
 			addCorner(coil, 4)
 			addStroke(coil, THEME.Outline, 1.3)
 		end
+	elseif towerDef.Id == "poison" then
+		addGradient(base, Color3.fromRGB(64, 196, 86), Color3.fromRGB(28, 108, 46), 90)
+		for _, pos in ipairs({{0.26,0.28},{0.74,0.28},{0.5,0.76}}) do
+			local bub = Instance.new("Frame")
+			bub.Size = UDim2.fromScale(0.24, 0.24)
+			bub.Position = UDim2.fromScale(pos[1], pos[2])
+			bub.AnchorPoint = Vector2.new(0.5, 0.5)
+			bub.BackgroundColor3 = Color3.fromRGB(134, 232, 76)
+			bub.BorderSizePixel = 0
+			bub.ZIndex = zBase + 2
+			bub.Parent = base
+			addCorner(bub, 99)
+			addStroke(bub, THEME.Outline, 1.1)
+		end
+	elseif towerDef.Id == "buff" then
+		addGradient(base, Color3.fromRGB(224, 182, 48), Color3.fromRGB(154, 102, 22), 90)
+		local halo = Instance.new("Frame")
+		halo.Size = UDim2.fromScale(0.92, 0.92)
+		halo.Position = UDim2.fromScale(0.5, 0.5)
+		halo.AnchorPoint = Vector2.new(0.5, 0.5)
+		halo.BackgroundTransparency = 1
+		halo.ZIndex = zBase + 2
+		halo.Parent = base
+		addCorner(halo, 99)
+		addStroke(halo, Color3.fromRGB(236, 218, 108), 1.8)
 	elseif towerDef.Id == "laser" then
 		-- Thap thanh hong tim vien vang + doi canh thien than 2 ben
 		addGradient(base, Color3.fromRGB(214, 74, 152), Color3.fromRGB(136, 36, 108), 90)
@@ -756,6 +819,63 @@ function GFX.buildEnemySprite(parent, def, kind, zBase)
 	return holder, body, hpFill, frostCoat, wingL, wingR, bodyStroke
 end
 
+function GFX.buildHeroSprite(parent, zBase)
+	local root = Instance.new("Frame")
+	root.Size = UDim2.fromOffset(30, 30)
+	root.AnchorPoint = Vector2.new(0.5, 0.5)
+	root.BackgroundTransparency = 1
+	root.ZIndex = zBase
+	root.Parent = parent
+
+	local aura = Instance.new("Frame")
+	aura.Size = UDim2.fromOffset(36, 36)
+	aura.Position = UDim2.fromScale(0.5, 0.5)
+	aura.AnchorPoint = Vector2.new(0.5, 0.5)
+	aura.BackgroundColor3 = THEME.TextGold
+	aura.BackgroundTransparency = 0.78
+	aura.BorderSizePixel = 0
+	aura.ZIndex = zBase
+	aura.Parent = root
+	addCorner(aura, 99)
+	addStroke(aura, THEME.TextGold, 1.5)
+
+	local body = Instance.new("Frame")
+	body.Size = UDim2.fromOffset(24, 24)
+	body.Position = UDim2.fromScale(0.5, 0.5)
+	body.AnchorPoint = Vector2.new(0.5, 0.5)
+	body.BackgroundColor3 = Color3.fromRGB(56, 148, 224)
+	body.BorderSizePixel = 0
+	body.ZIndex = zBase + 1
+	body.Parent = root
+	addCorner(body, 99)
+	addStroke(body, THEME.TextGold, 2.0)
+
+	local crown = Instance.new("Frame")
+	crown.Size = UDim2.fromOffset(14, 6)
+	crown.Position = UDim2.new(0.5, 0, 0, -2)
+	crown.AnchorPoint = Vector2.new(0.5, 0.5)
+	crown.BackgroundColor3 = THEME.TextGold
+	crown.BorderSizePixel = 0
+	crown.ZIndex = zBase + 3
+	crown.Parent = body
+	addCorner(crown, 3)
+	addStroke(crown, THEME.Outline, 1.2)
+
+	local sword = Instance.new("Frame")
+	sword.Size = UDim2.fromOffset(18, 4)
+	sword.Position = UDim2.fromScale(0.92, 0.5)
+	sword.AnchorPoint = Vector2.new(0.1, 0.5)
+	sword.Rotation = -25
+	sword.BackgroundColor3 = Color3.fromRGB(224, 228, 236)
+	sword.BorderSizePixel = 0
+	sword.ZIndex = zBase + 2
+	sword.Parent = body
+	addCorner(sword, 2)
+	addStroke(sword, THEME.Outline, 1.2)
+
+	return root, body, sword
+end
+
 -- ============================================================
 -- KHOI TAO SCREENGUI NOI DE LEN ROBLOX TOPBAR
 -- ============================================================
@@ -767,6 +887,31 @@ screenGui.DisplayOrder = 2147483647
 pcall(function() screenGui.ScreenInsets = Enum.ScreenInsets.None end)
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = guiParent
+
+-- Hieu ung am thanh nhe (SFX) co nut bat/tat
+local SFX_IDS = {
+	shoot     = "rbxassetid://12222216",
+	explosion = "rbxassetid://12222084",
+	frost     = "rbxassetid://12222030",
+	zap       = "rbxassetid://12222200",
+	laser     = "rbxassetid://12222140",
+	upgrade   = "rbxassetid://12222253",
+	kill      = "rbxassetid://12221967",
+}
+local function playSfx(kind, pitch)
+	if not saveState.SfxOn then return end
+	local id = SFX_IDS[kind]
+	if not id then return end
+	pcall(function()
+		local s = Instance.new("Sound")
+		s.SoundId = id
+		s.Volume = (kind == "explosion" or kind == "upgrade") and 0.28 or 0.18
+		s.PlaybackSpeed = pitch or 1
+		s.Parent = screenGui
+		s:Play()
+		task.delay(1.2, function() if s and s.Parent then s:Destroy() end end)
+	end)
+end
 
 local backdrop = Instance.new("Frame")
 backdrop.Size = UDim2.fromScale(1, 1)
@@ -884,7 +1029,8 @@ function SEC.buildTopBar()
 	div.Parent = top
 
 	local title = Instance.new("TextLabel")
-	title.Size = UDim2.fromOffset(172, 46)
+	title.Size = UDim2.fromOffset(124, 46)
+	title.TextSize = 14
 	title.Position = UDim2.fromOffset(12, 0)
 	title.BackgroundTransparency = 1
 	title.Text = "THỦ THÀNH 2D"
@@ -900,7 +1046,7 @@ function SEC.buildTopBar()
 	-- Cac chi so trong tran (an khi o sanh)
 	local hudGroup = Instance.new("Frame")
 	hudGroup.Size = UDim2.fromOffset(424, 40)
-	hudGroup.Position = UDim2.fromOffset(168, 4)
+	hudGroup.Position = UDim2.fromOffset(132, 4)
 	hudGroup.BackgroundTransparency = 1
 	hudGroup.Visible = false
 	hudGroup.ZIndex = 11
@@ -952,7 +1098,8 @@ function SEC.buildTopBar()
 	UI.pauseBtn = pauseBtn
 	UI.pauseLbl = pauseLbl
 
-	UI.homeBtn = makeArcadeBtn(top, "Sảnh", UDim2.fromOffset(54, 32), UDim2.new(1, -140, 0, 8), Color3.fromRGB(142, 72, 208), Color3.fromRGB(88, 36, 162), 9, { TextSize = 11, ZIndex = 12, Depth = 3, Stroke = 1.6 })
+	UI.sfxBtn, UI.sfxLbl = makeArcadeBtn(top, saveState.SfxOn and "Âm" or "Tắt", UDim2.fromOffset(40, 32), UDim2.new(1, -184, 0, 8), Color3.fromRGB(54, 152, 186), Color3.fromRGB(32, 92, 134), 9, { TextSize = 10, ZIndex = 12, Depth = 3, Stroke = 1.6 })
+	UI.homeBtn = makeArcadeBtn(top, "Sảnh", UDim2.fromOffset(52, 32), UDim2.new(1, -138, 0, 8), Color3.fromRGB(142, 72, 208), Color3.fromRGB(88, 36, 162), 9, { TextSize = 11, ZIndex = 12, Depth = 3, Stroke = 1.6 })
 	UI.homeBtn.Visible = false
 	UI.minBtn   = makeArcadeBtn(top, "-", UDim2.fromOffset(36, 32), UDim2.new(1, -80, 0, 8), Color3.fromRGB(82, 94, 128), Color3.fromRGB(48, 56, 82), 9, { TextSize = 18, ZIndex = 12, Depth = 3, Stroke = 1.6 })
 	UI.closeBtn = makeArcadeBtn(top, "X", UDim2.fromOffset(36, 32), UDim2.new(1, -40, 0, 8), Color3.fromRGB(212, 62, 68), Color3.fromRGB(152, 28, 36), 9, { TextSize = 13, ZIndex = 12, Depth = 3, Stroke = 1.6 })
@@ -1019,13 +1166,13 @@ function SEC.buildLobby()
 
 	local lay = Instance.new("UIListLayout")
 	lay.FillDirection = Enum.FillDirection.Horizontal
-	lay.Padding = UDim.new(0, 8)
+	lay.Padding = UDim.new(0, 6)
 	lay.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	lay.Parent = row
 
 	for idx, mp in ipairs(MAPS) do
 		local card = Instance.new("TextButton")
-		card.Size = UDim2.fromOffset(168, 240)
+		card.Size = UDim2.fromOffset(136, 240)
 		card.BackgroundColor3 = mp.BossArena and Color3.fromRGB(36, 20, 44) or Color3.fromRGB(24, 28, 52)
 		card.Text = ""
 		card.AutoButtonColor = false
@@ -1037,8 +1184,8 @@ function SEC.buildLobby()
 
 		-- Mini preview ban do
 		local prev = Instance.new("Frame")
-		prev.Size = UDim2.fromOffset(148, 96)
-		prev.Position = UDim2.fromOffset(10, 10)
+		prev.Size = UDim2.fromOffset(118, 86)
+		prev.Position = UDim2.fromOffset(9, 10)
 		prev.BackgroundColor3 = mp.Grass1
 		prev.BorderSizePixel = 0
 		prev.ClipsDescendants = true
@@ -1050,8 +1197,8 @@ function SEC.buildLobby()
 		-- Ve duong di mini
 		for w = 1, #mp.Waypoints - 1 do
 			local a, b = mp.Waypoints[w], mp.Waypoints[w + 1]
-			local x1, y1 = (a[1] - 0.5) * (148 / COLS), (a[2] - 0.5) * (96 / ROWS)
-			local x2, y2 = (b[1] - 0.5) * (148 / COLS), (b[2] - 0.5) * (96 / ROWS)
+			local x1, y1 = (a[1] - 0.5) * (118 / COLS), (a[2] - 0.5) * (86 / ROWS)
+			local x2, y2 = (b[1] - 0.5) * (118 / COLS), (b[2] - 0.5) * (86 / ROWS)
 			local seg = Instance.new("Frame")
 			local minX, minY = math.min(x1, x2), math.min(y1, y2)
 			local wPx = math.abs(x2 - x1) + 12
@@ -1080,7 +1227,7 @@ function SEC.buildLobby()
 		dLbl.Size = UDim2.new(1, -16, 0, 18)
 		dLbl.Position = UDim2.fromOffset(8, 140)
 		dLbl.BackgroundTransparency = 1
-		dLbl.Text = "Độ khó: " .. mp.Diff .. "  •  " .. mp.Waves .. " Đợt"
+		dLbl.Text = mp.Endless and "Vô Hạn Đợt" or (mp.Diff .. " • " .. mp.Waves .. " Đợt")
 		dLbl.TextColor3 = THEME.TextCyan
 		dLbl.Font = THEME.FontBody
 		dLbl.TextSize = 11
@@ -1111,18 +1258,73 @@ function SEC.buildLobby()
 
 	UI.playBtn = makeArcadeBtn(
 		lobbyPage, "▶  BẮT ĐẦU PHÒNG THỦ",
-		UDim2.fromOffset(276, 54), UDim2.new(0.5, -138, 1, -72),
-		Color3.fromRGB(68, 206, 74), Color3.fromRGB(28, 144, 48), 16,
-		{ TextSize = 17, ZIndex = 6, Depth = 5, Stroke = 2.6 }
+		UDim2.fromOffset(252, 52), UDim2.new(0.5, -238, 1, -70),
+		Color3.fromRGB(68, 206, 74), Color3.fromRGB(28, 144, 48), 15,
+		{ TextSize = 16, ZIndex = 6, Depth = 5, Stroke = 2.4 }
 	)
+	UI.permUpgBtn, UI.permUpgLbl = makeArcadeBtn(
+		lobbyPage, "CÂY KỸ NĂNG (" .. tostring(saveState.Stars) .. " Sao)",
+		UDim2.fromOffset(214, 52), UDim2.new(0.5, 24, 1, -70),
+		Color3.fromRGB(154, 72, 218), Color3.fromRGB(94, 34, 168), 15,
+		{ TextSize = 14, ZIndex = 6, Depth = 5, Stroke = 2.4 }
+	)
+
+	-- Modal Cay Ky Nang Vinh Vien ngoai sanh
+	local pmOverlay = Instance.new("Frame")
+	pmOverlay.Size = UDim2.fromScale(1, 1)
+	pmOverlay.BackgroundColor3 = Color3.fromRGB(6, 8, 16)
+	pmOverlay.BackgroundTransparency = 0.35
+	pmOverlay.Visible = false
+	pmOverlay.ZIndex = 50
+	pmOverlay.Parent = mainFrame
+	UI.pmOverlay = pmOverlay
+
+	local pmBox = Instance.new("Frame")
+	pmBox.Size = UDim2.fromOffset(480, 326)
+	pmBox.Position = UDim2.fromScale(0.5, 0.5)
+	pmBox.AnchorPoint = Vector2.new(0.5, 0.5)
+	pmBox.BackgroundColor3 = Color3.fromRGB(20, 24, 46)
+	pmBox.BorderSizePixel = 0
+	pmBox.ZIndex = 51
+	pmBox.Parent = pmOverlay
+	addCorner(pmBox, 14)
+	addStroke(pmBox, THEME.TextGold, 2.4)
+	UI.pmBox = pmBox
+
+	local pmTitle = Instance.new("TextLabel")
+	pmTitle.Size = UDim2.new(1, -56, 0, 34)
+	pmTitle.Position = UDim2.fromOffset(14, 8)
+	pmTitle.BackgroundTransparency = 1
+	pmTitle.Text = "CÂY KỸ NĂNG VĨNH VIỄN"
+	pmTitle.TextColor3 = THEME.TextGold
+	pmTitle.Font = THEME.FontHead
+	pmTitle.TextSize = 15
+	pmTitle.TextXAlignment = Enum.TextXAlignment.Left
+	pmTitle.ZIndex = 52
+	pmTitle.Parent = pmBox
+	UI.pmTitle = pmTitle
+
+	UI.pmClose = makeArcadeBtn(pmBox, "X", UDim2.fromOffset(32, 30), UDim2.new(1, -40, 0, 8), Color3.fromRGB(208, 62, 68), Color3.fromRGB(148, 28, 36), 8, { TextSize = 12, ZIndex = 52, Depth = 3 })
+
+	local pmList = Instance.new("Frame")
+	pmList.Size = UDim2.new(1, -24, 1, -54)
+	pmList.Position = UDim2.fromOffset(12, 46)
+	pmList.BackgroundTransparency = 1
+	pmList.ZIndex = 52
+	pmList.Parent = pmBox
+	local pmLay = Instance.new("UIListLayout")
+	pmLay.Padding = UDim.new(0, 8)
+	pmLay.Parent = pmList
+	UI.pmList = pmList
 end
 SEC.buildLobby()
 
 local function refreshLobbyStats()
-	UI.lobbyStatsLbl.Text = "Tổng quái đã tiêu diệt: " .. formatNum(saveState.TotalKills)
+	UI.lobbyStatsLbl.Text = "Tổng quái đã hạ: " .. formatNum(saveState.TotalKills) .. "  •  Sao kỹ năng: " .. formatNum(saveState.Stars)
+	if UI.permUpgLbl then UI.permUpgLbl.Text = "CÂY KỸ NĂNG (" .. formatNum(saveState.Stars) .. " Sao)" end
 	for j, mc in ipairs(mapCards) do
 		local id = mc.Map.Id
-		mc.RecLbl.Text = string.format("Kỷ lục: Đợt %d/%d\nChiến thắng: %d lần", saveState.BestWave[id] or 0, mc.Map.Waves, saveState.Wins[id] or 0)
+		mc.RecLbl.Text = mc.Map.Endless and string.format("Kỷ lục: Đợt %d\nChế độ Vô Tận", saveState.BestWave[id] or 0) or string.format("Kỷ lục: Đợt %d/%d\nThắng: %d lần", saveState.BestWave[id] or 0, mc.Map.Waves, saveState.Wins[id] or 0)
 		mc.Stroke.Color = (j == saveState.SelectedMap) and THEME.TextGold or Color3.fromRGB(76, 86, 134)
 		mc.Stroke.Thickness = (j == saveState.SelectedMap) and 3.0 or 2.2
 	end
@@ -1203,7 +1405,7 @@ function SEC.buildGameUI()
 
 	-- POPUP CHON 5 TOA THAP KHI BAM VAO VUNG DAT TRONG
 	local buildPopup = Instance.new("Frame")
-	buildPopup.Size = UDim2.fromOffset(316, 86)
+	buildPopup.Size = UDim2.fromOffset(430, 86)
 	buildPopup.BackgroundColor3 = Color3.fromRGB(20, 24, 46)
 	buildPopup.BorderSizePixel = 0
 	buildPopup.Visible = false
@@ -1237,7 +1439,7 @@ function SEC.buildGameUI()
 	for i, td in ipairs(TOWERS) do
 		local b = Instance.new("TextButton")
 		b.Size = UDim2.fromOffset(56, 60)
-		b.Position = UDim2.fromOffset(8 + (i - 1) * 61, 21)
+		b.Position = UDim2.fromOffset(8 + (i - 1) * 60, 21)
 		b.BackgroundColor3 = Color3.fromRGB(28, 34, 62)
 		b.Text = ""
 		b.AutoButtonColor = false
@@ -1282,9 +1484,9 @@ function SEC.buildGameUI()
 		popupBuildBtns[i] = { Btn = b, Stroke = st, PriceLbl = pr, Def = td }
 	end
 
-	-- POPUP NANG CAP & BAN KHI BAM VAO TOA THAP DA XAY
+	-- POPUP NANG CAP + NHANH TIEN HOA CAP 3 + MUC TIEU + BAN THAP
 	local upgradePopup = Instance.new("Frame")
-	upgradePopup.Size = UDim2.fromOffset(244, 78)
+	upgradePopup.Size = UDim2.fromOffset(266, 108)
 	upgradePopup.BackgroundColor3 = Color3.fromRGB(20, 24, 46)
 	upgradePopup.BorderSizePixel = 0
 	upgradePopup.Visible = false
@@ -1331,18 +1533,48 @@ function SEC.buildGameUI()
 
 	local upgBtn, upgLbl = makeArcadeBtn(
 		upgradePopup, "NÂNG CẤP",
-		UDim2.fromOffset(124, 32), UDim2.fromOffset(8, 39),
+		UDim2.fromOffset(250, 28), UDim2.fromOffset(8, 38),
 		Color3.fromRGB(64, 188, 96), Color3.fromRGB(28, 132, 58), 8,
 		{ TextSize = 10, ZIndex = 35, Depth = 3, Stroke = 1.6 }
 	)
 	UI.upgBtn = upgBtn
 	UI.upgLbl = upgLbl
 
+	-- 2 nhanh tien hoa khi nang tu Cap 2 len Cap 3
+	local evoABtn, evoALbl = makeArcadeBtn(
+		upgradePopup, "HỦY DIỆT",
+		UDim2.fromOffset(122, 28), UDim2.fromOffset(8, 38),
+		Color3.fromRGB(214, 96, 48), Color3.fromRGB(154, 42, 32), 8,
+		{ TextSize = 9, ZIndex = 35, Depth = 3, Stroke = 1.5 }
+	)
+	evoABtn.Visible = false
+	UI.evoABtn = evoABtn
+	UI.evoALbl = evoALbl
+
+	local evoBBtn, evoBLbl = makeArcadeBtn(
+		upgradePopup, "SIÊU TỐC",
+		UDim2.fromOffset(122, 28), UDim2.fromOffset(136, 38),
+		Color3.fromRGB(54, 152, 218), Color3.fromRGB(30, 88, 174), 8,
+		{ TextSize = 9, ZIndex = 35, Depth = 3, Stroke = 1.5 }
+	)
+	evoBBtn.Visible = false
+	UI.evoBBtn = evoBBtn
+	UI.evoBLbl = evoBLbl
+
+	local targetBtn, targetLbl = makeArcadeBtn(
+		upgradePopup, "Mục tiêu: Xa nhất",
+		UDim2.fromOffset(146, 28), UDim2.fromOffset(8, 72),
+		Color3.fromRGB(108, 74, 186), Color3.fromRGB(66, 38, 134), 8,
+		{ TextSize = 10, ZIndex = 35, Depth = 3, Stroke = 1.5 }
+	)
+	UI.targetBtn = targetBtn
+	UI.targetLbl = targetLbl
+
 	local sellBtn, sellLbl = makeArcadeBtn(
 		upgradePopup, "BÁN",
-		UDim2.fromOffset(96, 32), UDim2.fromOffset(140, 39),
+		UDim2.fromOffset(98, 28), UDim2.fromOffset(160, 72),
 		Color3.fromRGB(206, 72, 76), Color3.fromRGB(146, 34, 42), 8,
-		{ TextSize = 10, ZIndex = 35, Depth = 3, Stroke = 1.6 }
+		{ TextSize = 10, ZIndex = 35, Depth = 3, Stroke = 1.5 }
 	)
 	UI.sellBtn = sellBtn
 	UI.sellLbl = sellLbl
@@ -1395,32 +1627,41 @@ function SEC.buildGameUI()
 	addStroke(botBar, Color3.fromRGB(82, 72, 148), 1.6)
 
 	local infoLbl = Instance.new("TextLabel")
-	infoLbl.Size = UDim2.fromOffset(396, 36)
-	infoLbl.Position = UDim2.fromOffset(12, 1)
+	infoLbl.Size = UDim2.fromOffset(312, 36)
+	infoLbl.Position = UDim2.fromOffset(10, 1)
 	infoLbl.BackgroundTransparency = 1
-	infoLbl.Text = "Chạm vào ô cỏ để xây tháp  •  Chạm vào tháp để nâng cấp"
+	infoLbl.Text = "Chạm ô cỏ: xây tháp • Chạm đường: điều Hero"
 	infoLbl.TextColor3 = THEME.TextMain
 	infoLbl.Font = THEME.FontBody
-	infoLbl.TextSize = 12
+	infoLbl.TextSize = 11
 	infoLbl.TextXAlignment = Enum.TextXAlignment.Left
 	infoLbl.ZIndex = 7
 	infoLbl.Parent = botBar
 	UI.botInfoLbl = infoLbl
 
+	local autoBtn, autoLbl = makeArcadeBtn(
+		botBar, "TỰ GỌI: TẮT",
+		UDim2.fromOffset(112, 30), UDim2.new(1, -386, 0, 4),
+		Color3.fromRGB(78, 86, 122), Color3.fromRGB(48, 54, 82), 8,
+		{ TextSize = 10, ZIndex = 8, Depth = 3, Stroke = 1.5 }
+	)
+	UI.autoBtn = autoBtn
+	UI.autoLbl = autoLbl
+
 	local skillBtn, skillLbl = makeArcadeBtn(
 		botBar, "THIÊN THẠCH",
-		UDim2.fromOffset(148, 30), UDim2.new(1, -308, 0, 4),
+		UDim2.fromOffset(132, 30), UDim2.new(1, -268, 0, 4),
 		Color3.fromRGB(214, 86, 48), Color3.fromRGB(156, 36, 32), 8,
-		{ TextSize = 11, ZIndex = 8, Depth = 3, Stroke = 1.6 }
+		{ TextSize = 10, ZIndex = 8, Depth = 3, Stroke = 1.5 }
 	)
 	UI.skillBtn = skillBtn
 	UI.skillLbl = skillLbl
 
 	local waveBtn, waveBtnLbl = makeArcadeBtn(
 		botBar, "GỌI ĐỢT 1",
-		UDim2.fromOffset(148, 30), UDim2.new(1, -154, 0, 4),
+		UDim2.fromOffset(124, 30), UDim2.new(1, -130, 0, 4),
 		Color3.fromRGB(64, 194, 88), Color3.fromRGB(28, 134, 54), 8,
-		{ TextSize = 12, ZIndex = 8, Depth = 3, Stroke = 1.6 }
+		{ TextSize = 11, ZIndex = 8, Depth = 3, Stroke = 1.5 }
 	)
 	UI.waveBtn = waveBtn
 	UI.waveBtnLbl = waveBtnLbl
@@ -1494,6 +1735,9 @@ local TD = {
 	towers = {},
 	enemies = {},
 	projectiles = {},
+	autoWave = false,
+	autoTimer = 0,
+	hero = nil,
 	shakeTime = 0,
 }
 
@@ -1610,7 +1854,7 @@ end
 local function updateHUD()
 	UI.livesLbl.Text = "Máu: " .. tostring(math.max(0, TD.lives))
 	UI.goldLbl.Text  = "Vàng: " .. formatNum(TD.gold)
-	UI.waveLbl.Text  = "Đợt: " .. tostring(TD.wave) .. "/" .. tostring(TD.map.Waves)
+	UI.waveLbl.Text  = TD.map.Endless and ("Đợt: " .. tostring(TD.wave) .. " (∞)") or ("Đợt: " .. tostring(TD.wave) .. "/" .. tostring(TD.map.Waves))
 	UI.spdLbl.Text   = tostring(TD.speedMult) .. "x"
 
 	if TD.pendingCell then
@@ -1618,7 +1862,7 @@ local function updateHUD()
 		UI.tileMarker.Visible = true
 		UI.tileMarker.Position = UDim2.fromOffset(cx, cy)
 		UI.buildPopup.Visible = true
-		positionPopupNear(UI.buildPopup, cx, cy, 316, 86)
+		positionPopupNear(UI.buildPopup, cx, cy, 430, 86)
 		for _, pb in ipairs(popupBuildBtns) do
 			local afford = (TD.gold >= pb.Def.Cost)
 			pb.Stroke.Color = afford and THEME.TextGold or Color3.fromRGB(118, 52, 58)
@@ -1634,23 +1878,41 @@ local function updateHUD()
 		local upCost = math.floor(t.Def.UpgradeCost * t.Level)
 		local sellVal = math.floor(t.Invested * 0.7)
 		UI.upgradePopup.Visible = true
-		positionPopupNear(UI.upgradePopup, t.X, t.Y, 244, 78)
-		UI.upTitle.Text = string.format("%s  •  Cấp %d", t.Def.Name, t.Level)
-		UI.upStats.Text = string.format("Sát thương: %d  •  Tầm bắn: %d", math.floor(t.Damage), math.floor(t.Range))
-		UI.upgBtn.Visible = true
-		UI.upgLbl.Text = (t.Level < 3) and ("NÂNG CẤP (" .. upCost .. "V)") or "MAX CẤP"
+		positionPopupNear(UI.upgradePopup, t.X, t.Y, 266, 108)
+		local brTxt = t.Branch and (" • " .. t.Branch) or ""
+		UI.upTitle.Text = string.format("%s • Cấp %d%s", t.Def.Name, t.Level, brTxt)
+		if t.Def.Kind == "Buff" then
+			local pct = math.floor((t.BuffDmg or 0.25) * 100)
+			UI.upStats.Text = string.format("Tăng +%d%% ST cho tháp • Tầm: %d", pct, math.floor(t.Range))
+		else
+			UI.upStats.Text = string.format("ST: %d • Tầm: %d • Tốc: %.2fs", math.floor(t.Damage), math.floor(t.Range), t.FireRate)
+		end
+		if t.Level == 2 and t.Def.Kind ~= "Buff" then
+			UI.upgBtn.Visible = false
+			UI.evoABtn.Visible = true
+			UI.evoBBtn.Visible = true
+			UI.evoALbl.Text = "HỦY DIỆT (" .. upCost .. "V)"
+			UI.evoBLbl.Text = "SIÊU TỐC (" .. upCost .. "V)"
+		else
+			UI.upgBtn.Visible = true
+			UI.evoABtn.Visible = false
+			UI.evoBBtn.Visible = false
+			UI.upgLbl.Text = (t.Level < 3) and ("NÂNG CẤP (" .. upCost .. "V)") or "MAX CẤP 3"
+		end
+		local mNames = { First = "Xa nhất", Strong = "Máu cao", Weak = "Máu thấp" }
+		UI.targetLbl.Text = "Mục tiêu: " .. (mNames[t.TargetMode or "First"] or "Xa nhất")
 		UI.sellLbl.Text = "BÁN (+" .. sellVal .. "V)"
 		UI.rangeRing.Visible = true
 		UI.rangeRing.Position = UDim2.fromOffset(t.X, t.Y)
 		UI.rangeRing.Size = UDim2.fromOffset(t.Range * 2, t.Range * 2)
-		UI.botInfoLbl.Text = string.format("Đang chọn %s Cấp %d  •  Bấm Nâng Cấp hoặc Bán ngay trên tháp", t.Def.Name, t.Level)
+		UI.botInfoLbl.Text = string.format("Đang chọn %s Cấp %d • Chọn nâng cấp hoặc mục tiêu", t.Def.Name, t.Level)
 	else
 		UI.upgradePopup.Visible = false
 		UI.rangeRing.Visible = false
 		if TD.pendingCell then
 			UI.botInfoLbl.Text = "Chọn 1 trong 5 tòa tháp trên bảng để xây vào ô đất đã chọn"
 		else
-			UI.botInfoLbl.Text = "Chạm vào ô cỏ để xây tháp  •  Chạm vào tháp để nâng cấp"
+			UI.botInfoLbl.Text = "Chạm ô cỏ: xây tháp • Chạm đường: điều Hero"
 		end
 	end
 
@@ -1662,7 +1924,7 @@ local function updateHUD()
 
 	if TD.waveSpawning or #TD.enemies > 0 then
 		UI.waveBtnLbl.Text = "ĐANG CHIẾN..."
-	elseif TD.wave >= TD.map.Waves then
+	elseif (not TD.map.Endless) and TD.wave >= TD.map.Waves then
 		UI.waveBtnLbl.Text = "HOÀN THÀNH"
 	else
 		UI.waveBtnLbl.Text = "GỌI ĐỢT " .. tostring(TD.wave + 1)
@@ -1689,6 +1951,7 @@ local function finishMatch(won)
 	end
 	if won then
 		saveState.Wins[mid] = (saveState.Wins[mid] or 0) + 1
+		saveState.Stars += 15
 	end
 	saveData()
 	UI.endTitle.Text = won and "CHIẾN THẮNG!" or "THẤT THỦ!"
@@ -1747,12 +2010,15 @@ local function buildTowerAt(gx, gy, towerIdx)
 		Size = UDim2.fromOffset(CELL - 4, CELL - 4)
 	}):Play()
 
+	local dmgMult = 1 + (saveState.Upgrades.dmg or 0) * 0.08
 	local tObj = {
 		GX = gx, GY = gy, X = cx, Y = cy,
-		Def = def, Level = 1, Invested = def.Cost,
-		Damage = def.Damage, Range = def.Range, FireRate = def.FireRate,
+		Def = def, Level = 1, Branch = nil, TargetMode = "First", Invested = def.Cost,
+		Damage = def.Damage * dmgMult, Range = def.Range, FireRate = def.FireRate,
+		BuffDmg = def.BuffDmg or 0, BuffRate = def.BuffRate or 0,
 		Cooldown = 0, Node = holder, Turret = turret, Barrel = barrel, LvTag = lvTag,
 	}
+	playSfx("upgrade", 1.15)
 	table.insert(TD.towers, tObj)
 	holder.MouseButton1Click:Connect(function()
 		TD.pendingCell = nil
@@ -1798,7 +2064,13 @@ local function buildMapBoard(mp)
 				tile.BackgroundColor3 = mp.PathCol
 				addStroke(tile, mp.PathBorder, 1)
 				tile.MouseButton1Click:Connect(function()
+					local hadPopup = (TD.pendingCell ~= nil or TD.selectedTower ~= nil)
 					closeBoardPopups()
+					if not hadPopup and TD.hero then
+						local tx, ty = cellCenter(x, y)
+						TD.hero.TX, TD.hero.TY = tx, ty
+						spawnExplosionRing(tx, ty, 16, THEME.TextGold)
+					end
 					updateHUD()
 				end)
 			else
@@ -1883,6 +2155,21 @@ end
 
 local function buildWaveQueue(waveNum)
 	local q = {}
+	if TD.map.Endless then
+		local cnt = 7 + math.min(28, waveNum * 2)
+		for i = 1, cnt do
+			local k = "slime"
+			if waveNum >= 2 and i % 3 == 0 then k = "goblin" end
+			if waveNum >= 3 and i % 4 == 0 then k = "knight" end
+			if waveNum >= 5 and i % 5 == 0 then k = "wraith" end
+			if waveNum >= 7 and i % 6 == 0 then k = "golem" end
+			table.insert(q, k)
+		end
+		if waveNum % 9 == 0 then table.insert(q, "hero_boss")
+		elseif waveNum % 6 == 0 then table.insert(q, "titan_boss")
+		elseif waveNum % 3 == 0 then table.insert(q, "boss") end
+		return q
+	end
 	if TD.map.BossArena then
 		-- Man choi Boss Anh Hung: moi dot deu co ho ve + Dai Boss!
 		local escorts = 4 + waveNum
@@ -1940,25 +2227,34 @@ local function spawnEnemy(kind)
 	table.insert(TD.enemies, {
 		Kind = kind, Def = def, HP = maxHp, MaxHP = maxHp,
 		X = p0.x, Y = p0.y, WpIdx = 2, Progress = 0,
-		SlowTimer = 0, SlowFactor = 1, HitFlash = 0, BobPhase = math.random() * 6, SkillCd = 5.5,
+		SlowTimer = 0, SlowFactor = 1, PoisonTimer = 0, PoisonDps = 0, HitFlash = 0, BobPhase = math.random() * 6, SkillCd = 5.5,
 		Node = node, Body = body, HpFill = hpFill, FrostCoat = frostCoat,
 		WingL = wingL, WingR = wingR, Dead = false
 	})
 end
 
-local function damageEnemy(e, dmg, slowFrac, slowDur)
+local function damageEnemy(e, dmg, slowFrac, slowDur, poisonDps, poisonDur)
 	if e.Dead then return end
 	e.HP -= dmg
-	e.HitFlash = 0.12
+	e.HitFlash = 0.10
 	if slowFrac and slowDur then
 		e.SlowFactor = math.min(e.SlowFactor, 1 - slowFrac)
 		e.SlowTimer = math.max(e.SlowTimer, slowDur)
+	end
+	if poisonDps and poisonDur then
+		e.PoisonDps = math.max(e.PoisonDps, poisonDps)
+		e.PoisonTimer = math.max(e.PoisonTimer, poisonDur)
 	end
 	if e.HP <= 0 then
 		e.Dead = true
 		TD.gold += e.Def.Reward
 		TD.kills += 1
 		saveState.TotalKills += 1
+		if e.Def.Boss then
+			saveState.Stars += 5
+			spawnFloatingText(e.X, e.Y - 14, "+5 Sao", THEME.TextPurple)
+		end
+		playSfx("kill", 1.1)
 		spawnDeathParticles(e.X, e.Y, e.Def.Color)
 		spawnFloatingText(e.X, e.Y, "+" .. tostring(e.Def.Reward) .. "V", THEME.TextGold)
 		if e.Node and e.Node.Parent then e.Node:Destroy() end
@@ -1968,7 +2264,22 @@ local function damageEnemy(e, dmg, slowFrac, slowDur)
 	end
 end
 
-local function fireTower(t, target)
+local function getTowerBuffMults(t)
+	local dmgBonus, rateBonus = 0, 0
+	for _, other in ipairs(TD.towers) do
+		if other.Def.Kind == "Buff" and other ~= t then
+			local d = math.sqrt((other.X - t.X)^2 + (other.Y - t.Y)^2)
+			if d <= other.Range then
+				dmgBonus = math.max(dmgBonus, other.BuffDmg or 0.25)
+				rateBonus = math.max(rateBonus, other.BuffRate or 0.20)
+			end
+		end
+	end
+	return 1 + dmgBonus, 1 - rateBonus
+end
+
+local function fireTower(t, target, effDmg)
+	local dmg = effDmg or t.Damage
 	local ang = math.deg(math.atan2(target.Y - t.Y, target.X - t.X))
 	t.Turret.Rotation = ang
 	-- Hoat anh giat nong sung (Recoil)
@@ -1978,6 +2289,7 @@ local function fireTower(t, target)
 	}):Play()
 
 	if t.Def.Kind == "Lightning" then
+		playSfx("zap", 1.1)
 		local hitSet = {}
 		local curX, curY = t.X, t.Y
 		local curTarget = target
@@ -1985,7 +2297,7 @@ local function fireTower(t, target)
 			if not curTarget or curTarget.Dead then break end
 			hitSet[curTarget] = true
 			spawnBeamLine(curX, curY, curTarget.X, curTarget.Y, THEME.TextCyan, 3.5, 0.16)
-			damageEnemy(curTarget, t.Damage)
+			damageEnemy(curTarget, dmg)
 			curX, curY = curTarget.X, curTarget.Y
 			local nextBest, bestD = nil, 110
 			for _, other in ipairs(TD.enemies) do
@@ -1997,9 +2309,10 @@ local function fireTower(t, target)
 			curTarget = nextBest
 		end
 	elseif t.Def.Kind == "Laser" then
+		playSfx("laser", 1.0)
 		spawnBeamLine(t.X, t.Y, target.X, target.Y, t.Def.Accent, 5, 0.22)
 		spawnExplosionRing(target.X, target.Y, 16, t.Def.Accent)
-		damageEnemy(target, t.Damage)
+		damageEnemy(target, dmg)
 	else
 		local pNode = Instance.new("Frame")
 		if t.Def.Kind == "Arrow" then
@@ -2021,10 +2334,12 @@ local function fireTower(t, target)
 		pNode.ZIndex = 20
 		pNode.Parent = UI.fxLayer
 		addStroke(pNode, THEME.Outline, 1.4)
+		playSfx(t.Def.Kind == "Frost" and "frost" or "shoot", 1.0)
 		table.insert(TD.projectiles, {
 			X = t.X, Y = t.Y, Target = target, TX = target.X, TY = target.Y,
-			Speed = t.Def.ProjSpeed or 320, Damage = t.Damage,
+			Speed = t.Def.ProjSpeed or 320, Damage = dmg,
 			Splash = t.Def.Splash, Slow = t.Def.Slow, SlowDur = t.Def.SlowDur,
+			PoisonDps = t.Def.PoisonDps and (t.Def.PoisonDps * t.Level) or nil, PoisonDur = t.Def.PoisonDur,
 			Color = t.Def.Accent, Node = pNode
 		})
 	end
@@ -2032,8 +2347,8 @@ end
 
 local function startNewMatch()
 	TD.map = MAPS[saveState.SelectedMap] or MAPS[1]
-	TD.gold = TD.map.StartGold
-	TD.lives = TD.map.StartLives
+	TD.gold = TD.map.StartGold + (saveState.Upgrades.gold or 0) * 40
+	TD.lives = TD.map.StartLives + (saveState.Upgrades.lives or 0) * 3
 	TD.wave = 0
 	TD.kills = 0
 	TD.waveSpawning = false
@@ -2051,6 +2366,10 @@ local function startNewMatch()
 	lobbyPage.Visible = false
 	gamePage.Visible = true
 	buildMapBoard(TD.map)
+	local pEnd = TD.pathPoints[#TD.pathPoints]
+	local hNode, hBody, hSword = GFX.buildHeroSprite(UI.enemyLayer, 18)
+	hNode.Position = UDim2.fromOffset(pEnd.x, pEnd.y)
+	TD.hero = { X = pEnd.x, Y = pEnd.y, TX = pEnd.x, TY = pEnd.y, Cd = 0, SkillCd = 8, Node = hNode, Body = hBody, Sword = hSword }
 	updateHUD()
 end
 
@@ -2084,7 +2403,7 @@ UI.upClose.MouseButton1Click:Connect(function()
 	updateHUD()
 end)
 
-UI.upgBtn.MouseButton1Click:Connect(function()
+local function applyTowerUpgrade(branchName)
 	local t = TD.selectedTower
 	if not t or t.Level >= 3 then return end
 	local cost = math.floor(t.Def.UpgradeCost * t.Level)
@@ -2095,14 +2414,125 @@ UI.upgBtn.MouseButton1Click:Connect(function()
 	TD.gold -= cost
 	t.Invested += cost
 	t.Level += 1
-	t.Damage = t.Damage * 1.52
-	t.Range = t.Range * 1.12
-	t.FireRate = math.max(0.25, t.FireRate * 0.88)
-	t.LvTag.Text = "C" .. tostring(t.Level)
-	spawnExplosionRing(t.X, t.Y, 26, THEME.TextGold)
-	showToast("Đã nâng " .. t.Def.Name .. " lên Cấp " .. t.Level .. "!", THEME.TextGreen, 2.0)
+	if branchName == "Hủy Diệt" then
+		t.Branch = "Hủy Diệt"
+		t.Damage = t.Damage * 1.85
+		t.Range = t.Range * 1.10
+		t.LvTag.Text = "C3A"
+	elseif branchName == "Siêu Tốc" then
+		t.Branch = "Siêu Tốc"
+		t.Damage = t.Damage * 1.32
+		t.Range = t.Range * 1.25
+		t.FireRate = math.max(0.18, t.FireRate * 0.65)
+		t.LvTag.Text = "C3B"
+	else
+		t.Damage = t.Damage * 1.52
+		t.Range = t.Range * 1.12
+		t.FireRate = math.max(0.25, t.FireRate * 0.88)
+		if t.Def.Kind == "Buff" then
+			t.BuffDmg = (t.BuffDmg or 0.25) + 0.08
+			t.BuffRate = (t.BuffRate or 0.20) + 0.06
+		end
+		t.LvTag.Text = "C" .. tostring(t.Level)
+	end
+	playSfx("upgrade", 1.0)
+	spawnExplosionRing(t.X, t.Y, 28, THEME.TextGold)
+	showToast("Đã nâng " .. t.Def.Name .. " lên Cấp " .. t.Level .. (branchName and (" (" .. branchName .. ")") or "") .. "!", THEME.TextGreen, 2.0)
+	updateHUD()
+end
+
+UI.upgBtn.MouseButton1Click:Connect(function() applyTowerUpgrade(nil) end)
+UI.evoABtn.MouseButton1Click:Connect(function() applyTowerUpgrade("Hủy Diệt") end)
+UI.evoBBtn.MouseButton1Click:Connect(function() applyTowerUpgrade("Siêu Tốc") end)
+
+UI.targetBtn.MouseButton1Click:Connect(function()
+	local t = TD.selectedTower
+	if not t then return end
+	local order = { First = "Strong", Strong = "Weak", Weak = "First" }
+	t.TargetMode = order[t.TargetMode or "First"] or "First"
 	updateHUD()
 end)
+
+UI.autoBtn.MouseButton1Click:Connect(function()
+	TD.autoWave = not TD.autoWave
+	UI.autoLbl.Text = TD.autoWave and "TỰ GỌI: BẬT" or "TỰ GỌI: TẮT"
+	showToast(TD.autoWave and "Đã bật tự động gọi đợt kế tiếp!" or "Đã tắt tự động gọi đợt.", THEME.TextCyan, 1.8)
+end)
+
+UI.sfxBtn.MouseButton1Click:Connect(function()
+	saveState.SfxOn = not saveState.SfxOn
+	UI.sfxLbl.Text = saveState.SfxOn and "Âm" or "Tắt"
+	saveData()
+end)
+
+local function openPermUpgrades()
+	for _, ch in ipairs(UI.pmList:GetChildren()) do
+		if ch:IsA("Frame") then ch:Destroy() end
+	end
+	UI.pmTitle.Text = "CÂY KỸ NĂNG VĨNH VIỄN  •  " .. formatNum(saveState.Stars) .. " Sao"
+	for _, u in ipairs(PERM_UPGRADES) do
+		local lv = saveState.Upgrades[u.Key] or 0
+		local cost = u.BaseCost + lv * 10
+		local row = Instance.new("Frame")
+		row.Size = UDim2.new(1, 0, 0, 56)
+		row.BackgroundColor3 = Color3.fromRGB(28, 32, 58)
+		row.BorderSizePixel = 0
+		row.ZIndex = 53
+		row.Parent = UI.pmList
+		addCorner(row, 10)
+		addStroke(row, Color3.fromRGB(78, 86, 134), 1.6)
+
+		local nm = Instance.new("TextLabel")
+		nm.Size = UDim2.fromOffset(290, 20)
+		nm.Position = UDim2.fromOffset(10, 6)
+		nm.BackgroundTransparency = 1
+		nm.Text = u.Name .. "  •  Cấp " .. tostring(lv) .. "/" .. tostring(u.Max)
+		nm.TextColor3 = THEME.TextGold
+		nm.Font = THEME.FontHead
+		nm.TextSize = 12
+		nm.TextXAlignment = Enum.TextXAlignment.Left
+		nm.ZIndex = 54
+		nm.Parent = row
+
+		local ds = Instance.new("TextLabel")
+		ds.Size = UDim2.fromOffset(290, 22)
+		ds.Position = UDim2.fromOffset(10, 28)
+		ds.BackgroundTransparency = 1
+		ds.Text = u.Desc
+		ds.TextColor3 = THEME.TextMuted
+		ds.Font = THEME.FontBody
+		ds.TextSize = 11
+		ds.TextXAlignment = Enum.TextXAlignment.Left
+		ds.ZIndex = 54
+		ds.Parent = row
+
+		local isMax = (lv >= u.Max)
+		local b = makeArcadeBtn(
+			row, isMax and "MAX" or (tostring(cost) .. " Sao"),
+			UDim2.fromOffset(118, 34), UDim2.new(1, -126, 0, 11),
+			isMax and Color3.fromRGB(72, 82, 112) or Color3.fromRGB(64, 194, 92),
+			isMax and Color3.fromRGB(48, 54, 78) or Color3.fromRGB(28, 134, 58),
+			9, { TextSize = 11, ZIndex = 54, Depth = 3 }
+		)
+		b.MouseButton1Click:Connect(function()
+			if isMax then return end
+			if saveState.Stars < cost then
+				showToast("Không đủ Sao! Chơi qua đợt để kiếm thêm Sao.", THEME.TextRed, 2.2)
+				return
+			end
+			saveState.Stars -= cost
+			saveState.Upgrades[u.Key] = lv + 1
+			saveData()
+			playSfx("upgrade", 1.0)
+			refreshLobbyStats()
+			openPermUpgrades()
+		end)
+	end
+	UI.pmOverlay.Visible = true
+end
+
+UI.permUpgBtn.MouseButton1Click:Connect(openPermUpgrades)
+UI.pmClose.MouseButton1Click:Connect(function() UI.pmOverlay.Visible = false end)
 
 UI.sellBtn.MouseButton1Click:Connect(function()
 	local t = TD.selectedTower
@@ -2125,7 +2555,8 @@ UI.skillBtn.MouseButton1Click:Connect(function()
 		showToast("Chưa có quái trên đường để thả Thiên Thạch!", THEME.TextGold, 2.0)
 		return
 	end
-	TD.skillCd = 25
+	TD.skillCd = math.max(12, 25 - (saveState.Upgrades.skill or 0) * 2)
+	playSfx("explosion", 0.9)
 	TD.shakeTime = 0.25
 	local dmg = 95 + TD.wave * 24
 	for _, e in ipairs(TD.enemies) do
@@ -2231,6 +2662,11 @@ track(RunService.RenderStepped:Connect(function(rawDt)
 		if e.Dead then
 			table.remove(TD.enemies, i)
 		else
+			if e.PoisonTimer > 0 then
+				e.PoisonTimer = math.max(0, e.PoisonTimer - dt)
+				damageEnemy(e, e.PoisonDps * dt)
+				if e.Dead then table.remove(TD.enemies, i) continue end
+			end
 			if e.SlowTimer > 0 then
 				e.SlowTimer = math.max(0, e.SlowTimer - dt)
 				if e.SlowTimer == 0 then e.SlowFactor = 1 end
@@ -2241,6 +2677,8 @@ track(RunService.RenderStepped:Connect(function(rawDt)
 				e.Body.BackgroundColor3 = Color3.fromRGB(224, 224, 232)
 			elseif e.SlowTimer > 0 then
 				e.Body.BackgroundColor3 = Color3.fromRGB(96, 186, 224)
+			elseif e.PoisonTimer > 0 then
+				e.Body.BackgroundColor3 = Color3.fromRGB(108, 214, 72)
 			else
 				e.Body.BackgroundColor3 = e.Def.Color
 			end
@@ -2307,24 +2745,71 @@ track(RunService.RenderStepped:Connect(function(rawDt)
 		UI.bossBarBg.Visible = false
 	end
 
-	-- Thap tim muc tieu di xa nhat trong tam & ban
-	for _, t in ipairs(TD.towers) do
-		t.Cooldown = math.max(0, t.Cooldown - dt)
-		local bestE, bestProg = nil, -1
+	-- Cap nhat Hero di chuyen & chien dau tu dong
+	if TD.hero then
+		local h = TD.hero
+		local hdx, hdy = h.TX - h.X, h.TY - h.Y
+		local hdist = math.sqrt(hdx * hdx + hdy * hdy)
+		if hdist > 2 then
+			local hstep = math.min(hdist, 115 * dt)
+			h.X += (hdx / hdist) * hstep
+			h.Y += (hdy / hdist) * hstep
+			h.Node.Position = UDim2.fromOffset(h.X, h.Y)
+		end
+		h.Cd = math.max(0, h.Cd - dt)
+		h.SkillCd = math.max(0, h.SkillCd - dt)
+		local nearE, nearD = nil, 58
 		for _, e in ipairs(TD.enemies) do
 			if not e.Dead then
-				local d = math.sqrt((e.X - t.X)^2 + (e.Y - t.Y)^2)
-				if d <= t.Range and e.Progress > bestProg then
-					bestProg = e.Progress
-					bestE = e
-				end
+				local d = math.sqrt((e.X - h.X)^2 + (e.Y - h.Y)^2)
+				if d < nearD then nearD = d nearE = e end
 			end
 		end
-		if bestE then
-			t.Turret.Rotation = math.deg(math.atan2(bestE.Y - t.Y, bestE.X - t.X))
-			if t.Cooldown <= 0 then
-				t.Cooldown = t.FireRate
-				fireTower(t, bestE)
+		if nearE and h.SkillCd <= 0 then
+			h.SkillCd = 11
+			local sDmg = (68 + TD.wave * 14) * (1 + (saveState.Upgrades.dmg or 0) * 0.08)
+			spawnExplosionRing(h.X, h.Y, 68, THEME.TextGold)
+			playSfx("explosion", 1.25)
+			for _, e in ipairs(TD.enemies) do
+				if not e.Dead and math.sqrt((e.X - h.X)^2 + (e.Y - h.Y)^2) <= 72 then
+					damageEnemy(e, sDmg, 0.35, 1.4)
+				end
+			end
+		elseif nearE and h.Cd <= 0 then
+			h.Cd = 0.62
+			local hDmg = (32 + TD.wave * 6) * (1 + (saveState.Upgrades.dmg or 0) * 0.08)
+			spawnBeamLine(h.X, h.Y, nearE.X, nearE.Y, THEME.TextGold, 4, 0.14)
+			h.Sword.Rotation = 35
+			task.delay(0.12, function() if h.Sword and h.Sword.Parent then h.Sword.Rotation = -25 end end)
+			damageEnemy(nearE, hDmg, 0.25, 0.8)
+		end
+	end
+
+	-- Thap tim muc tieu theo TargetMode + huong Buff tu Thap Buff
+	for _, t in ipairs(TD.towers) do
+		if t.Def.Kind ~= "Buff" then
+			t.Cooldown = math.max(0, t.Cooldown - dt)
+			local mode = t.TargetMode or "First"
+			local bestE, bestVal = nil, nil
+			for _, e in ipairs(TD.enemies) do
+				if not e.Dead then
+					local d = math.sqrt((e.X - t.X)^2 + (e.Y - t.Y)^2)
+					if d <= t.Range then
+						local val = (mode == "Strong") and e.HP or ((mode == "Weak") and -e.HP or e.Progress)
+						if bestVal == nil or val > bestVal then
+							bestVal = val
+							bestE = e
+						end
+					end
+				end
+			end
+			if bestE then
+				t.Turret.Rotation = math.deg(math.atan2(bestE.Y - t.Y, bestE.X - t.X))
+				if t.Cooldown <= 0 then
+					local bDmg, bRate = getTowerBuffMults(t)
+					t.Cooldown = math.max(0.15, t.FireRate * bRate)
+					fireTower(t, bestE, t.Damage * bDmg)
+				end
 			end
 		end
 	end
@@ -2340,18 +2825,20 @@ track(RunService.RenderStepped:Connect(function(rawDt)
 		local step = p.Speed * dt
 		if dist <= step + 4 then
 			if p.Splash then
+				playSfx("explosion", 1.15)
 				spawnExplosionRing(p.TX, p.TY, p.Splash, p.Color)
 				for _, e in ipairs(TD.enemies) do
 					if not e.Dead then
 						local ed = math.sqrt((e.X - p.TX)^2 + (e.Y - p.TY)^2)
 						if ed <= p.Splash then
-							damageEnemy(e, p.Damage, p.Slow, p.SlowDur)
+							damageEnemy(e, p.Damage, p.Slow, p.SlowDur, p.PoisonDps, p.PoisonDur)
 						end
 					end
 				end
 			elseif p.Target and not p.Target.Dead then
 				if p.Slow then spawnExplosionRing(p.TX, p.TY, 18, THEME.TextCyan) end
-				damageEnemy(p.Target, p.Damage, p.Slow, p.SlowDur)
+				if p.PoisonDps then spawnExplosionRing(p.TX, p.TY, 16, THEME.TextGreen) end
+				damageEnemy(p.Target, p.Damage, p.Slow, p.SlowDur, p.PoisonDps, p.PoisonDur)
 			end
 			if p.Node and p.Node.Parent then p.Node:Destroy() end
 			table.remove(TD.projectiles, i)
@@ -2363,15 +2850,26 @@ track(RunService.RenderStepped:Connect(function(rawDt)
 		end
 	end
 
-	-- Kiem tra hoan thanh dot quai
+	-- Kiem tra hoan thanh dot quai + thuong Sao + Tu Dong Goi Dot
 	if not TD.waveSpawning and #TD.enemies == 0 and TD.wave > 0 then
-		if TD.wave >= TD.map.Waves then
+		if (not TD.map.Endless) and TD.wave >= TD.map.Waves then
 			finishMatch(true)
 		elseif UI.waveBtnLbl.Text == "ĐANG CHIẾN..." then
 			local bonus = 30 + TD.wave * 8
 			TD.gold += bonus
-			showToast("Xong Đợt " .. TD.wave .. "! Thưởng +" .. bonus .. " Vàng", THEME.TextGreen, 2.2)
+			saveState.Stars += 2
+			if TD.wave > (saveState.BestWave[TD.map.Id] or 0) then
+				saveState.BestWave[TD.map.Id] = TD.wave
+			end
+			saveData()
+			TD.autoTimer = 2.4
+			showToast("Xong Đợt " .. TD.wave .. "! Thưởng +" .. bonus .. " Vàng & +2 Sao", THEME.TextGreen, 2.2)
 			updateHUD()
+		elseif TD.autoWave then
+			TD.autoTimer -= dt
+			if TD.autoTimer <= 0 then
+				startNextWave()
+			end
 		end
 	end
 end))
@@ -2384,5 +2882,5 @@ screenGui.Destroying:Connect(function()
 end)
 end)
 if not _ok then
-	warn("[ThuThanh2D v2.2.1 ERROR]: " .. tostring(_err))
+	warn("[ThuThanh2D v3.0 ERROR]: " .. tostring(_err))
 end
