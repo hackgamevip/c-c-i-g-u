@@ -1,5 +1,5 @@
 -- ============================================================
--- THU THANH 2D (TOWER DEFENSE) v2.0 - DO HOA CHI TIET 5 THAP + 6 QUAI + CONG XOAY + THANH TRI + HOAT ANH
+-- THU THANH 2D (TOWER DEFENSE) v2.1 - MAN CHOI BOSS ANH HUNG + 2 DAI BOSS MOI + THANH MAU BOSS
 -- Full-Screen Mobile & PC | Tu dong luu ky luc | Phim tat PC: RightShift
 -- ============================================================
 local _ok, _err = pcall(function()
@@ -94,6 +94,15 @@ local MAPS = {
 			{1, 1}, {13, 1}, {13, 4}, {3, 4}, {3, 8}, {11, 8}, {11, 6}, {14, 6}
 		},
 	},
+	{
+		Id = "heroic_boss", Name = "Boss Anh Hùng", Diff = "Siêu Khó", Waves = 10, StartGold = 520, StartLives = 15,
+		BossArena = true,
+		Grass1 = Color3.fromRGB(58, 22, 36), Grass2 = Color3.fromRGB(48, 18, 30),
+		PathCol = Color3.fromRGB(102, 44, 54), PathBorder = Color3.fromRGB(192, 138, 46),
+		Waypoints = {
+			{1, 2}, {12, 2}, {12, 5}, {2, 5}, {2, 8}, {13, 8}, {13, 6}, {14, 6}
+		},
+	},
 }
 
 local TOWERS = {
@@ -135,7 +144,9 @@ local ENEMIES = {
 	knight = { Name = "Hiệp Sĩ Giáp",  HP = 185,  Speed = 40, Reward = 24, Size = 26, Color = Color3.fromRGB(122, 136, 162),Eye = Color3.fromRGB(76, 188, 216), Damage = 2 },
 	wraith = { Name = "Ma Bóng Đêm",   HP = 120,  Speed = 72, Reward = 22, Size = 24, Color = Color3.fromRGB(148, 86, 212), Eye = Color3.fromRGB(220, 212, 228), Alpha = 0.25, Damage = 2 },
 	golem  = { Name = "Khổng Lồ Đá",   HP = 420,  Speed = 30, Reward = 45, Size = 30, Color = Color3.fromRGB(156, 88, 62),  Eye = Color3.fromRGB(224, 182, 52), Damage = 3 },
-	boss   = { Name = "Rồng Hắc Ám",   HP = 1250, Speed = 34, Reward = 150,Size = 36, Color = Color3.fromRGB(198, 42, 66),  Eye = Color3.fromRGB(232, 196, 56), Boss = true, Damage = 5 },
+	boss       = { Name = "Rồng Hắc Ám",       HP = 1250, Speed = 34, Reward = 150, Size = 36, Color = Color3.fromRGB(198, 42, 66),  Eye = Color3.fromRGB(232, 196, 56), Boss = true, Damage = 5 },
+	titan_boss = { Name = "Chúa Quỷ Dung Nham",HP = 2600, Speed = 30, Reward = 260, Size = 38, Color = Color3.fromRGB(142, 34, 28),  Eye = Color3.fromRGB(236, 152, 44), Boss = true, Damage = 6 },
+	hero_boss  = { Name = "Đế Vương Hư Không", HP = 5200, Speed = 28, Reward = 500, Size = 42, Color = Color3.fromRGB(48, 22, 88),   Eye = Color3.fromRGB(236, 196, 64), Boss = true, HeroBoss = true, Damage = 10 },
 }
 
 -- ============================================================
@@ -143,8 +154,8 @@ local ENEMIES = {
 -- ============================================================
 local canWriteFile = (typeof(writefile) == "function") and (typeof(readfile) == "function")
 local saveState = {
-	BestWave = { meadow = 0, desert = 0, citadel = 0 },
-	Wins = { meadow = 0, desert = 0, citadel = 0 },
+	BestWave = { meadow = 0, desert = 0, citadel = 0, heroic_boss = 0 },
+	Wins = { meadow = 0, desert = 0, citadel = 0, heroic_boss = 0 },
 	TotalKills = 0,
 	SelectedMap = 1,
 }
@@ -657,14 +668,14 @@ function GFX.buildEnemySprite(parent, def, kind, zBase)
 		crack.ZIndex = zBase + 3
 		crack.Parent = body
 		addCorner(crack, 3)
-	elseif kind == "boss" then
+	elseif kind == "boss" or kind == "titan_boss" or kind == "hero_boss" then
 		-- Doi canh rong do-den dap nhip nhang + vuong mien vang
 		wingL = Instance.new("Frame")
 		wingL.Size = UDim2.fromScale(0.58, 0.44)
 		wingL.Position = UDim2.fromScale(-0.22, 0.42)
 		wingL.AnchorPoint = Vector2.new(0.5, 0.5)
 		wingL.Rotation = -18
-		wingL.BackgroundColor3 = Color3.fromRGB(154, 28, 46)
+		wingL.BackgroundColor3 = (kind == "hero_boss") and Color3.fromRGB(132, 46, 206) or ((kind == "titan_boss") and Color3.fromRGB(214, 96, 32) or Color3.fromRGB(154, 28, 46))
 		wingL.BorderSizePixel = 0
 		wingL.ZIndex = zBase + 1
 		wingL.Parent = body
@@ -676,7 +687,7 @@ function GFX.buildEnemySprite(parent, def, kind, zBase)
 		wingR.Position = UDim2.fromScale(1.22, 0.42)
 		wingR.AnchorPoint = Vector2.new(0.5, 0.5)
 		wingR.Rotation = 18
-		wingR.BackgroundColor3 = Color3.fromRGB(154, 28, 46)
+		wingR.BackgroundColor3 = (kind == "hero_boss") and Color3.fromRGB(132, 46, 206) or ((kind == "titan_boss") and Color3.fromRGB(214, 96, 32) or Color3.fromRGB(154, 28, 46))
 		wingR.BorderSizePixel = 0
 		wingR.ZIndex = zBase + 1
 		wingR.Parent = body
@@ -1008,26 +1019,26 @@ function SEC.buildLobby()
 
 	local lay = Instance.new("UIListLayout")
 	lay.FillDirection = Enum.FillDirection.Horizontal
-	lay.Padding = UDim.new(0, 12)
+	lay.Padding = UDim.new(0, 8)
 	lay.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	lay.Parent = row
 
 	for idx, mp in ipairs(MAPS) do
 		local card = Instance.new("TextButton")
-		card.Size = UDim2.fromOffset(224, 240)
-		card.BackgroundColor3 = Color3.fromRGB(24, 28, 52)
+		card.Size = UDim2.fromOffset(168, 240)
+		card.BackgroundColor3 = mp.BossArena and Color3.fromRGB(36, 20, 44) or Color3.fromRGB(24, 28, 52)
 		card.Text = ""
 		card.AutoButtonColor = false
 		card.BorderSizePixel = 0
 		card.ZIndex = 5
 		card.Parent = row
 		addCorner(card, 14)
-		local st = addStroke(card, Color3.fromRGB(76, 86, 134), 2.2)
+		local st = addStroke(card, mp.BossArena and Color3.fromRGB(196, 72, 92) or Color3.fromRGB(76, 86, 134), 2.2)
 
 		-- Mini preview ban do
 		local prev = Instance.new("Frame")
-		prev.Size = UDim2.fromOffset(200, 108)
-		prev.Position = UDim2.fromOffset(12, 12)
+		prev.Size = UDim2.fromOffset(148, 96)
+		prev.Position = UDim2.fromOffset(10, 10)
 		prev.BackgroundColor3 = mp.Grass1
 		prev.BorderSizePixel = 0
 		prev.ClipsDescendants = true
@@ -1039,8 +1050,8 @@ function SEC.buildLobby()
 		-- Ve duong di mini
 		for w = 1, #mp.Waypoints - 1 do
 			local a, b = mp.Waypoints[w], mp.Waypoints[w + 1]
-			local x1, y1 = (a[1] - 0.5) * (200 / COLS), (a[2] - 0.5) * (108 / ROWS)
-			local x2, y2 = (b[1] - 0.5) * (200 / COLS), (b[2] - 0.5) * (108 / ROWS)
+			local x1, y1 = (a[1] - 0.5) * (148 / COLS), (a[2] - 0.5) * (96 / ROWS)
+			local x2, y2 = (b[1] - 0.5) * (148 / COLS), (b[2] - 0.5) * (96 / ROWS)
 			local seg = Instance.new("Frame")
 			local minX, minY = math.min(x1, x2), math.min(y1, y2)
 			local wPx = math.abs(x2 - x1) + 12
@@ -1056,18 +1067,18 @@ function SEC.buildLobby()
 
 		local nLbl = Instance.new("TextLabel")
 		nLbl.Size = UDim2.new(1, -16, 0, 22)
-		nLbl.Position = UDim2.fromOffset(8, 128)
+		nLbl.Position = UDim2.fromOffset(8, 114)
 		nLbl.BackgroundTransparency = 1
 		nLbl.Text = mp.Name
-		nLbl.TextColor3 = THEME.TextMain
+		nLbl.TextColor3 = mp.BossArena and THEME.TextGold or THEME.TextMain
 		nLbl.Font = THEME.FontHead
-		nLbl.TextSize = 14
+		nLbl.TextSize = 13
 		nLbl.ZIndex = 6
 		nLbl.Parent = card
 
 		local dLbl = Instance.new("TextLabel")
 		dLbl.Size = UDim2.new(1, -16, 0, 18)
-		dLbl.Position = UDim2.fromOffset(8, 152)
+		dLbl.Position = UDim2.fromOffset(8, 140)
 		dLbl.BackgroundTransparency = 1
 		dLbl.Text = "Độ khó: " .. mp.Diff .. "  •  " .. mp.Waves .. " Đợt"
 		dLbl.TextColor3 = THEME.TextCyan
@@ -1078,7 +1089,7 @@ function SEC.buildLobby()
 
 		local recLbl = Instance.new("TextLabel")
 		recLbl.Size = UDim2.new(1, -16, 0, 38)
-		recLbl.Position = UDim2.fromOffset(8, 174)
+		recLbl.Position = UDim2.fromOffset(8, 166)
 		recLbl.BackgroundTransparency = 1
 		recLbl.Text = "Kỷ lục: Đợt 0/" .. mp.Waves .. "\nChiến thắng: 0 lần"
 		recLbl.TextColor3 = THEME.TextGold
@@ -1175,6 +1186,42 @@ function SEC.buildGameUI()
 	fxLayer.ZIndex = 22
 	fxLayer.Parent = board
 	UI.fxLayer = fxLayer
+
+	-- Thanh mau Boss lon tren cung ban co (hien khi Boss xuat hien)
+	local bossBarBg = Instance.new("Frame")
+	bossBarBg.Size = UDim2.fromOffset(320, 26)
+	bossBarBg.Position = UDim2.new(0.5, 0, 0, 8)
+	bossBarBg.AnchorPoint = Vector2.new(0.5, 0)
+	bossBarBg.BackgroundColor3 = Color3.fromRGB(22, 16, 34)
+	bossBarBg.BorderSizePixel = 0
+	bossBarBg.Visible = false
+	bossBarBg.ZIndex = 36
+	bossBarBg.Parent = board
+	addCorner(bossBarBg, 8)
+	addStroke(bossBarBg, THEME.TextGold, 2)
+	UI.bossBarBg = bossBarBg
+
+	local bossBarFill = Instance.new("Frame")
+	bossBarFill.Size = UDim2.fromScale(1, 1)
+	bossBarFill.BackgroundColor3 = Color3.fromRGB(204, 46, 74)
+	bossBarFill.BorderSizePixel = 0
+	bossBarFill.ZIndex = 37
+	bossBarFill.Parent = bossBarBg
+	addCorner(bossBarFill, 8)
+	addGradient(bossBarFill, Color3.fromRGB(228, 62, 92), Color3.fromRGB(142, 22, 54), 90)
+	UI.bossBarFill = bossBarFill
+
+	local bossBarLbl = Instance.new("TextLabel")
+	bossBarLbl.Size = UDim2.fromScale(1, 1)
+	bossBarLbl.BackgroundTransparency = 1
+	bossBarLbl.Text = "BOSS"
+	bossBarLbl.TextColor3 = THEME.TextMain
+	bossBarLbl.Font = THEME.FontHead
+	bossBarLbl.TextSize = 11
+	bossBarLbl.ZIndex = 38
+	bossBarLbl.Parent = bossBarBg
+	addTextOutline(bossBarLbl, 1.5, THEME.Outline)
+	UI.bossBarLbl = bossBarLbl
 
 	-- Bang dieu khien ben phai (156x360)
 	local side = Instance.new("Frame")
@@ -1724,6 +1771,26 @@ end
 
 local function buildWaveQueue(waveNum)
 	local q = {}
+	if TD.map.BossArena then
+		-- Man choi Boss Anh Hung: moi dot deu co ho ve + Dai Boss!
+		local escorts = 4 + waveNum
+		for i = 1, escorts do
+			local k = (i % 3 == 0) and "golem" or ((i % 2 == 0) and "knight" or "wraith")
+			table.insert(q, k)
+		end
+		if waveNum == TD.map.Waves then
+			table.insert(q, "titan_boss")
+			table.insert(q, "hero_boss")
+		elseif waveNum >= 7 then
+			table.insert(q, "titan_boss")
+			table.insert(q, "boss")
+		elseif waveNum >= 4 then
+			table.insert(q, "titan_boss")
+		else
+			table.insert(q, "boss")
+		end
+		return q
+	end
 	local count = 6 + waveNum * 2
 	for i = 1, count do
 		local kind = "slime"
@@ -1761,7 +1828,7 @@ local function spawnEnemy(kind)
 	table.insert(TD.enemies, {
 		Kind = kind, Def = def, HP = maxHp, MaxHP = maxHp,
 		X = p0.x, Y = p0.y, WpIdx = 2, Progress = 0,
-		SlowTimer = 0, SlowFactor = 1, HitFlash = 0, BobPhase = math.random() * 6,
+		SlowTimer = 0, SlowFactor = 1, HitFlash = 0, BobPhase = math.random() * 6, SkillCd = 5.5,
 		Node = node, Body = body, HpFill = hpFill, FrostCoat = frostCoat,
 		WingL = wingL, WingR = wingR, Dead = false
 	})
@@ -1866,6 +1933,7 @@ local function startNewMatch()
 	TD.selectedBuildIdx = 1
 	UI.pauseLbl.Text = "II"
 	UI.endCard.Visible = false
+	UI.bossBarBg.Visible = false
 	UI.hudGroup.Visible = true
 	UI.homeBtn.Visible = true
 	lobbyPage.Visible = false
@@ -2061,6 +2129,17 @@ track(RunService.RenderStepped:Connect(function(rawDt)
 				e.WingL.Rotation = -18 + flap
 				e.WingR.Rotation = 18 - flap
 			end
+			if e.Def.HeroBoss then
+				e.SkillCd -= dt
+				if e.SkillCd <= 0 then
+					e.SkillCd = 6.0
+					local heal = math.floor(e.MaxHP * 0.04)
+					e.HP = math.min(e.MaxHP, e.HP + heal)
+					e.HpFill.Size = UDim2.fromScale(math.clamp(e.HP / e.MaxHP, 0, 1), 1)
+					spawnExplosionRing(e.X, e.Y, 44, Color3.fromRGB(186, 86, 232))
+					spawnFloatingText(e.X, e.Y, "+" .. formatNum(heal) .. " HP", THEME.TextPurple)
+				end
+			end
 
 			local wp = TD.pathPoints[e.WpIdx]
 			if wp then
@@ -2091,6 +2170,21 @@ track(RunService.RenderStepped:Connect(function(rawDt)
 				end
 			end
 		end
+	end
+
+	-- Cap nhat Thanh Mau Boss lon tren cung ban co
+	local activeBoss = nil
+	for _, e in ipairs(TD.enemies) do
+		if not e.Dead and e.Def.Boss then
+			if not activeBoss or e.MaxHP > activeBoss.MaxHP then activeBoss = e end
+		end
+	end
+	if activeBoss then
+		UI.bossBarBg.Visible = true
+		UI.bossBarFill.Size = UDim2.fromScale(math.clamp(activeBoss.HP / activeBoss.MaxHP, 0, 1), 1)
+		UI.bossBarLbl.Text = activeBoss.Def.Name .. "  •  " .. formatNum(activeBoss.HP) .. " / " .. formatNum(activeBoss.MaxHP)
+	else
+		UI.bossBarBg.Visible = false
 	end
 
 	-- Thap tim muc tieu di xa nhat trong tam & ban
@@ -2170,5 +2264,5 @@ screenGui.Destroying:Connect(function()
 end)
 end)
 if not _ok then
-	warn("[ThuThanh2D v2.0 ERROR]: " .. tostring(_err))
+	warn("[ThuThanh2D v2.1 ERROR]: " .. tostring(_err))
 end
