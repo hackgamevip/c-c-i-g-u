@@ -1,5 +1,5 @@
 -- ============================================================
--- THU THANH 2D (TOWER DEFENSE) v2.1 - MAN CHOI BOSS ANH HUNG + 2 DAI BOSS MOI + THANH MAU BOSS
+-- THU THANH 2D (TOWER DEFENSE) v2.2 - POPUP CHON 5 THAP TAI O DAT + POPUP NANG CAP TAI THAP
 -- Full-Screen Mobile & PC | Tu dong luu ky luc | Phim tat PC: RightShift
 -- ============================================================
 local _ok, _err = pcall(function()
@@ -900,7 +900,7 @@ function SEC.buildTopBar()
 	-- Cac chi so trong tran (an khi o sanh)
 	local hudGroup = Instance.new("Frame")
 	hudGroup.Size = UDim2.fromOffset(424, 40)
-	hudGroup.Position = UDim2.fromOffset(178, 4)
+	hudGroup.Position = UDim2.fromOffset(168, 4)
 	hudGroup.BackgroundTransparency = 1
 	hudGroup.Visible = false
 	hudGroup.ZIndex = 11
@@ -1132,8 +1132,343 @@ refreshLobbyStats()
 -- ============================================================
 -- XAY DUNG MAN CHOI (BAN CO 14x9 + BANG CHON 5 THAP + NANG CAP)
 -- ============================================================
-local towerShopBtns = {}
+local popupBuildBtns = {}
 function SEC.buildGameUI()
+	-- Ban co 560x360 can giua dep mat (khong con cot thap ben ngoai)
+	local board = Instance.new("Frame")
+	board.Size = UDim2.fromOffset(COLS * CELL, ROWS * CELL)
+	board.Position = UDim2.fromOffset(82, 4)
+	board.BackgroundColor3 = Color3.fromRGB(24, 32, 48)
+	board.BorderSizePixel = 0
+	board.ClipsDescendants = true
+	board.ZIndex = 4
+	board.Parent = gamePage
+	addCorner(board, 10)
+	addStroke(board, Color3.fromRGB(92, 74, 168), 2.2)
+	UI.board = board
+
+	local tileLayer = Instance.new("Frame")
+	tileLayer.Size = UDim2.fromScale(1, 1)
+	tileLayer.BackgroundTransparency = 1
+	tileLayer.ZIndex = 5
+	tileLayer.Parent = board
+	UI.tileLayer = tileLayer
+
+	-- Khung vien vang danh dau o dat dang chon de xay thap
+	local tileMarker = Instance.new("Frame")
+	tileMarker.Size = UDim2.fromOffset(CELL - 2, CELL - 2)
+	tileMarker.AnchorPoint = Vector2.new(0.5, 0.5)
+	tileMarker.BackgroundColor3 = THEME.TextGold
+	tileMarker.BackgroundTransparency = 0.78
+	tileMarker.BorderSizePixel = 0
+	tileMarker.Visible = false
+	tileMarker.ZIndex = 9
+	tileMarker.Parent = board
+	addCorner(tileMarker, 6)
+	addStroke(tileMarker, THEME.TextGold, 2.2)
+	UI.tileMarker = tileMarker
+
+	local rangeRing = Instance.new("Frame")
+	rangeRing.AnchorPoint = Vector2.new(0.5, 0.5)
+	rangeRing.BackgroundColor3 = Color3.fromRGB(96, 192, 224)
+	rangeRing.BackgroundTransparency = 0.84
+	rangeRing.BorderSizePixel = 0
+	rangeRing.Visible = false
+	rangeRing.ZIndex = 8
+	rangeRing.Parent = board
+	addCorner(rangeRing, 999)
+	addStroke(rangeRing, Color3.fromRGB(118, 212, 232), 1.6)
+	UI.rangeRing = rangeRing
+
+	local towerLayer = Instance.new("Frame")
+	towerLayer.Size = UDim2.fromScale(1, 1)
+	towerLayer.BackgroundTransparency = 1
+	towerLayer.ZIndex = 10
+	towerLayer.Parent = board
+	UI.towerLayer = towerLayer
+
+	local enemyLayer = Instance.new("Frame")
+	enemyLayer.Size = UDim2.fromScale(1, 1)
+	enemyLayer.BackgroundTransparency = 1
+	enemyLayer.ZIndex = 14
+	enemyLayer.Parent = board
+	UI.enemyLayer = enemyLayer
+
+	local fxLayer = Instance.new("Frame")
+	fxLayer.Size = UDim2.fromScale(1, 1)
+	fxLayer.BackgroundTransparency = 1
+	fxLayer.ZIndex = 22
+	fxLayer.Parent = board
+	UI.fxLayer = fxLayer
+
+	-- POPUP CHON 5 TOA THAP KHI BAM VAO VUNG DAT TRONG
+	local buildPopup = Instance.new("Frame")
+	buildPopup.Size = UDim2.fromOffset(316, 86)
+	buildPopup.BackgroundColor3 = Color3.fromRGB(20, 24, 46)
+	buildPopup.BorderSizePixel = 0
+	buildPopup.Visible = false
+	buildPopup.ZIndex = 34
+	buildPopup.Parent = board
+	addCorner(buildPopup, 12)
+	addStroke(buildPopup, THEME.TextGold, 2.2)
+	addGradient(buildPopup, Color3.fromRGB(34, 38, 72), Color3.fromRGB(18, 20, 40), 90)
+	UI.buildPopup = buildPopup
+
+	local bpTitle = Instance.new("TextLabel")
+	bpTitle.Size = UDim2.new(1, -28, 0, 16)
+	bpTitle.Position = UDim2.fromOffset(8, 3)
+	bpTitle.BackgroundTransparency = 1
+	bpTitle.Text = "CHỌN THÁP ĐỂ XÂY"
+	bpTitle.TextColor3 = THEME.TextGold
+	bpTitle.Font = THEME.FontHead
+	bpTitle.TextSize = 10
+	bpTitle.TextXAlignment = Enum.TextXAlignment.Left
+	bpTitle.ZIndex = 35
+	bpTitle.Parent = buildPopup
+
+	local bpClose = makeArcadeBtn(
+		buildPopup, "X",
+		UDim2.fromOffset(20, 18), UDim2.new(1, -24, 0, 2),
+		Color3.fromRGB(204, 62, 68), Color3.fromRGB(142, 28, 36), 6,
+		{ TextSize = 10, ZIndex = 35, Depth = 2, Stroke = 1.4 }
+	)
+	UI.bpClose = bpClose
+
+	for i, td in ipairs(TOWERS) do
+		local b = Instance.new("TextButton")
+		b.Size = UDim2.fromOffset(56, 60)
+		b.Position = UDim2.fromOffset(8 + (i - 1) * 61, 21)
+		b.BackgroundColor3 = Color3.fromRGB(28, 34, 62)
+		b.Text = ""
+		b.AutoButtonColor = false
+		b.BorderSizePixel = 0
+		b.ZIndex = 35
+		b.Parent = buildPopup
+		addCorner(b, 8)
+		local st = addStroke(b, Color3.fromRGB(78, 92, 146), 1.6)
+
+		local iconBox = Instance.new("Frame")
+		iconBox.Size = UDim2.fromOffset(30, 30)
+		iconBox.Position = UDim2.new(0.5, 0, 0, 17)
+		iconBox.AnchorPoint = Vector2.new(0.5, 0.5)
+		iconBox.BackgroundTransparency = 1
+		iconBox.ZIndex = 36
+		iconBox.Parent = b
+		GFX.buildTowerSprite(iconBox, td, 26, 36)
+
+		local nm = Instance.new("TextLabel")
+		nm.Size = UDim2.new(1, -2, 0, 13)
+		nm.Position = UDim2.fromOffset(1, 32)
+		nm.BackgroundTransparency = 1
+		nm.Text = td.Name
+		nm.TextColor3 = THEME.TextMain
+		nm.Font = THEME.FontHead
+		nm.TextSize = 8
+		nm.TextTruncate = Enum.TextTruncate.AtEnd
+		nm.ZIndex = 36
+		nm.Parent = b
+
+		local pr = Instance.new("TextLabel")
+		pr.Size = UDim2.new(1, -2, 0, 13)
+		pr.Position = UDim2.fromOffset(1, 45)
+		pr.BackgroundTransparency = 1
+		pr.Text = tostring(td.Cost) .. "V"
+		pr.TextColor3 = THEME.TextGold
+		pr.Font = THEME.FontHead
+		pr.TextSize = 10
+		pr.ZIndex = 36
+		pr.Parent = b
+
+		popupBuildBtns[i] = { Btn = b, Stroke = st, PriceLbl = pr, Def = td }
+	end
+
+	-- POPUP NANG CAP & BAN KHI BAM VAO TOA THAP DA XAY
+	local upgradePopup = Instance.new("Frame")
+	upgradePopup.Size = UDim2.fromOffset(244, 78)
+	upgradePopup.BackgroundColor3 = Color3.fromRGB(20, 24, 46)
+	upgradePopup.BorderSizePixel = 0
+	upgradePopup.Visible = false
+	upgradePopup.ZIndex = 34
+	upgradePopup.Parent = board
+	addCorner(upgradePopup, 12)
+	addStroke(upgradePopup, THEME.TextCyan, 2.2)
+	addGradient(upgradePopup, Color3.fromRGB(34, 38, 72), Color3.fromRGB(18, 20, 40), 90)
+	UI.upgradePopup = upgradePopup
+
+	local upTitle = Instance.new("TextLabel")
+	upTitle.Size = UDim2.new(1, -30, 0, 18)
+	upTitle.Position = UDim2.fromOffset(8, 4)
+	upTitle.BackgroundTransparency = 1
+	upTitle.Text = "Cung Thủ Cấp 1"
+	upTitle.TextColor3 = THEME.TextGold
+	upTitle.Font = THEME.FontHead
+	upTitle.TextSize = 11
+	upTitle.TextXAlignment = Enum.TextXAlignment.Left
+	upTitle.ZIndex = 35
+	upTitle.Parent = upgradePopup
+	UI.upTitle = upTitle
+
+	local upStats = Instance.new("TextLabel")
+	upStats.Size = UDim2.new(1, -16, 0, 14)
+	upStats.Position = UDim2.fromOffset(8, 21)
+	upStats.BackgroundTransparency = 1
+	upStats.Text = "ST: 22  •  Tầm: 128"
+	upStats.TextColor3 = THEME.TextMuted
+	upStats.Font = THEME.FontBody
+	upStats.TextSize = 10
+	upStats.TextXAlignment = Enum.TextXAlignment.Left
+	upStats.ZIndex = 35
+	upStats.Parent = upgradePopup
+	UI.upStats = upStats
+
+	local upClose = makeArcadeBtn(
+		upgradePopup, "X",
+		UDim2.fromOffset(20, 18), UDim2.new(1, -24, 0, 3),
+		Color3.fromRGB(204, 62, 68), Color3.fromRGB(142, 28, 36), 6,
+		{ TextSize = 10, ZIndex = 35, Depth = 2, Stroke = 1.4 }
+	)
+	UI.upClose = upClose
+
+	local upgBtn, upgLbl = makeArcadeBtn(
+		upgradePopup, "NÂNG CẤP",
+		UDim2.fromOffset(124, 32), UDim2.fromOffset(8, 39),
+		Color3.fromRGB(64, 188, 96), Color3.fromRGB(28, 132, 58), 8,
+		{ TextSize = 10, ZIndex = 35, Depth = 3, Stroke = 1.6 }
+	)
+	UI.upgBtn = upgBtn
+	UI.upgLbl = upgLbl
+
+	local sellBtn, sellLbl = makeArcadeBtn(
+		upgradePopup, "BÁN",
+		UDim2.fromOffset(96, 32), UDim2.fromOffset(140, 39),
+		Color3.fromRGB(206, 72, 76), Color3.fromRGB(146, 34, 42), 8,
+		{ TextSize = 10, ZIndex = 35, Depth = 3, Stroke = 1.6 }
+	)
+	UI.sellBtn = sellBtn
+	UI.sellLbl = sellLbl
+
+	-- Thanh mau Boss lon tren cung ban co (hien khi Boss xuat hien)
+	local bossBarBg = Instance.new("Frame")
+	bossBarBg.Size = UDim2.fromOffset(320, 26)
+	bossBarBg.Position = UDim2.new(0.5, 0, 0, 8)
+	bossBarBg.AnchorPoint = Vector2.new(0.5, 0)
+	bossBarBg.BackgroundColor3 = Color3.fromRGB(22, 16, 34)
+	bossBarBg.BorderSizePixel = 0
+	bossBarBg.Visible = false
+	bossBarBg.ZIndex = 36
+	bossBarBg.Parent = board
+	addCorner(bossBarBg, 8)
+	addStroke(bossBarBg, THEME.TextGold, 2)
+	UI.bossBarBg = bossBarBg
+
+	local bossBarFill = Instance.new("Frame")
+	bossBarFill.Size = UDim2.fromScale(1, 1)
+	bossBarFill.BackgroundColor3 = Color3.fromRGB(204, 46, 74)
+	bossBarFill.BorderSizePixel = 0
+	bossBarFill.ZIndex = 37
+	bossBarFill.Parent = bossBarBg
+	addCorner(bossBarFill, 8)
+	addGradient(bossBarFill, Color3.fromRGB(228, 62, 92), Color3.fromRGB(142, 22, 54), 90)
+	UI.bossBarFill = bossBarFill
+
+	local bossBarLbl = Instance.new("TextLabel")
+	bossBarLbl.Size = UDim2.fromScale(1, 1)
+	bossBarLbl.BackgroundTransparency = 1
+	bossBarLbl.Text = "BOSS"
+	bossBarLbl.TextColor3 = THEME.TextMain
+	bossBarLbl.Font = THEME.FontHead
+	bossBarLbl.TextSize = 11
+	bossBarLbl.ZIndex = 38
+	bossBarLbl.Parent = bossBarBg
+	addTextOutline(bossBarLbl, 1.5, THEME.Outline)
+	UI.bossBarLbl = bossBarLbl
+
+	-- Thanh duoi (724x38): Huong dan + Nut Thien Thach + Nut Goi Dot
+	local botBar = Instance.new("Frame")
+	botBar.Size = UDim2.fromOffset(724, 38)
+	botBar.Position = UDim2.fromOffset(0, 368)
+	botBar.BackgroundColor3 = Color3.fromRGB(22, 26, 48)
+	botBar.BorderSizePixel = 0
+	botBar.ZIndex = 6
+	botBar.Parent = gamePage
+	addCorner(botBar, 10)
+	addStroke(botBar, Color3.fromRGB(82, 72, 148), 1.6)
+
+	local infoLbl = Instance.new("TextLabel")
+	infoLbl.Size = UDim2.fromOffset(396, 36)
+	infoLbl.Position = UDim2.fromOffset(12, 1)
+	infoLbl.BackgroundTransparency = 1
+	infoLbl.Text = "Chạm vào ô cỏ để xây tháp  •  Chạm vào tháp để nâng cấp"
+	infoLbl.TextColor3 = THEME.TextMain
+	infoLbl.Font = THEME.FontBody
+	infoLbl.TextSize = 12
+	infoLbl.TextXAlignment = Enum.TextXAlignment.Left
+	infoLbl.ZIndex = 7
+	infoLbl.Parent = botBar
+	UI.botInfoLbl = infoLbl
+
+	local skillBtn, skillLbl = makeArcadeBtn(
+		botBar, "THIÊN THẠCH",
+		UDim2.fromOffset(148, 30), UDim2.new(1, -308, 0, 4),
+		Color3.fromRGB(214, 86, 48), Color3.fromRGB(156, 36, 32), 8,
+		{ TextSize = 11, ZIndex = 8, Depth = 3, Stroke = 1.6 }
+	)
+	UI.skillBtn = skillBtn
+	UI.skillLbl = skillLbl
+
+	local waveBtn, waveBtnLbl = makeArcadeBtn(
+		botBar, "GỌI ĐỢT 1",
+		UDim2.fromOffset(148, 30), UDim2.new(1, -154, 0, 4),
+		Color3.fromRGB(64, 194, 88), Color3.fromRGB(28, 134, 54), 8,
+		{ TextSize = 12, ZIndex = 8, Depth = 3, Stroke = 1.6 }
+	)
+	UI.waveBtn = waveBtn
+	UI.waveBtnLbl = waveBtnLbl
+
+	-- Bang Ket Thuc (Thang / Thua)
+	local endCard = Instance.new("Frame")
+	endCard.Size = UDim2.fromOffset(330, 194)
+	endCard.Position = UDim2.fromScale(0.5, 0.5)
+	endCard.AnchorPoint = Vector2.new(0.5, 0.5)
+	endCard.BackgroundColor3 = Color3.fromRGB(20, 24, 44)
+	endCard.BorderSizePixel = 0
+	endCard.Visible = false
+	endCard.ZIndex = 45
+	endCard.Parent = board
+	addCorner(endCard, 14)
+	UI.endStroke = addStroke(endCard, THEME.TextGold, 2.6)
+	UI.endCard = endCard
+
+	local endTitle = Instance.new("TextLabel")
+	endTitle.Size = UDim2.new(1, 0, 0, 34)
+	endTitle.Position = UDim2.fromOffset(0, 14)
+	endTitle.BackgroundTransparency = 1
+	endTitle.Text = "CHIẾN THẮNG!"
+	endTitle.TextColor3 = THEME.TextGold
+	endTitle.Font = THEME.FontHead
+	endTitle.TextSize = 20
+	endTitle.ZIndex = 46
+	endTitle.Parent = endCard
+	addTextOutline(endTitle, 2, THEME.Outline)
+	UI.endTitle = endTitle
+
+	local endDesc = Instance.new("TextLabel")
+	endDesc.Size = UDim2.new(1, -24, 0, 56)
+	endDesc.Position = UDim2.fromOffset(12, 54)
+	endDesc.BackgroundTransparency = 1
+	endDesc.Text = ""
+	endDesc.TextColor3 = THEME.TextMain
+	endDesc.Font = THEME.FontBody
+	endDesc.TextSize = 13
+	endDesc.TextWrapped = true
+	endDesc.ZIndex = 46
+	endDesc.Parent = endCard
+	UI.endDesc = endDesc
+
+	UI.endReplayBtn = makeArcadeBtn(endCard, "CHƠI LẠI", UDim2.fromOffset(136, 40), UDim2.fromOffset(22, 134), Color3.fromRGB(64, 198, 86), Color3.fromRGB(28, 136, 52), 10, { TextSize = 13, ZIndex = 47, Depth = 4 })
+	UI.endHomeBtn   = makeArcadeBtn(endCard, "VỀ SẢNH",  UDim2.fromOffset(136, 40), UDim2.fromOffset(172, 134), Color3.fromRGB(142, 72, 208), Color3.fromRGB(88, 36, 162), 10, { TextSize = 13, ZIndex = 47, Depth = 4 })
+end
+SEC.buildGameUI()
 	-- Ban co 560x360 ben trai
 	local board = Instance.new("Frame")
 	board.Size = UDim2.fromOffset(COLS * CELL, ROWS * CELL)
@@ -1420,7 +1755,7 @@ local TD = {
 	spawnQueue = {},
 	spawnTimer = 0,
 	skillCd = 0,
-	selectedBuildIdx = 1,
+	pendingCell = nil,
 	selectedTower = nil,
 	pathCells = {},
 	pathPoints = {},
@@ -1520,36 +1855,71 @@ local function spawnDeathParticles(x, y, col)
 	end
 end
 
+local function positionPopupNear(popup, cx, cy, pw, ph)
+	local boardW, boardH = COLS * CELL, ROWS * CELL
+	local px = math.clamp(cx - pw * 0.5, 6, boardW - pw - 6)
+	local py = cy - ph - 26
+	if py < 6 then
+		py = cy + 26
+	end
+	py = math.clamp(py, 6, boardH - ph - 6)
+	popup.Position = UDim2.fromOffset(px, py)
+end
+
+local function closeBoardPopups()
+	TD.pendingCell = nil
+	TD.selectedTower = nil
+	UI.buildPopup.Visible = false
+	UI.upgradePopup.Visible = false
+	UI.tileMarker.Visible = false
+	UI.rangeRing.Visible = false
+end
+
 local function updateHUD()
 	UI.livesLbl.Text = "Máu: " .. tostring(math.max(0, TD.lives))
 	UI.goldLbl.Text  = "Vàng: " .. formatNum(TD.gold)
 	UI.waveLbl.Text  = "Đợt: " .. tostring(TD.wave) .. "/" .. tostring(TD.map.Waves)
 	UI.spdLbl.Text   = tostring(TD.speedMult) .. "x"
 
-	for i, sb in ipairs(towerShopBtns) do
-		local isSel = (TD.selectedBuildIdx == i) and (TD.selectedTower == nil)
-		sb.Stroke.Color = isSel and THEME.TextGold or ((TD.gold >= sb.Def.Cost) and Color3.fromRGB(78, 96, 148) or Color3.fromRGB(118, 52, 58))
-		sb.Stroke.Thickness = isSel and 2.4 or 1.5
+	if TD.pendingCell then
+		local cx, cy = cellCenter(TD.pendingCell.gx, TD.pendingCell.gy)
+		UI.tileMarker.Visible = true
+		UI.tileMarker.Position = UDim2.fromOffset(cx, cy)
+		UI.buildPopup.Visible = true
+		positionPopupNear(UI.buildPopup, cx, cy, 316, 86)
+		for _, pb in ipairs(popupBuildBtns) do
+			local afford = (TD.gold >= pb.Def.Cost)
+			pb.Stroke.Color = afford and THEME.TextGold or Color3.fromRGB(118, 52, 58)
+			pb.PriceLbl.TextColor3 = afford and THEME.TextGold or THEME.TextRed
+		end
+	else
+		UI.tileMarker.Visible = false
+		UI.buildPopup.Visible = false
 	end
 
 	if TD.selectedTower then
 		local t = TD.selectedTower
 		local upCost = math.floor(t.Def.UpgradeCost * t.Level)
 		local sellVal = math.floor(t.Invested * 0.7)
-		UI.botInfoLbl.Text = string.format("%s Cấp %d  •  Sát thương: %d  •  Tầm: %d", t.Def.Name, t.Level, math.floor(t.Damage), math.floor(t.Range))
-		UI.upgBtn.Visible = (t.Level < 3)
-		UI.upgLbl.Text = (t.Level < 3) and ("NÂNG CẤP (" .. upCost .. ")") or "MAX CẤP"
-		UI.sellBtn.Visible = true
-		UI.sellLbl.Text = "BÁN (+" .. sellVal .. ")"
+		UI.upgradePopup.Visible = true
+		positionPopupNear(UI.upgradePopup, t.X, t.Y, 244, 78)
+		UI.upTitle.Text = string.format("%s  •  Cấp %d", t.Def.Name, t.Level)
+		UI.upStats.Text = string.format("Sát thương: %d  •  Tầm bắn: %d", math.floor(t.Damage), math.floor(t.Range))
+		UI.upgBtn.Visible = true
+		UI.upgLbl.Text = (t.Level < 3) and ("NÂNG CẤP (" .. upCost .. "V)") or "MAX CẤP"
+		UI.sellLbl.Text = "BÁN (+" .. sellVal .. "V)"
 		UI.rangeRing.Visible = true
 		UI.rangeRing.Position = UDim2.fromOffset(t.X, t.Y)
 		UI.rangeRing.Size = UDim2.fromOffset(t.Range * 2, t.Range * 2)
+		UI.botInfoLbl.Text = string.format("Đang chọn %s Cấp %d  •  Bấm Nâng Cấp hoặc Bán ngay trên tháp", t.Def.Name, t.Level)
 	else
-		local bd = TOWERS[TD.selectedBuildIdx]
-		UI.botInfoLbl.Text = "Đang chọn: " .. bd.Name .. " (" .. bd.Cost .. " Vàng)  •  " .. bd.Desc
-		UI.upgBtn.Visible = false
-		UI.sellBtn.Visible = false
+		UI.upgradePopup.Visible = false
 		UI.rangeRing.Visible = false
+		if TD.pendingCell then
+			UI.botInfoLbl.Text = "Chọn 1 trong 5 tòa tháp trên bảng để xây vào ô đất đã chọn"
+		else
+			UI.botInfoLbl.Text = "Chạm vào ô cỏ để xây tháp  •  Chạm vào tháp để nâng cấp"
+		end
 	end
 
 	if TD.skillCd > 0 then
@@ -1575,7 +1945,7 @@ local function clearMatchLayers()
 	TD.towers = {}
 	TD.enemies = {}
 	TD.projectiles = {}
-	TD.selectedTower = nil
+	closeBoardPopups()
 end
 
 local function finishMatch(won)
@@ -1604,18 +1974,14 @@ local function getTowerAt(gx, gy)
 	return nil
 end
 
-local function buildTowerAt(gx, gy)
+local function buildTowerAt(gx, gy, towerIdx)
 	if TD.over or TD.paused then return end
 	if TD.pathCells[gx .. "_" .. gy] then return end
-	local existing = getTowerAt(gx, gy)
-	if existing then
-		TD.selectedTower = existing
-		updateHUD()
-		return
-	end
-	local def = TOWERS[TD.selectedBuildIdx]
+	if getTowerAt(gx, gy) then return end
+	local def = TOWERS[towerIdx]
+	if not def then return end
 	if TD.gold < def.Cost then
-		showToast("Không đủ vàng để xây " .. def.Name .. "!", THEME.TextRed, 2.0)
+		showToast("Không đủ vàng để xây " .. def.Name .. " (" .. def.Cost .. "V)!", THEME.TextRed, 2.0)
 		return
 	end
 	TD.gold -= def.Cost
@@ -1657,10 +2023,11 @@ local function buildTowerAt(gx, gy)
 	}
 	table.insert(TD.towers, tObj)
 	holder.MouseButton1Click:Connect(function()
+		TD.pendingCell = nil
 		TD.selectedTower = tObj
 		updateHUD()
 	end)
-	TD.selectedTower = nil
+	closeBoardPopups()
 	updateHUD()
 end
 
@@ -1698,10 +2065,23 @@ local function buildMapBoard(mp)
 			if isPath then
 				tile.BackgroundColor3 = mp.PathCol
 				addStroke(tile, mp.PathBorder, 1)
+				tile.MouseButton1Click:Connect(function()
+					closeBoardPopups()
+					updateHUD()
+				end)
 			else
 				tile.BackgroundColor3 = ((x + y) % 2 == 0) and mp.Grass1 or mp.Grass2
 				tile.MouseButton1Click:Connect(function()
-					buildTowerAt(x, y)
+					if TD.over or TD.paused then return end
+					local existing = getTowerAt(x, y)
+					if existing then
+						TD.pendingCell = nil
+						TD.selectedTower = existing
+					else
+						TD.selectedTower = nil
+						TD.pendingCell = { gx = x, gy = y }
+					end
+					updateHUD()
 				end)
 			end
 			tile.Parent = UI.tileLayer
@@ -1930,7 +2310,7 @@ local function startNewMatch()
 	TD.over = false
 	TD.paused = false
 	TD.active = true
-	TD.selectedBuildIdx = 1
+	closeBoardPopups()
 	UI.pauseLbl.Text = "II"
 	UI.endCard.Visible = false
 	UI.bossBarBg.Visible = false
@@ -1956,13 +2336,21 @@ end
 -- ============================================================
 -- KET NOI NUT BAM & VONG LAP CHINH (RENDERSTEPPED)
 -- ============================================================
-for i, sb in ipairs(towerShopBtns) do
-	sb.Btn.MouseButton1Click:Connect(function()
-		TD.selectedBuildIdx = i
-		TD.selectedTower = nil
-		updateHUD()
+for i, pb in ipairs(popupBuildBtns) do
+	pb.Btn.MouseButton1Click:Connect(function()
+		if TD.pendingCell then
+			buildTowerAt(TD.pendingCell.gx, TD.pendingCell.gy, i)
+		end
 	end)
 end
+UI.bpClose.MouseButton1Click:Connect(function()
+	closeBoardPopups()
+	updateHUD()
+end)
+UI.upClose.MouseButton1Click:Connect(function()
+	closeBoardPopups()
+	updateHUD()
+end)
 
 UI.upgBtn.MouseButton1Click:Connect(function()
 	local t = TD.selectedTower
@@ -2074,9 +2462,9 @@ track(RunService.RenderStepped:Connect(function(rawDt)
 	-- Rung nhe ban co khi tha Thien Thach
 	if TD.shakeTime > 0 then
 		TD.shakeTime = math.max(0, TD.shakeTime - rawDt)
-		UI.board.Position = UDim2.fromOffset(math.random(-3, 3), 4 + math.random(-3, 3))
+		UI.board.Position = UDim2.fromOffset(82 + math.random(-3, 3), 4 + math.random(-3, 3))
 	else
-		UI.board.Position = UDim2.fromOffset(0, 4)
+		UI.board.Position = UDim2.fromOffset(82, 4)
 	end
 
 	-- Xoay vong cong quai
@@ -2264,5 +2652,5 @@ screenGui.Destroying:Connect(function()
 end)
 end)
 if not _ok then
-	warn("[ThuThanh2D v2.1 ERROR]: " .. tostring(_err))
+	warn("[ThuThanh2D v2.2 ERROR]: " .. tostring(_err))
 end
