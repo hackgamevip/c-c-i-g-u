@@ -1,5 +1,5 @@
 -- ============================================================
--- THU THANH 2D (TOWER DEFENSE) v5.1 - XOA HERO + THIEN THACH O KY NANG + CHAN CLICK MODAL + LOGO NUT BAM
+-- THU THANH 2D (TOWER DEFENSE) v5.2 - KHO DO + NUT TRON 3D + HOI MAU THANH + 3 SAO MAP + TOGGLE + XAC NHAN THOAT
 -- Full-Screen Mobile & PC | Tu dong luu ky luc | Phim tat PC: RightShift
 -- ============================================================
 local _ok, _err = pcall(function()
@@ -226,7 +226,10 @@ local saveState = {
 	Stars = 15,
 	Upgrades = { dmg = 0, gold = 0, lives = 0, skill = 0 },
 	SfxOn = true,
+	SfxVol = 0.7,
 	LowFx = false,
+	MapStars = { meadow = 0, desert = 0, citadel = 0, heroic_boss = 0, endless = 0 },
+	Bag = { potion = 2, goldbag = 1, scroll = 1 },
 	SelectedMap = 1,
 	Difficulty = "normal",
 	OwnedSkins = { default = true },
@@ -244,6 +247,12 @@ local function createDefaultQuests()
 	}
 end
 saveState.Quests = createDefaultQuests()
+
+local BAG_ITEMS = {
+	{ Id = "potion",  Name = "Bình Máu Thành", Cost = 5, Desc = "Hồi ngay +5 HP Thành Trì trong trận",   Color = Color3.fromRGB(224, 62, 74) },
+	{ Id = "goldbag", Name = "Túi Vàng Khẩn",  Cost = 6, Desc = "Nhận ngay +250 Vàng để xây/nâng tháp", Color = Color3.fromRGB(224, 182, 44) },
+	{ Id = "scroll",  Name = "Cuộn Hồi Chiêu", Cost = 8, Desc = "Xóa hồi chiêu toàn bộ kỹ năng ngay",   Color = Color3.fromRGB(168, 86, 224) },
+}
 
 local PERM_UPGRADES = {
 	{ Key = "dmg",   Name = "Sát Thương Tháp",   Desc = "+8% sát thương mọi tháp mỗi cấp",   Max = 5, BaseCost = 10 },
@@ -294,6 +303,13 @@ local function loadData()
 			if type(tbl.Stars) == "number" then saveState.Stars = math.max(0, math.floor(tbl.Stars)) end
 			if type(tbl.SfxOn) == "boolean" then saveState.SfxOn = tbl.SfxOn end
 			if type(tbl.LowFx) == "boolean" then saveState.LowFx = tbl.LowFx end
+			if type(tbl.SfxVol) == "number" then saveState.SfxVol = math.clamp(tbl.SfxVol, 0.2, 1.0) end
+			if type(tbl.MapStars) == "table" then
+				for k, v in pairs(tbl.MapStars) do if type(v) == "number" then saveState.MapStars[k] = math.clamp(math.floor(v), 0, 3) end end
+			end
+			if type(tbl.Bag) == "table" then
+				for k, v in pairs(tbl.Bag) do if type(v) == "number" and saveState.Bag[k] ~= nil then saveState.Bag[k] = math.max(0, math.floor(v)) end end
+			end
 			if type(tbl.Upgrades) == "table" then
 				for k, v in pairs(tbl.Upgrades) do
 					if type(v) == "number" and saveState.Upgrades[k] ~= nil then saveState.Upgrades[k] = math.clamp(math.floor(v), 0, 5) end
@@ -1311,6 +1327,71 @@ function GFX.makeIcon(parent, kind, size, pos, anchor, z)
 			addCorner(bar, 3)
 			addStroke(bar, THEME.Outline, 1.1)
 		end
+	elseif kind == "castle_logo" then
+		local b = Instance.new("Frame")
+		b.Size = UDim2.fromScale(0.78, 0.72)
+		b.Position = UDim2.fromScale(0.5, 0.62)
+		b.AnchorPoint = Vector2.new(0.5, 0.5)
+		b.BackgroundColor3 = Color3.fromRGB(142, 86, 218)
+		b.BorderSizePixel = 0
+		b.ZIndex = z + 1
+		b.Parent = box
+		addCorner(b, 4)
+		addStroke(b, THEME.Outline, 1.4)
+		for _, ox in ipairs({0.22, 0.5, 0.78}) do
+			local t = Instance.new("Frame")
+			t.Size = UDim2.fromScale(0.24, 0.34)
+			t.Position = UDim2.fromScale(ox, 0.24)
+			t.AnchorPoint = Vector2.new(0.5, 0.5)
+			t.BackgroundColor3 = Color3.fromRGB(168, 108, 232)
+			t.BorderSizePixel = 0
+			t.ZIndex = z + 2
+			t.Parent = box
+			addCorner(t, 2)
+			addStroke(t, THEME.Outline, 1.2)
+		end
+	elseif kind == "bag" then
+		local bg = Instance.new("Frame")
+		bg.Size = UDim2.fromScale(0.78, 0.80)
+		bg.Position = UDim2.fromScale(0.5, 0.56)
+		bg.AnchorPoint = Vector2.new(0.5, 0.5)
+		bg.BackgroundColor3 = Color3.fromRGB(196, 98, 42)
+		bg.BorderSizePixel = 0
+		bg.ZIndex = z + 1
+		bg.Parent = box
+		addCorner(bg, 6)
+		addStroke(bg, THEME.Outline, 1.4)
+		local flap = Instance.new("Frame")
+		flap.Size = UDim2.fromScale(0.84, 0.38)
+		flap.Position = UDim2.fromScale(0.5, 0.34)
+		flap.AnchorPoint = Vector2.new(0.5, 0.5)
+		flap.BackgroundColor3 = Color3.fromRGB(224, 152, 48)
+		flap.BorderSizePixel = 0
+		flap.ZIndex = z + 2
+		flap.Parent = box
+		addCorner(flap, 4)
+		addStroke(flap, THEME.Outline, 1.2)
+	elseif kind == "heal" then
+		local h1 = Instance.new("Frame")
+		h1.Size = UDim2.fromScale(0.76, 0.28)
+		h1.Position = UDim2.fromScale(0.5, 0.5)
+		h1.AnchorPoint = Vector2.new(0.5, 0.5)
+		h1.BackgroundColor3 = Color3.fromRGB(218, 236, 224)
+		h1.BorderSizePixel = 0
+		h1.ZIndex = z + 1
+		h1.Parent = box
+		addCorner(h1, 3)
+		addStroke(h1, THEME.Outline, 1.2)
+		local h2 = Instance.new("Frame")
+		h2.Size = UDim2.fromScale(0.28, 0.76)
+		h2.Position = UDim2.fromScale(0.5, 0.5)
+		h2.AnchorPoint = Vector2.new(0.5, 0.5)
+		h2.BackgroundColor3 = Color3.fromRGB(218, 236, 224)
+		h2.BorderSizePixel = 0
+		h2.ZIndex = z + 2
+		h2.Parent = box
+		addCorner(h2, 3)
+		addStroke(h2, THEME.Outline, 1.2)
 	elseif kind == "trap" then
 		local base = Instance.new("Frame")
 		base.Size = UDim2.fromScale(0.78, 0.78)
@@ -1364,7 +1445,7 @@ local function playSfx(kind, pitch)
 	pcall(function()
 		local s = Instance.new("Sound")
 		s.SoundId = id
-		s.Volume = (kind == "explosion" or kind == "upgrade") and 0.28 or 0.18
+		s.Volume = ((kind == "explosion" or kind == "upgrade") and 0.34 or 0.22) * (saveState.SfxVol or 0.7)
 		s.PlaybackSpeed = pitch or 1
 		s.Parent = screenGui
 		s:Play()
@@ -1487,10 +1568,10 @@ function SEC.buildTopBar()
 	div.ZIndex = 11
 	div.Parent = top
 
+	GFX.makeIcon(top, "castle_logo", 24, UDim2.fromOffset(20, 24), Vector2.new(0.5, 0.5), 12)
 	local title = Instance.new("TextLabel")
-	title.Size = UDim2.fromOffset(124, 46)
-	title.TextSize = 14
-	title.Position = UDim2.fromOffset(12, 0)
+	title.Size = UDim2.fromOffset(102, 46)
+	title.Position = UDim2.fromOffset(36, 0)
 	title.BackgroundTransparency = 1
 	title.Text = "THỦ THÀNH 2D"
 	title.TextColor3 = THEME.TextGold
@@ -1538,7 +1619,40 @@ function SEC.buildTopBar()
 		return l
 	end
 
-	UI.livesLbl = makeStatPill(0,   78,  Color3.fromRGB(196, 68, 76),  THEME.TextRed,  "20",   "heart")
+	-- Thanh Mau Thanh Tri dang Progress Bar do co tim (giong anh mau)
+	local hpPill = Instance.new("Frame")
+	hpPill.Size = UDim2.fromOffset(82, 32)
+	hpPill.Position = UDim2.fromOffset(0, 4)
+	hpPill.BackgroundColor3 = Color3.fromRGB(28, 16, 26)
+	hpPill.BorderSizePixel = 0
+	hpPill.ClipsDescendants = true
+	hpPill.ZIndex = 12
+	hpPill.Parent = hudGroup
+	addCorner(hpPill, 10)
+	addStroke(hpPill, Color3.fromRGB(206, 68, 76), 1.6)
+	local hpBar = Instance.new("Frame")
+	hpBar.Size = UDim2.fromScale(1, 1)
+	hpBar.BackgroundColor3 = Color3.fromRGB(186, 44, 56)
+	hpBar.BorderSizePixel = 0
+	hpBar.ZIndex = 12
+	hpBar.Parent = hpPill
+	addCorner(hpBar, 9)
+	addGradient(hpBar, Color3.fromRGB(218, 62, 74), Color3.fromRGB(142, 26, 38), 90)
+	UI.livesBarFill = hpBar
+	GFX.makeIcon(hpPill, "heart", 18, UDim2.new(0, 14, 0.5, 0), Vector2.new(0.5, 0.5), 14)
+	local hpTxt = Instance.new("TextLabel")
+	hpTxt.Size = UDim2.new(1, -24, 1, 0)
+	hpTxt.Position = UDim2.fromOffset(24, 0)
+	hpTxt.BackgroundTransparency = 1
+	hpTxt.Text = "30/30"
+	hpTxt.TextColor3 = THEME.TextMain
+	hpTxt.Font = THEME.FontHead
+	hpTxt.TextSize = 11
+	hpTxt.TextXAlignment = Enum.TextXAlignment.Left
+	hpTxt.ZIndex = 15
+	hpTxt.Parent = hpPill
+	addTextOutline(hpTxt, 1.4, THEME.Outline)
+	UI.livesLbl = hpTxt
 	UI.goldLbl  = makeStatPill(84,  102, Color3.fromRGB(186, 146, 42), THEME.TextGold, "240",  "coin")
 	UI.waveLbl  = makeStatPill(192, 98,  Color3.fromRGB(72, 158, 206), THEME.TextCyan, "0/12", "wave")
 
@@ -1699,7 +1813,27 @@ function SEC.buildLobby()
 		recLbl.ZIndex = 6
 		recLbl.Parent = card
 
-		mapCards[idx] = { Card = card, Stroke = st, RecLbl = recLbl, Map = mp }
+		local starRow = Instance.new("Frame")
+		starRow.Size = UDim2.fromOffset(72, 18)
+		starRow.Position = UDim2.new(0.5, -36, 1, -24)
+		starRow.BackgroundTransparency = 1
+		starRow.ZIndex = 7
+		starRow.Parent = card
+		local starIcons = {}
+		for si = 1, 3 do
+			local sf = Instance.new("Frame")
+			sf.Size = UDim2.fromOffset(14, 14)
+			sf.Position = UDim2.fromOffset(6 + (si - 1) * 22, 2)
+			sf.Rotation = 45
+			sf.BackgroundColor3 = Color3.fromRGB(64, 70, 96)
+			sf.BorderSizePixel = 0
+			sf.ZIndex = 7
+			sf.Parent = starRow
+			addCorner(sf, 3)
+			addStroke(sf, THEME.Outline, 1.2)
+			starIcons[si] = sf
+		end
+		mapCards[idx] = { Card = card, Stroke = st, RecLbl = recLbl, Stars = starIcons, Map = mp }
 		card.MouseButton1Click:Connect(function()
 			saveState.SelectedMap = idx
 			saveData()
@@ -1713,38 +1847,48 @@ function SEC.buildLobby()
 
 	local playBtn, _, playFace = makeArcadeBtn(
 		lobbyPage, "CHƠI NGAY",
-		UDim2.fromOffset(172, 50), UDim2.new(0.5, -310, 1, -66),
+		UDim2.fromOffset(148, 50), UDim2.new(0.5, -346, 1, -66),
 		Color3.fromRGB(68, 206, 74), Color3.fromRGB(28, 144, 48), 14,
-		{ TextSize = 14, ZIndex = 6, Depth = 5, Stroke = 2.4, LabelPos = UDim2.fromOffset(14, 0), LabelSize = UDim2.new(1, -18, 1, 0) }
+		{ TextSize = 13, ZIndex = 6, Depth = 5, Stroke = 2.4, LabelPos = UDim2.fromOffset(14, 0), LabelSize = UDim2.new(1, -18, 1, 0) }
 	)
-	GFX.makeIcon(playFace, "play", 22, UDim2.new(0, 22, 0.5, 0), Vector2.new(0.5, 0.5), 9)
+	GFX.makeIcon(playFace, "play", 20, UDim2.new(0, 19, 0.5, 0), Vector2.new(0.5, 0.5), 9)
 	UI.playBtn = playBtn
 
 	local permBtn, permLbl, permFace = makeArcadeBtn(
-		lobbyPage, "KỸ NĂNG (" .. tostring(saveState.Stars) .. ")",
-		UDim2.fromOffset(166, 50), UDim2.new(0.5, -130, 1, -66),
+		lobbyPage, "KỸ NĂNG",
+		UDim2.fromOffset(136, 50), UDim2.new(0.5, -190, 1, -66),
 		Color3.fromRGB(154, 72, 218), Color3.fromRGB(94, 34, 168), 14,
-		{ TextSize = 12, ZIndex = 6, Depth = 5, Stroke = 2.4, LabelPos = UDim2.fromOffset(14, 0), LabelSize = UDim2.new(1, -18, 1, 0) }
+		{ TextSize = 11, ZIndex = 6, Depth = 5, Stroke = 2.4, LabelPos = UDim2.fromOffset(14, 0), LabelSize = UDim2.new(1, -18, 1, 0) }
 	)
-	GFX.makeIcon(permFace, "star", 20, UDim2.new(0, 19, 0.5, 0), Vector2.new(0.5, 0.5), 9)
+	GFX.makeIcon(permFace, "star", 18, UDim2.new(0, 17, 0.5, 0), Vector2.new(0.5, 0.5), 9)
 	UI.permUpgBtn = permBtn
 	UI.permUpgLbl = permLbl
 
+	local bagBtn, bagLbl, bagFace = makeArcadeBtn(
+		lobbyPage, "KHO ĐỒ",
+		UDim2.fromOffset(124, 50), UDim2.new(0.5, -46, 1, -66),
+		Color3.fromRGB(218, 122, 42), Color3.fromRGB(164, 68, 22), 14,
+		{ TextSize = 11, ZIndex = 6, Depth = 5, Stroke = 2.4, LabelPos = UDim2.fromOffset(14, 0), LabelSize = UDim2.new(1, -18, 1, 0) }
+	)
+	GFX.makeIcon(bagFace, "bag", 18, UDim2.new(0, 18, 0.5, 0), Vector2.new(0.5, 0.5), 9)
+	UI.bagBtn = bagBtn
+	UI.bagLbl = bagLbl
+
 	local qBtn, qLbl, qFace = makeArcadeBtn(
 		lobbyPage, "NHIỆM VỤ",
-		UDim2.fromOffset(146, 50), UDim2.new(0.5, 44, 1, -66),
-		Color3.fromRGB(214, 152, 42), Color3.fromRGB(162, 92, 18), 14,
-		{ TextSize = 12, ZIndex = 6, Depth = 5, Stroke = 2.4, LabelPos = UDim2.fromOffset(14, 0), LabelSize = UDim2.new(1, -18, 1, 0) }
+		UDim2.fromOffset(132, 50), UDim2.new(0.5, 86, 1, -66),
+		Color3.fromRGB(214, 166, 38), Color3.fromRGB(162, 98, 18), 14,
+		{ TextSize = 11, ZIndex = 6, Depth = 5, Stroke = 2.4, LabelPos = UDim2.fromOffset(14, 0), LabelSize = UDim2.new(1, -18, 1, 0) }
 	)
-	GFX.makeIcon(qFace, "quest", 20, UDim2.new(0, 20, 0.5, 0), Vector2.new(0.5, 0.5), 9)
+	GFX.makeIcon(qFace, "quest", 18, UDim2.new(0, 18, 0.5, 0), Vector2.new(0.5, 0.5), 9)
 	UI.questBtn = qBtn
 	UI.questLbl = qLbl
 
 	local setBtn, _, setFace = makeArcadeBtn(
 		lobbyPage, "CÀI ĐẶT",
-		UDim2.fromOffset(112, 50), UDim2.new(0.5, 198, 1, -66),
+		UDim2.fromOffset(120, 50), UDim2.new(0.5, 226, 1, -66),
 		Color3.fromRGB(58, 142, 206), Color3.fromRGB(32, 82, 158), 14,
-		{ TextSize = 12, ZIndex = 6, Depth = 5, Stroke = 2.4, LabelPos = UDim2.fromOffset(14, 0), LabelSize = UDim2.new(1, -18, 1, 0) }
+		{ TextSize = 11, ZIndex = 6, Depth = 5, Stroke = 2.4, LabelPos = UDim2.fromOffset(14, 0), LabelSize = UDim2.new(1, -18, 1, 0) }
 	)
 	GFX.makeIcon(setFace, "gear", 18, UDim2.new(0, 18, 0.5, 0), Vector2.new(0.5, 0.5), 9)
 	UI.settingsBtn = setBtn
@@ -1817,6 +1961,8 @@ local function refreshLobbyStats()
 	for j, mc in ipairs(mapCards) do
 		local id = mc.Map.Id
 		mc.RecLbl.Text = mc.Map.Endless and string.format("Kỷ lục: Đợt %d\nChế độ Vô Tận", saveState.BestWave[id] or 0) or string.format("Kỷ lục: Đợt %d/%d\nThắng: %d lần", saveState.BestWave[id] or 0, mc.Map.Waves, saveState.Wins[id] or 0)
+		local ms = saveState.MapStars[id] or 0
+		if mc.Stars then for si = 1, 3 do mc.Stars[si].BackgroundColor3 = (si <= ms) and THEME.TextGold or Color3.fromRGB(64, 70, 96) end end
 		mc.Stroke.Color = (j == saveState.SelectedMap) and THEME.TextGold or Color3.fromRGB(76, 86, 134)
 		mc.Stroke.Thickness = (j == saveState.SelectedMap) and 3.0 or 2.2
 	end
@@ -1864,38 +2010,33 @@ function SEC.buildGameUI()
 	lhTitle.ZIndex = 6
 	lhTitle.Parent = leftHud
 
-	local skillBtn, skillLbl, skillFace = makeArcadeBtn(
-		leftHud, "THIÊN THẠCH",
-		UDim2.fromOffset(66, 78), UDim2.fromOffset(5, 34),
-		Color3.fromRGB(218, 92, 46), Color3.fromRGB(154, 34, 32), 10,
-		{ TextSize = 8, ZIndex = 6, Depth = 3, Stroke = 1.6, LabelPos = UDim2.fromOffset(2, 26), LabelSize = UDim2.new(1, -4, 1, -28) }
-	)
-	skillLbl.TextWrapped = true
-	GFX.makeIcon(skillFace, "meteor", 22, UDim2.new(0.5, 0, 0, 16), Vector2.new(0.5, 0.5), 9)
-	UI.skillBtn = skillBtn
-	UI.skillLbl = skillLbl
+	-- 4 Nut Ky Nang hinh tron bong 3D (tham khao anh mau)
+	local function makeSkillOrb(yPos, labelTxt, c1, c2, iconKind)
+		local orb, _, face = makeArcadeBtn(
+			leftHud, "",
+			UDim2.fromOffset(52, 52), UDim2.fromOffset(12, yPos),
+			c1, c2, 26, { ZIndex = 6, Depth = 3, Stroke = 2.0 }
+		)
+		GFX.makeIcon(face, iconKind, 24, UDim2.fromScale(0.5, 0.5), Vector2.new(0.5, 0.5), 9)
+		local cap = Instance.new("TextLabel")
+		cap.Size = UDim2.fromOffset(72, 24)
+		cap.Position = UDim2.fromOffset(2, yPos + 53)
+		cap.BackgroundTransparency = 1
+		cap.Text = labelTxt
+		cap.TextColor3 = THEME.TextMain
+		cap.Font = THEME.FontHead
+		cap.TextSize = 8
+		cap.TextWrapped = true
+		cap.ZIndex = 6
+		cap.Parent = leftHud
+		addTextOutline(cap, 1.2, THEME.Outline)
+		return orb, cap
+	end
 
-	local blizBtn, blizLbl, blizFace = makeArcadeBtn(
-		leftHud, "BÃO TUYẾT",
-		UDim2.fromOffset(66, 78), UDim2.fromOffset(5, 122),
-		Color3.fromRGB(54, 174, 224), Color3.fromRGB(28, 96, 178), 10,
-		{ TextSize = 8, ZIndex = 6, Depth = 3, Stroke = 1.6, LabelPos = UDim2.fromOffset(2, 26), LabelSize = UDim2.new(1, -4, 1, -28) }
-	)
-	blizLbl.TextWrapped = true
-	GFX.makeIcon(blizFace, "snow", 22, UDim2.new(0.5, 0, 0, 16), Vector2.new(0.5, 0.5), 9)
-	UI.blizBtn = blizBtn
-	UI.blizLbl = blizLbl
-
-	local trapBtn, trapLbl, trapFace = makeArcadeBtn(
-		leftHud, "BẪY: TẮT",
-		UDim2.fromOffset(66, 78), UDim2.fromOffset(5, 210),
-		Color3.fromRGB(134, 78, 198), Color3.fromRGB(78, 38, 146), 10,
-		{ TextSize = 8, ZIndex = 6, Depth = 3, Stroke = 1.6, LabelPos = UDim2.fromOffset(2, 26), LabelSize = UDim2.new(1, -4, 1, -28) }
-	)
-	trapLbl.TextWrapped = true
-	GFX.makeIcon(trapFace, "trap", 20, UDim2.new(0.5, 0, 0, 16), Vector2.new(0.5, 0.5), 9)
-	UI.trapBtn = trapBtn
-	UI.trapLbl = trapLbl
+	UI.skillBtn, UI.skillLbl = makeSkillOrb(28,  "THIÊN THẠCH", Color3.fromRGB(224, 96, 46),  Color3.fromRGB(154, 34, 32),  "meteor")
+	UI.blizBtn,  UI.blizLbl  = makeSkillOrb(108, "BÃO TUYẾT",   Color3.fromRGB(54, 178, 228), Color3.fromRGB(28, 96, 178),  "snow")
+	UI.healBtn,  UI.healLbl  = makeSkillOrb(188, "HỒI THÀNH",   Color3.fromRGB(64, 202, 92),  Color3.fromRGB(28, 136, 54),  "heal")
+	UI.trapBtn,  UI.trapLbl  = makeSkillOrb(268, "BẪY: TẮT",    Color3.fromRGB(154, 76, 214), Color3.fromRGB(88, 36, 158),  "trap")
 
 	-- Bang Thong Ke Sat Thuong truc tiep ben phai ban co (76x360)
 	local rightHud = Instance.new("Frame")
@@ -2219,7 +2360,7 @@ function SEC.buildGameUI()
 	addStroke(botBar, Color3.fromRGB(82, 72, 148), 1.6)
 
 	local infoLbl = Instance.new("TextLabel")
-	infoLbl.Size = UDim2.fromOffset(420, 36)
+	infoLbl.Size = UDim2.fromOffset(316, 36)
 	infoLbl.Position = UDim2.fromOffset(12, 1)
 	infoLbl.BackgroundTransparency = 1
 	infoLbl.Text = "Chạm ô cỏ để xây tháp  •  Chạm tháp để nâng cấp"
@@ -2230,6 +2371,15 @@ function SEC.buildGameUI()
 	infoLbl.ZIndex = 7
 	infoLbl.Parent = botBar
 	UI.botInfoLbl = infoLbl
+
+	local matchBagBtn, _, matchBagFace = makeArcadeBtn(
+		botBar, "KHO ĐỒ",
+		UDim2.fromOffset(96, 30), UDim2.new(1, -382, 0, 4),
+		Color3.fromRGB(218, 122, 42), Color3.fromRGB(164, 68, 22), 8,
+		{ TextSize = 10, ZIndex = 8, Depth = 3, Stroke = 1.5, LabelPos = UDim2.fromOffset(10, 0), LabelSize = UDim2.new(1, -12, 1, 0) }
+	)
+	GFX.makeIcon(matchBagFace, "bag", 15, UDim2.new(0, 14, 0.5, 0), Vector2.new(0.5, 0.5), 11)
+	UI.matchBagBtn = matchBagBtn
 
 	local autoBtn, autoLbl = makeArcadeBtn(
 		botBar, "TỰ GỌI: TẮT",
@@ -2306,6 +2456,7 @@ local TD = {
 	map = MAPS[1],
 	gold = 240,
 	lives = 20,
+	maxLives = 20,
 	wave = 0,
 	kills = 0,
 	waveSpawning = false,
@@ -2313,6 +2464,7 @@ local TD = {
 	spawnTimer = 0,
 	skillCd = 0,
 	blizCd = 0,
+	healCd = 0,
 	dmgByTower = {},
 	pendingCell = nil,
 	selectedTower = nil,
@@ -2451,7 +2603,9 @@ local function closeBoardPopups()
 end
 
 local function updateHUD()
-	UI.livesLbl.Text = tostring(math.max(0, TD.lives))
+	local curL, maxL = math.max(0, TD.lives), math.max(1, TD.maxLives)
+	UI.livesLbl.Text = tostring(curL) .. "/" .. tostring(maxL)
+	if UI.livesBarFill then UI.livesBarFill.Size = UDim2.fromScale(math.clamp(curL / maxL, 0, 1), 1) end
 	UI.goldLbl.Text  = formatNum(TD.gold)
 	UI.waveLbl.Text  = TD.map.Endless and (tostring(TD.wave) .. " (∞)") or (tostring(TD.wave) .. "/" .. tostring(TD.map.Waves))
 	UI.spdLbl.Text   = tostring(TD.speedMult) .. "x"
@@ -2518,12 +2672,17 @@ local function updateHUD()
 	if TD.skillCd > 0 then
 		UI.skillLbl.Text = string.format("THIÊN THẠCH\n%.0fs", math.ceil(TD.skillCd))
 	else
-		UI.skillLbl.Text = "THIÊN THẠCH\nSẴN SÀNG"
+		UI.skillLbl.Text = "THIÊN THẠCH"
 	end
 	if TD.blizCd > 0 then
 		UI.blizLbl.Text = string.format("BÃO TUYẾT\n%.0fs", math.ceil(TD.blizCd))
 	else
-		UI.blizLbl.Text = "BÃO TUYẾT\nSẴN SÀNG"
+		UI.blizLbl.Text = "BÃO TUYẾT"
+	end
+	if TD.healCd > 0 then
+		UI.healLbl.Text = string.format("HỒI THÀNH\n%.0fs", math.ceil(TD.healCd))
+	else
+		UI.healLbl.Text = "HỒI THÀNH"
 	end
 	local ranked = {}
 	for k, v in pairs(TD.dmgByTower) do
@@ -2572,6 +2731,9 @@ local function finishMatch(won)
 	end
 	if won then
 		saveState.Wins[mid] = (saveState.Wins[mid] or 0) + 1
+		local ratio = TD.lives / math.max(1, TD.maxLives)
+		local earnedS = (ratio >= 0.99) and 3 or ((ratio >= 0.5) and 2 or 1)
+		if earnedS > (saveState.MapStars[mid] or 0) then saveState.MapStars[mid] = earnedS end
 		saveState.Stars += math.floor(15 * (getDiffDef(saveState.Difficulty).StarMult or 1) + 0.5)
 		addQuestProg("win", 1)
 	end
@@ -3073,6 +3235,8 @@ local function startNewMatch()
 	local diffDef = getDiffDef(saveState.Difficulty)
 	TD.gold = TD.map.StartGold + (saveState.Upgrades.gold or 0) * 40
 	TD.lives = (diffDef.Id == "hell") and 1 or (diffDef.Lives + (saveState.Upgrades.lives or 0) * 2)
+	TD.maxLives = TD.lives
+	TD.healCd = 0
 	TD.wave = 0
 	TD.kills = 0
 	TD.waveSpawning = false
@@ -3456,13 +3620,13 @@ UI.openDiffModal = function(mp)
 	UI.pmOverlay.Visible = true
 end
 
--- Bang Cai Dat o sanh chinh (Toi uu FPS + Am thanh)
+-- Bang Cai Dat o sanh chinh (Cong tac gat Toggle Switch + Thanh truot Am Luong)
 local function openLobbySettings()
 	for _, ch in ipairs(UI.pmList:GetChildren()) do
 		if ch:IsA("Frame") then ch:Destroy() end
 	end
 	UI.pmTitle.Text = "CÀI ĐẶT GAME"
-	local function addOpt(titleTxt, descTxt, isOn, onClick)
+	local function addToggleOpt(titleTxt, descTxt, isOn, onClick)
 		local row = Instance.new("Frame")
 		row.Size = UDim2.new(1, 0, 0, 56)
 		row.BackgroundColor3 = Color3.fromRGB(28, 32, 58)
@@ -3473,8 +3637,8 @@ local function openLobbySettings()
 		addStroke(row, Color3.fromRGB(78, 86, 134), 1.6)
 
 		local t1 = Instance.new("TextLabel")
-		t1.Size = UDim2.fromOffset(300, 20)
-		t1.Position = UDim2.fromOffset(10, 6)
+		t1.Size = UDim2.fromOffset(320, 20)
+		t1.Position = UDim2.fromOffset(12, 6)
 		t1.BackgroundTransparency = 1
 		t1.Text = titleTxt
 		t1.TextColor3 = THEME.TextGold
@@ -3485,8 +3649,8 @@ local function openLobbySettings()
 		t1.Parent = row
 
 		local t2 = Instance.new("TextLabel")
-		t2.Size = UDim2.fromOffset(300, 20)
-		t2.Position = UDim2.fromOffset(10, 28)
+		t2.Size = UDim2.fromOffset(320, 20)
+		t2.Position = UDim2.fromOffset(12, 28)
 		t2.BackgroundTransparency = 1
 		t2.Text = descTxt
 		t2.TextColor3 = THEME.TextMuted
@@ -3496,29 +3660,222 @@ local function openLobbySettings()
 		t2.ZIndex = 54
 		t2.Parent = row
 
-		local b = makeArcadeBtn(
-			row, isOn and "ĐANG BẬT" or "ĐANG TẮT",
-			UDim2.fromOffset(112, 34), UDim2.new(1, -120, 0, 11),
-			isOn and Color3.fromRGB(64, 194, 92) or Color3.fromRGB(82, 92, 124),
-			isOn and Color3.fromRGB(28, 134, 58) or Color3.fromRGB(52, 58, 84),
-			8, { TextSize = 11, ZIndex = 54, Depth = 3 }
-		)
-		b.MouseButton1Click:Connect(onClick)
+		-- Cong tac gat Toggle Switch xanh / xam (giong anh mau)
+		local sw = Instance.new("TextButton")
+		sw.Size = UDim2.fromOffset(62, 30)
+		sw.Position = UDim2.new(1, -74, 0, 13)
+		sw.BackgroundColor3 = isOn and Color3.fromRGB(56, 192, 92) or Color3.fromRGB(64, 70, 96)
+		sw.Text = ""
+		sw.AutoButtonColor = false
+		sw.BorderSizePixel = 0
+		sw.ZIndex = 54
+		sw.Parent = row
+		addCorner(sw, 99)
+		addStroke(sw, THEME.Outline, 1.8)
+
+		local knob = Instance.new("Frame")
+		knob.Size = UDim2.fromOffset(22, 22)
+		knob.Position = isOn and UDim2.fromOffset(35, 4) or UDim2.fromOffset(5, 4)
+		knob.BackgroundColor3 = Color3.fromRGB(224, 228, 236)
+		knob.BorderSizePixel = 0
+		knob.ZIndex = 55
+		knob.Parent = sw
+		addCorner(knob, 99)
+		addStroke(knob, THEME.Outline, 1.3)
+
+		sw.MouseButton1Click:Connect(onClick)
 	end
-	addOpt("Tối ưu FPS (Giảm hiệu ứng)", "Tắt bớt hạt nổ & chữ bay để mượt hơn ở Đợt cao", saveState.LowFx, function()
+
+	addToggleOpt("Tối ưu FPS (Giảm hiệu ứng)", "Tắt bớt hạt nổ & chữ bay để mượt hơn ở Đợt cao", saveState.LowFx, function()
 		saveState.LowFx = not saveState.LowFx
 		saveData()
 		openLobbySettings()
 	end)
-	addOpt("Âm thanh chiến đấu (SFX)", "Bật hoặc tắt tiếng bắn tháp, nổ pháo, nâng cấp", saveState.SfxOn, function()
+	addToggleOpt("Âm thanh chiến đấu (SFX)", "Bật hoặc tắt tiếng bắn tháp, nổ pháo, nâng cấp", saveState.SfxOn, function()
 		saveState.SfxOn = not saveState.SfxOn
 		UI.sfxLbl.Text = saveState.SfxOn and "Âm" or "Tắt"
 		saveData()
 		openLobbySettings()
 	end)
+
+	-- Thanh truot chon muc Am Luong (20% - 100%)
+	local volRow = Instance.new("Frame")
+	volRow.Size = UDim2.new(1, 0, 0, 56)
+	volRow.BackgroundColor3 = Color3.fromRGB(28, 32, 58)
+	volRow.BorderSizePixel = 0
+	volRow.ZIndex = 53
+	volRow.Parent = UI.pmList
+	addCorner(volRow, 10)
+	addStroke(volRow, Color3.fromRGB(78, 86, 134), 1.6)
+
+	local vl = Instance.new("TextLabel")
+	vl.Size = UDim2.fromOffset(200, 22)
+	vl.Position = UDim2.fromOffset(12, 6)
+	vl.BackgroundTransparency = 1
+	vl.Text = "Âm lượng hiệu ứng: " .. tostring(math.floor((saveState.SfxVol or 0.7) * 100)) .. "%"
+	vl.TextColor3 = THEME.TextCyan
+	vl.Font = THEME.FontHead
+	vl.TextSize = 12
+	vl.TextXAlignment = Enum.TextXAlignment.Left
+	vl.ZIndex = 54
+	vl.Parent = volRow
+
+	local barBg = Instance.new("Frame")
+	barBg.Size = UDim2.new(1, -134, 0, 12)
+	barBg.Position = UDim2.fromOffset(12, 34)
+	barBg.BackgroundColor3 = Color3.fromRGB(16, 18, 34)
+	barBg.BorderSizePixel = 0
+	barBg.ZIndex = 54
+	barBg.Parent = volRow
+	addCorner(barBg, 6)
+	addStroke(barBg, THEME.Outline, 1.3)
+
+	local barFill = Instance.new("Frame")
+	barFill.Size = UDim2.fromScale(math.clamp(saveState.SfxVol or 0.7, 0.2, 1), 1)
+	barFill.BackgroundColor3 = Color3.fromRGB(54, 168, 224)
+	barFill.BorderSizePixel = 0
+	barFill.ZIndex = 55
+	barFill.Parent = barBg
+	addCorner(barFill, 6)
+
+	local vMinus = makeArcadeBtn(volRow, "-", UDim2.fromOffset(44, 30), UDim2.new(1, -106, 0, 13), Color3.fromRGB(78, 88, 124), Color3.fromRGB(48, 54, 82), 8, { TextSize = 16, ZIndex = 54, Depth = 3 })
+	local vPlus  = makeArcadeBtn(volRow, "+", UDim2.fromOffset(44, 30), UDim2.new(1, -56, 0, 13), Color3.fromRGB(56, 152, 214), Color3.fromRGB(32, 92, 174), 8, { TextSize = 16, ZIndex = 54, Depth = 3 })
+	vMinus.MouseButton1Click:Connect(function()
+		saveState.SfxVol = math.max(0.2, math.floor(((saveState.SfxVol or 0.7) - 0.2) * 10 + 0.5) / 10)
+		saveData()
+		openLobbySettings()
+	end)
+	vPlus.MouseButton1Click:Connect(function()
+		saveState.SfxVol = math.min(1.0, math.floor(((saveState.SfxVol or 0.7) + 0.2) * 10 + 0.5) / 10)
+		saveData()
+		playSfx("upgrade", 1.1)
+		openLobbySettings()
+	end)
 	UI.pmOverlay.Visible = true
 end
 UI.settingsBtn.MouseButton1Click:Connect(openLobbySettings)
+
+-- Bang KHO DO (Mua bang Sao o sanh / Su dung truc tiep trong tran!)
+local function openInventoryModal(inMatch)
+	for _, ch in ipairs(UI.pmList:GetChildren()) do
+		if ch:IsA("Frame") then ch:Destroy() end
+	end
+	UI.pmTitle.Text = inMatch and "KHO ĐỒ CHIẾN ĐẤU  •  DÙNG NGAY" or ("KHO ĐỒ  •  " .. formatNum(saveState.Stars) .. " Sao")
+	for _, it in ipairs(BAG_ITEMS) do
+		local qty = saveState.Bag[it.Id] or 0
+		local row = Instance.new("Frame")
+		row.Size = UDim2.new(1, 0, 0, 62)
+		row.BackgroundColor3 = Color3.fromRGB(28, 32, 58)
+		row.BorderSizePixel = 0
+		row.ZIndex = 53
+		row.Parent = UI.pmList
+		addCorner(row, 10)
+		addStroke(row, it.Color, 1.8)
+
+		local ic = Instance.new("Frame")
+		ic.Size = UDim2.fromOffset(38, 38)
+		ic.Position = UDim2.fromOffset(10, 12)
+		ic.BackgroundColor3 = it.Color
+		ic.BorderSizePixel = 0
+		ic.ZIndex = 54
+		ic.Parent = row
+		addCorner(ic, 9)
+		addStroke(ic, THEME.Outline, 1.6)
+		local qTag = Instance.new("TextLabel")
+		qTag.Size = UDim2.fromScale(1, 1)
+		qTag.BackgroundTransparency = 1
+		qTag.Text = "x" .. tostring(qty)
+		qTag.TextColor3 = THEME.TextMain
+		qTag.Font = THEME.FontHead
+		qTag.TextSize = 13
+		qTag.ZIndex = 55
+		qTag.Parent = ic
+		addTextOutline(qTag, 1.5, THEME.Outline)
+
+		local nm = Instance.new("TextLabel")
+		nm.Size = UDim2.fromOffset(260, 20)
+		nm.Position = UDim2.fromOffset(58, 8)
+		nm.BackgroundTransparency = 1
+		nm.Text = it.Name
+		nm.TextColor3 = THEME.TextGold
+		nm.Font = THEME.FontHead
+		nm.TextSize = 12
+		nm.TextXAlignment = Enum.TextXAlignment.Left
+		nm.ZIndex = 54
+		nm.Parent = row
+
+		local ds = Instance.new("TextLabel")
+		ds.Size = UDim2.fromOffset(260, 22)
+		ds.Position = UDim2.fromOffset(58, 30)
+		ds.BackgroundTransparency = 1
+		ds.Text = it.Desc
+		ds.TextColor3 = THEME.TextMuted
+		ds.Font = THEME.FontBody
+		ds.TextSize = 10
+		ds.TextXAlignment = Enum.TextXAlignment.Left
+		ds.ZIndex = 54
+		ds.Parent = row
+
+		local btnTxt = inMatch and (qty > 0 and "SỬ DỤNG" or "HẾT ĐỒ") or ("MUA (" .. it.Cost .. " Sao)")
+		local actBtn = makeArcadeBtn(
+			row, btnTxt,
+			UDim2.fromOffset(118, 36), UDim2.new(1, -126, 0, 13),
+			(inMatch and qty == 0) and Color3.fromRGB(72, 82, 112) or Color3.fromRGB(64, 194, 92),
+			(inMatch and qty == 0) and Color3.fromRGB(48, 54, 78) or Color3.fromRGB(28, 134, 58),
+			8, { TextSize = 10, ZIndex = 54, Depth = 3 }
+		)
+		actBtn.MouseButton1Click:Connect(function()
+			if inMatch then
+				if qty <= 0 or not TD.active or TD.over then return end
+				saveState.Bag[it.Id] = qty - 1
+				if it.Id == "potion" then
+					TD.lives = math.min(TD.maxLives, TD.lives + 5)
+					showToast("Dùng Bình Máu: +5 HP Thành Trì!", THEME.TextGreen, 2.2)
+				elseif it.Id == "goldbag" then
+					TD.gold += 250
+					showToast("Dùng Túi Vàng: +250 Vàng!", THEME.TextGold, 2.2)
+				elseif it.Id == "scroll" then
+					TD.skillCd, TD.blizCd, TD.healCd = 0, 0, 0
+					showToast("Dùng Cuộn Hồi Chiêu: Toàn bộ kỹ năng đã sẵn sàng!", THEME.TextPurple, 2.2)
+				end
+				saveData()
+				playSfx("upgrade", 1.15)
+				updateHUD()
+				UI.pmOverlay.Visible = false
+			else
+				if saveState.Stars < it.Cost then
+					showToast("Cần " .. it.Cost .. " Sao để mua " .. it.Name .. "!", THEME.TextRed, 2.0)
+					return
+				end
+				saveState.Stars -= it.Cost
+				saveState.Bag[it.Id] = qty + 1
+				saveData()
+				playSfx("upgrade", 1.1)
+				refreshLobbyStats()
+				openInventoryModal(false)
+			end
+		end)
+	end
+	UI.pmOverlay.Visible = true
+end
+UI.bagBtn.MouseButton1Click:Connect(function() openInventoryModal(false) end)
+UI.matchBagBtn.MouseButton1Click:Connect(function() openInventoryModal(true) end)
+
+-- Ky nang Hoi Mau Thanh (+3 HP)
+UI.healBtn.MouseButton1Click:Connect(function()
+	if not TD.active or TD.paused or TD.over or TD.healCd > 0 then return end
+	if TD.lives >= TD.maxLives then
+		showToast("Máu Thành Trì đang đầy!", THEME.TextGreen, 1.8)
+		return
+	end
+	TD.healCd = math.max(16, 28 - (saveState.Upgrades.skill or 0) * 2)
+	TD.lives = math.min(TD.maxLives, TD.lives + 3)
+	playSfx("upgrade", 1.2)
+	local pEnd = TD.pathPoints[#TD.pathPoints]
+	if pEnd then spawnExplosionRing(pEnd.x, pEnd.y, 44, THEME.TextGreen) end
+	showToast("Hồi Thành: +3 HP Thành Trì!", THEME.TextGreen, 2.0)
+	updateHUD()
+end)
 
 UI.trapBtn.MouseButton1Click:Connect(function()
 	if TD.trapMode == "none" then
@@ -3623,9 +3980,41 @@ end
 
 UI.minBtn.MouseButton1Click:Connect(minimizeMenu)
 floatBtn.MouseButton1Click:Connect(function() if not floatDragged then restoreMenu() end end)
+-- Hop thoai Xac Nhan Thoat Game (giong anh mau)
 UI.closeBtn.MouseButton1Click:Connect(function()
-	saveData()
-	screenGui:Destroy()
+	for _, ch in ipairs(UI.pmList:GetChildren()) do
+		if ch:IsA("Frame") then ch:Destroy() end
+	end
+	UI.pmTitle.Text = "THÔNG BÁO"
+	local box = Instance.new("Frame")
+	box.Size = UDim2.new(1, 0, 0, 146)
+	box.BackgroundColor3 = Color3.fromRGB(28, 32, 58)
+	box.BorderSizePixel = 0
+	box.ZIndex = 53
+	box.Parent = UI.pmList
+	addCorner(box, 12)
+	addStroke(box, THEME.TextGold, 1.8)
+
+	local msg = Instance.new("TextLabel")
+	msg.Size = UDim2.new(1, -24, 0, 56)
+	msg.Position = UDim2.fromOffset(12, 18)
+	msg.BackgroundTransparency = 1
+	msg.Text = "Bạn có chắc muốn thoát game Thủ Thành 2D?\nTiến trình Sao và kỷ lục sẽ tự động được lưu lại."
+	msg.TextColor3 = THEME.TextMain
+	msg.Font = THEME.FontHead
+	msg.TextSize = 13
+	msg.TextWrapped = true
+	msg.ZIndex = 54
+	msg.Parent = box
+
+	local cancelB = makeArcadeBtn(box, "HỦY", UDim2.fromOffset(146, 38), UDim2.new(0.5, -156, 0, 90), Color3.fromRGB(78, 92, 134), Color3.fromRGB(48, 56, 86), 9, { TextSize = 13, ZIndex = 54, Depth = 3 })
+	local okB     = makeArcadeBtn(box, "ĐỒNG Ý", UDim2.fromOffset(146, 38), UDim2.new(0.5, 10, 0, 90), Color3.fromRGB(214, 62, 68), Color3.fromRGB(152, 28, 36), 9, { TextSize = 13, ZIndex = 54, Depth = 3 })
+	cancelB.MouseButton1Click:Connect(function() UI.pmOverlay.Visible = false end)
+	okB.MouseButton1Click:Connect(function()
+		saveData()
+		screenGui:Destroy()
+	end)
+	UI.pmOverlay.Visible = true
 end)
 
 track(UserInputService.InputBegan:Connect(function(inp, gp)
@@ -3668,6 +4057,11 @@ track(RunService.RenderStepped:Connect(function(rawDt)
 		local p2 = math.ceil(TD.blizCd)
 		TD.blizCd = math.max(0, TD.blizCd - dt)
 		if math.ceil(TD.blizCd) ~= p2 then needHud = true end
+	end
+	if TD.healCd > 0 then
+		local p3 = math.ceil(TD.healCd)
+		TD.healCd = math.max(0, TD.healCd - dt)
+		if math.ceil(TD.healCd) ~= p3 then needHud = true end
 	end
 	if needHud then updateHUD() end
 
@@ -3914,5 +4308,5 @@ screenGui.Destroying:Connect(function()
 end)
 end)
 if not _ok then
-	warn("[ThuThanh2D v5.1 ERROR]: " .. tostring(_err))
+	warn("[ThuThanh2D v5.2 ERROR]: " .. tostring(_err))
 end
