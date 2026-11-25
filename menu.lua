@@ -1,5 +1,5 @@
 -- ============================================================
--- THU THANH 2D (TOWER DEFENSE) v5.7 - KHO DO + NUT TRON 3D + HOI MAU THANH + 3 SAO MAP + TOGGLE + XAC NHAN THOAT
+-- THU THANH 2D (TOWER DEFENSE) v5.8 - KHO DO + NUT TRON 3D + HOI MAU THANH + 3 SAO MAP + TOGGLE + XAC NHAN THOAT
 -- Full-Screen Mobile & PC | Tu dong luu ky luc | Phim tat PC: RightShift
 -- ============================================================
 local _ok, _err = pcall(function()
@@ -117,45 +117,45 @@ local MAPS = {
 local TOWERS = {
 	{
 		Id = "archer", Name = "Cung Thủ", Cost = 60, UpgradeCost = 55,
-		Damage = 24, Range = 140, FireRate = 0.52, ProjSpeed = 440,
+		Damage = 26, Range = 138, FireRate = 0.54, ProjSpeed = 450,
 		Kind = "Arrow", BaseCol = Color3.fromRGB(64, 176, 92), TopCol = Color3.fromRGB(168, 118, 56),
-		Accent = Color3.fromRGB(214, 186, 86), Desc = "Bắn nhanh, tầm rộng, giá rẻ"
+		Accent = Color3.fromRGB(214, 186, 86), Desc = "Bắn nhanh, tầm rộng, mở trận ổn định"
 	},
 	{
-		Id = "frost", Name = "Băng Giá", Cost = 95, UpgradeCost = 85,
-		Damage = 16, Range = 132, FireRate = 0.80, ProjSpeed = 350, Slow = 0.45, SlowDur = 2.6,
+		Id = "frost", Name = "Băng Giá", Cost = 90, UpgradeCost = 80,
+		Damage = 18, Range = 132, FireRate = 0.82, ProjSpeed = 360, Slow = 0.44, SlowDur = 2.5,
 		Kind = "Frost", BaseCol = Color3.fromRGB(54, 152, 212), TopCol = Color3.fromRGB(132, 206, 224),
-		Accent = Color3.fromRGB(182, 222, 232), Desc = "Làm chậm quái 45% tầm xa"
+		Accent = Color3.fromRGB(182, 222, 232), Desc = "Làm chậm quái 44% giữ nhịp phòng thủ"
 	},
 	{
 		Id = "cannon", Name = "Đại Bác", Cost = 115, UpgradeCost = 95,
-		Damage = 62, Range = 122, FireRate = 1.30, ProjSpeed = 290, Splash = 68,
+		Damage = 58, Range = 124, FireRate = 1.24, ProjSpeed = 300, Splash = 66,
 		Kind = "Bomb", BaseCol = Color3.fromRGB(196, 82, 54), TopCol = Color3.fromRGB(58, 62, 76),
-		Accent = Color3.fromRGB(218, 128, 48), Desc = "Nổ diện rộng dọn đàn quái"
+		Accent = Color3.fromRGB(218, 128, 48), Desc = "Nổ diện rộng dọn đàn quái đông"
 	},
 	{
-		Id = "poison", Name = "Tháp Độc", Cost = 125, UpgradeCost = 105,
-		Damage = 18, Range = 138, FireRate = 0.82, ProjSpeed = 360, PoisonDps = 22, PoisonDur = 4.0,
+		Id = "poison", Name = "Tháp Độc", Cost = 120, UpgradeCost = 100,
+		Damage = 22, Range = 136, FireRate = 0.80, ProjSpeed = 370, PoisonDps = 20, PoisonDur = 3.8,
 		Kind = "Poison", BaseCol = Color3.fromRGB(48, 168, 72), TopCol = Color3.fromRGB(32, 92, 46),
-		Accent = Color3.fromRGB(118, 224, 72), Desc = "Trúng độc rút máu xuyên giáp"
+		Accent = Color3.fromRGB(118, 224, 72), Desc = "Độc rút máu bền bỉ khắc chế quái trâu"
 	},
 	{
-		Id = "buff", Name = "Tháp Buff", Cost = 145, UpgradeCost = 130,
-		Damage = 0, Range = 134, FireRate = 1.0, BuffDmg = 0.25, BuffRate = 0.18,
+		Id = "buff", Name = "Tháp Buff", Cost = 140, UpgradeCost = 125,
+		Damage = 0, Range = 136, FireRate = 1.0, BuffDmg = 0.28, BuffRate = 0.20,
 		Kind = "Buff", BaseCol = Color3.fromRGB(204, 156, 38), TopCol = Color3.fromRGB(226, 204, 102),
-		Accent = Color3.fromRGB(232, 212, 84), Desc = "Tăng sát thương & tốc bắn quanh nó"
+		Accent = Color3.fromRGB(232, 212, 84), Desc = "Tăng +28% ST & tốc bắn tháp quanh nó"
 	},
 	{
 		Id = "tesla", Name = "Lôi Điện", Cost = 165, UpgradeCost = 140,
-		Damage = 40, Range = 142, FireRate = 0.90, Chain = 4,
+		Damage = 44, Range = 142, FireRate = 0.84, Chain = 4,
 		Kind = "Lightning", BaseCol = Color3.fromRGB(142, 72, 212), TopCol = Color3.fromRGB(214, 192, 62),
-		Accent = Color3.fromRGB(112, 204, 228), Desc = "Sét chuỗi giật lan 4 mục tiêu"
+		Accent = Color3.fromRGB(112, 204, 228), Desc = "Sét chuỗi giật lan 4 mục tiêu liên tiếp"
 	},
 	{
-		Id = "laser", Name = "Laze Thần", Cost = 250, UpgradeCost = 215,
-		Damage = 108, Range = 172, FireRate = 1.00,
+		Id = "laser", Name = "Laze Thần", Cost = 240, UpgradeCost = 205,
+		Damage = 116, Range = 168, FireRate = 1.02,
 		Kind = "Laser", BaseCol = Color3.fromRGB(204, 58, 118), TopCol = Color3.fromRGB(224, 184, 54),
-		Accent = Color3.fromRGB(228, 92, 168), Desc = "Tia laze diệt Boss cực mạnh"
+		Accent = Color3.fromRGB(228, 92, 168), Desc = "Tia laze xuyên phá diệt Boss cực nhanh"
 	},
 }
 
@@ -181,11 +181,9 @@ local function getTdSkin(id)
 end
 
 local DIFFICULTIES = {
-	{ Id = "easy",   Name = "Dễ",          Lives = 50, HpMult = 0.75, SpdMult = 0.95, StarMult = 1.0, Color = Color3.fromRGB(76, 198, 102) },
-	{ Id = "normal", Name = "Bình Thường", Lives = 30, HpMult = 1.00, SpdMult = 1.00, StarMult = 1.0, Color = Color3.fromRGB(72, 168, 224) },
-	{ Id = "hard",   Name = "Khó",         Lives = 10, HpMult = 1.50, SpdMult = 1.04, StarMult = 1.5, Color = Color3.fromRGB(224, 168, 48) },
-	{ Id = "insane", Name = "Siêu Khó",    Lives = 3,  HpMult = 2.25, SpdMult = 1.08, StarMult = 2.0, Color = Color3.fromRGB(224, 96, 52) },
-	{ Id = "hell",   Name = "Địa Ngục",    Lives = 1,  HpMult = 3.50, SpdMult = 1.12, StarMult = 3.0, Color = Color3.fromRGB(214, 46, 118) },
+	{ Id = "easy",   Name = "Dễ",          Lives = 50, HpMult = 0.78, SpdMult = 0.95, StarMult = 1.0, Color = Color3.fromRGB(82, 206, 108),  Top = Color3.fromRGB(64, 196, 92),  Bot = Color3.fromRGB(28, 134, 54) },
+	{ Id = "normal", Name = "Bình Thường", Lives = 30, HpMult = 1.00, SpdMult = 1.00, StarMult = 1.3, Color = Color3.fromRGB(84, 178, 228),  Top = Color3.fromRGB(54, 152, 214), Bot = Color3.fromRGB(28, 92, 164) },
+	{ Id = "hard",   Name = "Khó",         Lives = 10, HpMult = 1.45, SpdMult = 1.05, StarMult = 1.8, Color = Color3.fromRGB(228, 148, 56),  Top = Color3.fromRGB(218, 94, 52),  Bot = Color3.fromRGB(154, 42, 32) },
 }
 
 local function getDiffDef(id)
@@ -230,6 +228,8 @@ local saveState = {
 	LowFx = false,
 	Hide3D = false,
 	MapStars = { meadow = 0, desert = 0, citadel = 0, heroic_boss = 0, endless = 0 },
+	StageUnlocked = { meadow = 1, desert = 1, citadel = 1, heroic_boss = 1, endless = 1 },
+	SelectedStage = 1,
 	Bag = { potion = 2, goldbag = 1, scroll = 1 },
 	SelectedMap = 1,
 	Difficulty = "normal",
@@ -305,6 +305,8 @@ local function loadData()
 			if type(tbl.SfxOn) == "boolean" then saveState.SfxOn = tbl.SfxOn end
 			if type(tbl.LowFx) == "boolean" then saveState.LowFx = tbl.LowFx end
 			if type(tbl.Hide3D) == "boolean" then saveState.Hide3D = tbl.Hide3D end
+			if type(tbl.StageUnlocked) == "table" then for k, v in pairs(tbl.StageUnlocked) do saveState.StageUnlocked[k] = math.clamp(tonumber(v) or 1, 1, 7) end end
+			if saveState.Difficulty == "insane" or saveState.Difficulty == "hell" then saveState.Difficulty = "hard" end
 			if type(tbl.SfxVol) == "number" then saveState.SfxVol = math.clamp(tbl.SfxVol, 0.2, 1.0) end
 			if type(tbl.MapStars) == "table" then
 				for k, v in pairs(tbl.MapStars) do if type(v) == "number" then saveState.MapStars[k] = math.clamp(math.floor(v), 0, 3) end end
@@ -1236,6 +1238,250 @@ function GFX.buildTrapSprite(parent, kind, zBase)
 end
 
 -- BO LOGO / ICON VECTOR 2D CHO TAT CA NUT BAM & CHI SO (KHONG DUNG EMOJI)
+-- Ve boi canh phong canh minh hoa cho 5 ban do ngoai Sanh (theo anh mau)
+function GFX.buildMapScene(prev, mapId, z)
+	local sky = Instance.new("Frame")
+	sky.Size = UDim2.fromScale(1, 1)
+	sky.BorderSizePixel = 0
+	sky.ZIndex = z
+	sky.Parent = prev
+
+	if mapId == "meadow" then
+		-- Thao Nguyen Xanh: troi xanh, lau dai trang mai xanh, doi co, duong dat & hang rao go
+		sky.BackgroundColor3 = Color3.fromRGB(64, 178, 232)
+		addGradient(sky, Color3.fromRGB(52, 162, 228), Color3.fromRGB(168, 224, 242), 90)
+		-- Doi nui xanh xa
+		local hill1 = Instance.new("Frame")
+		hill1.Size = UDim2.fromOffset(148, 72)
+		hill1.Position = UDim2.fromOffset(-14, 40)
+		hill1.BackgroundColor3 = Color3.fromRGB(62, 168, 74)
+		hill1.BorderSizePixel = 0
+		hill1.ZIndex = z + 1
+		hill1.Parent = prev
+		addCorner(hill1, 99)
+		addGradient(hill1, Color3.fromRGB(108, 206, 78), Color3.fromRGB(38, 126, 56), 90)
+		-- Duong dat vang uon luon
+		local rd = Instance.new("Frame")
+		rd.Size = UDim2.fromOffset(30, 56)
+		rd.Position = UDim2.new(0.5, -15, 0, 44)
+		rd.BackgroundColor3 = Color3.fromRGB(224, 188, 108)
+		rd.BorderSizePixel = 0
+		rd.ZIndex = z + 2
+		rd.Parent = prev
+		addCorner(rd, 12)
+		-- Lau dai trang mai xanh tren doi
+		local cas = Instance.new("Frame")
+		cas.Size = UDim2.fromOffset(38, 24)
+		cas.Position = UDim2.fromOffset(64, 24)
+		cas.BackgroundColor3 = Color3.fromRGB(218, 222, 232)
+		cas.BorderSizePixel = 0
+		cas.ZIndex = z + 2
+		cas.Parent = prev
+		addCorner(cas, 4)
+		for _, tx in ipairs({62, 78, 94}) do
+			local rf = Instance.new("Frame")
+			rf.Size = UDim2.fromOffset(10, 10)
+			rf.Position = UDim2.fromOffset(tx, 16)
+			rf.Rotation = 45
+			rf.BackgroundColor3 = Color3.fromRGB(48, 126, 214)
+			rf.BorderSizePixel = 0
+			rf.ZIndex = z + 3
+			rf.Parent = prev
+		end
+		-- Cay xanh ben trai
+		local tr = Instance.new("Frame")
+		tr.Size = UDim2.fromOffset(34, 34)
+		tr.Position = UDim2.fromOffset(-6, 18)
+		tr.BackgroundColor3 = Color3.fromRGB(78, 194, 58)
+		tr.BorderSizePixel = 0
+		tr.ZIndex = z + 3
+		tr.Parent = prev
+		addCorner(tr, 99)
+		-- Hang rao go 2 ben
+		for _, fx in ipairs({6, 86}) do
+			local fn = Instance.new("Frame")
+			fn.Size = UDim2.fromOffset(26, 12)
+			fn.Position = UDim2.fromOffset(fx, 68)
+			fn.BackgroundColor3 = Color3.fromRGB(168, 104, 52)
+			fn.BorderSizePixel = 0
+			fn.ZIndex = z + 4
+			fn.Parent = prev
+			addCorner(fn, 3)
+		end
+	elseif mapId == "desert" then
+		-- Sa Mac Lua: hoang hon vang cam, mat troi, nui da do, xuong rong
+		sky.BackgroundColor3 = Color3.fromRGB(232, 162, 68)
+		addGradient(sky, Color3.fromRGB(224, 126, 52), Color3.fromRGB(238, 206, 118), 90)
+		local sun = Instance.new("Frame")
+		sun.Size = UDim2.fromOffset(22, 22)
+		sun.Position = UDim2.fromOffset(36, 10)
+		sun.BackgroundColor3 = Color3.fromRGB(242, 224, 128)
+		sun.BorderSizePixel = 0
+		sun.ZIndex = z + 1
+		sun.Parent = prev
+		addCorner(sun, 99)
+		-- Nui da do 2 ben
+		for _, mx in ipairs({-6, 76}) do
+			local ms = Instance.new("Frame")
+			ms.Size = UDim2.fromOffset(48, 36)
+			ms.Position = UDim2.fromOffset(mx, 28)
+			ms.BackgroundColor3 = Color3.fromRGB(186, 88, 44)
+			ms.BorderSizePixel = 0
+			ms.ZIndex = z + 1
+			ms.Parent = prev
+			addCorner(ms, 8)
+		end
+		-- Dun cat vang
+		local sand = Instance.new("Frame")
+		sand.Size = UDim2.fromOffset(140, 56)
+		sand.Position = UDim2.fromOffset(-10, 48)
+		sand.BackgroundColor3 = Color3.fromRGB(228, 174, 72)
+		sand.BorderSizePixel = 0
+		sand.ZIndex = z + 2
+		sand.Parent = prev
+		addCorner(sand, 24)
+		addGradient(sand, Color3.fromRGB(236, 192, 86), Color3.fromRGB(196, 126, 46), 90)
+		-- Xuong rong xanh 2 ben
+		for _, cx in ipairs({12, 96}) do
+			local cac = Instance.new("Frame")
+			cac.Size = UDim2.fromOffset(10, 24)
+			cac.Position = UDim2.fromOffset(cx, 44)
+			cac.BackgroundColor3 = Color3.fromRGB(62, 168, 56)
+			cac.BorderSizePixel = 0
+			cac.ZIndex = z + 3
+			cac.Parent = prev
+			addCorner(cac, 5)
+		end
+	elseif mapId == "citadel" then
+		-- Thanh Tri Hac Am: trang tron tim, lau dai den cong do, co do
+		sky.BackgroundColor3 = Color3.fromRGB(58, 36, 98)
+		addGradient(sky, Color3.fromRGB(46, 26, 88), Color3.fromRGB(112, 68, 168), 90)
+		local moon = Instance.new("Frame")
+		moon.Size = UDim2.fromOffset(26, 26)
+		moon.Position = UDim2.fromOffset(14, 10)
+		moon.BackgroundColor3 = Color3.fromRGB(228, 218, 242)
+		moon.BorderSizePixel = 0
+		moon.ZIndex = z + 1
+		moon.Parent = prev
+		addCorner(moon, 99)
+		-- Nen da xam
+		local grd = Instance.new("Frame")
+		grd.Size = UDim2.fromOffset(132, 48)
+		grd.Position = UDim2.fromOffset(-6, 52)
+		grd.BackgroundColor3 = Color3.fromRGB(68, 62, 92)
+		grd.BorderSizePixel = 0
+		grd.ZIndex = z + 1
+		grd.Parent = prev
+		addCorner(grd, 14)
+		-- Lau dai hac am + cong do ruc
+		local dc = Instance.new("Frame")
+		dc.Size = UDim2.fromOffset(52, 34)
+		dc.Position = UDim2.fromOffset(44, 22)
+		dc.BackgroundColor3 = Color3.fromRGB(44, 38, 68)
+		dc.BorderSizePixel = 0
+		dc.ZIndex = z + 2
+		dc.Parent = prev
+		addCorner(dc, 5)
+		local gate = Instance.new("Frame")
+		gate.Size = UDim2.fromOffset(12, 16)
+		gate.Position = UDim2.new(0.5, -6, 1, -16)
+		gate.BackgroundColor3 = Color3.fromRGB(224, 46, 58)
+		gate.BorderSizePixel = 0
+		gate.ZIndex = z + 3
+		gate.Parent = dc
+		addCorner(gate, 6)
+		for _, bx in ipairs({10, 96}) do
+			local bn = Instance.new("Frame")
+			bn.Size = UDim2.fromOffset(12, 18)
+			bn.Position = UDim2.fromOffset(bx, 64)
+			bn.BackgroundColor3 = Color3.fromRGB(196, 36, 52)
+			bn.BorderSizePixel = 0
+			bn.ZIndex = z + 3
+			bn.Parent = prev
+			addCorner(bn, 3)
+		end
+	elseif mapId == "heroic_boss" then
+		-- Boss Anh Hung: troi thien duong xanh sang, cung dien chop vang, san dau hoang kim
+		sky.BackgroundColor3 = Color3.fromRGB(72, 178, 232)
+		addGradient(sky, Color3.fromRGB(54, 152, 228), Color3.fromRGB(186, 228, 242), 90)
+		local plaza = Instance.new("Frame")
+		plaza.Size = UDim2.fromOffset(136, 44)
+		plaza.Position = UDim2.fromOffset(-8, 56)
+		plaza.BackgroundColor3 = Color3.fromRGB(214, 198, 148)
+		plaza.BorderSizePixel = 0
+		plaza.ZIndex = z + 1
+		plaza.Parent = prev
+		addCorner(plaza, 18)
+		local ringG = Instance.new("Frame")
+		ringG.Size = UDim2.fromOffset(58, 18)
+		ringG.Position = UDim2.new(0.5, -29, 0, 66)
+		ringG.BackgroundColor3 = Color3.fromRGB(232, 192, 58)
+		ringG.BorderSizePixel = 0
+		ringG.ZIndex = z + 2
+		ringG.Parent = prev
+		addCorner(ringG, 99)
+		-- Cung dien trang chop vang
+		local pal = Instance.new("Frame")
+		pal.Size = UDim2.fromOffset(54, 34)
+		pal.Position = UDim2.new(0.5, -27, 0, 24)
+		pal.BackgroundColor3 = Color3.fromRGB(224, 226, 236)
+		pal.BorderSizePixel = 0
+		pal.ZIndex = z + 2
+		pal.Parent = prev
+		addCorner(pal, 5)
+		local sp = Instance.new("Frame")
+		sp.Size = UDim2.fromOffset(16, 16)
+		sp.Position = UDim2.new(0.5, -8, 0, 12)
+		sp.Rotation = 45
+		sp.BackgroundColor3 = Color3.fromRGB(236, 194, 52)
+		sp.BorderSizePixel = 0
+		sp.ZIndex = z + 3
+		sp.Parent = prev
+	else
+		-- Vo Tan: vu tru tim sao, dao bay, cong xoan hu khong & tinh the tim
+		sky.BackgroundColor3 = Color3.fromRGB(28, 16, 62)
+		addGradient(sky, Color3.fromRGB(20, 12, 52), Color3.fromRGB(68, 28, 118), 90)
+		local isl = Instance.new("Frame")
+		isl.Size = UDim2.fromOffset(124, 42)
+		isl.Position = UDim2.fromOffset(-3, 56)
+		isl.BackgroundColor3 = Color3.fromRGB(62, 54, 96)
+		isl.BorderSizePixel = 0
+		isl.ZIndex = z + 1
+		isl.Parent = prev
+		addCorner(isl, 14)
+		-- Cong xoan tim ruc sang
+		local arch = Instance.new("Frame")
+		arch.Size = UDim2.fromOffset(42, 38)
+		arch.Position = UDim2.new(0.5, -21, 0, 20)
+		arch.BackgroundColor3 = Color3.fromRGB(78, 72, 118)
+		arch.BorderSizePixel = 0
+		arch.ZIndex = z + 2
+		arch.Parent = prev
+		addCorner(arch, 18)
+		local vort = Instance.new("Frame")
+		vort.Size = UDim2.fromOffset(26, 26)
+		vort.Position = UDim2.fromScale(0.5, 0.56)
+		vort.AnchorPoint = Vector2.new(0.5, 0.5)
+		vort.BackgroundColor3 = Color3.fromRGB(204, 72, 236)
+		vort.BorderSizePixel = 0
+		vort.ZIndex = z + 3
+		vort.Parent = arch
+		addCorner(vort, 99)
+		-- Tinh the tim phat sang 2 goc
+		for _, cx in ipairs({8, 96}) do
+			local cr = Instance.new("Frame")
+			cr.Size = UDim2.fromOffset(12, 18)
+			cr.Position = UDim2.fromOffset(cx, 66)
+			cr.Rotation = (cx < 50) and -16 or 16
+			cr.BackgroundColor3 = Color3.fromRGB(186, 72, 236)
+			cr.BorderSizePixel = 0
+			cr.ZIndex = z + 3
+			cr.Parent = prev
+			addCorner(cr, 4)
+		end
+	end
+end
+
 function GFX.makeIcon(parent, kind, size, pos, anchor, z)
 	local box = Instance.new("Frame")
 	box.Size = UDim2.fromOffset(size, size)
@@ -1907,56 +2153,37 @@ function SEC.buildLobby()
 		local st = addStroke(card, mp.BossArena and Color3.fromRGB(196, 72, 92) or Color3.fromRGB(86, 98, 156), 2.2)
 		add3DGloss(card, 12, 6, 0.82)
 
-		-- Mini preview ban do
+		-- Boi canh minh hoa 3D moi cho ban do (khung vien vang noi bat)
 		local prev = Instance.new("Frame")
-		prev.Size = UDim2.fromOffset(118, 92)
+		prev.Size = UDim2.fromOffset(118, 118)
 		prev.Position = UDim2.fromOffset(9, 10)
 		prev.BackgroundColor3 = mp.Grass1
 		prev.BorderSizePixel = 0
 		prev.ClipsDescendants = true
 		prev.ZIndex = 6
 		prev.Parent = card
-		addCorner(prev, 10)
-		addStroke(prev, THEME.Outline, 1.8)
-		add3DGloss(prev, 8, 8, 0.82)
-
-		-- Ve duong di mini
-		for w = 1, #mp.Waypoints - 1 do
-			local a, b = mp.Waypoints[w], mp.Waypoints[w + 1]
-			local x1, y1 = (a[1] - 0.5) * (118 / COLS), (a[2] - 0.5) * (92 / ROWS)
-			local x2, y2 = (b[1] - 0.5) * (118 / COLS), (b[2] - 0.5) * (92 / ROWS)
-			local seg = Instance.new("Frame")
-			local minX, minY = math.min(x1, x2), math.min(y1, y2)
-			local wPx = math.abs(x2 - x1) + 12
-			local hPx = math.abs(y2 - y1) + 12
-			seg.Size = UDim2.fromOffset(wPx, hPx)
-			seg.Position = UDim2.fromOffset(minX - 6, minY - 6)
-			seg.BackgroundColor3 = mp.PathCol
-			seg.BorderSizePixel = 0
-			seg.ZIndex = 7
-			seg.Parent = prev
-			addCorner(seg, 4)
-		end
+		addCorner(prev, 12)
+		addStroke(prev, THEME.TextGold, 2.4)
+		GFX.buildMapScene(prev, mp.Id, 6)
+		add3DGloss(prev, 10, 11, 0.80)
 
 		local nLbl = Instance.new("TextLabel")
-		nLbl.Size = UDim2.new(1, -16, 0, 22)
-		nLbl.Position = UDim2.fromOffset(8, 114)
+		nLbl.Size = UDim2.new(1, -12, 0, 26)
+		nLbl.Position = UDim2.fromOffset(6, 138)
 		nLbl.BackgroundTransparency = 1
 		nLbl.Text = mp.Name
-		nLbl.TextColor3 = mp.BossArena and THEME.TextGold or THEME.TextMain
+		nLbl.TextColor3 = THEME.TextMain
 		nLbl.Font = THEME.FontHead
 		nLbl.TextSize = 13
 		nLbl.ZIndex = 6
 		nLbl.Parent = card
 
-
-
 		local recLbl = Instance.new("TextLabel")
-		recLbl.Size = UDim2.new(1, -16, 0, 38)
-		recLbl.Position = UDim2.fromOffset(8, 146)
+		recLbl.Size = UDim2.new(1, -12, 0, 18)
+		recLbl.Position = UDim2.fromOffset(6, 166)
 		recLbl.BackgroundTransparency = 1
-		recLbl.Text = "Kỷ lục: Đợt 0/" .. mp.Waves .. "\nChiến thắng: 0 lần"
-		recLbl.TextColor3 = THEME.TextGold
+		recLbl.Text = mp.Endless and "Vô Tận" or "Ải 1/7"
+		recLbl.TextColor3 = THEME.TextMuted
 		recLbl.Font = THEME.FontBody
 		recLbl.TextSize = 11
 		recLbl.ZIndex = 6
@@ -2120,7 +2347,8 @@ local function refreshLobbyStats()
 	end
 	for j, mc in ipairs(mapCards) do
 		local id = mc.Map.Id
-		mc.RecLbl.Text = mc.Map.Endless and string.format("Kỷ lục: Đợt %d\nChế độ Vô Tận", saveState.BestWave[id] or 0) or string.format("Kỷ lục: Đợt %d/%d\nThắng: %d lần", saveState.BestWave[id] or 0, mc.Map.Waves, saveState.Wins[id] or 0)
+		local uSt = math.clamp(saveState.StageUnlocked[id] or 1, 1, 7)
+		mc.RecLbl.Text = mc.Map.Endless and "Chế độ Vô Tận" or ("Mở khóa: Ải " .. tostring(uSt) .. "/7")
 		local ms = saveState.MapStars[id] or 0
 		if mc.Stars then for si = 1, 3 do mc.Stars[si].BackgroundColor3 = (si <= ms) and THEME.TextGold or Color3.fromRGB(64, 70, 96) end end
 		mc.Stroke.Color = (j == saveState.SelectedMap) and THEME.TextGold or Color3.fromRGB(76, 86, 134)
@@ -3161,22 +3389,36 @@ local function finishMatch(won)
 	if TD.wave > (saveState.BestWave[mid] or 0) then
 		saveState.BestWave[mid] = TD.wave
 	end
+	local diffMult = (getDiffDef(saveState.Difficulty).StarMult or 1)
+	local matchStars = 0
 	if won then
 		saveState.Wins[mid] = (saveState.Wins[mid] or 0) + 1
 		local ratio = TD.lives / math.max(1, TD.maxLives)
 		local earnedS = (ratio >= 0.99) and 3 or ((ratio >= 0.5) and 2 or 1)
 		if earnedS > (saveState.MapStars[mid] or 0) then saveState.MapStars[mid] = earnedS end
-		saveState.Stars += math.floor(15 * (getDiffDef(saveState.Difficulty).StarMult or 1) + 0.5)
+		matchStars = math.floor((12 + (TD.stage or 1) * 3) * diffMult + 0.5)
+		saveState.Stars += matchStars
+		if (not TD.map.Endless) and (TD.stage or 1) < 7 then
+			local nextSt = (TD.stage or 1) + 1
+			if nextSt > (saveState.StageUnlocked[mid] or 1) then
+				saveState.StageUnlocked[mid] = nextSt
+			end
+			saveState.SelectedStage = nextSt
+		end
 		addQuestProg("win", 1)
+	elseif TD.wave > 0 then
+		matchStars = math.max(2, math.floor(TD.wave * 2 * diffMult + 0.5))
+		saveState.Stars += matchStars
 	end
 	saveData()
-	UI.endTitle.Text = won and "CHIẾN THẮNG!" or "THẤT THỦ!"
+	UI.endTitle.Text = won and (TD.map.Endless and "CHIẾN THẮNG!" or ("VƯỢT ẢI " .. tostring(TD.stage or 1) .. "/7!")) or "THẤT THỦ!"
 	UI.endTitle.TextColor3 = won and THEME.TextGold or THEME.TextRed
 	UI.endStroke.Color = won and THEME.TextGold or THEME.TextRed
 	local mvpName, mvpDmg = "Chưa có", 0
 	for k, v in pairs(TD.dmgByTower) do if v > mvpDmg then mvpDmg = math.floor(v) mvpName = k end end
 	local dfName = getDiffDef(saveState.Difficulty).Name
-	UI.endDesc.Text = string.format("%s (%s) • Đợt %d • Hạ: %d\nTháp MVP: %s (%s ST)", TD.map.Name, dfName, TD.wave, TD.kills, mvpName, formatNum(mvpDmg))
+	local stTag = TD.map.Endless and "" or (" • Ải " .. tostring(TD.stage or 1) .. "/7")
+	UI.endDesc.Text = string.format("%s%s (%s) • Thưởng: +%d Sao\nĐợt %d • Hạ: %d • MVP: %s (%s ST)", TD.map.Name, stTag, dfName, matchStars, TD.wave, TD.kills, mvpName, formatNum(mvpDmg))
 	if UI.endChartBox then
 		for _, ch in ipairs(UI.endChartBox:GetChildren()) do
 			if ch:IsA("Frame") or ch:IsA("TextLabel") then ch:Destroy() end
@@ -3635,7 +3877,8 @@ end
 local function spawnEnemy(kind)
 	local def = ENEMIES[kind] or ENEMIES.slime
 	local diffDef = getDiffDef(saveState.Difficulty)
-	local scaleHP = (1 + (TD.wave - 1) * 0.24) * (diffDef.HpMult or 1.0)
+	local stageMult = 1 + ((TD.stage or 1) - 1) * 0.16
+	local scaleHP = (1 + (TD.wave - 1) * 0.20) * stageMult * (diffDef.HpMult or 1.0)
 	local isElite = (TD.wave >= 15 and not def.Boss and math.random(1, 4) == 1)
 	local maxHp = math.max(10, math.floor(def.HP * scaleHP * (isElite and 1.65 or 1.0)))
 	local p0 = TD.pathPoints[1]
@@ -3791,8 +4034,10 @@ end
 
 local function startNewMatch()
 	TD.map = MAPS[saveState.SelectedMap] or MAPS[1]
+	local maxU = math.clamp(saveState.StageUnlocked[TD.map.Id] or 1, 1, 7)
+	TD.stage = TD.map.Endless and 1 or math.clamp(saveState.SelectedStage or 1, 1, maxU)
 	local diffDef = getDiffDef(saveState.Difficulty)
-	TD.gold = TD.map.StartGold + (saveState.Upgrades.gold or 0) * 40
+	TD.gold = TD.map.StartGold + (TD.stage - 1) * 35 + (saveState.Upgrades.gold or 0) * 40
 	TD.lives = (diffDef.Id == "hell") and 1 or (diffDef.Lives + (saveState.Upgrades.lives or 0) * 2)
 	TD.maxLives = TD.lives
 	TD.healCd = 0
@@ -4154,41 +4399,95 @@ local function openStarQuests()
 end
 UI.questBtn.MouseButton1Click:Connect(openStarQuests)
 
--- Bang chon Che Do Kho khi bam vao 1 Ban Do ngoai sanh
+-- Bang chon Ai (7 Man moi ban do) + 3 nut Cap Do nam ngang gon (bam vao la vo tran luon)
 UI.openDiffModal = function(mp)
 	for _, ch in ipairs(UI.pmList:GetChildren()) do
 		if ch:IsA("Frame") or ch:IsA("ScrollingFrame") then ch:Destroy() end
 	end
-	UI.pmTitle.Text = "CHỌN CẤP ĐỘ  •  " .. mp.Name
-	for _, df in ipairs(DIFFICULTIES) do
-		local row = Instance.new("Frame")
-		row.Size = UDim2.new(1, 0, 0, 44)
-		row.BackgroundColor3 = Color3.fromRGB(28, 32, 58)
-		row.BorderSizePixel = 0
-		row.ZIndex = 53
-		row.Parent = UI.pmList
-		addCorner(row, 9)
-		addStroke(row, (saveState.Difficulty == df.Id) and df.Color or Color3.fromRGB(72, 82, 128), (saveState.Difficulty == df.Id) and 2.2 or 1.4)
+	UI.pmTitle.Text = mp.Name .. (mp.Endless and "  •  CHỌN CẤP ĐỘ" or "  •  CHỌN ẢI & CẤP ĐỘ")
 
-		local lbl = Instance.new("TextLabel")
-		lbl.Size = UDim2.fromOffset(312, 42)
-		lbl.Position = UDim2.fromOffset(10, 1)
-		lbl.BackgroundTransparency = 1
-		lbl.Text = df.Name
-		lbl.TextColor3 = df.Color
-		lbl.Font = THEME.FontHead
-		lbl.TextSize = 11
-		lbl.TextXAlignment = Enum.TextXAlignment.Left
-		lbl.ZIndex = 54
-		lbl.Parent = row
+	local maxUnlocked = math.clamp(saveState.StageUnlocked[mp.Id] or 1, 1, 7)
+	if (saveState.SelectedStage or 1) > maxUnlocked then saveState.SelectedStage = maxUnlocked end
 
-		local goBtn = makeArcadeBtn(
-			row, "CHƠI NGAY",
-			UDim2.fromOffset(104, 30), UDim2.new(1, -112, 0, 7),
-			Color3.fromRGB(64, 194, 92), Color3.fromRGB(28, 134, 58),
-			8, { TextSize = 10, ZIndex = 54, Depth = 3 }
+	if not mp.Endless then
+		local stCard = Instance.new("Frame")
+		stCard.Size = UDim2.new(1, 0, 0, 108)
+		stCard.BackgroundColor3 = Color3.fromRGB(24, 28, 54)
+		stCard.BorderSizePixel = 0
+		stCard.ZIndex = 53
+		stCard.Parent = UI.pmList
+		addCorner(stCard, 12)
+		addStroke(stCard, Color3.fromRGB(78, 88, 142), 1.6)
+
+		local stTitle = Instance.new("TextLabel")
+		stTitle.Size = UDim2.new(1, -20, 0, 22)
+		stTitle.Position = UDim2.fromOffset(10, 6)
+		stTitle.BackgroundTransparency = 1
+		stTitle.Text = "CHỌN MÀN CHƠI (7 ẢI • THẮNG MỖI ẢI ĐƯỢC CỘNG SAO)"
+		stTitle.TextColor3 = THEME.TextGold
+		stTitle.Font = THEME.FontHead
+		stTitle.TextSize = 11
+		stTitle.TextXAlignment = Enum.TextXAlignment.Left
+		stTitle.ZIndex = 54
+		stTitle.Parent = stCard
+
+		local stGrid = Instance.new("Frame")
+		stGrid.Size = UDim2.new(1, -16, 0, 64)
+		stGrid.Position = UDim2.fromOffset(8, 34)
+		stGrid.BackgroundTransparency = 1
+		stGrid.ZIndex = 54
+		stGrid.Parent = stCard
+
+		for sIdx = 1, 7 do
+			local unlocked = (sIdx <= maxUnlocked)
+			local picked = (saveState.SelectedStage == sIdx)
+			local c1 = picked and Color3.fromRGB(224, 174, 48) or (unlocked and Color3.fromRGB(62, 134, 206) or Color3.fromRGB(48, 52, 78))
+			local c2 = picked and Color3.fromRGB(164, 104, 18) or (unlocked and Color3.fromRGB(34, 78, 152) or Color3.fromRGB(30, 34, 54))
+			local sBtn = makeArcadeBtn(
+				stGrid, unlocked and ("Ải " .. tostring(sIdx)) or ("Khóa"),
+				UDim2.fromOffset(58, 48), UDim2.fromOffset((sIdx - 1) * 63, 6),
+				c1, c2, 9, { TextSize = 11, ZIndex = 55, Depth = 3, Stroke = picked and 2.4 or 1.6 }
+			)
+			sBtn.MouseButton1Click:Connect(function()
+				if not unlocked then
+					showToast("Vượt Ải " .. tostring(sIdx - 1) .. " để mở khóa Ải " .. tostring(sIdx) .. "!", THEME.TextRed, 1.8)
+					return
+				end
+				saveState.SelectedStage = sIdx
+				UI.openDiffModal(mp)
+			end)
+		end
+	end
+
+	-- Hang ngang nho 3 nut Cap Do (De | Binh Thuong | Kho) -> bam vao la vo tran ngay
+	local dWrap = Instance.new("Frame")
+	dWrap.Size = UDim2.new(1, 0, 0, 96)
+	dWrap.BackgroundColor3 = Color3.fromRGB(24, 28, 54)
+	dWrap.BorderSizePixel = 0
+	dWrap.ZIndex = 53
+	dWrap.Parent = UI.pmList
+	addCorner(dWrap, 12)
+	addStroke(dWrap, Color3.fromRGB(78, 88, 142), 1.6)
+
+	local dTitle = Instance.new("TextLabel")
+	dTitle.Size = UDim2.new(1, -20, 0, 22)
+	dTitle.Position = UDim2.fromOffset(10, 6)
+	dTitle.BackgroundTransparency = 1
+	dTitle.Text = "CHỌN CẤP ĐỘ ĐỂ VÀO TRẬN NGAY"
+	dTitle.TextColor3 = THEME.TextCyan
+	dTitle.Font = THEME.FontHead
+	dTitle.TextSize = 11
+	dTitle.TextXAlignment = Enum.TextXAlignment.Left
+	dTitle.ZIndex = 54
+	dTitle.Parent = dWrap
+
+	for dIdx, df in ipairs(DIFFICULTIES) do
+		local dBtn = makeArcadeBtn(
+			dWrap, df.Name,
+			UDim2.fromOffset(138, 48), UDim2.fromOffset(12 + (dIdx - 1) * 146, 36),
+			df.Top, df.Bot, 11, { TextSize = 13, ZIndex = 55, Depth = 4, Stroke = 2.0 }
 		)
-		goBtn.MouseButton1Click:Connect(function()
+		dBtn.MouseButton1Click:Connect(function()
 			saveState.Difficulty = df.Id
 			saveData()
 			UI.pmOverlay.Visible = false
@@ -4882,7 +5181,7 @@ track(RunService.Heartbeat:Connect(function(rawDt)
 			if e.Def.Boss then
 				e.SkillCd -= dt
 				if e.SkillCd <= 0 then
-					e.SkillCd = 7.0
+					e.SkillCd = 8.5
 					if e.Def.HeroBoss then
 						local heal = math.floor(e.MaxHP * 0.04)
 						e.HP = math.min(e.MaxHP, e.HP + heal)
@@ -4918,7 +5217,7 @@ track(RunService.Heartbeat:Connect(function(rawDt)
 								if dd < bestD then bestD = dd nearT = tw end
 							end
 							if nearT then
-								nearT.StunTimer = 2.0
+								nearT.StunTimer = 1.6
 								spawnBeam(e.X, e.Y, nearT.X, nearT.Y, Color3.fromRGB(186, 86, 232), 4, 0.25)
 								spawnExplosionRing(nearT.X, nearT.Y, 26, Color3.fromRGB(186, 86, 232))
 								spawnFloatingText(nearT.X, nearT.Y - 10, "CHOÁNG!", THEME.TextPurple)
@@ -5114,7 +5413,7 @@ track(RunService.Heartbeat:Connect(function(rawDt)
 		if (not TD.map.Endless) and TD.wave >= TD.map.Waves then
 			finishMatch(true)
 		elseif UI.waveBtnLbl.Text == "ĐANG CHIẾN..." then
-			local bonus = 30 + TD.wave * 8
+			local bonus = 35 + TD.wave * 10
 			TD.gold += bonus
 			local wStars = math.max(2, math.floor(2 * (getDiffDef(saveState.Difficulty).StarMult or 1) + 0.5))
 			saveState.Stars += wStars
@@ -5142,5 +5441,5 @@ screenGui.Destroying:Connect(function()
 end)
 end)
 if not _ok then
-	warn("[ThuThanh2D v5.7 ERROR]: " .. tostring(_err))
+	warn("[ThuThanh2D v5.8 ERROR]: " .. tostring(_err))
 end
