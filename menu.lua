@@ -1,5 +1,5 @@
 -- ============================================================
--- THU THANH 2D (TOWER DEFENSE) v5.5 - KHO DO + NUT TRON 3D + HOI MAU THANH + 3 SAO MAP + TOGGLE + XAC NHAN THOAT
+-- THU THANH 2D (TOWER DEFENSE) v5.7 - KHO DO + NUT TRON 3D + HOI MAU THANH + 3 SAO MAP + TOGGLE + XAC NHAN THOAT
 -- Full-Screen Mobile & PC | Tu dong luu ky luc | Phim tat PC: RightShift
 -- ============================================================
 local _ok, _err = pcall(function()
@@ -378,6 +378,39 @@ local function addGradient(obj, c1, c2, rot)
 	return g
 end
 
+local function darkenCol(col, factor)
+	return Color3.new(
+		math.clamp(col.R * factor, 0, 1),
+		math.clamp(col.G * factor, 0, 1),
+		math.clamp(col.B * factor, 0, 1)
+	)
+end
+
+local function lightenCol(col, amt)
+	return Color3.new(
+		math.clamp(col.R + (1 - col.R) * amt, 0, 1),
+		math.clamp(col.G + (1 - col.G) * amt, 0, 1),
+		math.clamp(col.B + (1 - col.B) * amt, 0, 1)
+	)
+end
+
+local function add3DGloss(parent, radius, z, alpha)
+	local gl = Instance.new("Frame")
+	gl.Size = UDim2.new(1, -6, 0, math.min(20, math.max(8, (radius or 10))))
+	gl.Position = UDim2.fromOffset(3, 2)
+	gl.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	gl.BackgroundTransparency = alpha or 0.84
+	gl.BorderSizePixel = 0
+	gl.ZIndex = z
+	gl.Parent = parent
+	addCorner(gl, math.max(4, (radius or 10) - 2))
+	local gr = Instance.new("UIGradient")
+	gr.Rotation = 90
+	gr.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(1, 1) })
+	gr.Parent = gl
+	return gl
+end
+
 local function makeArcadeBtn(parent, text, size, pos, c1, c2, radius, opts)
 	opts = opts or {}
 	local depth = opts.Depth or 4
@@ -386,8 +419,9 @@ local function makeArcadeBtn(parent, text, size, pos, c1, c2, radius, opts)
 	local btn = Instance.new("TextButton")
 	btn.Size = size
 	if pos then btn.Position = pos end
-	btn.BackgroundColor3 = THEME.Outline
-	btn.BackgroundTransparency = 0.22
+	-- Khoi de 3D dam mau theo sac nut (extruded 3D plinth)
+	btn.BackgroundColor3 = darkenCol(c2, 0.56)
+	btn.BackgroundTransparency = 0
 	btn.Text = ""
 	btn.AutoButtonColor = false
 	btn.BorderSizePixel = 0
@@ -404,17 +438,33 @@ local function makeArcadeBtn(parent, text, size, pos, c1, c2, radius, opts)
 	face.ZIndex = z + 1
 	face.Parent = btn
 	addCorner(face, radius or 10)
-	addGradient(face, c1, c2, 90)
+	addGradient(face, lightenCol(c1, 0.12), c2, 90)
 
+	-- Anh sang phan chieu kinh 3D phia tren
 	local shine = Instance.new("Frame")
-	shine.Size = UDim2.new(1, -10, 0.36, 0)
-	shine.Position = UDim2.fromOffset(5, 3)
+	shine.Size = UDim2.new(1, -8, 0.42, 0)
+	shine.Position = UDim2.fromOffset(4, 2)
 	shine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	shine.BackgroundTransparency = 0.80
+	shine.BackgroundTransparency = 0.72
 	shine.BorderSizePixel = 0
 	shine.ZIndex = z + 2
 	shine.Parent = face
-	addCorner(shine, math.max(4, (radius or 10) - 3))
+	addCorner(shine, math.max(4, (radius or 10) - 2))
+	local sGrad = Instance.new("UIGradient")
+	sGrad.Rotation = 90
+	sGrad.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(1, 1) })
+	sGrad.Parent = shine
+
+	-- Vien phan quang duoi mat nut 3D
+	local rim = Instance.new("Frame")
+	rim.Size = UDim2.new(1, -12, 0, 2)
+	rim.Position = UDim2.new(0, 6, 1, -3)
+	rim.BackgroundColor3 = lightenCol(c1, 0.35)
+	rim.BackgroundTransparency = 0.55
+	rim.BorderSizePixel = 0
+	rim.ZIndex = z + 2
+	rim.Parent = face
+	addCorner(rim, 2)
 
 	local lbl = Instance.new("TextLabel")
 	lbl.Size = opts.LabelSize or UDim2.fromScale(1, 1)
@@ -482,29 +532,51 @@ function GFX.buildTowerSprite(parent, towerDef, size, zBase)
 	root.ZIndex = zBase
 	root.Parent = parent
 
-	-- Bong do duoi chan thap
+	-- Bong do 3D mem duoi chan thap
 	local shad = Instance.new("Frame")
-	shad.Size = UDim2.fromScale(0.92, 0.88)
-	shad.Position = UDim2.fromScale(0.5, 0.56)
+	shad.Size = UDim2.fromScale(0.98, 0.72)
+	shad.Position = UDim2.fromScale(0.52, 0.72)
 	shad.AnchorPoint = Vector2.new(0.5, 0.5)
-	shad.BackgroundColor3 = Color3.fromRGB(8, 10, 18)
-	shad.BackgroundTransparency = 0.5
+	shad.BackgroundColor3 = Color3.fromRGB(6, 8, 16)
+	shad.BackgroundTransparency = 0.45
 	shad.BorderSizePixel = 0
 	shad.ZIndex = zBase
 	shad.Parent = root
-	addCorner(shad, 10)
+	addCorner(shad, 99)
 
-	-- De thap theo tung chung loai
+	-- Khoi de noi 3D (extruded pedestal) tao chieu sau
+	local bRad = (towerDef.Id == "tesla" or towerDef.Id == "frost") and 12 or 7
+	local plinth = Instance.new("Frame")
+	plinth.Size = UDim2.fromScale(0.84, 0.82)
+	plinth.Position = UDim2.fromScale(0.5, 0.56)
+	plinth.AnchorPoint = Vector2.new(0.5, 0.5)
+	plinth.BackgroundColor3 = darkenCol(towerDef.BaseCol, 0.48)
+	plinth.BorderSizePixel = 0
+	plinth.ZIndex = zBase + 1
+	plinth.Parent = root
+	addCorner(plinth, bRad)
+
+	-- Mat tren de thap 3D co anh sang noi khoi
 	local base = Instance.new("Frame")
-	base.Size = UDim2.fromScale(0.84, 0.84)
-	base.Position = UDim2.fromScale(0.5, 0.5)
+	base.Size = UDim2.fromScale(0.84, 0.80)
+	base.Position = UDim2.fromScale(0.5, 0.46)
 	base.AnchorPoint = Vector2.new(0.5, 0.5)
 	base.BackgroundColor3 = towerDef.BaseCol
 	base.BorderSizePixel = 0
 	base.ZIndex = zBase + 1
 	base.Parent = root
-	addCorner(base, (towerDef.Id == "tesla" or towerDef.Id == "frost") and 12 or 7)
-	addStroke(base, THEME.Outline, 2.0)
+	addCorner(base, bRad)
+	addStroke(base, THEME.Outline, 1.8)
+	local bGloss = Instance.new("Frame")
+	bGloss.Size = UDim2.fromScale(0.76, 0.30)
+	bGloss.Position = UDim2.fromScale(0.5, 0.18)
+	bGloss.AnchorPoint = Vector2.new(0.5, 0.5)
+	bGloss.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	bGloss.BackgroundTransparency = 0.78
+	bGloss.BorderSizePixel = 0
+	bGloss.ZIndex = zBase + 2
+	bGloss.Parent = base
+	addCorner(bGloss, 99)
 
 	-- Chi tiet trang tri rieng cho tung loai thap
 	if towerDef.Id == "archer" then
@@ -704,7 +776,7 @@ function GFX.buildEnemySprite(parent, def, kind, zBase)
 	shadow.Parent = holder
 	addCorner(shadow, 99)
 
-	-- Than quai chinh
+	-- Than quai 3D noi khoi (do bong 135 do + dom phan quang)
 	local body = Instance.new("Frame")
 	body.Size = UDim2.fromScale(1, 1)
 	body.Position = UDim2.fromScale(0.5, 0.5)
@@ -715,7 +787,25 @@ function GFX.buildEnemySprite(parent, def, kind, zBase)
 	body.ZIndex = zBase + 2
 	body.Parent = holder
 	addCorner(body, (kind == "golem" or kind == "knight") and 6 or (def.Boss and 9 or 99))
-	local bodyStroke = addStroke(body, def.Boss and THEME.TextGold or THEME.Outline, def.Boss and 2.4 or 1.8)
+	local bodyStroke = addStroke(body, def.Boss and THEME.TextGold or THEME.Outline, def.Boss and 2.4 or 1.6)
+	local volGrad = Instance.new("UIGradient")
+	volGrad.Rotation = 135
+	volGrad.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+		ColorSequenceKeypoint.new(0.55, Color3.fromRGB(224, 224, 232)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(132, 132, 152)),
+	})
+	volGrad.Parent = body
+	local spec3d = Instance.new("Frame")
+	spec3d.Size = UDim2.fromScale(0.34, 0.20)
+	spec3d.Position = UDim2.fromScale(0.32, 0.22)
+	spec3d.AnchorPoint = Vector2.new(0.5, 0.5)
+	spec3d.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	spec3d.BackgroundTransparency = 0.68
+	spec3d.BorderSizePixel = 0
+	spec3d.ZIndex = zBase + 3
+	spec3d.Parent = body
+	addCorner(spec3d, 99)
 
 	local wingL, wingR = nil, nil
 
@@ -976,6 +1066,18 @@ function GFX.buildObstacleSprite(parent, kind, zBase)
 	root.BackgroundTransparency = 1
 	root.ZIndex = zBase
 	root.Parent = parent
+
+	-- Bong do 3D duoi chan vat can
+	local obShad = Instance.new("Frame")
+	obShad.Size = UDim2.fromOffset(26, 10)
+	obShad.Position = UDim2.fromScale(0.54, 0.88)
+	obShad.AnchorPoint = Vector2.new(0.5, 0.5)
+	obShad.BackgroundColor3 = Color3.fromRGB(6, 10, 18)
+	obShad.BackgroundTransparency = 0.48
+	obShad.BorderSizePixel = 0
+	obShad.ZIndex = zBase
+	obShad.Parent = root
+	addCorner(obShad, 99)
 
 	if kind == "tree" then
 		-- Than cay nau + tan la xanh 2 tang
@@ -1511,8 +1613,9 @@ mainFrame.BorderSizePixel = 0
 mainFrame.ClipsDescendants = true
 mainFrame.ZIndex = 2
 mainFrame.Parent = screenGui
-addCorner(mainFrame, 14)
-addStroke(mainFrame, Color3.fromRGB(106, 72, 198), 2.4)
+addCorner(mainFrame, 16)
+addStroke(mainFrame, Color3.fromRGB(118, 86, 214), 2.4)
+addGradient(mainFrame, Color3.fromRGB(24, 28, 54), Color3.fromRGB(11, 13, 26), 110)
 
 local uiScale = Instance.new("UIScale")
 uiScale.Parent = mainFrame
@@ -1599,7 +1702,8 @@ function SEC.buildTopBar()
 	top.BorderSizePixel = 0
 	top.ZIndex = 10
 	top.Parent = mainFrame
-	addGradient(top, Color3.fromRGB(50, 38, 96), Color3.fromRGB(22, 24, 48), 90)
+	addGradient(top, Color3.fromRGB(58, 46, 112), Color3.fromRGB(20, 22, 46), 90)
+	add3DGloss(top, 10, 11, 0.84)
 
 	local div = Instance.new("Frame")
 	div.Size = UDim2.new(1, 0, 0, 2)
@@ -1644,6 +1748,8 @@ function SEC.buildTopBar()
 		p.Parent = hudGroup
 		addCorner(p, 10)
 		addStroke(p, strokeCol, 1.6)
+		addGradient(p, Color3.fromRGB(28, 32, 62), Color3.fromRGB(12, 14, 28), 90)
+		add3DGloss(p, 8, 12, 0.82)
 		GFX.makeIcon(p, iconKind, 18, UDim2.new(0, 14, 0.5, 0), Vector2.new(0.5, 0.5), 13)
 		local l = Instance.new("TextLabel")
 		l.Size = UDim2.new(1, -26, 1, 0)
@@ -1798,7 +1904,8 @@ function SEC.buildLobby()
 		card.ZIndex = 5
 		card.Parent = row
 		addCorner(card, 14)
-		local st = addStroke(card, mp.BossArena and Color3.fromRGB(196, 72, 92) or Color3.fromRGB(76, 86, 134), 2.2)
+		local st = addStroke(card, mp.BossArena and Color3.fromRGB(196, 72, 92) or Color3.fromRGB(86, 98, 156), 2.2)
+		add3DGloss(card, 12, 6, 0.82)
 
 		-- Mini preview ban do
 		local prev = Instance.new("Frame")
@@ -1811,6 +1918,7 @@ function SEC.buildLobby()
 		prev.Parent = card
 		addCorner(prev, 10)
 		addStroke(prev, THEME.Outline, 1.8)
+		add3DGloss(prev, 8, 8, 0.82)
 
 		-- Ve duong di mini
 		for w = 1, #mp.Waypoints - 1 do
@@ -1970,6 +2078,8 @@ function SEC.buildLobby()
 	pmBox.Parent = pmOverlay
 	addCorner(pmBox, 14)
 	addStroke(pmBox, THEME.TextGold, 2.4)
+	addGradient(pmBox, Color3.fromRGB(32, 36, 72), Color3.fromRGB(14, 16, 34), 95)
+	add3DGloss(pmBox, 12, 52, 0.84)
 	UI.pmBox = pmBox
 
 	local pmTitle = Instance.new("TextLabel")
@@ -2047,7 +2157,8 @@ function SEC.buildGameUI()
 	leftHud.Parent = gamePage
 	addCorner(leftHud, 10)
 	addStroke(leftHud, Color3.fromRGB(78, 72, 146), 1.6)
-	addGradient(leftHud, Color3.fromRGB(30, 34, 66), Color3.fromRGB(16, 18, 36), 90)
+	addGradient(leftHud, Color3.fromRGB(36, 42, 80), Color3.fromRGB(14, 16, 34), 90)
+	add3DGloss(leftHud, 8, 6, 0.84)
 
 	local lhTitle = Instance.new("TextLabel")
 	lhTitle.Size = UDim2.new(1, 0, 0, 24)
@@ -2098,7 +2209,8 @@ function SEC.buildGameUI()
 	rightHud.Parent = gamePage
 	addCorner(rightHud, 10)
 	addStroke(rightHud, Color3.fromRGB(78, 72, 146), 1.6)
-	addGradient(rightHud, Color3.fromRGB(30, 34, 66), Color3.fromRGB(16, 18, 36), 90)
+	addGradient(rightHud, Color3.fromRGB(36, 42, 80), Color3.fromRGB(14, 16, 34), 90)
+	add3DGloss(rightHud, 8, 6, 0.84)
 
 	local rhTitle = Instance.new("TextLabel")
 	rhTitle.Size = UDim2.new(1, 0, 0, 24)
@@ -2408,7 +2520,9 @@ function SEC.buildGameUI()
 	botBar.ZIndex = 6
 	botBar.Parent = gamePage
 	addCorner(botBar, 10)
-	addStroke(botBar, Color3.fromRGB(82, 72, 148), 1.6)
+	addStroke(botBar, Color3.fromRGB(92, 82, 168), 1.8)
+	addGradient(botBar, Color3.fromRGB(34, 38, 72), Color3.fromRGB(16, 18, 36), 90)
+	add3DGloss(botBar, 8, 7, 0.84)
 
 	local infoLbl = Instance.new("TextLabel")
 	infoLbl.Size = UDim2.fromOffset(316, 36)
@@ -2490,6 +2604,8 @@ function SEC.buildGameUI()
 	endCard.Parent = board
 	addCorner(endCard, 14)
 	UI.endStroke = addStroke(endCard, THEME.TextGold, 2.6)
+	addGradient(endCard, Color3.fromRGB(32, 38, 72), Color3.fromRGB(14, 16, 34), 95)
+	add3DGloss(endCard, 12, 46, 0.84)
 	UI.endCard = endCard
 
 	local endTitle = Instance.new("TextLabel")
@@ -3274,6 +3390,13 @@ local function buildMapBoard(mp)
 				tile.BackgroundColor3 = mp.PathCol
 				tile.BorderSizePixel = 1
 				tile.BorderColor3 = mp.PathBorder
+				local bevel = Instance.new("Frame")
+				bevel.Size = UDim2.new(1, 0, 0, 3)
+				bevel.BackgroundColor3 = Color3.fromRGB(6, 8, 16)
+				bevel.BackgroundTransparency = 0.72
+				bevel.BorderSizePixel = 0
+				bevel.ZIndex = 6
+				bevel.Parent = tile
 				if (x + y) % 2 == 0 then
 					local stone = Instance.new("Frame")
 					stone.Size = UDim2.fromOffset(10, 6)
@@ -4051,7 +4174,7 @@ UI.openDiffModal = function(mp)
 		lbl.Size = UDim2.fromOffset(312, 42)
 		lbl.Position = UDim2.fromOffset(10, 1)
 		lbl.BackgroundTransparency = 1
-		lbl.Text = string.format("%s  •  Thành %d HP  •  Máu quái x%.2g  •  Sao x%.2g", df.Name, df.Lives, df.HpMult, df.StarMult)
+		lbl.Text = df.Name
 		lbl.TextColor3 = df.Color
 		lbl.Font = THEME.FontHead
 		lbl.TextSize = 11
@@ -5019,5 +5142,5 @@ screenGui.Destroying:Connect(function()
 end)
 end)
 if not _ok then
-	warn("[ThuThanh2D v5.5 ERROR]: " .. tostring(_err))
+	warn("[ThuThanh2D v5.7 ERROR]: " .. tostring(_err))
 end
