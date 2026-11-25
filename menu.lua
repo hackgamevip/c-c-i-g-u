@@ -1,5 +1,5 @@
 -- ============================================================
--- THU THANH 2D (TOWER DEFENSE) v5.8 - KHO DO + NUT TRON 3D + HOI MAU THANH + 3 SAO MAP + TOGGLE + XAC NHAN THOAT
+-- THU THANH 2D (TOWER DEFENSE) v5.9 - KHO DO + NUT TRON 3D + HOI MAU THANH + 3 SAO MAP + TOGGLE + XAC NHAN THOAT
 -- Full-Screen Mobile & PC | Tu dong luu ky luc | Phim tat PC: RightShift
 -- ============================================================
 local _ok, _err = pcall(function()
@@ -1238,7 +1238,7 @@ function GFX.buildTrapSprite(parent, kind, zBase)
 end
 
 -- BO LOGO / ICON VECTOR 2D CHO TAT CA NUT BAM & CHI SO (KHONG DUNG EMOJI)
--- Ve boi canh phong canh minh hoa cho 5 ban do ngoai Sanh (theo anh mau)
+-- Ve boi canh phong canh 3D chi tiet cho 5 ban do ngoai Sanh (theo anh mau)
 function GFX.buildMapScene(prev, mapId, z)
 	local sky = Instance.new("Frame")
 	sky.Size = UDim2.fromScale(1, 1)
@@ -1247,233 +1247,326 @@ function GFX.buildMapScene(prev, mapId, z)
 	sky.Parent = prev
 
 	if mapId == "meadow" then
-		-- Thao Nguyen Xanh: troi xanh, lau dai trang mai xanh, doi co, duong dat & hang rao go
-		sky.BackgroundColor3 = Color3.fromRGB(64, 178, 232)
-		addGradient(sky, Color3.fromRGB(52, 162, 228), Color3.fromRGB(168, 224, 242), 90)
-		-- Doi nui xanh xa
+		-- Thao Nguyen Xanh: troi xanh may trang, nui xa, lau dai trang mai xanh co do, doi co, duong dat & hang rao go
+		sky.BackgroundColor3 = Color3.fromRGB(54, 174, 232)
+		addGradient(sky, Color3.fromRGB(36, 146, 224), Color3.fromRGB(168, 226, 244), 90)
+		for _, cl in ipairs({{14, 8, 26, 10}, {46, 12, 22, 8}}) do
+			local c = Instance.new("Frame")
+			c.Size = UDim2.fromOffset(cl[3], cl[4])
+			c.Position = UDim2.fromOffset(cl[1], cl[2])
+			c.BackgroundColor3 = Color3.fromRGB(236, 244, 248)
+			c.BackgroundTransparency = 0.15
+			c.BorderSizePixel = 0
+			c.ZIndex = z + 1
+			c.Parent = prev
+			addCorner(c, 99)
+		end
+		local mt = Instance.new("Frame")
+		mt.Size = UDim2.fromOffset(44, 44)
+		mt.Position = UDim2.fromOffset(22, 32)
+		mt.Rotation = 45
+		mt.BackgroundColor3 = Color3.fromRGB(72, 162, 206)
+		mt.BorderSizePixel = 0
+		mt.ZIndex = z + 1
+		mt.Parent = prev
+		addCorner(mt, 6)
 		local hill1 = Instance.new("Frame")
-		hill1.Size = UDim2.fromOffset(148, 72)
-		hill1.Position = UDim2.fromOffset(-14, 40)
-		hill1.BackgroundColor3 = Color3.fromRGB(62, 168, 74)
+		hill1.Size = UDim2.fromOffset(152, 76)
+		hill1.Position = UDim2.fromOffset(-16, 48)
+		hill1.BackgroundColor3 = Color3.fromRGB(58, 172, 68)
 		hill1.BorderSizePixel = 0
-		hill1.ZIndex = z + 1
+		hill1.ZIndex = z + 2
 		hill1.Parent = prev
 		addCorner(hill1, 99)
-		addGradient(hill1, Color3.fromRGB(108, 206, 78), Color3.fromRGB(38, 126, 56), 90)
+		addGradient(hill1, Color3.fromRGB(118, 212, 76), Color3.fromRGB(32, 128, 52), 90)
 		-- Duong dat vang uon luon
-		local rd = Instance.new("Frame")
-		rd.Size = UDim2.fromOffset(30, 56)
-		rd.Position = UDim2.new(0.5, -15, 0, 44)
-		rd.BackgroundColor3 = Color3.fromRGB(224, 188, 108)
-		rd.BorderSizePixel = 0
-		rd.ZIndex = z + 2
-		rd.Parent = prev
-		addCorner(rd, 12)
-		-- Lau dai trang mai xanh tren doi
+		local rd1 = Instance.new("Frame")
+		rd1.Size = UDim2.fromOffset(22, 32)
+		rd1.Position = UDim2.fromOffset(58, 48)
+		rd1.Rotation = 18
+		rd1.BackgroundColor3 = Color3.fromRGB(232, 198, 112)
+		rd1.BorderSizePixel = 0
+		rd1.ZIndex = z + 3
+		rd1.Parent = prev
+		addCorner(rd1, 10)
+		local rd2 = Instance.new("Frame")
+		rd2.Size = UDim2.fromOffset(30, 52)
+		rd2.Position = UDim2.fromOffset(44, 72)
+		rd2.BackgroundColor3 = Color3.fromRGB(228, 192, 104)
+		rd2.BorderSizePixel = 0
+		rd2.ZIndex = z + 3
+		rd2.Parent = prev
+		addCorner(rd2, 12)
+		-- Lau dai trang mai xanh + cong go + co do
 		local cas = Instance.new("Frame")
-		cas.Size = UDim2.fromOffset(38, 24)
-		cas.Position = UDim2.fromOffset(64, 24)
-		cas.BackgroundColor3 = Color3.fromRGB(218, 222, 232)
+		cas.Size = UDim2.fromOffset(42, 26)
+		cas.Position = UDim2.fromOffset(66, 26)
+		cas.BackgroundColor3 = Color3.fromRGB(224, 228, 236)
 		cas.BorderSizePixel = 0
 		cas.ZIndex = z + 2
 		cas.Parent = prev
 		addCorner(cas, 4)
-		for _, tx in ipairs({62, 78, 94}) do
+		local cDoor = Instance.new("Frame")
+		cDoor.Size = UDim2.fromOffset(8, 12)
+		cDoor.Position = UDim2.new(0.5, -4, 1, -12)
+		cDoor.BackgroundColor3 = Color3.fromRGB(132, 78, 38)
+		cDoor.BorderSizePixel = 0
+		cDoor.ZIndex = z + 3
+		cDoor.Parent = cas
+		addCorner(cDoor, 4)
+		for _, tx in ipairs({66, 82, 98}) do
 			local rf = Instance.new("Frame")
 			rf.Size = UDim2.fromOffset(10, 10)
-			rf.Position = UDim2.fromOffset(tx, 16)
+			rf.Position = UDim2.fromOffset(tx, 18)
 			rf.Rotation = 45
-			rf.BackgroundColor3 = Color3.fromRGB(48, 126, 214)
+			rf.BackgroundColor3 = Color3.fromRGB(44, 124, 218)
 			rf.BorderSizePixel = 0
 			rf.ZIndex = z + 3
 			rf.Parent = prev
 		end
-		-- Cay xanh ben trai
+		-- Cay xanh to ben trai
+		local trk = Instance.new("Frame")
+		trk.Size = UDim2.fromOffset(12, 28)
+		trk.Position = UDim2.fromOffset(6, 52)
+		trk.BackgroundColor3 = Color3.fromRGB(132, 78, 38)
+		trk.BorderSizePixel = 0
+		trk.ZIndex = z + 3
+		trk.Parent = prev
 		local tr = Instance.new("Frame")
-		tr.Size = UDim2.fromOffset(34, 34)
-		tr.Position = UDim2.fromOffset(-6, 18)
-		tr.BackgroundColor3 = Color3.fromRGB(78, 194, 58)
+		tr.Size = UDim2.fromOffset(42, 42)
+		tr.Position = UDim2.fromOffset(-10, 18)
+		tr.BackgroundColor3 = Color3.fromRGB(82, 202, 54)
 		tr.BorderSizePixel = 0
-		tr.ZIndex = z + 3
+		tr.ZIndex = z + 4
 		tr.Parent = prev
 		addCorner(tr, 99)
 		-- Hang rao go 2 ben
-		for _, fx in ipairs({6, 86}) do
+		for _, fx in ipairs({4, 86}) do
 			local fn = Instance.new("Frame")
-			fn.Size = UDim2.fromOffset(26, 12)
-			fn.Position = UDim2.fromOffset(fx, 68)
-			fn.BackgroundColor3 = Color3.fromRGB(168, 104, 52)
+			fn.Size = UDim2.fromOffset(28, 12)
+			fn.Position = UDim2.fromOffset(fx, 86)
+			fn.BackgroundColor3 = Color3.fromRGB(168, 104, 48)
 			fn.BorderSizePixel = 0
 			fn.ZIndex = z + 4
 			fn.Parent = prev
 			addCorner(fn, 3)
 		end
 	elseif mapId == "desert" then
-		-- Sa Mac Lua: hoang hon vang cam, mat troi, nui da do, xuong rong
-		sky.BackgroundColor3 = Color3.fromRGB(232, 162, 68)
-		addGradient(sky, Color3.fromRGB(224, 126, 52), Color3.fromRGB(238, 206, 118), 90)
+		-- Sa Mac Lua: hoang hon vang cam, mat troi, nui da do, xuong rong co tay, hang rao go
+		sky.BackgroundColor3 = Color3.fromRGB(234, 158, 62)
+		addGradient(sky, Color3.fromRGB(224, 118, 46), Color3.fromRGB(242, 212, 124), 90)
 		local sun = Instance.new("Frame")
-		sun.Size = UDim2.fromOffset(22, 22)
-		sun.Position = UDim2.fromOffset(36, 10)
-		sun.BackgroundColor3 = Color3.fromRGB(242, 224, 128)
+		sun.Size = UDim2.fromOffset(24, 24)
+		sun.Position = UDim2.fromOffset(32, 10)
+		sun.BackgroundColor3 = Color3.fromRGB(246, 232, 138)
 		sun.BorderSizePixel = 0
 		sun.ZIndex = z + 1
 		sun.Parent = prev
 		addCorner(sun, 99)
-		-- Nui da do 2 ben
-		for _, mx in ipairs({-6, 76}) do
-			local ms = Instance.new("Frame")
-			ms.Size = UDim2.fromOffset(48, 36)
-			ms.Position = UDim2.fromOffset(mx, 28)
-			ms.BackgroundColor3 = Color3.fromRGB(186, 88, 44)
-			ms.BorderSizePixel = 0
-			ms.ZIndex = z + 1
-			ms.Parent = prev
-			addCorner(ms, 8)
+		for _, ms in ipairs({{-6, 30, 44, 38}, {72, 24, 52, 44}}) do
+			local m = Instance.new("Frame")
+			m.Size = UDim2.fromOffset(ms[3], ms[4])
+			m.Position = UDim2.fromOffset(ms[1], ms[2])
+			m.BackgroundColor3 = Color3.fromRGB(186, 86, 42)
+			m.BorderSizePixel = 0
+			m.ZIndex = z + 1
+			m.Parent = prev
+			addCorner(m, 8)
 		end
-		-- Dun cat vang
 		local sand = Instance.new("Frame")
-		sand.Size = UDim2.fromOffset(140, 56)
-		sand.Position = UDim2.fromOffset(-10, 48)
-		sand.BackgroundColor3 = Color3.fromRGB(228, 174, 72)
+		sand.Size = UDim2.fromOffset(146, 72)
+		sand.Position = UDim2.fromOffset(-14, 54)
+		sand.BackgroundColor3 = Color3.fromRGB(232, 178, 72)
 		sand.BorderSizePixel = 0
 		sand.ZIndex = z + 2
 		sand.Parent = prev
-		addCorner(sand, 24)
-		addGradient(sand, Color3.fromRGB(236, 192, 86), Color3.fromRGB(196, 126, 46), 90)
-		-- Xuong rong xanh 2 ben
-		for _, cx in ipairs({12, 96}) do
+		addCorner(sand, 28)
+		addGradient(sand, Color3.fromRGB(240, 198, 88), Color3.fromRGB(198, 128, 46), 90)
+		-- Xuong rong 2 ben co canh
+		for _, cx in ipairs({10, 96}) do
 			local cac = Instance.new("Frame")
-			cac.Size = UDim2.fromOffset(10, 24)
-			cac.Position = UDim2.fromOffset(cx, 44)
-			cac.BackgroundColor3 = Color3.fromRGB(62, 168, 56)
+			cac.Size = UDim2.fromOffset(10, 28)
+			cac.Position = UDim2.fromOffset(cx, 50)
+			cac.BackgroundColor3 = Color3.fromRGB(62, 174, 54)
 			cac.BorderSizePixel = 0
 			cac.ZIndex = z + 3
 			cac.Parent = prev
 			addCorner(cac, 5)
+			local arm = Instance.new("Frame")
+			arm.Size = UDim2.fromOffset(18, 6)
+			arm.Position = UDim2.fromOffset(cx - 4, 60)
+			arm.BackgroundColor3 = Color3.fromRGB(58, 166, 52)
+			arm.BorderSizePixel = 0
+			arm.ZIndex = z + 3
+			arm.Parent = prev
+			addCorner(arm, 3)
+		end
+		for _, fx in ipairs({4, 86}) do
+			local fn = Instance.new("Frame")
+			fn.Size = UDim2.fromOffset(28, 12)
+			fn.Position = UDim2.fromOffset(fx, 90)
+			fn.BackgroundColor3 = Color3.fromRGB(162, 96, 44)
+			fn.BorderSizePixel = 0
+			fn.ZIndex = z + 4
+			fn.Parent = prev
+			addCorner(fn, 3)
 		end
 	elseif mapId == "citadel" then
-		-- Thanh Tri Hac Am: trang tron tim, lau dai den cong do, co do
-		sky.BackgroundColor3 = Color3.fromRGB(58, 36, 98)
-		addGradient(sky, Color3.fromRGB(46, 26, 88), Color3.fromRGB(112, 68, 168), 90)
+		-- Thanh Tri Hac Am: trang tron sang, lau dai den chop nhon + cua so do + cong ruc do + 2 co do
+		sky.BackgroundColor3 = Color3.fromRGB(54, 32, 96)
+		addGradient(sky, Color3.fromRGB(40, 22, 84), Color3.fromRGB(118, 72, 176), 90)
 		local moon = Instance.new("Frame")
-		moon.Size = UDim2.fromOffset(26, 26)
-		moon.Position = UDim2.fromOffset(14, 10)
-		moon.BackgroundColor3 = Color3.fromRGB(228, 218, 242)
+		moon.Size = UDim2.fromOffset(28, 28)
+		moon.Position = UDim2.fromOffset(12, 8)
+		moon.BackgroundColor3 = Color3.fromRGB(234, 224, 246)
 		moon.BorderSizePixel = 0
 		moon.ZIndex = z + 1
 		moon.Parent = prev
 		addCorner(moon, 99)
-		-- Nen da xam
 		local grd = Instance.new("Frame")
-		grd.Size = UDim2.fromOffset(132, 48)
-		grd.Position = UDim2.fromOffset(-6, 52)
-		grd.BackgroundColor3 = Color3.fromRGB(68, 62, 92)
+		grd.Size = UDim2.fromOffset(136, 60)
+		grd.Position = UDim2.fromOffset(-8, 62)
+		grd.BackgroundColor3 = Color3.fromRGB(78, 72, 108)
 		grd.BorderSizePixel = 0
 		grd.ZIndex = z + 1
 		grd.Parent = prev
 		addCorner(grd, 14)
-		-- Lau dai hac am + cong do ruc
 		local dc = Instance.new("Frame")
-		dc.Size = UDim2.fromOffset(52, 34)
-		dc.Position = UDim2.fromOffset(44, 22)
-		dc.BackgroundColor3 = Color3.fromRGB(44, 38, 68)
+		dc.Size = UDim2.fromOffset(58, 38)
+		dc.Position = UDim2.fromOffset(42, 26)
+		dc.BackgroundColor3 = Color3.fromRGB(46, 40, 74)
 		dc.BorderSizePixel = 0
 		dc.ZIndex = z + 2
 		dc.Parent = prev
 		addCorner(dc, 5)
+		for _, spx in ipairs({46, 65, 84}) do
+			local sp = Instance.new("Frame")
+			sp.Size = UDim2.fromOffset(12, 12)
+			sp.Position = UDim2.fromOffset(spx, 18)
+			sp.Rotation = 45
+			sp.BackgroundColor3 = Color3.fromRGB(58, 52, 92)
+			sp.BorderSizePixel = 0
+			sp.ZIndex = z + 2
+			sp.Parent = prev
+		end
 		local gate = Instance.new("Frame")
-		gate.Size = UDim2.fromOffset(12, 16)
-		gate.Position = UDim2.new(0.5, -6, 1, -16)
-		gate.BackgroundColor3 = Color3.fromRGB(224, 46, 58)
+		gate.Size = UDim2.fromOffset(14, 18)
+		gate.Position = UDim2.new(0.5, -7, 1, -18)
+		gate.BackgroundColor3 = Color3.fromRGB(228, 48, 56)
 		gate.BorderSizePixel = 0
 		gate.ZIndex = z + 3
 		gate.Parent = dc
 		addCorner(gate, 6)
-		for _, bx in ipairs({10, 96}) do
+		for _, bx in ipairs({8, 96}) do
 			local bn = Instance.new("Frame")
-			bn.Size = UDim2.fromOffset(12, 18)
-			bn.Position = UDim2.fromOffset(bx, 64)
-			bn.BackgroundColor3 = Color3.fromRGB(196, 36, 52)
+			bn.Size = UDim2.fromOffset(14, 22)
+			bn.Position = UDim2.fromOffset(bx, 82)
+			bn.BackgroundColor3 = Color3.fromRGB(198, 36, 52)
 			bn.BorderSizePixel = 0
 			bn.ZIndex = z + 3
 			bn.Parent = prev
 			addCorner(bn, 3)
 		end
 	elseif mapId == "heroic_boss" then
-		-- Boss Anh Hung: troi thien duong xanh sang, cung dien chop vang, san dau hoang kim
-		sky.BackgroundColor3 = Color3.fromRGB(72, 178, 232)
-		addGradient(sky, Color3.fromRGB(54, 152, 228), Color3.fromRGB(186, 228, 242), 90)
+		-- Boss Anh Hung: troi thien duong xanh sang, cung dien hoang gia chop vang, 2 tru da & san dau vang
+		sky.BackgroundColor3 = Color3.fromRGB(64, 174, 232)
+		addGradient(sky, Color3.fromRGB(48, 148, 228), Color3.fromRGB(188, 230, 246), 90)
 		local plaza = Instance.new("Frame")
-		plaza.Size = UDim2.fromOffset(136, 44)
-		plaza.Position = UDim2.fromOffset(-8, 56)
-		plaza.BackgroundColor3 = Color3.fromRGB(214, 198, 148)
+		plaza.Size = UDim2.fromOffset(140, 56)
+		plaza.Position = UDim2.fromOffset(-10, 68)
+		plaza.BackgroundColor3 = Color3.fromRGB(222, 204, 152)
 		plaza.BorderSizePixel = 0
 		plaza.ZIndex = z + 1
 		plaza.Parent = prev
-		addCorner(plaza, 18)
+		addCorner(plaza, 20)
 		local ringG = Instance.new("Frame")
-		ringG.Size = UDim2.fromOffset(58, 18)
-		ringG.Position = UDim2.new(0.5, -29, 0, 66)
-		ringG.BackgroundColor3 = Color3.fromRGB(232, 192, 58)
+		ringG.Size = UDim2.fromOffset(64, 20)
+		ringG.Position = UDim2.new(0.5, -32, 0, 82)
+		ringG.BackgroundColor3 = Color3.fromRGB(236, 196, 58)
 		ringG.BorderSizePixel = 0
 		ringG.ZIndex = z + 2
 		ringG.Parent = prev
 		addCorner(ringG, 99)
-		-- Cung dien trang chop vang
 		local pal = Instance.new("Frame")
-		pal.Size = UDim2.fromOffset(54, 34)
-		pal.Position = UDim2.new(0.5, -27, 0, 24)
-		pal.BackgroundColor3 = Color3.fromRGB(224, 226, 236)
+		pal.Size = UDim2.fromOffset(56, 38)
+		pal.Position = UDim2.new(0.5, -28, 0, 30)
+		pal.BackgroundColor3 = Color3.fromRGB(228, 230, 238)
 		pal.BorderSizePixel = 0
 		pal.ZIndex = z + 2
 		pal.Parent = prev
 		addCorner(pal, 5)
 		local sp = Instance.new("Frame")
-		sp.Size = UDim2.fromOffset(16, 16)
-		sp.Position = UDim2.new(0.5, -8, 0, 12)
+		sp.Size = UDim2.fromOffset(18, 18)
+		sp.Position = UDim2.new(0.5, -9, 0, 14)
 		sp.Rotation = 45
-		sp.BackgroundColor3 = Color3.fromRGB(236, 194, 52)
+		sp.BackgroundColor3 = Color3.fromRGB(240, 198, 52)
 		sp.BorderSizePixel = 0
 		sp.ZIndex = z + 3
 		sp.Parent = prev
+		for _, px in ipairs({8, 94}) do
+			local pil = Instance.new("Frame")
+			pil.Size = UDim2.fromOffset(16, 34)
+			pil.Position = UDim2.fromOffset(px, 56)
+			pil.BackgroundColor3 = Color3.fromRGB(214, 218, 228)
+			pil.BorderSizePixel = 0
+			pil.ZIndex = z + 3
+			pil.Parent = prev
+			addCorner(pil, 3)
+		end
 	else
-		-- Vo Tan: vu tru tim sao, dao bay, cong xoan hu khong & tinh the tim
-		sky.BackgroundColor3 = Color3.fromRGB(28, 16, 62)
-		addGradient(sky, Color3.fromRGB(20, 12, 52), Color3.fromRGB(68, 28, 118), 90)
+		-- Vo Tan: vu tru sao tim, dao bay 2 ben, cong xoan hu khong tim sang & cum pha le tim
+		sky.BackgroundColor3 = Color3.fromRGB(24, 14, 58)
+		addGradient(sky, Color3.fromRGB(16, 10, 48), Color3.fromRGB(72, 28, 126), 90)
+		for _, fl in ipairs({{8, 18, 22, 12}, {88, 16, 22, 12}}) do
+			local fi = Instance.new("Frame")
+			fi.Size = UDim2.fromOffset(fl[3], fl[4])
+			fi.Position = UDim2.fromOffset(fl[1], fl[2])
+			fi.BackgroundColor3 = Color3.fromRGB(68, 54, 112)
+			fi.BorderSizePixel = 0
+			fi.ZIndex = z + 1
+			fi.Parent = prev
+			addCorner(fi, 5)
+		end
 		local isl = Instance.new("Frame")
-		isl.Size = UDim2.fromOffset(124, 42)
-		isl.Position = UDim2.fromOffset(-3, 56)
-		isl.BackgroundColor3 = Color3.fromRGB(62, 54, 96)
+		isl.Size = UDim2.fromOffset(128, 54)
+		isl.Position = UDim2.fromOffset(-5, 68)
+		isl.BackgroundColor3 = Color3.fromRGB(64, 54, 102)
 		isl.BorderSizePixel = 0
 		isl.ZIndex = z + 1
 		isl.Parent = prev
 		addCorner(isl, 14)
-		-- Cong xoan tim ruc sang
 		local arch = Instance.new("Frame")
-		arch.Size = UDim2.fromOffset(42, 38)
-		arch.Position = UDim2.new(0.5, -21, 0, 20)
-		arch.BackgroundColor3 = Color3.fromRGB(78, 72, 118)
+		arch.Size = UDim2.fromOffset(48, 44)
+		arch.Position = UDim2.new(0.5, -24, 0, 24)
+		arch.BackgroundColor3 = Color3.fromRGB(82, 74, 126)
 		arch.BorderSizePixel = 0
 		arch.ZIndex = z + 2
 		arch.Parent = prev
-		addCorner(arch, 18)
+		addCorner(arch, 20)
 		local vort = Instance.new("Frame")
-		vort.Size = UDim2.fromOffset(26, 26)
+		vort.Size = UDim2.fromOffset(30, 30)
 		vort.Position = UDim2.fromScale(0.5, 0.56)
 		vort.AnchorPoint = Vector2.new(0.5, 0.5)
-		vort.BackgroundColor3 = Color3.fromRGB(204, 72, 236)
+		vort.BackgroundColor3 = Color3.fromRGB(208, 72, 240)
 		vort.BorderSizePixel = 0
 		vort.ZIndex = z + 3
 		vort.Parent = arch
 		addCorner(vort, 99)
-		-- Tinh the tim phat sang 2 goc
+		local vCore = Instance.new("Frame")
+		vCore.Size = UDim2.fromOffset(14, 14)
+		vCore.Position = UDim2.fromScale(0.5, 0.5)
+		vCore.AnchorPoint = Vector2.new(0.5, 0.5)
+		vCore.BackgroundColor3 = Color3.fromRGB(238, 192, 246)
+		vCore.BorderSizePixel = 0
+		vCore.ZIndex = z + 4
+		vCore.Parent = vort
+		addCorner(vCore, 99)
 		for _, cx in ipairs({8, 96}) do
 			local cr = Instance.new("Frame")
-			cr.Size = UDim2.fromOffset(12, 18)
-			cr.Position = UDim2.fromOffset(cx, 66)
+			cr.Size = UDim2.fromOffset(14, 24)
+			cr.Position = UDim2.fromOffset(cx, 82)
 			cr.Rotation = (cx < 50) and -16 or 16
-			cr.BackgroundColor3 = Color3.fromRGB(186, 72, 236)
+			cr.BackgroundColor3 = Color3.fromRGB(192, 74, 238)
 			cr.BorderSizePixel = 0
 			cr.ZIndex = z + 3
 			cr.Parent = prev
@@ -1700,37 +1793,101 @@ function GFX.makeIcon(parent, kind, size, pos, anchor, z)
 			addCorner(t, 2)
 			addStroke(t, THEME.Outline, 1.2)
 		end
-	elseif kind == "book" then
-		local cov = Instance.new("Frame")
-		cov.Size = UDim2.fromOffset(math.floor(size * 0.72), math.floor(size * 0.82))
-		cov.Position = UDim2.fromScale(0.5, 0.5)
-		cov.AnchorPoint = Vector2.new(0.5, 0.5)
-		cov.BackgroundColor3 = Color3.fromRGB(224, 232, 244)
-		cov.BorderSizePixel = 0
-		cov.ZIndex = z
-		cov.Parent = box
-		addCorner(cov, 3)
-		addStroke(cov, THEME.Outline, 1.4)
-		local sp = Instance.new("Frame")
-		sp.Size = UDim2.new(0, 3, 1, 0)
-		sp.BackgroundColor3 = Color3.fromRGB(62, 168, 214)
-		sp.BorderSizePixel = 0
-		sp.ZIndex = z + 1
-		sp.Parent = cov
-		local l1 = Instance.new("Frame")
-		l1.Size = UDim2.new(0.55, 0, 0, 2)
-		l1.Position = UDim2.fromScale(0.32, 0.34)
-		l1.BackgroundColor3 = Color3.fromRGB(72, 92, 134)
-		l1.BorderSizePixel = 0
-		l1.ZIndex = z + 1
-		l1.Parent = cov
-		local l2 = Instance.new("Frame")
-		l2.Size = UDim2.new(0.45, 0, 0, 2)
-		l2.Position = UDim2.fromScale(0.32, 0.58)
-		l2.BackgroundColor3 = Color3.fromRGB(72, 92, 134)
-		l2.BorderSizePixel = 0
-		l2.ZIndex = z + 1
-		l2.Parent = cov
+	elseif kind == "skull" then
+		-- Dau lau trang 3D giong anh mau Dot
+		local head = Instance.new("Frame")
+		head.Size = UDim2.fromScale(0.84, 0.72)
+		head.Position = UDim2.fromScale(0.5, 0.42)
+		head.AnchorPoint = Vector2.new(0.5, 0.5)
+		head.BackgroundColor3 = Color3.fromRGB(238, 236, 246)
+		head.BorderSizePixel = 0
+		head.ZIndex = z + 1
+		head.Parent = box
+		addCorner(head, 99)
+		addStroke(head, THEME.Outline, 1.4)
+		local jaw = Instance.new("Frame")
+		jaw.Size = UDim2.fromScale(0.52, 0.30)
+		jaw.Position = UDim2.fromScale(0.5, 0.78)
+		jaw.AnchorPoint = Vector2.new(0.5, 0.5)
+		jaw.BackgroundColor3 = Color3.fromRGB(224, 218, 238)
+		jaw.BorderSizePixel = 0
+		jaw.ZIndex = z + 1
+		jaw.Parent = box
+		addCorner(jaw, 4)
+		addStroke(jaw, THEME.Outline, 1.3)
+		for _, ex in ipairs({0.33, 0.67}) do
+			local eye = Instance.new("Frame")
+			eye.Size = UDim2.fromScale(0.22, 0.24)
+			eye.Position = UDim2.fromScale(ex, 0.44)
+			eye.AnchorPoint = Vector2.new(0.5, 0.5)
+			eye.BackgroundColor3 = Color3.fromRGB(20, 18, 42)
+			eye.BorderSizePixel = 0
+			eye.ZIndex = z + 2
+			eye.Parent = box
+			addCorner(eye, 99)
+		end
+		local nose = Instance.new("Frame")
+		nose.Size = UDim2.fromScale(0.14, 0.14)
+		nose.Position = UDim2.fromScale(0.5, 0.62)
+		nose.AnchorPoint = Vector2.new(0.5, 0.5)
+		nose.Rotation = 45
+		nose.BackgroundColor3 = Color3.fromRGB(24, 20, 48)
+		nose.BorderSizePixel = 0
+		nose.ZIndex = z + 2
+		nose.Parent = box
+	elseif kind == "chest" then
+		-- Ruong kho bau nau vien vang (Kho Do giong anh mau)
+		local body = Instance.new("Frame")
+		body.Size = UDim2.fromScale(0.86, 0.76)
+		body.Position = UDim2.fromScale(0.5, 0.54)
+		body.AnchorPoint = Vector2.new(0.5, 0.5)
+		body.BackgroundColor3 = Color3.fromRGB(168, 86, 32)
+		body.BorderSizePixel = 0
+		body.ZIndex = z + 1
+		body.Parent = box
+		addCorner(body, 4)
+		addStroke(body, THEME.Outline, 1.5)
+		local band = Instance.new("Frame")
+		band.Size = UDim2.new(1, 0, 0.26, 0)
+		band.Position = UDim2.fromScale(0, 0.34)
+		band.BackgroundColor3 = Color3.fromRGB(238, 194, 46)
+		band.BorderSizePixel = 0
+		band.ZIndex = z + 2
+		band.Parent = body
+		local lock = Instance.new("Frame")
+		lock.Size = UDim2.fromScale(0.28, 0.34)
+		lock.Position = UDim2.fromScale(0.5, 0.52)
+		lock.AnchorPoint = Vector2.new(0.5, 0.5)
+		lock.BackgroundColor3 = Color3.fromRGB(244, 212, 68)
+		lock.BorderSizePixel = 0
+		lock.ZIndex = z + 3
+		lock.Parent = body
+		addCorner(lock, 3)
+		addStroke(lock, THEME.Outline, 1.2)
+	elseif kind == "star5" then
+		-- Ngoi sao vang 3D (Nhiem Vu giong anh mau)
+		for _, rot in ipairs({0, 36, 72}) do
+			local arm = Instance.new("Frame")
+			arm.Size = UDim2.fromScale(0.76, 0.36)
+			arm.Position = UDim2.fromScale(0.5, 0.5)
+			arm.AnchorPoint = Vector2.new(0.5, 0.5)
+			arm.Rotation = rot
+			arm.BackgroundColor3 = Color3.fromRGB(246, 206, 48)
+			arm.BorderSizePixel = 0
+			arm.ZIndex = z + 1
+			arm.Parent = box
+			addCorner(arm, 4)
+			addStroke(arm, THEME.Outline, 1.2)
+		end
+		local core = Instance.new("Frame")
+		core.Size = UDim2.fromScale(0.46, 0.46)
+		core.Position = UDim2.fromScale(0.5, 0.5)
+		core.AnchorPoint = Vector2.new(0.5, 0.5)
+		core.BackgroundColor3 = Color3.fromRGB(252, 224, 92)
+		core.BorderSizePixel = 0
+		core.ZIndex = z + 2
+		core.Parent = box
+		addCorner(core, 99)
 	elseif kind == "bag" then
 		local bg = Instance.new("Frame")
 		bg.Size = UDim2.fromScale(0.78, 0.80)
@@ -2047,7 +2204,41 @@ function SEC.buildTopBar()
 	addTextOutline(hpTxt, 1.4, THEME.Outline)
 	UI.livesLbl = hpTxt
 	UI.goldLbl  = makeStatPill(84,  102, Color3.fromRGB(186, 146, 42), THEME.TextGold, "240",  "coin")
-	UI.waveLbl  = makeStatPill(192, 98,  Color3.fromRGB(72, 158, 206), THEME.TextCyan, "0/12", "wave")
+	-- O Dot Quai 3D dau lau + vien tim + khung chim ben trong (giong anh mau 2)
+	local wavePill = Instance.new("Frame")
+	wavePill.Size = UDim2.fromOffset(106, 32)
+	wavePill.Position = UDim2.fromOffset(190, 4)
+	wavePill.BackgroundColor3 = Color3.fromRGB(28, 26, 78)
+	wavePill.BorderSizePixel = 0
+	wavePill.ZIndex = 12
+	wavePill.Parent = hudGroup
+	addCorner(wavePill, 14)
+	addStroke(wavePill, Color3.fromRGB(108, 98, 224), 2.0)
+	addGradient(wavePill, Color3.fromRGB(48, 44, 118), Color3.fromRGB(20, 18, 56), 90)
+	GFX.makeIcon(wavePill, "skull", 20, UDim2.new(0, 15, 0.5, 0), Vector2.new(0.5, 0.5), 13)
+
+	local waveInner = Instance.new("Frame")
+	waveInner.Size = UDim2.new(1, -32, 0, 22)
+	waveInner.Position = UDim2.fromOffset(28, 5)
+	waveInner.BackgroundColor3 = Color3.fromRGB(16, 14, 46)
+	waveInner.BorderSizePixel = 0
+	waveInner.ZIndex = 13
+	waveInner.Parent = wavePill
+	addCorner(waveInner, 9)
+	addStroke(waveInner, Color3.fromRGB(58, 54, 134), 1.2)
+
+	local wLbl = Instance.new("TextLabel")
+	wLbl.Size = UDim2.fromScale(1, 1)
+	wLbl.BackgroundTransparency = 1
+	wLbl.RichText = true
+	wLbl.Text = '<font color="#F0D23C">Đợt 0</font><font color="#E2E8F4">/12</font>'
+	wLbl.TextColor3 = THEME.TextMain
+	wLbl.Font = THEME.FontHead
+	wLbl.TextSize = 11
+	wLbl.ZIndex = 14
+	wLbl.Parent = waveInner
+	addTextOutline(wLbl, 1.4, THEME.Outline)
+	UI.waveLbl = wLbl
 
 	local spdBtn, spdLbl = makeArcadeBtn(
 		hudGroup, "1x",
@@ -2223,59 +2414,50 @@ function SEC.buildLobby()
 
 	local playBtn, _, playFace = makeArcadeBtn(
 		lobbyPage, "CHƠI NGAY",
-		UDim2.fromOffset(124, 50), UDim2.new(0.5, -355, 1, -66),
-		Color3.fromRGB(68, 206, 74), Color3.fromRGB(28, 144, 48), 14,
-		{ TextSize = 11, ZIndex = 6, Depth = 5, Stroke = 2.4, LabelPos = UDim2.fromOffset(14, 0), LabelSize = UDim2.new(1, -16, 1, 0) }
+		UDim2.fromOffset(140, 50), UDim2.new(0.5, -356, 1, -66),
+		Color3.fromRGB(48, 224, 92), Color3.fromRGB(16, 154, 56), 14,
+		{ TextSize = 12, ZIndex = 6, Depth = 5, Stroke = 2.4, LabelPos = UDim2.fromOffset(16, 0), LabelSize = UDim2.new(1, -20, 1, 0) }
 	)
-	GFX.makeIcon(playFace, "play", 18, UDim2.new(0, 15, 0.5, 0), Vector2.new(0.5, 0.5), 9)
+	GFX.makeIcon(playFace, "play", 20, UDim2.new(0, 18, 0.5, 0), Vector2.new(0.5, 0.5), 9)
 	UI.playBtn = playBtn
 
 	local permBtn, permLbl, permFace = makeArcadeBtn(
 		lobbyPage, "KỸ NĂNG",
-		UDim2.fromOffset(118, 50), UDim2.new(0.5, -223, 1, -66),
-		Color3.fromRGB(154, 72, 218), Color3.fromRGB(94, 34, 168), 14,
-		{ TextSize = 10, ZIndex = 6, Depth = 5, Stroke = 2.4, LabelPos = UDim2.fromOffset(14, 0), LabelSize = UDim2.new(1, -16, 1, 0) }
+		UDim2.fromOffset(140, 50), UDim2.new(0.5, -208, 1, -66),
+		Color3.fromRGB(186, 68, 232), Color3.fromRGB(118, 28, 188), 14,
+		{ TextSize = 11, ZIndex = 6, Depth = 5, Stroke = 2.4, LabelPos = UDim2.fromOffset(16, 0), LabelSize = UDim2.new(1, -20, 1, 0) }
 	)
-	GFX.makeIcon(permFace, "star", 16, UDim2.new(0, 14, 0.5, 0), Vector2.new(0.5, 0.5), 9)
+	GFX.makeIcon(permFace, "star", 19, UDim2.new(0, 18, 0.5, 0), Vector2.new(0.5, 0.5), 9)
 	UI.permUpgBtn = permBtn
 	UI.permUpgLbl = permLbl
 
 	local bagBtn, bagLbl, bagFace = makeArcadeBtn(
 		lobbyPage, "KHO ĐỒ",
-		UDim2.fromOffset(106, 50), UDim2.new(0.5, -97, 1, -66),
-		Color3.fromRGB(218, 122, 42), Color3.fromRGB(164, 68, 22), 14,
-		{ TextSize = 10, ZIndex = 6, Depth = 5, Stroke = 2.4, LabelPos = UDim2.fromOffset(14, 0), LabelSize = UDim2.new(1, -16, 1, 0) }
+		UDim2.fromOffset(132, 50), UDim2.new(0.5, -60, 1, -66),
+		Color3.fromRGB(242, 192, 36), Color3.fromRGB(218, 116, 18), 14,
+		{ TextSize = 12, ZIndex = 6, Depth = 5, Stroke = 2.4, LabelPos = UDim2.fromOffset(16, 0), LabelSize = UDim2.new(1, -20, 1, 0) }
 	)
-	GFX.makeIcon(bagFace, "bag", 16, UDim2.new(0, 14, 0.5, 0), Vector2.new(0.5, 0.5), 9)
+	GFX.makeIcon(bagFace, "chest", 20, UDim2.new(0, 18, 0.5, 0), Vector2.new(0.5, 0.5), 9)
 	UI.bagBtn = bagBtn
 	UI.bagLbl = bagLbl
 
 	local qBtn, qLbl, qFace = makeArcadeBtn(
 		lobbyPage, "NHIỆM VỤ",
-		UDim2.fromOffset(114, 50), UDim2.new(0.5, 17, 1, -66),
-		Color3.fromRGB(214, 166, 38), Color3.fromRGB(162, 98, 18), 14,
-		{ TextSize = 10, ZIndex = 6, Depth = 5, Stroke = 2.4, LabelPos = UDim2.fromOffset(14, 0), LabelSize = UDim2.new(1, -16, 1, 0) }
+		UDim2.fromOffset(138, 50), UDim2.new(0.5, 80, 1, -66),
+		Color3.fromRGB(244, 206, 42), Color3.fromRGB(222, 132, 18), 14,
+		{ TextSize = 11, ZIndex = 6, Depth = 5, Stroke = 2.4, LabelPos = UDim2.fromOffset(16, 0), LabelSize = UDim2.new(1, -20, 1, 0) }
 	)
-	GFX.makeIcon(qFace, "quest", 16, UDim2.new(0, 14, 0.5, 0), Vector2.new(0.5, 0.5), 9)
+	GFX.makeIcon(qFace, "star5", 20, UDim2.new(0, 18, 0.5, 0), Vector2.new(0.5, 0.5), 9)
 	UI.questBtn = qBtn
 	UI.questLbl = qLbl
 
-	local wikiBtn, _, wikiFace = makeArcadeBtn(
-		lobbyPage, "SỔ TAY",
-		UDim2.fromOffset(104, 50), UDim2.new(0.5, 139, 1, -66),
-		Color3.fromRGB(48, 168, 174), Color3.fromRGB(26, 108, 124), 14,
-		{ TextSize = 10, ZIndex = 6, Depth = 5, Stroke = 2.4, LabelPos = UDim2.fromOffset(14, 0), LabelSize = UDim2.new(1, -16, 1, 0) }
-	)
-	GFX.makeIcon(wikiFace, "book", 16, UDim2.new(0, 14, 0.5, 0), Vector2.new(0.5, 0.5), 9)
-	UI.wikiBtn = wikiBtn
-
 	local setBtn, _, setFace = makeArcadeBtn(
 		lobbyPage, "CÀI ĐẶT",
-		UDim2.fromOffset(104, 50), UDim2.new(0.5, 251, 1, -66),
-		Color3.fromRGB(58, 142, 206), Color3.fromRGB(32, 82, 158), 14,
-		{ TextSize = 10, ZIndex = 6, Depth = 5, Stroke = 2.4, LabelPos = UDim2.fromOffset(14, 0), LabelSize = UDim2.new(1, -16, 1, 0) }
+		UDim2.fromOffset(130, 50), UDim2.new(0.5, 226, 1, -66),
+		Color3.fromRGB(118, 146, 218), Color3.fromRGB(68, 86, 158), 14,
+		{ TextSize = 12, ZIndex = 6, Depth = 5, Stroke = 2.4, LabelPos = UDim2.fromOffset(16, 0), LabelSize = UDim2.new(1, -20, 1, 0) }
 	)
-	GFX.makeIcon(setFace, "gear", 16, UDim2.new(0, 14, 0.5, 0), Vector2.new(0.5, 0.5), 9)
+	GFX.makeIcon(setFace, "gear", 20, UDim2.new(0, 18, 0.5, 0), Vector2.new(0.5, 0.5), 9)
 	UI.settingsBtn = setBtn
 
 	-- Modal Cay Ky Nang Vinh Vien ngoai sanh
@@ -3248,7 +3430,7 @@ local function updateHUD()
 	UI.livesLbl.Text = tostring(curL) .. "/" .. tostring(maxL)
 	if UI.livesBarFill then UI.livesBarFill.Size = UDim2.fromScale(math.clamp(curL / maxL, 0, 1), 1) end
 	UI.goldLbl.Text  = formatNum(TD.gold)
-	UI.waveLbl.Text  = TD.map.Endless and (tostring(TD.wave) .. " (∞)") or (tostring(TD.wave) .. "/" .. tostring(TD.map.Waves))
+	UI.waveLbl.Text  = TD.map.Endless and ('<font color="#F0D23C">Đợt ' .. tostring(TD.wave) .. '</font><font color="#E2E8F4"> ∞</font>') or ('<font color="#F0D23C">Đợt ' .. tostring(TD.wave) .. '</font><font color="#E2E8F4">/' .. tostring(TD.map.Waves) .. '</font>')
 	UI.spdLbl.Text   = tostring(TD.speedMult) .. "x"
 
 	if TD.pendingCell then
@@ -4744,151 +4926,6 @@ end
 UI.bagBtn.MouseButton1Click:Connect(function() openInventoryModal(false) end)
 UI.matchBagBtn.MouseButton1Click:Connect(function() openInventoryModal(true) end)
 
--- So Tay (Wiki) tra cuu 7 Thap + 17 Quai & Boss
-local function openWikiModal(tabName)
-	tabName = tabName or "towers"
-	for _, ch in ipairs(UI.pmList:GetChildren()) do
-		if ch:IsA("Frame") or ch:IsA("ScrollingFrame") then ch:Destroy() end
-	end
-	UI.pmTitle.Text = "SỔ TAY CHIẾN THUẬT"
-
-	local tabRow = Instance.new("Frame")
-	tabRow.Size = UDim2.new(1, 0, 0, 32)
-	tabRow.BackgroundTransparency = 1
-	tabRow.ZIndex = 53
-	tabRow.Parent = UI.pmList
-
-	local tBtn = makeArcadeBtn(
-		tabRow, "THÁP PHÒNG THỦ (" .. tostring(#TOWERS) .. ")",
-		UDim2.fromOffset(218, 28), UDim2.fromOffset(0, 2),
-		(tabName == "towers") and Color3.fromRGB(54, 158, 212) or Color3.fromRGB(52, 58, 92),
-		(tabName == "towers") and Color3.fromRGB(28, 94, 168) or Color3.fromRGB(34, 38, 66), 8,
-		{ TextSize = 11, ZIndex = 54, Depth = 3 }
-	)
-	local eBtn = makeArcadeBtn(
-		tabRow, "QUÁI VẬT & BOSS (17)",
-		UDim2.fromOffset(218, 28), UDim2.new(1, -218, 0, 2),
-		(tabName == "enemies") and Color3.fromRGB(204, 68, 76) or Color3.fromRGB(52, 58, 92),
-		(tabName == "enemies") and Color3.fromRGB(144, 32, 42) or Color3.fromRGB(34, 38, 66), 8,
-		{ TextSize = 11, ZIndex = 54, Depth = 3 }
-	)
-	tBtn.MouseButton1Click:Connect(function() openWikiModal("towers") end)
-	eBtn.MouseButton1Click:Connect(function() openWikiModal("enemies") end)
-
-	local sc = Instance.new("ScrollingFrame")
-	sc.Size = UDim2.new(1, 0, 0, 224)
-	sc.BackgroundTransparency = 1
-	sc.BorderSizePixel = 0
-	sc.ScrollBarThickness = 5
-	sc.ScrollBarImageColor3 = THEME.TextGold
-	sc.AutomaticCanvasSize = Enum.AutomaticSize.Y
-	sc.CanvasSize = UDim2.new(0, 0, 0, 0)
-	sc.ZIndex = 53
-	sc.Parent = UI.pmList
-	local sLay = Instance.new("UIListLayout")
-	sLay.Padding = UDim.new(0, 6)
-	sLay.Parent = sc
-
-	if tabName == "towers" then
-		for _, td in ipairs(TOWERS) do
-			local row = Instance.new("Frame")
-			row.Size = UDim2.new(1, -8, 0, 56)
-			row.BackgroundColor3 = Color3.fromRGB(28, 32, 58)
-			row.BorderSizePixel = 0
-			row.ZIndex = 53
-			row.Parent = sc
-			addCorner(row, 9)
-			addStroke(row, td.Accent or Color3.fromRGB(78, 86, 134), 1.5)
-
-			local ic = Instance.new("Frame")
-			ic.Size = UDim2.fromOffset(36, 36)
-			ic.Position = UDim2.fromOffset(8, 10)
-			ic.BackgroundTransparency = 1
-			ic.ZIndex = 54
-			ic.Parent = row
-			GFX.buildTowerSprite(ic, td, 32, 54)
-
-			local nm = Instance.new("TextLabel")
-			nm.Size = UDim2.new(1, -56, 0, 18)
-			nm.Position = UDim2.fromOffset(50, 4)
-			nm.BackgroundTransparency = 1
-			nm.Text = string.format("%s  •  Giá: %dV  •  Tầm: %d", td.Name, td.Cost, td.Range)
-			nm.TextColor3 = THEME.TextGold
-			nm.Font = THEME.FontHead
-			nm.TextSize = 11
-			nm.TextXAlignment = Enum.TextXAlignment.Left
-			nm.ZIndex = 54
-			nm.Parent = row
-
-			local st = Instance.new("TextLabel")
-			st.Size = UDim2.new(1, -56, 0, 30)
-			st.Position = UDim2.fromOffset(50, 22)
-			st.BackgroundTransparency = 1
-			local extra = (td.Kind == "Buff") and ("Tăng +" .. math.floor((td.BuffDmg or 0.25) * 100) .. "% ST & tốc bắn cho tháp lân cận") or string.format("ST: %d • Tốc: %.2fs • Cấp 3: Hủy Diệt (ST mạnh) / Siêu Tốc (bắn nhanh)", td.Damage, td.FireRate)
-			st.Text = extra
-			st.TextColor3 = THEME.TextMuted
-			st.Font = THEME.FontBody
-			st.TextSize = 10
-			st.TextWrapped = true
-			st.TextXAlignment = Enum.TextXAlignment.Left
-			st.ZIndex = 54
-			st.Parent = row
-		end
-	else
-		local orderKeys = { "slime", "goblin", "spider", "bat", "skeleton", "knight", "scorpion", "wraith", "orc", "golem", "boss", "cerberus", "lich_boss", "titan_boss", "dark_knight_boss", "phoenix_boss", "hero_boss" }
-		for _, k in ipairs(orderKeys) do
-			local ed = ENEMIES[k]
-			if ed then
-				local row = Instance.new("Frame")
-				row.Size = UDim2.new(1, -8, 0, 46)
-				row.BackgroundColor3 = ed.Boss and Color3.fromRGB(44, 22, 42) or Color3.fromRGB(28, 32, 58)
-				row.BorderSizePixel = 0
-				row.ZIndex = 53
-				row.Parent = sc
-				addCorner(row, 9)
-				addStroke(row, ed.Boss and THEME.TextRed or (ed.Color or Color3.fromRGB(78, 86, 134)), ed.Boss and 1.8 or 1.4)
-
-				local dot = Instance.new("Frame")
-				dot.Size = UDim2.fromOffset(22, 22)
-				dot.Position = UDim2.fromOffset(10, 12)
-				dot.BackgroundColor3 = ed.Color
-				dot.BorderSizePixel = 0
-				dot.ZIndex = 54
-				dot.Parent = row
-				addCorner(dot, 99)
-				addStroke(dot, THEME.Outline, 1.5)
-
-				local nm = Instance.new("TextLabel")
-				nm.Size = UDim2.new(1, -46, 0, 18)
-				nm.Position = UDim2.fromOffset(40, 4)
-				nm.BackgroundTransparency = 1
-				nm.Text = (ed.Boss and "[BOSS] " or "") .. ed.Name .. "  •  Thưởng: +" .. tostring(ed.Reward) .. "V"
-				nm.TextColor3 = ed.Boss and THEME.TextGold or THEME.TextMain
-				nm.Font = THEME.FontHead
-				nm.TextSize = 11
-				nm.TextXAlignment = Enum.TextXAlignment.Left
-				nm.ZIndex = 54
-				nm.Parent = row
-
-				local st = Instance.new("TextLabel")
-				st.Size = UDim2.new(1, -46, 0, 18)
-				st.Position = UDim2.fromOffset(40, 23)
-				st.BackgroundTransparency = 1
-				local note = ed.Boss and "Chiêu Boss: Triệu hồi / Tăng tốc / Choáng tháp • Lọt thành thua ngay" or "Quái thường • Lọt thành -1 HP"
-				st.Text = string.format("Máu gốc: %s • Tốc: %d • %s", formatNum(ed.HP), ed.Speed, note)
-				st.TextColor3 = THEME.TextMuted
-				st.Font = THEME.FontBody
-				st.TextSize = 9
-				st.TextXAlignment = Enum.TextXAlignment.Left
-				st.TextTruncate = Enum.TextTruncate.AtEnd
-				st.ZIndex = 54
-				st.Parent = row
-			end
-		end
-	end
-	UI.pmOverlay.Visible = true
-end
-UI.wikiBtn.MouseButton1Click:Connect(function() openWikiModal("towers") end)
 
 -- Ky nang Hoi Mau Thanh (+3 HP)
 UI.healBtn.MouseButton1Click:Connect(function()
@@ -5441,5 +5478,5 @@ screenGui.Destroying:Connect(function()
 end)
 end)
 if not _ok then
-	warn("[ThuThanh2D v5.8 ERROR]: " .. tostring(_err))
+	warn("[ThuThanh2D v5.9 ERROR]: " .. tostring(_err))
 end
