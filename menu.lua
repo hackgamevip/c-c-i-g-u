@@ -1,5 +1,5 @@
 -- ============================================================
--- THU THANH 2D (TOWER DEFENSE) v6.2 - KHO DO + NUT TRON 3D + HOI MAU THANH + 3 SAO MAP + TOGGLE + XAC NHAN THOAT
+-- THU THANH 2D (TOWER DEFENSE) v6.3 - KHO DO + NUT TRON 3D + HOI MAU THANH + 3 SAO MAP + TOGGLE + XAC NHAN THOAT
 -- Full-Screen Mobile & PC | Tu dong luu ky luc | Phim tat PC: RightShift
 -- ============================================================
 local _ok, _err = pcall(function()
@@ -229,6 +229,8 @@ local saveState = {
 	Hide3D = false,
 	MapStars = { meadow = 0, desert = 0, citadel = 0, heroic_boss = 0, endless = 0 },
 	StageUnlocked = { meadow = 1, desert = 1, citadel = 1, heroic_boss = 1, endless = 1 },
+	StageStars = {},
+	StageDiffUnlocked = {},
 	SelectedStage = 1,
 	Bag = { potion = 2, goldbag = 1, scroll = 1 },
 	SelectedMap = 1,
@@ -306,6 +308,8 @@ local function loadData()
 			if type(tbl.LowFx) == "boolean" then saveState.LowFx = tbl.LowFx end
 			if type(tbl.Hide3D) == "boolean" then saveState.Hide3D = tbl.Hide3D end
 			if type(tbl.StageUnlocked) == "table" then for k, v in pairs(tbl.StageUnlocked) do saveState.StageUnlocked[k] = math.clamp(tonumber(v) or 1, 1, 7) end end
+			if type(tbl.StageStars) == "table" then for k, v in pairs(tbl.StageStars) do saveState.StageStars[k] = math.clamp(tonumber(v) or 0, 0, 3) end end
+			if type(tbl.StageDiffUnlocked) == "table" then for k, v in pairs(tbl.StageDiffUnlocked) do saveState.StageDiffUnlocked[k] = math.clamp(tonumber(v) or 1, 1, 3) end end
 			if saveState.Difficulty == "insane" or saveState.Difficulty == "hell" then saveState.Difficulty = "hard" end
 			if type(tbl.SfxVol) == "number" then saveState.SfxVol = math.clamp(tbl.SfxVol, 0.2, 1.0) end
 			if type(tbl.MapStars) == "table" then
@@ -2130,12 +2134,49 @@ local function applyScale()
 end
 applyScale()
 
-local floatBtn = makeArcadeBtn(
-	screenGui, "TD",
-	UDim2.fromOffset(50, 50), UDim2.new(0, 16, 0.5, -25),
-	Color3.fromRGB(132, 68, 214), Color3.fromRGB(78, 34, 158), 25,
-	{ TextSize = 15, ZIndex = 40, Depth = 4 }
-)
+-- Nut menu chinh thu nho thiet ke lai: Huy hieu Lau Dai 3D vien vang hien dai
+local floatBtn = Instance.new("TextButton")
+floatBtn.Size = UDim2.fromOffset(56, 56)
+floatBtn.Position = UDim2.new(0, 16, 0.5, -28)
+floatBtn.BackgroundColor3 = Color3.fromRGB(24, 20, 56)
+floatBtn.Text = ""
+floatBtn.AutoButtonColor = false
+floatBtn.BorderSizePixel = 0
+floatBtn.ZIndex = 40
+floatBtn.Parent = screenGui
+addCorner(floatBtn, 16)
+addStroke(floatBtn, THEME.TextGold, 2.6)
+addGradient(floatBtn, Color3.fromRGB(68, 44, 146), Color3.fromRGB(22, 18, 52), 135)
+add3DGloss(floatBtn, 14, 41, 0.78)
+
+local fbInner = Instance.new("Frame")
+fbInner.Size = UDim2.fromOffset(44, 44)
+fbInner.Position = UDim2.fromScale(0.5, 0.5)
+fbInner.AnchorPoint = Vector2.new(0.5, 0.5)
+fbInner.BackgroundColor3 = Color3.fromRGB(18, 16, 44)
+fbInner.BackgroundTransparency = 0.25
+fbInner.BorderSizePixel = 0
+fbInner.ZIndex = 41
+fbInner.Parent = floatBtn
+addCorner(fbInner, 12)
+addStroke(fbInner, Color3.fromRGB(122, 92, 224), 1.4)
+
+GFX.makeIcon(fbInner, "castle_logo", 28, UDim2.fromScale(0.5, 0.38), Vector2.new(0.5, 0.5), 42)
+
+local fbTag = Instance.new("TextLabel")
+fbTag.Size = UDim2.fromOffset(40, 14)
+fbTag.Position = UDim2.new(0.5, 0, 1, -2)
+fbTag.AnchorPoint = Vector2.new(0.5, 1)
+fbTag.BackgroundColor3 = Color3.fromRGB(196, 142, 28)
+fbTag.BorderSizePixel = 0
+fbTag.Text = "TD 2D"
+fbTag.TextColor3 = Color3.fromRGB(244, 246, 252)
+fbTag.Font = THEME.FontHead
+fbTag.TextSize = 8
+fbTag.ZIndex = 44
+fbTag.Parent = floatBtn
+addCorner(fbTag, 5)
+addStroke(fbTag, THEME.Outline, 1.3)
 floatBtn.Visible = false
 local floatDragged = false
 makeDraggable(floatBtn, floatBtn, function(v) floatDragged = v end)
@@ -3801,12 +3842,37 @@ local function finishMatch(won)
 	end
 	local diffMult = (getDiffDef(saveState.Difficulty).StarMult or 1)
 	local matchStars = 0
+	local earnedStageStars = 0
+	local starNote = ""
+	local stKey = mid .. "_" .. tostring(TD.stage or 1)
 	if won then
 		saveState.Wins[mid] = (saveState.Wins[mid] or 0) + 1
-		local ratio = TD.lives / math.max(1, TD.maxLives)
-		local earnedS = (ratio >= 0.99) and 3 or ((ratio >= 0.5) and 2 or 1)
-		if earnedS > (saveState.MapStars[mid] or 0) then saveState.MapStars[mid] = earnedS end
-		matchStars = math.floor((12 + (TD.stage or 1) * 3) * diffMult + 0.5)
+		-- Co che tinh Sao cho moi Ai:
+		-- Khong lot con nao = 3 Sao | Lot >=1 con (con >50% tim) = -1 Sao (2 Sao) | Mat >=50% so tim = -2 Sao (1 Sao)
+		if TD.lives <= TD.maxLives * 0.5 then
+			earnedStageStars = 1
+			starNote = "1/3 Sao (-2 Sao do mất >=50% tim)"
+		elseif (TD.leaks or 0) >= 1 or TD.lives < TD.maxLives then
+			earnedStageStars = 2
+			starNote = "2/3 Sao (-1 Sao do lọt quái)"
+		else
+			earnedStageStars = 3
+			starNote = "3/3 Sao (Toàn thắng không lọt quái!)"
+		end
+		if earnedStageStars > (saveState.StageStars[stKey] or 0) then
+			saveState.StageStars[stKey] = earnedStageStars
+		end
+		if earnedStageStars > (saveState.MapStars[mid] or 0) then
+			saveState.MapStars[mid] = earnedStageStars
+		end
+		-- Mo khoa cap do tiep theo cho Ai nay (De -> Binh Thuong -> Kho)
+		local curDiffIdx = (saveState.Difficulty == "hard") and 3 or ((saveState.Difficulty == "normal") and 2 or 1)
+		local nextDiffLv = math.min(3, curDiffIdx + 1)
+		if nextDiffLv > (saveState.StageDiffUnlocked[stKey] or 1) then
+			saveState.StageDiffUnlocked[stKey] = nextDiffLv
+		end
+		-- Thuong Sao ky nang cong them theo so Sao dat duoc o Ai
+		matchStars = math.floor((10 + (TD.stage or 1) * 3 + earnedStageStars * 4) * diffMult + 0.5)
 		saveState.Stars += matchStars
 		if (not TD.map.Endless) and (TD.stage or 1) < 7 then
 			local nextSt = (TD.stage or 1) + 1
@@ -3817,8 +3883,14 @@ local function finishMatch(won)
 		end
 		addQuestProg("win", 1)
 	elseif TD.wave > 0 then
+		-- Che do Vo Tan: dat Dot 10 mo Binh Thuong, Dot 20 mo Kho
+		if TD.map.Endless then
+			if TD.wave >= 20 and (saveState.StageDiffUnlocked[stKey] or 1) < 3 then saveState.StageDiffUnlocked[stKey] = 3
+			elseif TD.wave >= 10 and (saveState.StageDiffUnlocked[stKey] or 1) < 2 then saveState.StageDiffUnlocked[stKey] = 2 end
+		end
 		matchStars = math.max(2, math.floor(TD.wave * 2 * diffMult + 0.5))
 		saveState.Stars += matchStars
+		starNote = "Thưởng nỗ lực: +" .. tostring(matchStars) .. " Sao"
 	end
 	saveData()
 	UI.endTitle.Text = won and (TD.map.Endless and "CHIẾN THẮNG!" or ("VƯỢT ẢI " .. tostring(TD.stage or 1) .. "/7!")) or "THẤT THỦ!"
@@ -3828,7 +3900,7 @@ local function finishMatch(won)
 	for k, v in pairs(TD.dmgByTower) do if v > mvpDmg then mvpDmg = math.floor(v) mvpName = k end end
 	local dfName = getDiffDef(saveState.Difficulty).Name
 	local stTag = TD.map.Endless and "" or (" • Ải " .. tostring(TD.stage or 1) .. "/7")
-	UI.endDesc.Text = string.format("%s%s (%s) • Thưởng: +%d Sao\nĐợt %d • Hạ: %d • MVP: %s (%s ST)", TD.map.Name, stTag, dfName, matchStars, TD.wave, TD.kills, mvpName, formatNum(mvpDmg))
+	UI.endDesc.Text = string.format("%s%s (%s) • +%d Sao\n%s • MVP: %s (%s ST)", TD.map.Name, stTag, dfName, matchStars, starNote, mvpName, formatNum(mvpDmg))
 	if UI.endChartBox then
 		for _, ch in ipairs(UI.endChartBox:GetChildren()) do
 			if ch:IsA("Frame") or ch:IsA("TextLabel") then ch:Destroy() end
@@ -4286,6 +4358,12 @@ end
 
 local function spawnEnemy(kind)
 	local def = ENEMIES[kind] or ENEMIES.slime
+	local stKeyInit = TD.map.Id .. "_" .. tostring(TD.stage)
+	local maxDiffLv = math.clamp(saveState.StageDiffUnlocked[stKeyInit] or 1, 1, 3)
+	local curDiffLv = (saveState.Difficulty == "hard") and 3 or ((saveState.Difficulty == "normal") and 2 or 1)
+	if curDiffLv > maxDiffLv then
+		saveState.Difficulty = DIFFICULTIES[maxDiffLv].Id
+	end
 	local diffDef = getDiffDef(saveState.Difficulty)
 	local stageMult = 1 + ((TD.stage or 1) - 1) * 0.16
 	local scaleHP = (1 + (TD.wave - 1) * 0.20) * stageMult * (diffDef.HpMult or 1.0)
@@ -4450,6 +4528,7 @@ local function startNewMatch()
 	TD.gold = TD.map.StartGold + (TD.stage - 1) * 35 + (saveState.Upgrades.gold or 0) * 40
 	TD.lives = (diffDef.Id == "hell") and 1 or (diffDef.Lives + (saveState.Upgrades.lives or 0) * 2)
 	TD.maxLives = TD.lives
+	TD.leaks = 0
 	TD.healCd = 0
 	TD.wave = 0
 	TD.kills = 0
@@ -4884,20 +4963,72 @@ local function openStarQuests()
 end
 UI.questBtn.MouseButton1Click:Connect(openStarQuests)
 
--- Bang chon Ai (7 Man moi ban do) + 3 nut Cap Do nam ngang gon (bam vao la vo tran luon)
+-- Bang chon Man Choi & Cap Do thiet ke lai: 7 Ai co 3 Sao tung ai + Mo khoa cap do tuan tu (De -> Binh Thuong -> Kho)
 UI.openDiffModal = function(mp)
 	for _, ch in ipairs(UI.pmList:GetChildren()) do
 		if ch:IsA("Frame") or ch:IsA("ScrollingFrame") then ch:Destroy() end
 	end
-	UI.pmTitle.Text = mp.Name .. (mp.Endless and "  •  CHỌN CẤP ĐỘ" or "  •  CHỌN ẢI & CẤP ĐỘ")
+	UI.pmTitle.Text = mp.Name .. (mp.Endless and "  •  CHỌN CẤP ĐỘ" or "  •  CHỌN MÀN CHƠI")
 
 	local maxUnlocked = math.clamp(saveState.StageUnlocked[mp.Id] or 1, 1, 7)
 	if (saveState.SelectedStage or 1) > maxUnlocked then saveState.SelectedStage = maxUnlocked end
+	local curStage = mp.Endless and 1 or math.clamp(saveState.SelectedStage or 1, 1, maxUnlocked)
+	local stKey = mp.Id .. "_" .. tostring(curStage)
+	local unlockedDiffLv = math.clamp(saveState.StageDiffUnlocked[stKey] or 1, 1, 3)
+
+	-- Thanh gioi thieu ban do + tong so sao dat duoc tren ban do (X/21 Sao)
+	local banner = Instance.new("Frame")
+	banner.Size = UDim2.new(1, 0, 0, 56)
+	banner.BackgroundColor3 = Color3.fromRGB(26, 30, 62)
+	banner.BorderSizePixel = 0
+	banner.ZIndex = 53
+	banner.Parent = UI.pmList
+	addCorner(banner, 11)
+	addStroke(banner, THEME.TextGold, 1.8)
+	addGradient(banner, Color3.fromRGB(44, 48, 96), Color3.fromRGB(20, 22, 46), 90)
+
+	local thumbUrl = getMapImageAsset(mp.Id)
+	if thumbUrl then
+		local th = Instance.new("ImageLabel")
+		th.Size = UDim2.fromOffset(48, 46)
+		th.Position = UDim2.fromOffset(6, 5)
+		th.BackgroundTransparency = 1
+		th.Image = thumbUrl
+		th.ScaleType = Enum.ScaleType.Fit
+		th.ZIndex = 54
+		th.Parent = banner
+	end
+
+	local totalSt = 0
+	for s = 1, 7 do totalSt += (saveState.StageStars[mp.Id .. "_" .. tostring(s)] or 0) end
+	local bName = Instance.new("TextLabel")
+	bName.Size = UDim2.new(1, -68, 0, 22)
+	bName.Position = UDim2.fromOffset(60, 6)
+	bName.BackgroundTransparency = 1
+	bName.Text = mp.Endless and (mp.Name .. "  •  Kỷ lục Đợt " .. tostring(saveState.BestWave[mp.Id] or 0)) or (mp.Name .. "  •  Ải đang chọn: " .. tostring(curStage) .. "/7")
+	bName.TextColor3 = THEME.TextGold
+	bName.Font = THEME.FontHead
+	bName.TextSize = 13
+	bName.TextXAlignment = Enum.TextXAlignment.Left
+	bName.ZIndex = 54
+	bName.Parent = banner
+
+	local bSub = Instance.new("TextLabel")
+	bSub.Size = UDim2.new(1, -68, 0, 20)
+	bSub.Position = UDim2.fromOffset(60, 29)
+	bSub.BackgroundTransparency = 1
+	bSub.Text = mp.Endless and "Vượt Đợt 10 mở Bình Thường • Đợt 20 mở Khó" or string.format("Tổng Sao Ải: %d/21  •  Lọt 1 quái -1 Sao, mất >=50%% tim -2 Sao", totalSt)
+	bSub.TextColor3 = THEME.TextMuted
+	bSub.Font = THEME.FontBody
+	bSub.TextSize = 10
+	bSub.TextXAlignment = Enum.TextXAlignment.Left
+	bSub.ZIndex = 54
+	bSub.Parent = banner
 
 	if not mp.Endless then
 		local stCard = Instance.new("Frame")
-		stCard.Size = UDim2.new(1, 0, 0, 108)
-		stCard.BackgroundColor3 = Color3.fromRGB(24, 28, 54)
+		stCard.Size = UDim2.new(1, 0, 0, 102)
+		stCard.BackgroundColor3 = Color3.fromRGB(22, 26, 52)
 		stCard.BorderSizePixel = 0
 		stCard.ZIndex = 53
 		stCard.Parent = UI.pmList
@@ -4905,37 +5036,51 @@ UI.openDiffModal = function(mp)
 		addStroke(stCard, Color3.fromRGB(78, 88, 142), 1.6)
 
 		local stTitle = Instance.new("TextLabel")
-		stTitle.Size = UDim2.new(1, -20, 0, 22)
-		stTitle.Position = UDim2.fromOffset(10, 6)
+		stTitle.Size = UDim2.new(1, -20, 0, 20)
+		stTitle.Position = UDim2.fromOffset(10, 5)
 		stTitle.BackgroundTransparency = 1
-		stTitle.Text = "CHỌN MÀN CHƠI (7 ẢI • THẮNG MỖI ẢI ĐƯỢC CỘNG SAO)"
-		stTitle.TextColor3 = THEME.TextGold
+		stTitle.Text = "CHỌN ẢI (7 MÀN • SAO RIÊNG TỪNG ẢI)"
+		stTitle.TextColor3 = THEME.TextCyan
 		stTitle.Font = THEME.FontHead
-		stTitle.TextSize = 11
+		stTitle.TextSize = 10
 		stTitle.TextXAlignment = Enum.TextXAlignment.Left
 		stTitle.ZIndex = 54
 		stTitle.Parent = stCard
 
 		local stGrid = Instance.new("Frame")
-		stGrid.Size = UDim2.new(1, -16, 0, 64)
-		stGrid.Position = UDim2.fromOffset(8, 34)
+		stGrid.Size = UDim2.new(1, -14, 0, 68)
+		stGrid.Position = UDim2.fromOffset(7, 28)
 		stGrid.BackgroundTransparency = 1
 		stGrid.ZIndex = 54
 		stGrid.Parent = stCard
 
 		for sIdx = 1, 7 do
 			local unlocked = (sIdx <= maxUnlocked)
-			local picked = (saveState.SelectedStage == sIdx)
-			local c1 = picked and Color3.fromRGB(224, 174, 48) or (unlocked and Color3.fromRGB(62, 134, 206) or Color3.fromRGB(48, 52, 78))
-			local c2 = picked and Color3.fromRGB(164, 104, 18) or (unlocked and Color3.fromRGB(34, 78, 152) or Color3.fromRGB(30, 34, 54))
+			local picked = (curStage == sIdx)
+			local earned = saveState.StageStars[mp.Id .. "_" .. tostring(sIdx)] or 0
+			local c1 = picked and Color3.fromRGB(228, 176, 44) or (unlocked and Color3.fromRGB(58, 132, 208) or Color3.fromRGB(46, 50, 74))
+			local c2 = picked and Color3.fromRGB(164, 102, 16) or (unlocked and Color3.fromRGB(32, 74, 148) or Color3.fromRGB(28, 32, 52))
 			local sBtn = makeArcadeBtn(
-				stGrid, unlocked and ("Ải " .. tostring(sIdx)) or ("Khóa"),
-				UDim2.fromOffset(58, 48), UDim2.fromOffset((sIdx - 1) * 63, 6),
+				stGrid, unlocked and ("Ải " .. tostring(sIdx)) or "Khóa",
+				UDim2.fromOffset(58, 44), UDim2.fromOffset((sIdx - 1) * 63 + 2, 2),
 				c1, c2, 9, { TextSize = 11, ZIndex = 55, Depth = 3, Stroke = picked and 2.4 or 1.6 }
 			)
+			-- 3 vien sao nho ben duoi moi Ai
+			for si = 1, 3 do
+				local stDot = Instance.new("Frame")
+				stDot.Size = UDim2.fromOffset(10, 10)
+				stDot.Position = UDim2.fromOffset((sIdx - 1) * 63 + 11 + (si - 1) * 15, 51)
+				stDot.Rotation = 45
+				stDot.BackgroundColor3 = (si <= earned) and THEME.TextGold or Color3.fromRGB(54, 60, 88)
+				stDot.BorderSizePixel = 0
+				stDot.ZIndex = 55
+				stDot.Parent = stGrid
+				addCorner(stDot, 2)
+				addStroke(stDot, THEME.Outline, 1.1)
+			end
 			sBtn.MouseButton1Click:Connect(function()
 				if not unlocked then
-					showToast("Vượt Ải " .. tostring(sIdx - 1) .. " để mở khóa Ải " .. tostring(sIdx) .. "!", THEME.TextRed, 1.8)
+					showToast("Thắng Ải " .. tostring(sIdx - 1) .. " để mở khóa Ải " .. tostring(sIdx) .. "!", THEME.TextRed, 1.9)
 					return
 				end
 				saveState.SelectedStage = sIdx
@@ -4944,10 +5089,10 @@ UI.openDiffModal = function(mp)
 		end
 	end
 
-	-- Hang ngang nho 3 nut Cap Do (De | Binh Thuong | Kho) -> bam vao la vo tran ngay
+	-- 3 nut Cap Do nam ngang co khoa tuan tu (De -> Binh Thuong -> Kho)
 	local dWrap = Instance.new("Frame")
-	dWrap.Size = UDim2.new(1, 0, 0, 96)
-	dWrap.BackgroundColor3 = Color3.fromRGB(24, 28, 54)
+	dWrap.Size = UDim2.new(1, 0, 0, 92)
+	dWrap.BackgroundColor3 = Color3.fromRGB(22, 26, 52)
 	dWrap.BorderSizePixel = 0
 	dWrap.ZIndex = 53
 	dWrap.Parent = UI.pmList
@@ -4955,24 +5100,33 @@ UI.openDiffModal = function(mp)
 	addStroke(dWrap, Color3.fromRGB(78, 88, 142), 1.6)
 
 	local dTitle = Instance.new("TextLabel")
-	dTitle.Size = UDim2.new(1, -20, 0, 22)
+	dTitle.Size = UDim2.new(1, -20, 0, 20)
 	dTitle.Position = UDim2.fromOffset(10, 6)
 	dTitle.BackgroundTransparency = 1
-	dTitle.Text = "CHỌN CẤP ĐỘ ĐỂ VÀO TRẬN NGAY"
-	dTitle.TextColor3 = THEME.TextCyan
+	dTitle.Text = "CHỌN CẤP ĐỘ ĐỂ VÀO TRẬN (THẮNG ĐỂ MỞ CẤP TIẾP THEO)"
+	dTitle.TextColor3 = THEME.TextGold
 	dTitle.Font = THEME.FontHead
-	dTitle.TextSize = 11
+	dTitle.TextSize = 10
 	dTitle.TextXAlignment = Enum.TextXAlignment.Left
 	dTitle.ZIndex = 54
 	dTitle.Parent = dWrap
 
 	for dIdx, df in ipairs(DIFFICULTIES) do
+		local isOpen = (dIdx <= unlockedDiffLv)
+		local cTop = isOpen and df.Top or Color3.fromRGB(62, 68, 92)
+		local cBot = isOpen and df.Bot or Color3.fromRGB(36, 40, 58)
+		local btnTxt = isOpen and df.Name or (df.Name .. " (Khóa)")
 		local dBtn = makeArcadeBtn(
-			dWrap, df.Name,
-			UDim2.fromOffset(138, 48), UDim2.fromOffset(12 + (dIdx - 1) * 146, 36),
-			df.Top, df.Bot, 11, { TextSize = 13, ZIndex = 55, Depth = 4, Stroke = 2.0 }
+			dWrap, btnTxt,
+			UDim2.fromOffset(138, 48), UDim2.fromOffset(12 + (dIdx - 1) * 146, 32),
+			cTop, cBot, 11, { TextSize = isOpen and 13 or 11, ZIndex = 55, Depth = 4, Stroke = 2.0 }
 		)
 		dBtn.MouseButton1Click:Connect(function()
+			if not isOpen then
+				local prevName = DIFFICULTIES[dIdx - 1] and DIFFICULTIES[dIdx - 1].Name or "Dễ"
+				showToast("Hãy thắng cấp " .. prevName .. " trước để mở " .. df.Name .. "!", THEME.TextRed, 2.2)
+				return
+			end
 			saveState.Difficulty = df.Id
 			saveData()
 			UI.pmOverlay.Visible = false
@@ -5829,6 +5983,7 @@ track(RunService.Heartbeat:Connect(function(rawDt)
 					showToast("BOSS ĐÃ PHÁ HỦY THÀNH TRÌ!", THEME.TextRed, 3.0)
 				else
 					TD.lives -= 1
+					TD.leaks = (TD.leaks or 0) + 1
 				end
 				if e.Node and e.Node.Parent then e.Node:Destroy() end
 				table.remove(TD.enemies, i)
@@ -6017,5 +6172,5 @@ screenGui.Destroying:Connect(function()
 end)
 end)
 if not _ok then
-	warn("[ThuThanh2D v6.2 ERROR]: " .. tostring(_err))
+	warn("[ThuThanh2D v6.3 ERROR]: " .. tostring(_err))
 end
