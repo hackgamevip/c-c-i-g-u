@@ -1,5 +1,5 @@
 -- ============================================================
--- THU THANH 2D (TOWER DEFENSE) v7.4 - KHO DO + NUT TRON 3D + HOI MAU THANH + 3 SAO MAP + TOGGLE + XAC NHAN THOAT
+-- THU THANH 2D (TOWER DEFENSE) v7.5 - KHO DO + NUT TRON 3D + HOI MAU THANH + 3 SAO MAP + TOGGLE + XAC NHAN THOAT
 -- Full-Screen Mobile & PC | Tu dong luu ky luc | Phim tat PC: RightShift
 -- ============================================================
 local _ok, _err = pcall(function()
@@ -10,6 +10,10 @@ local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
 
 local player = Players.LocalPlayer
+while not player do
+	task.wait(0.1)
+	player = Players.LocalPlayer
+end
 local GUI_NAME = "ThuThanh2D_Standalone"
 local SAVE_FILE = "ThuThanh2D_Save_" .. tostring(player.UserId) .. ".json"
 
@@ -45,7 +49,7 @@ end
 
 local guiParent = getGuiParent()
 local oldGui = guiParent:FindFirstChild(GUI_NAME)
-if oldGui then oldGui:Destroy() end
+if oldGui then pcall(function() oldGui:Destroy() end) end
 
 local connections = {}
 local function track(conn)
@@ -1446,7 +1450,7 @@ getMapImageAsset = function(mapId)
 		mapAssetCache[mapId] = false
 		return false
 	end
-	local fname = "ThuThanh2D_Map_" .. tostring(mapId) .. "_v74.png"
+	local fname = "ThuThanh2D_Map_" .. tostring(mapId) .. "_v72.png"
 	local ok, url = pcall(function()
 		local exists = (type(isfile) == "function") and isfile(fname)
 		if not exists then
@@ -3040,9 +3044,10 @@ function SEC.buildGameUI()
 	UI.skillBtn,   UI.skillLbl,   UI.skillSt,    UI.skillQtyLbl   = makeSkillSlot(1, "Thiên Thạch", "x0", "sk_meteor",    Color3.fromRGB(224, 96, 46),  Color3.fromRGB(154, 34, 32))
 	UI.blizBtn,    UI.blizLbl,    UI.blizSt,     UI.blizQtyLbl    = makeSkillSlot(2, "Bão Tuyết",   "x0", "sk_bliz",      Color3.fromRGB(54, 178, 228), Color3.fromRGB(28, 96, 178))
 	UI.voidBtn,    UI.voidLbl,    UI.voidSt,     UI.voidQtyLbl    = makeSkillSlot(3, "Hố Đen",      "x0", "sk_void",      Color3.fromRGB(168, 56, 224), Color3.fromRGB(88, 22, 148))
-	UI.spikeBtn,   _,             UI.spikeStroke,UI.spikeQtyLbl   = makeSkillSlot(4, "Bẫy Gai",     "x0", "icon_spike",   Color3.fromRGB(142, 62, 212), Color3.fromRGB(82, 32, 148))
-	UI.mineBtn,    _,             UI.mineStroke, UI.mineQtyLbl    = makeSkillSlot(5, "Mìn Nổ",      "x0", "icon_mine",    Color3.fromRGB(214, 72, 46),  Color3.fromRGB(146, 36, 28))
-	UI.goldBagBtn, _,             UI.goldBagSt,  UI.goldBagLbl    = makeSkillSlot(6, "Túi Vàng",    "x0", "icon_goldbag", Color3.fromRGB(236, 184, 38), Color3.fromRGB(178, 108, 16))
+	local _u
+	UI.spikeBtn,   _u,            UI.spikeStroke,UI.spikeQtyLbl   = makeSkillSlot(4, "Bẫy Gai",     "x0", "icon_spike",   Color3.fromRGB(142, 62, 212), Color3.fromRGB(82, 32, 148))
+	UI.mineBtn,    _u,            UI.mineStroke, UI.mineQtyLbl    = makeSkillSlot(5, "Mìn Nổ",      "x0", "icon_mine",    Color3.fromRGB(214, 72, 46),  Color3.fromRGB(146, 36, 28))
+	UI.goldBagBtn, _u,            UI.goldBagSt,  UI.goldBagLbl    = makeSkillSlot(6, "Túi Vàng",    "x0", "icon_goldbag", Color3.fromRGB(236, 184, 38), Color3.fromRGB(178, 108, 16))
 
 	-- Bang Thong Ke Sat Thuong truc tiep ben phai ban co (76x360)
 	local rightHud = Instance.new("Frame")
@@ -5614,8 +5619,7 @@ local function openLobbySettings()
 	cTitle.Size = UDim2.fromOffset(122, 46)
 	cTitle.Position = UDim2.fromOffset(10, 5)
 	cTitle.BackgroundTransparency = 1
-	cTitle.Text = "NHẬP CODE QUÀ
-(Sao + Kỹ Năng)"
+	cTitle.Text = "NHẬP CODE QUÀ\n(Sao + Kỹ Năng)"
 	cTitle.TextColor3 = THEME.TextGold
 	cTitle.Font = THEME.FontHead
 	cTitle.TextSize = 10
@@ -6427,7 +6431,7 @@ track(RunService.Heartbeat:Connect(function(rawDt)
 							end
 							if nearT then
 								nearT.StunTimer = 1.6
-								spawnBeam(e.X, e.Y, nearT.X, nearT.Y, Color3.fromRGB(186, 86, 232), 4, 0.25)
+								spawnBeamLine(e.X, e.Y, nearT.X, nearT.Y, Color3.fromRGB(186, 86, 232), 4, 0.25)
 								spawnExplosionRing(nearT.X, nearT.Y, 26, Color3.fromRGB(186, 86, 232))
 								spawnFloatingText(nearT.X, nearT.Y - 10, "CHOÁNG!", THEME.TextPurple)
 							else
@@ -6654,5 +6658,27 @@ screenGui.Destroying:Connect(function()
 end)
 end)
 if not _ok then
-	warn("[ThuThanh2D v7.4 ERROR]: " .. tostring(_err))
+	local errMsg = "[ThuThanh2D v7.5 ERROR]: " .. tostring(_err)
+	warn(errMsg)
+	pcall(function()
+		local lp = game:GetService("Players").LocalPlayer
+		local pg = (typeof(gethui) == "function" and select(2, pcall(gethui))) or (lp and lp:FindFirstChildOfClass("PlayerGui"))
+		if pg then
+			local eg = Instance.new("ScreenGui")
+			eg.Name = "ThuThanh2D_ErrBox"
+			eg.DisplayOrder = 2147483647
+			eg.Parent = pg
+			local lbl = Instance.new("TextLabel")
+			lbl.Size = UDim2.new(0.86, 0, 0, 72)
+			lbl.Position = UDim2.new(0.07, 0, 0.08, 0)
+			lbl.BackgroundColor3 = Color3.fromRGB(148, 28, 36)
+			lbl.TextColor3 = Color3.fromRGB(245, 245, 245)
+			lbl.TextWrapped = true
+			lbl.Font = Enum.Font.GothamSemibold
+			lbl.TextSize = 12
+			lbl.Text = errMsg
+			lbl.Parent = eg
+			task.delay(10, function() pcall(function() eg:Destroy() end) end)
+		end
+	end)
 end
