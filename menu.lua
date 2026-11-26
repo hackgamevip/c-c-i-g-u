@@ -1,5 +1,5 @@
 -- ============================================================
--- THU THANH 2D (TOWER DEFENSE) v7.5 - KHO DO + NUT TRON 3D + HOI MAU THANH + 3 SAO MAP + TOGGLE + XAC NHAN THOAT
+-- THU THANH 2D (TOWER DEFENSE) v7.6 - KHO DO + NUT TRON 3D + HOI MAU THANH + 3 SAO MAP + TOGGLE + XAC NHAN THOAT
 -- Full-Screen Mobile & PC | Tu dong luu ky luc | Phim tat PC: RightShift
 -- ============================================================
 local _ok, _err = pcall(function()
@@ -4967,7 +4967,9 @@ local function openPermUpgrades()
 				saveData()
 				playSfx("upgrade", 1.1)
 				refreshLobbyStats()
-				openStarShop()
+				local newQty = (it.Kind == "bag") and (saveState.Bag[it.Id] or 0) or (saveState.SkillStock[it.Id] or 0)
+				nm.Text = it.Name .. "  •  Đang có: x" .. tostring(newQty)
+				UI.pmTitle.Text = "CỬA HÀNG  •  " .. formatNum(saveState.Stars) .. " Sao"
 			end)
 		end
 		UI.pmOverlay.Visible = true
@@ -5616,21 +5618,31 @@ local function openLobbySettings()
 	addGradient(codeRow, Color3.fromRGB(44, 38, 86), Color3.fromRGB(20, 22, 46), 90)
 
 	local cTitle = Instance.new("TextLabel")
-	cTitle.Size = UDim2.fromOffset(122, 46)
+	cTitle.Size = UDim2.fromOffset(118, 46)
 	cTitle.Position = UDim2.fromOffset(10, 5)
 	cTitle.BackgroundTransparency = 1
-	cTitle.Text = "NHẬP CODE QUÀ\n(Sao + Kỹ Năng)"
+	cTitle.Text = "NHẬP CODE QUÀ"
 	cTitle.TextColor3 = THEME.TextGold
 	cTitle.Font = THEME.FontHead
-	cTitle.TextSize = 10
+	cTitle.TextSize = 11
 	cTitle.TextXAlignment = Enum.TextXAlignment.Left
 	cTitle.ZIndex = 54
 	cTitle.Parent = codeRow
 
+	local cBox = Instance.new("Frame")
+	cBox.Size = UDim2.new(1, -234, 0, 34)
+	cBox.Position = UDim2.fromOffset(128, 11)
+	cBox.BackgroundColor3 = Color3.fromRGB(14, 16, 32)
+	cBox.BorderSizePixel = 0
+	cBox.ZIndex = 54
+	cBox.Parent = codeRow
+	addCorner(cBox, 8)
+	addStroke(cBox, Color3.fromRGB(82, 92, 148), 1.4)
+
 	local cInput = Instance.new("TextBox")
-	cInput.Size = UDim2.fromOffset(174, 32)
-	cInput.Position = UDim2.fromOffset(132, 12)
-	cInput.BackgroundColor3 = Color3.fromRGB(14, 16, 32)
+	cInput.Size = UDim2.new(1, -38, 1, 0)
+	cInput.Position = UDim2.fromOffset(8, 0)
+	cInput.BackgroundTransparency = 1
 	cInput.BorderSizePixel = 0
 	cInput.Text = ""
 	cInput.PlaceholderText = "Nhập code tại đây..."
@@ -5638,29 +5650,28 @@ local function openLobbySettings()
 	cInput.TextColor3 = THEME.TextMain
 	cInput.Font = THEME.FontHead
 	cInput.TextSize = 11
+	cInput.TextXAlignment = Enum.TextXAlignment.Left
 	cInput.ClearTextOnFocus = false
-	cInput.ZIndex = 54
-	cInput.Parent = codeRow
-	addCorner(cInput, 8)
-	addStroke(cInput, Color3.fromRGB(82, 92, 148), 1.4)
-
-	local cBtn = makeArcadeBtn(codeRow, "NHẬN", UDim2.fromOffset(82, 32), UDim2.new(1, -130, 0, 12), Color3.fromRGB(64, 194, 92), Color3.fromRGB(28, 134, 58), 8, { TextSize = 11, ZIndex = 54, Depth = 3 })
+	cInput.ZIndex = 55
+	cInput.Parent = cBox
 
 	local qmUrl = getMapImageAsset("btn_qmark")
 	local hintBtn
 	if qmUrl then
 		hintBtn = Instance.new("ImageButton")
-		hintBtn.Size = UDim2.fromOffset(34, 34)
-		hintBtn.Position = UDim2.new(1, -42, 0, 11)
+		hintBtn.Size = UDim2.fromOffset(26, 26)
+		hintBtn.Position = UDim2.new(1, -30, 0.5, -13)
 		hintBtn.BackgroundTransparency = 1
 		hintBtn.Image = qmUrl
 		hintBtn.ScaleType = Enum.ScaleType.Fit
 		hintBtn.AutoButtonColor = false
-		hintBtn.ZIndex = 54
-		hintBtn.Parent = codeRow
+		hintBtn.ZIndex = 56
+		hintBtn.Parent = cBox
 	else
-		hintBtn = makeArcadeBtn(codeRow, "?", UDim2.fromOffset(34, 32), UDim2.new(1, -42, 0, 12), Color3.fromRGB(48, 152, 232), Color3.fromRGB(24, 86, 182), 8, { TextSize = 13, ZIndex = 54, Depth = 3 })
+		hintBtn = makeArcadeBtn(cBox, "?", UDim2.fromOffset(26, 26), UDim2.new(1, -30, 0.5, -13), Color3.fromRGB(48, 152, 232), Color3.fromRGB(24, 86, 182), 7, { TextSize = 12, ZIndex = 56, Depth = 2 })
 	end
+
+	local cBtn = makeArcadeBtn(codeRow, "NHẬN", UDim2.fromOffset(88, 34), UDim2.new(1, -96, 0, 11), Color3.fromRGB(64, 194, 92), Color3.fromRGB(28, 134, 58), 8, { TextSize = 11, ZIndex = 54, Depth = 3 })
 
 	hintBtn.MouseButton1Click:Connect(function()
 		for _, ch in ipairs(UI.pmList:GetChildren()) do if ch:IsA("Frame") or ch:IsA("ScrollingFrame") then ch:Destroy() end end
@@ -6658,7 +6669,7 @@ screenGui.Destroying:Connect(function()
 end)
 end)
 if not _ok then
-	local errMsg = "[ThuThanh2D v7.5 ERROR]: " .. tostring(_err)
+	local errMsg = "[ThuThanh2D v7.6 ERROR]: " .. tostring(_err)
 	warn(errMsg)
 	pcall(function()
 		local lp = game:GetService("Players").LocalPlayer
