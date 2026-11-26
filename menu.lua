@@ -1,5 +1,5 @@
 -- ============================================================
--- THU THANH 2D (TOWER DEFENSE) v7.0 - KHO DO + NUT TRON 3D + HOI MAU THANH + 3 SAO MAP + TOGGLE + XAC NHAN THOAT
+-- THU THANH 2D (TOWER DEFENSE) v7.1 - KHO DO + NUT TRON 3D + HOI MAU THANH + 3 SAO MAP + TOGGLE + XAC NHAN THOAT
 -- Full-Screen Mobile & PC | Tu dong luu ky luc | Phim tat PC: RightShift
 -- ============================================================
 local _ok, _err = pcall(function()
@@ -1069,7 +1069,8 @@ function GFX.buildEnemySprite(parent, def, kind, zBase)
 	return holder, body, hpFill, frostCoat, wingL, wingR, bodyStroke
 end
 
-function GFX.buildObstacleSprite(parent, kind, zBase)
+function GFX.buildObstacleSprite(parent, kind, zBase, mapId)
+	mapId = mapId or "meadow"
 	local root = Instance.new("Frame")
 	root.Size = UDim2.fromOffset(CELL - 4, CELL - 4)
 	root.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -1084,52 +1085,148 @@ function GFX.buildObstacleSprite(parent, kind, zBase)
 	obShad.Position = UDim2.fromScale(0.54, 0.88)
 	obShad.AnchorPoint = Vector2.new(0.5, 0.5)
 	obShad.BackgroundColor3 = Color3.fromRGB(6, 10, 18)
-	obShad.BackgroundTransparency = 0.48
+	obShad.BackgroundTransparency = 0.45
 	obShad.BorderSizePixel = 0
 	obShad.ZIndex = zBase
 	obShad.Parent = root
 	addCorner(obShad, 99)
 
 	if kind == "tree" then
-		-- Than cay nau + tan la xanh 2 tang
-		local trunk = Instance.new("Frame")
-		trunk.Size = UDim2.fromOffset(8, 12)
-		trunk.Position = UDim2.fromScale(0.5, 0.78)
-		trunk.AnchorPoint = Vector2.new(0.5, 0.5)
-		trunk.BackgroundColor3 = Color3.fromRGB(118, 74, 42)
-		trunk.BorderSizePixel = 0
-		trunk.ZIndex = zBase
-		trunk.Parent = root
-		addCorner(trunk, 3)
-		addStroke(trunk, THEME.Outline, 1.4)
+		if mapId == "desert" then
+			-- Sa Mac: Cay chet kho (than nau sam + canh kho tro trui, khong la)
+			local trunk = Instance.new("Frame")
+			trunk.Size = UDim2.fromOffset(7, 22)
+			trunk.Position = UDim2.fromScale(0.5, 0.62)
+			trunk.AnchorPoint = Vector2.new(0.5, 0.5)
+			trunk.BackgroundColor3 = Color3.fromRGB(98, 66, 44)
+			trunk.BorderSizePixel = 0
+			trunk.ZIndex = zBase + 1
+			trunk.Parent = root
+			addCorner(trunk, 3)
+			addStroke(trunk, THEME.Outline, 1.4)
+			addGradient(trunk, Color3.fromRGB(128, 86, 56), Color3.fromRGB(68, 44, 28), 0)
 
-		local leaf1 = Instance.new("Frame")
-		leaf1.Size = UDim2.fromOffset(26, 22)
-		leaf1.Position = UDim2.fromScale(0.5, 0.42)
-		leaf1.AnchorPoint = Vector2.new(0.5, 0.5)
-		leaf1.BackgroundColor3 = Color3.fromRGB(44, 148, 66)
-		leaf1.BorderSizePixel = 0
-		leaf1.ZIndex = zBase + 1
-		leaf1.Parent = root
-		addCorner(leaf1, 99)
-		addStroke(leaf1, THEME.Outline, 1.6)
+			for _, br in ipairs({{0.32, 0.42, -38, 12}, {0.68, 0.36, 36, 13}, {0.38, 0.24, -22, 9}}) do
+				local b = Instance.new("Frame")
+				b.Size = UDim2.fromOffset(4, br[4])
+				b.Position = UDim2.fromScale(br[1], br[2])
+				b.AnchorPoint = Vector2.new(0.5, 0.5)
+				b.Rotation = br[3]
+				b.BackgroundColor3 = Color3.fromRGB(106, 72, 48)
+				b.BorderSizePixel = 0
+				b.ZIndex = zBase + 1
+				b.Parent = root
+				addCorner(b, 2)
+				addStroke(b, THEME.Outline, 1.2)
+			end
+		elseif mapId == "citadel" then
+			-- Thanh Tri Hac Am: Cay ma kho xuong xau + dom lua tim
+			local trunk = Instance.new("Frame")
+			trunk.Size = UDim2.fromOffset(8, 22)
+			trunk.Position = UDim2.fromScale(0.5, 0.62)
+			trunk.AnchorPoint = Vector2.new(0.5, 0.5)
+			trunk.BackgroundColor3 = Color3.fromRGB(58, 48, 74)
+			trunk.BorderSizePixel = 0
+			trunk.ZIndex = zBase + 1
+			trunk.Parent = root
+			addCorner(trunk, 3)
+			addStroke(trunk, THEME.Outline, 1.4)
+			for _, br in ipairs({{0.30, 0.40, -42, 13}, {0.70, 0.38, 40, 13}}) do
+				local b = Instance.new("Frame")
+				b.Size = UDim2.fromOffset(4, br[4])
+				b.Position = UDim2.fromScale(br[1], br[2])
+				b.AnchorPoint = Vector2.new(0.5, 0.5)
+				b.Rotation = br[3]
+				b.BackgroundColor3 = Color3.fromRGB(68, 56, 88)
+				b.BorderSizePixel = 0
+				b.ZIndex = zBase + 1
+				b.Parent = root
+				addCorner(b, 2)
+				addStroke(b, THEME.Outline, 1.2)
+			end
+			local wisp = Instance.new("Frame")
+			wisp.Size = UDim2.fromOffset(7, 7)
+			wisp.Position = UDim2.fromScale(0.32, 0.28)
+			wisp.BackgroundColor3 = Color3.fromRGB(186, 82, 232)
+			wisp.BorderSizePixel = 0
+			wisp.ZIndex = zBase + 2
+			wisp.Parent = root
+			addCorner(wisp, 99)
+		else
+			-- Thao Nguyen / Dau Truong / Vo Tan: Cay 3D tan 2 tang theo mau ban do
+			local c1 = (mapId == "heroic_boss") and Color3.fromRGB(214, 158, 38) or ((mapId == "endless") and Color3.fromRGB(128, 54, 198) or Color3.fromRGB(44, 148, 66))
+			local c2 = (mapId == "heroic_boss") and Color3.fromRGB(238, 198, 72) or ((mapId == "endless") and Color3.fromRGB(178, 86, 232) or Color3.fromRGB(84, 196, 88))
+			local trunk = Instance.new("Frame")
+			trunk.Size = UDim2.fromOffset(8, 12)
+			trunk.Position = UDim2.fromScale(0.5, 0.78)
+			trunk.AnchorPoint = Vector2.new(0.5, 0.5)
+			trunk.BackgroundColor3 = (mapId == "endless") and Color3.fromRGB(64, 52, 92) or Color3.fromRGB(118, 74, 42)
+			trunk.BorderSizePixel = 0
+			trunk.ZIndex = zBase
+			trunk.Parent = root
+			addCorner(trunk, 3)
+			addStroke(trunk, THEME.Outline, 1.4)
 
-		local leaf2 = Instance.new("Frame")
-		leaf2.Size = UDim2.fromOffset(16, 14)
-		leaf2.Position = UDim2.fromScale(0.46, 0.34)
-		leaf2.AnchorPoint = Vector2.new(0.5, 0.5)
-		leaf2.BackgroundColor3 = Color3.fromRGB(78, 186, 86)
-		leaf2.BorderSizePixel = 0
-		leaf2.ZIndex = zBase + 2
-		leaf2.Parent = root
-		addCorner(leaf2, 99)
+			local leaf1 = Instance.new("Frame")
+			leaf1.Size = UDim2.fromOffset(26, 22)
+			leaf1.Position = UDim2.fromScale(0.5, 0.42)
+			leaf1.AnchorPoint = Vector2.new(0.5, 0.5)
+			leaf1.BackgroundColor3 = c1
+			leaf1.BorderSizePixel = 0
+			leaf1.ZIndex = zBase + 1
+			leaf1.Parent = root
+			addCorner(leaf1, 99)
+			addStroke(leaf1, THEME.Outline, 1.6)
+			addGradient(leaf1, c2, darkenCol(c1, 0.65), 135)
+
+			local leaf2 = Instance.new("Frame")
+			leaf2.Size = UDim2.fromOffset(15, 13)
+			leaf2.Position = UDim2.fromScale(0.45, 0.34)
+			leaf2.AnchorPoint = Vector2.new(0.5, 0.5)
+			leaf2.BackgroundColor3 = c2
+			leaf2.BorderSizePixel = 0
+			leaf2.ZIndex = zBase + 2
+			leaf2.Parent = root
+			addCorner(leaf2, 99)
+		end
+	elseif kind == "cactus" then
+		-- Xuong rong sa mac 3D
+		local body = Instance.new("Frame")
+		body.Size = UDim2.fromOffset(9, 24)
+		body.Position = UDim2.fromScale(0.5, 0.58)
+		body.AnchorPoint = Vector2.new(0.5, 0.5)
+		body.BackgroundColor3 = Color3.fromRGB(58, 158, 62)
+		body.BorderSizePixel = 0
+		body.ZIndex = zBase + 1
+		body.Parent = root
+		addCorner(body, 5)
+		addStroke(body, THEME.Outline, 1.4)
+		local armL = Instance.new("Frame")
+		armL.Size = UDim2.fromOffset(10, 6)
+		armL.Position = UDim2.fromScale(0.28, 0.52)
+		armL.AnchorPoint = Vector2.new(0.5, 0.5)
+		armL.BackgroundColor3 = Color3.fromRGB(52, 146, 56)
+		armL.BorderSizePixel = 0
+		armL.ZIndex = zBase + 1
+		armL.Parent = root
+		addCorner(armL, 3)
+		local armR = Instance.new("Frame")
+		armR.Size = UDim2.fromOffset(10, 6)
+		armR.Position = UDim2.fromScale(0.72, 0.44)
+		armR.AnchorPoint = Vector2.new(0.5, 0.5)
+		armR.BackgroundColor3 = Color3.fromRGB(68, 174, 72)
+		armR.BorderSizePixel = 0
+		armR.ZIndex = zBase + 1
+		armR.Parent = root
+		addCorner(armR, 3)
 	elseif kind == "house" then
-		-- Nha nho co tuong gach, mai ngoi do va cua so vang
+		local wCol = (mapId == "desert") and Color3.fromRGB(214, 174, 112) or ((mapId == "citadel") and Color3.fromRGB(78, 72, 102) or Color3.fromRGB(196, 178, 148))
+		local rCol = (mapId == "desert") and Color3.fromRGB(186, 112, 46) or ((mapId == "citadel") and Color3.fromRGB(52, 36, 78) or ((mapId == "heroic_boss") and Color3.fromRGB(218, 172, 44) or Color3.fromRGB(186, 62, 56)))
 		local wall = Instance.new("Frame")
 		wall.Size = UDim2.fromOffset(24, 18)
 		wall.Position = UDim2.fromScale(0.5, 0.66)
 		wall.AnchorPoint = Vector2.new(0.5, 0.5)
-		wall.BackgroundColor3 = Color3.fromRGB(196, 178, 148)
+		wall.BackgroundColor3 = wCol
 		wall.BorderSizePixel = 0
 		wall.ZIndex = zBase
 		wall.Parent = root
@@ -1140,31 +1237,33 @@ function GFX.buildObstacleSprite(parent, kind, zBase)
 		roof.Size = UDim2.fromOffset(30, 14)
 		roof.Position = UDim2.fromScale(0.5, 0.32)
 		roof.AnchorPoint = Vector2.new(0.5, 0.5)
-		roof.BackgroundColor3 = Color3.fromRGB(186, 62, 56)
+		roof.BackgroundColor3 = rCol
 		roof.BorderSizePixel = 0
 		roof.ZIndex = zBase + 1
 		roof.Parent = root
 		addCorner(roof, 5)
 		addStroke(roof, THEME.Outline, 1.6)
+		addGradient(roof, lightenCol(rCol, 0.18), darkenCol(rCol, 0.72), 90)
 
 		local win = Instance.new("Frame")
 		win.Size = UDim2.fromOffset(7, 7)
 		win.Position = UDim2.fromScale(0.5, 0.68)
 		win.AnchorPoint = Vector2.new(0.5, 0.5)
-		win.BackgroundColor3 = Color3.fromRGB(224, 196, 82)
+		win.BackgroundColor3 = (mapId == "citadel") and Color3.fromRGB(224, 68, 72) or Color3.fromRGB(232, 202, 82)
 		win.BorderSizePixel = 0
 		win.ZIndex = zBase + 2
 		win.Parent = root
 		addCorner(win, 2)
 		addStroke(win, THEME.Outline, 1.1)
 	elseif kind == "crystal" then
-		-- Khoi tinh the dung nham / bang
+		local cr1 = (mapId == "endless") and Color3.fromRGB(186, 72, 236) or ((mapId == "heroic_boss") and Color3.fromRGB(232, 192, 52) or Color3.fromRGB(218, 84, 52))
+		local cr2 = (mapId == "endless") and Color3.fromRGB(112, 186, 236) or ((mapId == "heroic_boss") and Color3.fromRGB(244, 224, 128) or Color3.fromRGB(232, 148, 56))
 		local c1 = Instance.new("Frame")
 		c1.Size = UDim2.fromOffset(14, 24)
 		c1.Position = UDim2.fromScale(0.5, 0.5)
 		c1.AnchorPoint = Vector2.new(0.5, 0.5)
 		c1.Rotation = 14
-		c1.BackgroundColor3 = Color3.fromRGB(218, 84, 52)
+		c1.BackgroundColor3 = cr1
 		c1.BorderSizePixel = 0
 		c1.ZIndex = zBase + 1
 		c1.Parent = root
@@ -1176,34 +1275,35 @@ function GFX.buildObstacleSprite(parent, kind, zBase)
 		c2.Position = UDim2.fromScale(0.32, 0.58)
 		c2.AnchorPoint = Vector2.new(0.5, 0.5)
 		c2.Rotation = -22
-		c2.BackgroundColor3 = Color3.fromRGB(232, 148, 56)
+		c2.BackgroundColor3 = cr2
 		c2.BorderSizePixel = 0
 		c2.ZIndex = zBase
 		c2.Parent = root
 		addCorner(c2, 4)
 		addStroke(c2, THEME.Outline, 1.4)
 	else
-		-- Hon da xam 3D
+		local rkCol = (mapId == "desert") and Color3.fromRGB(178, 112, 62) or ((mapId == "citadel") and Color3.fromRGB(72, 68, 96) or Color3.fromRGB(108, 114, 128))
 		local r1 = Instance.new("Frame")
 		r1.Size = UDim2.fromOffset(26, 20)
 		r1.Position = UDim2.fromScale(0.5, 0.56)
 		r1.AnchorPoint = Vector2.new(0.5, 0.5)
-		r1.BackgroundColor3 = Color3.fromRGB(108, 114, 128)
+		r1.BackgroundColor3 = rkCol
 		r1.BorderSizePixel = 0
 		r1.ZIndex = zBase
 		r1.Parent = root
 		addCorner(r1, 8)
 		addStroke(r1, THEME.Outline, 1.6)
+		addGradient(r1, lightenCol(rkCol, 0.22), darkenCol(rkCol, 0.68), 135)
 
 		local r2 = Instance.new("Frame")
 		r2.Size = UDim2.fromOffset(14, 10)
-		r2.Position = UDim2.fromScale(0.42, 0.44)
+		r2.Position = UDim2.fromScale(0.36, 0.42)
 		r2.AnchorPoint = Vector2.new(0.5, 0.5)
-		r2.BackgroundColor3 = Color3.fromRGB(148, 154, 168)
+		r2.BackgroundColor3 = lightenCol(rkCol, 0.30)
 		r2.BorderSizePixel = 0
 		r2.ZIndex = zBase + 1
 		r2.Parent = root
-		addCorner(r2, 5)
+		addCorner(r2, 6)
 	end
 	return root
 end
@@ -2301,7 +2401,7 @@ function SEC.buildTopBar()
 
 	-- Cac chi so trong tran (an khi o sanh)
 	local hudGroup = Instance.new("Frame")
-	hudGroup.Size = UDim2.fromOffset(424, 40)
+	hudGroup.Size = UDim2.fromOffset(450, 40)
 	hudGroup.Position = UDim2.fromOffset(146, 4)
 	hudGroup.BackgroundTransparency = 1
 	hudGroup.Visible = false
@@ -2486,12 +2586,36 @@ function SEC.buildTopBar()
 		UI.spdIsImg = false
 	end
 
+	-- Nut TUI VANG chuyen len TopBar ben phai nut toc do
+	local gbBtn, gbLbl, gbFace = makeArcadeBtn(
+		hudGroup, "TÚI VÀNG (x0)",
+		UDim2.fromOffset(102, 34), UDim2.fromOffset(342, 3),
+		Color3.fromRGB(236, 184, 38), Color3.fromRGB(178, 108, 16), 9,
+		{ TextSize = 9, ZIndex = 12, Depth = 3, Stroke = 1.6, LabelPos = UDim2.fromOffset(16, 0), LabelSize = UDim2.new(1, -18, 1, 0) }
+	)
+	local gbUrl = getMapImageAsset("icon_goldbag")
+	if gbUrl then
+		local gi = Instance.new("ImageLabel")
+		gi.Size = UDim2.fromOffset(22, 22)
+		gi.Position = UDim2.new(0, 13, 0.5, 0)
+		gi.AnchorPoint = Vector2.new(0.5, 0.5)
+		gi.BackgroundTransparency = 1
+		gi.Image = gbUrl
+		gi.ScaleType = Enum.ScaleType.Fit
+		gi.ZIndex = 14
+		gi.Parent = gbFace
+	else
+		GFX.makeIcon(gbFace, "coin", 15, UDim2.new(0, 12, 0.5, 0), Vector2.new(0.5, 0.5), 14)
+	end
+	UI.goldBagBtn = gbBtn
+	UI.goldBagLbl = gbLbl
+
 	UI.sfxLbl = { Text = "" }
 	local m3Url = getMapImageAsset("btn_menu3")
 	if m3Url then
 		local mb = Instance.new("ImageButton")
-		mb.Size = UDim2.fromOffset(40, 40)
-		mb.Position = UDim2.new(1, -130, 0, 4)
+		mb.Size = UDim2.fromOffset(46, 44)
+		mb.Position = UDim2.new(1, -138, 0, 2)
 		mb.BackgroundTransparency = 1
 		mb.Image = m3Url
 		mb.ScaleType = Enum.ScaleType.Fit
@@ -2858,8 +2982,9 @@ function SEC.buildGameUI()
 	lhTitle.BackgroundTransparency = 1
 	lhTitle.Text = "KỸ NĂNG"
 	lhTitle.TextColor3 = THEME.TextGold
-	lhTitle.Font = THEME.FontHead
-	lhTitle.TextSize = 10
+	lhTitle.Font = Enum.Font.GothamBlack
+	lhTitle.TextSize = 11
+	addTextOutline(lhTitle, 1.4, THEME.Outline)
 	lhTitle.ZIndex = 6
 	lhTitle.Parent = leftHud
 
@@ -2921,10 +3046,11 @@ function SEC.buildGameUI()
 		cap.BackgroundTransparency = 1
 		cap.Text = labelTxt
 		cap.TextColor3 = THEME.TextMain
-		cap.Font = THEME.FontHead
+		cap.Font = Enum.Font.GothamBlack
 		cap.TextSize = 8
 		cap.ZIndex = 7
 		cap.Parent = leftHud
+		addTextOutline(cap, 1.3, THEME.Outline)
 		return btn, cdMask, st, costTag
 	end
 
@@ -3270,32 +3396,11 @@ function SEC.buildGameUI()
 	infoLbl.TextXAlignment = Enum.TextXAlignment.Left
 	infoLbl.TextTruncate = Enum.TextTruncate.AtEnd
 	infoLbl.ZIndex = 7
+	infoLbl.Visible = false
+	infoLbl.Text = ""
 	infoLbl.Parent = botBar
 	UI.botInfoLbl = infoLbl
 	UI.trapLbl = { Text = "BẪY: TẮT" }
-
-	local gbBtn, gbLbl, gbFace = makeArcadeBtn(
-		botBar, "TÚI VÀNG (x0)",
-		UDim2.fromOffset(116, 32), UDim2.new(1, -402, 0, 3),
-		Color3.fromRGB(236, 184, 38), Color3.fromRGB(178, 108, 16), 8,
-		{ TextSize = 9, ZIndex = 8, Depth = 3, Stroke = 1.5, LabelPos = UDim2.fromOffset(18, 0), LabelSize = UDim2.new(1, -20, 1, 0) }
-	)
-	local gbUrl = getMapImageAsset("icon_goldbag")
-	if gbUrl then
-		local gi = Instance.new("ImageLabel")
-		gi.Size = UDim2.fromOffset(22, 22)
-		gi.Position = UDim2.new(0, 14, 0.5, 0)
-		gi.AnchorPoint = Vector2.new(0.5, 0.5)
-		gi.BackgroundTransparency = 1
-		gi.Image = gbUrl
-		gi.ScaleType = Enum.ScaleType.Fit
-		gi.ZIndex = 11
-		gi.Parent = gbFace
-	else
-		GFX.makeIcon(gbFace, "coin", 15, UDim2.new(0, 12, 0.5, 0), Vector2.new(0.5, 0.5), 11)
-	end
-	UI.goldBagBtn = gbBtn
-	UI.goldBagLbl = gbLbl
 
 	local autoBtn, autoLbl = makeArcadeBtn(
 		botBar, "TỰ GỌI: TẮT",
@@ -3853,16 +3958,16 @@ local function updateHUD()
 		UI.rangeRing.Visible = true
 		UI.rangeRing.Position = UDim2.fromOffset(t.X, t.Y)
 		UI.rangeRing.Size = UDim2.fromOffset(t.Range * 2, t.Range * 2)
-		UI.botInfoLbl.Text = string.format("Đang chọn %s Cấp %d • Chọn nâng cấp hoặc mục tiêu", t.Def.Name, t.Level)
+		
 	else
 		UI.upgradePopup.Visible = false
 		if not (TD.pendingCell and TD.previewTowerIdx) then
 			UI.rangeRing.Visible = false
 		end
 		if TD.pendingCell then
-			UI.botInfoLbl.Text = "Chạm 1 lần để xem tầm bắn  •  Chạm lần 2 để xây tháp"
+			
 		else
-			UI.botInfoLbl.Text = getNextWavePreviewText()
+			
 		end
 	end
 
@@ -4301,7 +4406,7 @@ local function buildMapBoard(mp)
 			end
 		end
 	end
-	local kinds = mp.BossArena and {"rock", "crystal", "tree", "rock"} or (mp.Id == "desert" and {"rock", "crystal", "house", "tree"} or {"tree", "tree", "tree", "rock", "house"})
+	local kinds = mp.BossArena and {"rock", "crystal", "tree", "house"} or (mp.Id == "desert" and {"tree", "cactus", "rock", "house"} or (mp.Id == "endless" and {"crystal", "tree", "rock", "crystal"} or {"tree", "tree", "rock", "house"}))
 	for k = 1, math.min(14, #freeGrass) do
 		local pick = table.remove(freeGrass, math.random(1, #freeGrass))
 		local ox, oy = pick[1], pick[2]
@@ -4314,7 +4419,7 @@ local function buildMapBoard(mp)
 		obNode.BackgroundTransparency = 1
 		obNode.ZIndex = 9
 		obNode.Parent = UI.towerLayer
-		GFX.buildObstacleSprite(obNode, oKind, 9)
+		GFX.buildObstacleSprite(obNode, oKind, 9, mp.Id)
 		TD.obstacles[ox .. "_" .. oy] = { GX = ox, GY = oy, Kind = oKind, Node = obNode }
 	end
 
@@ -4345,38 +4450,47 @@ local function buildMapBoard(mp)
 	addGradient(vortex, Color3.fromRGB(232, 68, 72), Color3.fromRGB(112, 16, 32), 45)
 	UI.portalVortex = vortex
 
+	-- Thanh Tri 3D thay doi do hoa theo tung che do/ban do choi
+	local cWallCol = (mp.Id == "desert") and Color3.fromRGB(204, 152, 82) or ((mp.Id == "citadel") and Color3.fromRGB(64, 58, 92) or ((mp.Id == "heroic_boss") and Color3.fromRGB(218, 214, 206) or ((mp.Id == "endless") and Color3.fromRGB(58, 44, 98) or Color3.fromRGB(168, 148, 122))))
+	local cRoofCol = (mp.Id == "desert") and Color3.fromRGB(224, 126, 42) or ((mp.Id == "citadel") and Color3.fromRGB(178, 38, 62) or ((mp.Id == "heroic_boss") and Color3.fromRGB(236, 188, 48) or ((mp.Id == "endless") and Color3.fromRGB(186, 72, 236) or Color3.fromRGB(48, 142, 218))))
+	local cGateCol = (mp.Id == "citadel") and Color3.fromRGB(224, 46, 58) or ((mp.Id == "endless") and Color3.fromRGB(196, 82, 242) or Color3.fromRGB(88, 52, 28))
+
 	local castle = Instance.new("Frame")
-	castle.Size = UDim2.fromOffset(36, 36)
+	castle.Size = UDim2.fromOffset(38, 38)
 	castle.Position = UDim2.fromOffset(pEnd.x, pEnd.y)
 	castle.AnchorPoint = Vector2.new(0.5, 0.5)
-	castle.BackgroundColor3 = Color3.fromRGB(154, 118, 82)
+	castle.BackgroundColor3 = cWallCol
 	castle.BorderSizePixel = 0
 	castle.ZIndex = 7
 	castle.Parent = UI.tileLayer
 	addCorner(castle, 8)
 	addStroke(castle, THEME.TextGold, 2.2)
-	for _, tx in ipairs({0.2, 0.8}) do
+	addGradient(castle, lightenCol(cWallCol, 0.16), darkenCol(cWallCol, 0.68), 90)
+
+	-- Thap canh 2 ben + thap giua cao
+	for _, spInfo in ipairs({{0.18, 0.12, 10, 14}, {0.82, 0.12, 10, 14}, {0.5, 0.04, 12, 16}}) do
 		local spire = Instance.new("Frame")
-		spire.Size = UDim2.fromOffset(10, 14)
-		spire.Position = UDim2.fromScale(tx, 0.14)
+		spire.Size = UDim2.fromOffset(spInfo[3], spInfo[4])
+		spire.Position = UDim2.fromScale(spInfo[1], spInfo[2])
 		spire.AnchorPoint = Vector2.new(0.5, 0.5)
-		spire.BackgroundColor3 = Color3.fromRGB(48, 142, 214)
+		spire.BackgroundColor3 = cRoofCol
 		spire.BorderSizePixel = 0
 		spire.ZIndex = 8
 		spire.Parent = castle
 		addCorner(spire, 4)
 		addStroke(spire, THEME.Outline, 1.3)
+		addGradient(spire, lightenCol(cRoofCol, 0.22), darkenCol(cRoofCol, 0.65), 90)
 	end
 	local cGate = Instance.new("Frame")
-	cGate.Size = UDim2.fromOffset(12, 14)
-	cGate.Position = UDim2.fromScale(0.5, 0.72)
+	cGate.Size = UDim2.fromOffset(14, 15)
+	cGate.Position = UDim2.fromScale(0.5, 0.74)
 	cGate.AnchorPoint = Vector2.new(0.5, 0.5)
-	cGate.BackgroundColor3 = Color3.fromRGB(82, 48, 28)
+	cGate.BackgroundColor3 = cGateCol
 	cGate.BorderSizePixel = 0
 	cGate.ZIndex = 8
 	cGate.Parent = castle
-	addCorner(cGate, 5)
-	addStroke(cGate, THEME.Outline, 1.2)
+	addCorner(cGate, 6)
+	addStroke(cGate, THEME.Outline, 1.3)
 end
 
 local function buildWaveQueue(waveNum)
@@ -4783,27 +4897,12 @@ local function openPermUpgrades()
 	tabRow.BackgroundTransparency = 1
 	tabRow.ZIndex = 53
 	tabRow.Parent = UI.pmList
-	local function openStarShop(tab)
-		tab = tab or "skills"
+	local function openStarShop()
 		for _, ch in ipairs(UI.pmList:GetChildren()) do if ch:IsA("Frame") or ch:IsA("ScrollingFrame") then ch:Destroy() end end
-		UI.pmTitle.Text = "CỬA HÀNG SẢNH  •  " .. formatNum(saveState.Stars) .. " Sao"
-
-		local tabRow = Instance.new("Frame")
-		tabRow.Size = UDim2.new(1, 0, 0, 30)
-		tabRow.BackgroundTransparency = 1
-		tabRow.ZIndex = 53
-		tabRow.Parent = UI.pmList
-		local b1 = makeArcadeBtn(tabRow, "KỸ NĂNG & TÚI VÀNG", UDim2.fromOffset(216, 28), UDim2.fromOffset(0, 1),
-			(tab == "skills") and Color3.fromRGB(236, 134, 34) or Color3.fromRGB(52, 58, 92),
-			(tab == "skills") and Color3.fromRGB(186, 74, 18) or Color3.fromRGB(34, 38, 66), 8, { TextSize = 10, ZIndex = 54, Depth = 3 })
-		local b2 = makeArcadeBtn(tabRow, "HIỆU ỨNG SAO", UDim2.fromOffset(216, 28), UDim2.new(1, -216, 0, 1),
-			(tab == "skins") and Color3.fromRGB(186, 68, 214) or Color3.fromRGB(52, 58, 92),
-			(tab == "skins") and Color3.fromRGB(118, 32, 168) or Color3.fromRGB(34, 38, 66), 8, { TextSize = 10, ZIndex = 54, Depth = 3 })
-		b1.MouseButton1Click:Connect(function() openStarShop("skills") end)
-		b2.MouseButton1Click:Connect(function() openStarShop("skins") end)
+		UI.pmTitle.Text = "CỬA HÀNG  •  " .. formatNum(saveState.Stars) .. " Sao"
 
 		local sc = Instance.new("ScrollingFrame")
-		sc.Size = UDim2.new(1, 0, 0, 224)
+		sc.Size = UDim2.new(1, 0, 0, 260)
 		sc.BackgroundTransparency = 1
 		sc.BorderSizePixel = 0
 		sc.ScrollBarThickness = 5
@@ -4816,132 +4915,71 @@ local function openPermUpgrades()
 		lay.Padding = UDim.new(0, 6)
 		lay.Parent = sc
 
-		if tab == "skills" then
-			for _, it in ipairs(SHOP_SKILLS) do
-				local qty = (it.Kind == "bag") and (saveState.Bag[it.Id] or 0) or (saveState.SkillStock[it.Id] or 0)
-				local row = Instance.new("Frame")
-				row.Size = UDim2.new(1, -8, 0, 52)
-				row.BackgroundColor3 = Color3.fromRGB(28, 32, 58)
-				row.BorderSizePixel = 0
-				row.ZIndex = 53
-				row.Parent = sc
-				addCorner(row, 9)
-				addStroke(row, it.Color, 1.6)
+		for _, it in ipairs(SHOP_SKILLS) do
+			local qty = (it.Kind == "bag") and (saveState.Bag[it.Id] or 0) or (saveState.SkillStock[it.Id] or 0)
+			local row = Instance.new("Frame")
+			row.Size = UDim2.new(1, -8, 0, 52)
+			row.BackgroundColor3 = Color3.fromRGB(28, 32, 58)
+			row.BorderSizePixel = 0
+			row.ZIndex = 53
+			row.Parent = sc
+			addCorner(row, 9)
+			addStroke(row, it.Color, 1.6)
 
-				local u = getMapImageAsset(it.Img)
-				if u then
-					local ic = Instance.new("ImageLabel")
-					ic.Size = UDim2.fromOffset(36, 36)
-					ic.Position = UDim2.fromOffset(8, 8)
-					ic.BackgroundTransparency = 1
-					ic.Image = u
-					ic.ScaleType = Enum.ScaleType.Fit
-					ic.ZIndex = 54
-					ic.Parent = row
+			local u = getMapImageAsset(it.Img)
+			if u then
+				local ic = Instance.new("ImageLabel")
+				ic.Size = UDim2.fromOffset(36, 36)
+				ic.Position = UDim2.fromOffset(8, 8)
+				ic.BackgroundTransparency = 1
+				ic.Image = u
+				ic.ScaleType = Enum.ScaleType.Fit
+				ic.ZIndex = 54
+				ic.Parent = row
+			end
+
+			local nm = Instance.new("TextLabel")
+			nm.Size = UDim2.fromOffset(250, 20)
+			nm.Position = UDim2.fromOffset(52, 5)
+			nm.BackgroundTransparency = 1
+			nm.Text = it.Name .. "  •  Đang có: x" .. tostring(qty)
+			nm.TextColor3 = THEME.TextGold
+			nm.Font = THEME.FontHead
+			nm.TextSize = 11
+			nm.TextXAlignment = Enum.TextXAlignment.Left
+			nm.ZIndex = 54
+			nm.Parent = row
+
+			local ds = Instance.new("TextLabel")
+			ds.Size = UDim2.fromOffset(250, 20)
+			ds.Position = UDim2.fromOffset(52, 26)
+			ds.BackgroundTransparency = 1
+			ds.Text = it.Desc
+			ds.TextColor3 = THEME.TextMuted
+			ds.Font = THEME.FontBody
+			ds.TextSize = 10
+			ds.TextXAlignment = Enum.TextXAlignment.Left
+			ds.ZIndex = 54
+			ds.Parent = row
+
+			local buyB = makeArcadeBtn(row, "MUA (" .. tostring(it.Cost) .. " Sao)", UDim2.fromOffset(118, 34), UDim2.new(1, -126, 0, 9),
+				Color3.fromRGB(64, 194, 92), Color3.fromRGB(28, 134, 58), 8, { TextSize = 10, ZIndex = 54, Depth = 3 })
+			buyB.MouseButton1Click:Connect(function()
+				if saveState.Stars < it.Cost then
+					showToast("Cần " .. tostring(it.Cost) .. " Sao để mua " .. it.Name .. "!", THEME.TextRed, 1.8)
+					return
 				end
-
-				local nm = Instance.new("TextLabel")
-				nm.Size = UDim2.fromOffset(250, 20)
-				nm.Position = UDim2.fromOffset(52, 5)
-				nm.BackgroundTransparency = 1
-				nm.Text = it.Name .. "  •  Đang có: x" .. tostring(qty)
-				nm.TextColor3 = THEME.TextGold
-				nm.Font = THEME.FontHead
-				nm.TextSize = 11
-				nm.TextXAlignment = Enum.TextXAlignment.Left
-				nm.ZIndex = 54
-				nm.Parent = row
-
-				local ds = Instance.new("TextLabel")
-				ds.Size = UDim2.fromOffset(250, 20)
-				ds.Position = UDim2.fromOffset(52, 26)
-				ds.BackgroundTransparency = 1
-				ds.Text = it.Desc
-				ds.TextColor3 = THEME.TextMuted
-				ds.Font = THEME.FontBody
-				ds.TextSize = 10
-				ds.TextXAlignment = Enum.TextXAlignment.Left
-				ds.ZIndex = 54
-				ds.Parent = row
-
-				local buyB = makeArcadeBtn(row, "MUA (" .. tostring(it.Cost) .. " Sao)", UDim2.fromOffset(118, 34), UDim2.new(1, -126, 0, 9),
-					Color3.fromRGB(64, 194, 92), Color3.fromRGB(28, 134, 58), 8, { TextSize = 10, ZIndex = 54, Depth = 3 })
-				buyB.MouseButton1Click:Connect(function()
-					if saveState.Stars < it.Cost then
-						showToast("Cần " .. tostring(it.Cost) .. " Sao để mua " .. it.Name .. "!", THEME.TextRed, 1.8)
-						return
-					end
-					saveState.Stars -= it.Cost
-					if it.Kind == "bag" then
-						saveState.Bag[it.Id] = (saveState.Bag[it.Id] or 0) + 1
-					else
-						saveState.SkillStock[it.Id] = (saveState.SkillStock[it.Id] or 0) + 1
-					end
-					saveData()
-					playSfx("upgrade", 1.1)
-					refreshLobbyStats()
-					openStarShop("skills")
-				end)
-			end
-		else
-			for _, sk in ipairs(TD_SKINS) do
-				local owned = (saveState.OwnedSkins[sk.Id] == true)
-				local eq = (saveState.EquippedSkin == sk.Id)
-				local sRow = Instance.new("Frame")
-				sRow.Size = UDim2.new(1, -8, 0, 50)
-				sRow.BackgroundColor3 = Color3.fromRGB(28, 32, 58)
-				sRow.BorderSizePixel = 0
-				sRow.ZIndex = 53
-				sRow.Parent = sc
-				addCorner(sRow, 9)
-				addStroke(sRow, eq and THEME.TextGreen or (sk.Aura or Color3.fromRGB(78, 86, 134)), eq and 2 or 1.5)
-				local sn = Instance.new("TextLabel")
-				sn.Size = UDim2.fromOffset(296, 20)
-				sn.Position = UDim2.fromOffset(10, 4)
-				sn.BackgroundTransparency = 1
-				sn.Text = sk.Name
-				sn.TextColor3 = sk.Aura or THEME.TextMain
-				sn.Font = THEME.FontHead
-				sn.TextSize = 12
-				sn.TextXAlignment = Enum.TextXAlignment.Left
-				sn.ZIndex = 54
-				sn.Parent = sRow
-				local sd = Instance.new("TextLabel")
-				sd.Size = UDim2.fromOffset(296, 18)
-				sd.Position = UDim2.fromOffset(10, 24)
-				sd.BackgroundTransparency = 1
-				sd.Text = sk.Desc
-				sd.TextColor3 = THEME.TextMuted
-				sd.Font = THEME.FontBody
-				sd.TextSize = 10
-				sd.TextXAlignment = Enum.TextXAlignment.Left
-				sd.ZIndex = 54
-				sd.Parent = sRow
-				local sBtn = makeArcadeBtn(
-					sRow, eq and "ĐANG DÙNG" or (owned and "TRANG BỊ" or (tostring(sk.Cost) .. " Sao")),
-					UDim2.fromOffset(112, 32), UDim2.new(1, -120, 0, 9),
-					eq and Color3.fromRGB(64, 194, 92) or (owned and Color3.fromRGB(54, 148, 212) or Color3.fromRGB(214, 152, 42)),
-					eq and Color3.fromRGB(28, 134, 58) or (owned and Color3.fromRGB(30, 86, 174) or Color3.fromRGB(162, 92, 18)),
-					8, { TextSize = 10, ZIndex = 54, Depth = 3 }
-				)
-				sBtn.MouseButton1Click:Connect(function()
-					if owned then
-						saveState.EquippedSkin = sk.Id
-						saveData()
-						openStarShop("skins")
-					elseif saveState.Stars >= sk.Cost then
-						saveState.Stars -= sk.Cost
-						saveState.OwnedSkins[sk.Id] = true
-						saveState.EquippedSkin = sk.Id
-						saveData()
-						playSfx("upgrade", 1.15)
-						refreshLobbyStats()
-						openStarShop("skins")
-					else
-						showToast("Cần " .. tostring(sk.Cost) .. " Sao!", THEME.TextRed, 1.8)
-					end
-				end)
-			end
+				saveState.Stars -= it.Cost
+				if it.Kind == "bag" then
+					saveState.Bag[it.Id] = (saveState.Bag[it.Id] or 0) + 1
+				else
+					saveState.SkillStock[it.Id] = (saveState.SkillStock[it.Id] or 0) + 1
+				end
+				saveData()
+				playSfx("upgrade", 1.1)
+				refreshLobbyStats()
+				openStarShop()
+			end)
 		end
 		UI.pmOverlay.Visible = true
 	end
@@ -6436,5 +6474,5 @@ screenGui.Destroying:Connect(function()
 end)
 end)
 if not _ok then
-	warn("[ThuThanh2D v7.0 ERROR]: " .. tostring(_err))
+	warn("[ThuThanh2D v7.1 ERROR]: " .. tostring(_err))
 end
