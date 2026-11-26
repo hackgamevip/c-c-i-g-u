@@ -1,5 +1,5 @@
 -- ============================================================
--- THU THANH 2D (TOWER DEFENSE) v7.2 - KHO DO + NUT TRON 3D + HOI MAU THANH + 3 SAO MAP + TOGGLE + XAC NHAN THOAT
+-- THU THANH 2D (TOWER DEFENSE) v7.3 - KHO DO + NUT TRON 3D + HOI MAU THANH + 3 SAO MAP + TOGGLE + XAC NHAN THOAT
 -- Full-Screen Mobile & PC | Tu dong luu ky luc | Phim tat PC: RightShift
 -- ============================================================
 local _ok, _err = pcall(function()
@@ -359,6 +359,7 @@ loadData()
 -- ============================================================
 local UI = {}
 local SEC = {}
+local getMapImageAsset
 local GFX = {}
 
 local function addCorner(obj, r)
@@ -1462,7 +1463,7 @@ local function b64DecodeLua(data)
 end
 
 local mapAssetCache = {}
-local function getMapImageAsset(mapId)
+getMapImageAsset = function(mapId)
 	if mapAssetCache[mapId] ~= nil then return mapAssetCache[mapId] end
 	local getAsset = (type(getcustomasset) == "function" and getcustomasset) or (type(getsynasset) == "function" and getsynasset) or nil
 	if not getAsset or type(writefile) ~= "function" then
@@ -6600,5 +6601,5 @@ screenGui.Destroying:Connect(function()
 end)
 end)
 if not _ok then
-	warn("[ThuThanh2D v7.2 ERROR]: " .. tostring(_err))
+	warn("[ThuThanh2D v7.3 ERROR]: " .. tostring(_err))
 end
