@@ -1,5 +1,5 @@
 -- ============================================================
--- THU THANH 2D (TOWER DEFENSE) v8.0 - KHO DO + NUT TRON 3D + HOI MAU THANH + 3 SAO MAP + TOGGLE + XAC NHAN THOAT
+-- THU THANH 2D (TOWER DEFENSE) v8.1 - KHO DO + NUT TRON 3D + HOI MAU THANH + 3 SAO MAP + TOGGLE + XAC NHAN THOAT
 -- Full-Screen Mobile & PC | Tu dong luu ky luc | Phim tat PC: RightShift
 -- ============================================================
 local _ok, _err = pcall(function()
@@ -4079,18 +4079,30 @@ local function updateHUD()
 	end
 end
 
-local function clearMatchLayers()
-	for _, ch in ipairs(UI.tileLayer:GetChildren()) do ch:Destroy() end
-	for _, ch in ipairs(UI.towerLayer:GetChildren()) do ch:Destroy() end
-	for _, ch in ipairs(UI.enemyLayer:GetChildren()) do ch:Destroy() end
-	for _, ch in ipairs(UI.trapLayer:GetChildren()) do ch:Destroy() end
-	for _, ch in ipairs(UI.fxLayer:GetChildren()) do ch:Destroy() end
+local function clearMatchLayers(asyncMode)
+	TD.boardToken = (TD.boardToken or 0) + 1
+	local myTok = TD.boardToken
 	TD.towers = {}
 	TD.enemies = {}
 	TD.projectiles = {}
 	TD.obstacles = {}
 	TD.traps = {}
+	TD.fxCount = 0
 	closeBoardPopups()
+	local layers = { UI.fxLayer, UI.enemyLayer, UI.trapLayer, UI.towerLayer, UI.tileLayer }
+	if asyncMode then
+		task.spawn(function()
+			for _, ly in ipairs(layers) do
+				if TD.boardToken ~= myTok then return end
+				if ly and ly.Parent then ly:ClearAllChildren() end
+				task.wait()
+			end
+		end)
+	else
+		for _, ly in ipairs(layers) do
+			if ly and ly.Parent then ly:ClearAllChildren() end
+		end
+	end
 end
 
 local function finishMatch(won)
@@ -4866,13 +4878,15 @@ end
 local function goLobby()
 	TD.active = false
 	TD.paused = false
-	clearMatchLayers()
+	TD.over = false
+	if UI.pauseOverlay then UI.pauseOverlay.Visible = false end
 	UI.hudGroup.Visible = false
 	UI.homeBtn.Visible = false
 	UI.pauseBtn.Visible = false
 	gamePage.Visible = false
 	lobbyPage.Visible = true
 	refreshLobbyStats()
+	clearMatchLayers(true)
 end
 
 -- ============================================================
@@ -5590,9 +5604,11 @@ local function openLobbySettings()
 	setScroll.Parent = UI.pmList
 	local setLay = Instance.new("UIListLayout")
 	setLay.Padding = UDim.new(0, 6)
+	setLay.SortOrder = Enum.SortOrder.LayoutOrder
 	setLay.Parent = setScroll
 	local function addToggleOpt(titleTxt, descTxt, isOn, onClick)
 		local row = Instance.new("Frame")
+		row.LayoutOrder = 2
 		row.Size = UDim2.new(1, 0, 0, 50)
 		row.BackgroundColor3 = Color3.fromRGB(28, 32, 58)
 		row.BorderSizePixel = 0
@@ -5671,6 +5687,7 @@ local function openLobbySettings()
 
 	-- Thanh truot chon muc Am Luong (20% - 100%)
 	local volRow = Instance.new("Frame")
+	volRow.LayoutOrder = 3
 	volRow.Size = UDim2.new(1, 0, 0, 52)
 	volRow.BackgroundColor3 = Color3.fromRGB(28, 32, 58)
 	volRow.BorderSizePixel = 0
@@ -5725,6 +5742,7 @@ local function openLobbySettings()
 
 	-- Nhap Code nhan Sao + Ky Nang + Tui Vang (kem nut ? goi y code)
 	local codeRow = Instance.new("Frame")
+	codeRow.LayoutOrder = 1
 	codeRow.Size = UDim2.new(1, -6, 0, 56)
 	codeRow.BackgroundColor3 = Color3.fromRGB(28, 32, 58)
 	codeRow.BorderSizePixel = 0
@@ -5804,6 +5822,12 @@ local function openLobbySettings()
 			{ Code = "VUOTAI2026", Desc = "+80 Sao, +4 Thiên Thạch, +4 Bão Tuyết, +4 Túi Vàng" },
 			{ Code = "CHIENBINH9", Desc = "+75 Sao, +4 Hố Đen, +5 Bẫy Gai, +5 Mìn Nổ" },
 			{ Code = "DAUTRUONG1", Desc = "+120 Sao & +6 tất cả Kỹ Năng, Bẫy, Túi Vàng" },
+			{ Code = "BAOVETHANH", Desc = "+45 Sao, +3 Thiên Thạch, +3 Bẫy Gai, +2 Túi Vàng" },
+			{ Code = "THIENTHACH", Desc = "+55 Sao, +5 Thiên Thạch, +2 Túi Vàng" },
+			{ Code = "BAOTUYET26", Desc = "+55 Sao, +5 Bão Tuyết, +3 Bẫy Gai" },
+			{ Code = "HODENVIP99", Desc = "+65 Sao, +4 Hố Đen, +4 Mìn Nổ" },
+			{ Code = "KHOBAUVANG", Desc = "+90 Sao, +6 Túi Vàng, +3 Thiên Thạch" },
+			{ Code = "HUYENTHOAI", Desc = "+150 Sao & +8 tất cả Kỹ Năng, Bẫy, Túi Vàng" },
 		}
 		local cScroll = Instance.new("ScrollingFrame")
 		cScroll.Size = UDim2.new(1, 0, 0, 218)
@@ -5905,6 +5929,12 @@ local function openLobbySettings()
 			VUOTAI2026 = { Stars = 80,  meteor = 4, bliz = 4, goldbag = 4, Msg = "+80 Sao, +4 Thiên Thạch, +4 Bão Tuyết, +4 Túi Vàng!" },
 			CHIENBINH9 = { Stars = 75,  void = 4, spike = 5, mine = 5, Msg = "+75 Sao, +4 Hố Đen, +5 Bẫy Gai, +5 Mìn Nổ!" },
 			DAUTRUONG1 = { Stars = 120, meteor = 6, bliz = 6, void = 6, spike = 6, mine = 6, goldbag = 6, Msg = "+120 Sao & +6 tất cả Kỹ Năng, Bẫy, Túi Vàng!" },
+			BAOVETHANH = { Stars = 45,  meteor = 3, spike = 3, goldbag = 2, Msg = "+45 Sao, +3 Thiên Thạch, +3 Bẫy Gai, +2 Túi Vàng!" },
+			THIENTHACH = { Stars = 55,  meteor = 5, goldbag = 2, Msg = "+55 Sao, +5 Thiên Thạch, +2 Túi Vàng!" },
+			BAOTUYET26 = { Stars = 55,  bliz = 5, spike = 3, Msg = "+55 Sao, +5 Bão Tuyết, +3 Bẫy Gai!" },
+			HODENVIP99 = { Stars = 65,  void = 4, mine = 4, Msg = "+65 Sao, +4 Hố Đen, +4 Mìn Nổ!" },
+			KHOBAUVANG = { Stars = 90,  goldbag = 6, meteor = 3, Msg = "+90 Sao, +6 Túi Vàng, +3 Thiên Thạch!" },
+			HUYENTHOAI = { Stars = 150, meteor = 8, bliz = 8, void = 8, spike = 8, mine = 8, goldbag = 8, Msg = "+150 Sao & +8 tất cả Kỹ Năng, Bẫy, Túi Vàng!" },
 		}
 		local rw = REWARDS[code]
 		if not rw then
@@ -5926,6 +5956,7 @@ local function openLobbySettings()
 
 	-- Nut Reset du lieu choi lai tu dau (co xac nhan 2 buoc)
 	local resetRow = Instance.new("Frame")
+	resetRow.LayoutOrder = 4
 	resetRow.Size = UDim2.new(1, -6, 0, 52)
 	resetRow.BackgroundColor3 = Color3.fromRGB(40, 22, 34)
 	resetRow.BorderSizePixel = 0
@@ -6513,7 +6544,13 @@ local function openExitConfirm()
 	UI.exitOverlay.Visible = true
 end
 
-UI.closeBtn.MouseButton1Click:Connect(openExitConfirm)
+UI.closeBtn.MouseButton1Click:Connect(function()
+	if gamePage.Visible and TD.active and not TD.over then
+		openPauseMenu()
+	else
+		openExitConfirm()
+	end
+end)
 UI.lobbyExitBtn.MouseButton1Click:Connect(openExitConfirm)
 
 track(UserInputService.InputBegan:Connect(function(inp, gp)
@@ -7002,7 +7039,7 @@ screenGui.Destroying:Connect(function()
 end)
 end)
 if not _ok then
-	local errMsg = "[ThuThanh2D v8.0 ERROR]: " .. tostring(_err)
+	local errMsg = "[ThuThanh2D v8.1 ERROR]: " .. tostring(_err)
 	warn(errMsg)
 	pcall(function()
 		local lp = game:GetService("Players").LocalPlayer
