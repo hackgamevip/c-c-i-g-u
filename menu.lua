@@ -1,5 +1,5 @@
 -- ============================================================
--- THU THANH 2D (TOWER DEFENSE) v7.6 - KHO DO + NUT TRON 3D + HOI MAU THANH + 3 SAO MAP + TOGGLE + XAC NHAN THOAT
+-- THU THANH 2D (TOWER DEFENSE) v8.0 - KHO DO + NUT TRON 3D + HOI MAU THANH + 3 SAO MAP + TOGGLE + XAC NHAN THOAT
 -- Full-Screen Mobile & PC | Tu dong luu ky luc | Phim tat PC: RightShift
 -- ============================================================
 local _ok, _err = pcall(function()
@@ -243,18 +243,28 @@ local saveState = {
 	OwnedSkins = { default = true },
 	EquippedSkin = "default",
 	UsedCodes = {},
+	FirstCleared = {},
+	Perfect3Star = {},
 	Quests = nil,
 }
 
 local function createDefaultQuests()
 	return {
-		{ Id = "kills",  Title = "Tiêu diệt 50 quái vật",         Goal = 50, Progress = 0, Reward = 10, Claimed = false },
-		{ Id = "boss",   Title = "Hạ gục 2 Boss bất kỳ",          Goal = 2,  Progress = 0, Reward = 12, Claimed = false },
-		{ Id = "skill",  Title = "Dùng kỹ năng hoặc bẫy 5 lần",   Goal = 5,  Progress = 0, Reward = 8,  Claimed = false },
-		{ Id = "build",  Title = "Xây dựng 12 tòa tháp",          Goal = 12, Progress = 0, Reward = 8,  Claimed = false },
-		{ Id = "tier3",  Title = "Nâng 3 tháp lên Cấp 3",         Goal = 3,  Progress = 0, Reward = 10, Claimed = false },
-		{ Id = "wave",   Title = "Vượt qua 10 đợt quái",          Goal = 10, Progress = 0, Reward = 12, Claimed = false },
-		{ Id = "win",    Title = "Chiến thắng 2 ải bất kỳ",       Goal = 2,  Progress = 0, Reward = 18, Claimed = false },
+		{ Id = "kills",   Track = "kills", Title = "Tiêu diệt 50 quái vật",          Goal = 50,   Progress = 0, Reward = 10, Claimed = false },
+		{ Id = "boss",    Track = "boss",  Title = "Hạ gục 2 Boss bất kỳ",           Goal = 2,    Progress = 0, Reward = 12, Claimed = false },
+		{ Id = "skill",   Track = "skill", Title = "Dùng kỹ năng hoặc bẫy 5 lần",    Goal = 5,    Progress = 0, Reward = 8,  Claimed = false },
+		{ Id = "build",   Track = "build", Title = "Xây dựng 12 tòa tháp",           Goal = 12,   Progress = 0, Reward = 8,  Claimed = false },
+		{ Id = "tier3",   Track = "tier3", Title = "Nâng 3 tháp lên Cấp 3",          Goal = 3,    Progress = 0, Reward = 10, Claimed = false },
+		{ Id = "wave",    Track = "wave",  Title = "Vượt qua 10 đợt quái",           Goal = 10,   Progress = 0, Reward = 12, Claimed = false },
+		{ Id = "win",     Track = "win",   Title = "Chiến thắng 2 ải bất kỳ",        Goal = 2,    Progress = 0, Reward = 18, Claimed = false },
+		{ Id = "kills2",  Track = "kills", Title = "Tiêu diệt 250 quái vật",         Goal = 250,  Progress = 0, Reward = 25, Claimed = false },
+		{ Id = "kills3",  Track = "kills", Title = "Tiêu diệt 1,000 quái vật",       Goal = 1000, Progress = 0, Reward = 60, Claimed = false },
+		{ Id = "boss2",   Track = "boss",  Title = "Hạ gục 10 Boss bất kỳ",          Goal = 10,   Progress = 0, Reward = 35, Claimed = false },
+		{ Id = "skill2",  Track = "skill", Title = "Dùng kỹ năng hoặc bẫy 25 lần",   Goal = 25,   Progress = 0, Reward = 22, Claimed = false },
+		{ Id = "build2",  Track = "build", Title = "Xây dựng 50 tòa tháp",           Goal = 50,   Progress = 0, Reward = 25, Claimed = false },
+		{ Id = "tier3_2", Track = "tier3", Title = "Nâng 15 tháp lên Cấp 3",         Goal = 15,   Progress = 0, Reward = 30, Claimed = false },
+		{ Id = "wave2",   Track = "wave",  Title = "Vượt qua 50 đợt quái",           Goal = 50,   Progress = 0, Reward = 40, Claimed = false },
+		{ Id = "win2",    Track = "win",   Title = "Chiến thắng 10 ải bất kỳ",       Goal = 10,   Progress = 0, Reward = 55, Claimed = false },
 	}
 end
 saveState.Quests = createDefaultQuests()
@@ -323,6 +333,8 @@ local function loadData()
 			if type(tbl.StageDiffUnlocked) == "table" then for k, v in pairs(tbl.StageDiffUnlocked) do saveState.StageDiffUnlocked[k] = math.clamp(tonumber(v) or 1, 1, 3) end end
 			if type(tbl.SkillStock) == "table" then for k, v in pairs(tbl.SkillStock) do saveState.SkillStock[k] = math.max(0, math.floor(tonumber(v) or 0)) end end
 			if type(tbl.UsedCodes) == "table" then for k, v in pairs(tbl.UsedCodes) do if v == true then saveState.UsedCodes[k] = true end end end
+			if type(tbl.FirstCleared) == "table" then for k, v in pairs(tbl.FirstCleared) do if v == true then saveState.FirstCleared[k] = true end end end
+			if type(tbl.Perfect3Star) == "table" then for k, v in pairs(tbl.Perfect3Star) do if v == true then saveState.Perfect3Star[k] = true end end end
 			if saveState.Difficulty == "insane" or saveState.Difficulty == "hell" then saveState.Difficulty = "hard" end
 			if type(tbl.SfxVol) == "number" then saveState.SfxVol = math.clamp(tbl.SfxVol, 0.2, 1.0) end
 			if type(tbl.MapStars) == "table" then
@@ -2203,6 +2215,10 @@ local SFX_IDS = {
 	laser     = "rbxassetid://12222140",
 	upgrade   = "rbxassetid://12222253",
 	kill      = "rbxassetid://12221967",
+	place     = "rbxassetid://12222124",
+	boss      = "rbxassetid://12222058",
+	victory   = "rbxassetid://12222253",
+	freeze    = "rbxassetid://12222030",
 }
 local sfxPool, sfxLast = {}, {}
 local function playSfx(kind, pitch)
@@ -3232,7 +3248,7 @@ function SEC.buildGameUI()
 
 	-- POPUP NANG CAP + NHANH TIEN HOA CAP 3 + MUC TIEU + BAN THAP
 	local upgradePopup = Instance.new("Frame")
-	upgradePopup.Size = UDim2.fromOffset(266, 108)
+	upgradePopup.Size = UDim2.fromOffset(266, 124)
 	upgradePopup.BackgroundColor3 = Color3.fromRGB(20, 24, 46)
 	upgradePopup.BorderSizePixel = 0
 	upgradePopup.Visible = false
@@ -3269,6 +3285,19 @@ function SEC.buildGameUI()
 	upStats.Parent = upgradePopup
 	UI.upStats = upStats
 
+	local upPreview = Instance.new("TextLabel")
+	upPreview.Size = UDim2.new(1, -16, 0, 14)
+	upPreview.Position = UDim2.fromOffset(8, 35)
+	upPreview.BackgroundTransparency = 1
+	upPreview.Text = ""
+	upPreview.TextColor3 = THEME.TextCyan
+	upPreview.Font = THEME.FontHead
+	upPreview.TextSize = 9
+	upPreview.TextXAlignment = Enum.TextXAlignment.Left
+	upPreview.ZIndex = 35
+	upPreview.Parent = upgradePopup
+	UI.upPreview = upPreview
+
 	local upClose = makeArcadeBtn(
 		upgradePopup, "X",
 		UDim2.fromOffset(20, 18), UDim2.new(1, -24, 0, 3),
@@ -3279,7 +3308,7 @@ function SEC.buildGameUI()
 
 	local upgBtn, upgLbl = makeArcadeBtn(
 		upgradePopup, "NÂNG CẤP",
-		UDim2.fromOffset(250, 28), UDim2.fromOffset(8, 38),
+		UDim2.fromOffset(250, 28), UDim2.fromOffset(8, 52),
 		Color3.fromRGB(64, 188, 96), Color3.fromRGB(28, 132, 58), 8,
 		{ TextSize = 10, ZIndex = 35, Depth = 3, Stroke = 1.6 }
 	)
@@ -3289,7 +3318,7 @@ function SEC.buildGameUI()
 	-- 2 nhanh tien hoa khi nang tu Cap 2 len Cap 3
 	local evoABtn, evoALbl = makeArcadeBtn(
 		upgradePopup, "HỦY DIỆT",
-		UDim2.fromOffset(122, 28), UDim2.fromOffset(8, 38),
+		UDim2.fromOffset(122, 28), UDim2.fromOffset(8, 52),
 		Color3.fromRGB(214, 96, 48), Color3.fromRGB(154, 42, 32), 8,
 		{ TextSize = 9, ZIndex = 35, Depth = 3, Stroke = 1.5 }
 	)
@@ -3299,7 +3328,7 @@ function SEC.buildGameUI()
 
 	local evoBBtn, evoBLbl = makeArcadeBtn(
 		upgradePopup, "SIÊU TỐC",
-		UDim2.fromOffset(122, 28), UDim2.fromOffset(136, 38),
+		UDim2.fromOffset(122, 28), UDim2.fromOffset(136, 52),
 		Color3.fromRGB(54, 152, 218), Color3.fromRGB(30, 88, 174), 8,
 		{ TextSize = 9, ZIndex = 35, Depth = 3, Stroke = 1.5 }
 	)
@@ -3548,7 +3577,7 @@ local TD = {
 
 local function addQuestProg(qId, amt)
 	for _, q in ipairs(saveState.Quests) do
-		if q.Id == qId and not q.Claimed then
+		if (q.Track or q.Id) == qId and not q.Claimed then
 			q.Progress = math.min(q.Goal, q.Progress + amt)
 		end
 	end
@@ -3875,6 +3904,7 @@ local function getNextWavePreviewText()
 	return res
 end
 
+local getTowerBuffMults
 local function updateHUD()
 	local curL, maxL = math.max(0, TD.lives), math.max(1, TD.maxLives)
 	UI.livesLbl.Text = tostring(curL) .. "/" .. tostring(maxL)
@@ -3920,33 +3950,74 @@ local function updateHUD()
 		local upCost = (t.Level >= 3) and (320 + (t.Level - 2) * 260) or math.floor(t.Def.UpgradeCost * t.Level)
 		local sellVal = math.floor(t.Invested * 0.7)
 		UI.upgradePopup.Visible = true
-		positionPopupNear(UI.upgradePopup, t.X, t.Y, 266, 108)
+		positionPopupNear(UI.upgradePopup, t.X, t.Y, 266, 124)
 		local brTxt = t.Branch and (" • " .. t.Branch) or ""
 		UI.upTitle.Text = string.format("%s • Cấp %d%s", t.Def.Name, t.Level, brTxt)
+		local isEvoChoice = (t.Level == 3 and not t.Branch)
 		if t.Def.Kind == "Buff" then
-			local pct = math.floor((t.BuffDmg or 0.25) * 100)
-			UI.upStats.Text = string.format("Tăng +%d%% ST cho tháp • Tầm: %d", pct, math.floor(t.Range))
+			local isRng = (t.BuffMode == "range")
+			local curPct = math.floor((isRng and (t.BuffRange or 0.24) or (t.BuffDmg or 0.28)) * 100)
+			UI.upStats.Text = isRng
+				and string.format("Buff Tầm: +%d%% • Phủ: %d", curPct, math.floor(t.Range))
+				or string.format("Buff ST: +%d%% • Tốc +%d%% • Phủ: %d", curPct, math.floor((t.BuffRate or 0.20)*100), math.floor(t.Range))
+			if isEvoChoice then
+				UI.upPreview.Text = "Hủy Diệt: Buff +14% | Siêu Tốc: Phủ +25% & Tốc +10%"
+			elseif t.Level < 3 then
+				local nPct = curPct + 8
+				local nRng = math.floor(t.Range * 1.12)
+				UI.upPreview.Text = string.format("Nâng: %s +%d%%→+%d%% | Phủ: %d→%d", isRng and "Tầm" or "ST", curPct, nPct, math.floor(t.Range), nRng)
+			else
+				local nPct = math.min(85, curPct + 5)
+				local nRng = math.min(240, math.floor(t.Range + 4))
+				UI.upPreview.Text = string.format("Cường hóa: +%d%%→+%d%% | Phủ: %d→%d", curPct, nPct, math.floor(t.Range), nRng)
+			end
 		else
-			UI.upStats.Text = string.format("ST: %d • Tầm: %d • Tốc: %.2fs", math.floor(t.Damage), math.floor(t.Range), t.FireRate)
+			local bD, bR, bRg = 1, 1, 1
+			if getTowerBuffMults then bD, bR, bRg = getTowerBuffMults(t) end
+			local curD = math.floor(t.Damage * bD)
+			local curRg = math.floor(t.Range * bRg)
+			UI.upStats.Text = string.format("ST: %d • Tầm: %d • Tốc: %.2fs", curD, curRg, t.FireRate * bR)
+			if isEvoChoice then
+				local dA = math.floor(t.Damage * 1.85)
+				local rB = math.floor(t.Range * 1.25)
+				local fB = math.max(0.18, t.FireRate * 0.65)
+				UI.upPreview.Text = string.format("Hủy Diệt: ST→%d | Siêu Tốc: Tầm→%d, Tốc→%.2fs", dA, rB, fB)
+			elseif t.Level < 3 then
+				local nD = math.floor(t.Damage * 1.52)
+				local nRg = math.floor(t.Range * 1.12)
+				local nFr = math.max(0.25, t.FireRate * 0.88)
+				UI.upPreview.Text = string.format("Nâng: ST %d→%d | Tầm %d→%d | Tốc %.2f→%.2fs", math.floor(t.Damage), nD, math.floor(t.Range), nRg, t.FireRate, nFr)
+			else
+				local nD = math.floor(t.Damage * 1.25)
+				local nRg = math.min(240, math.floor(t.Range + 4))
+				UI.upPreview.Text = string.format("Cường hóa: ST %d→%d | Tầm %d→%d", math.floor(t.Damage), nD, math.floor(t.Range), nRg)
+			end
 		end
-		if t.Level == 2 and t.Def.Kind ~= "Buff" then
+		if isEvoChoice then
 			UI.upgBtn.Visible = false
 			UI.evoABtn.Visible = true
 			UI.evoBBtn.Visible = true
-			UI.evoALbl.Text = "HỦY DIỆT (" .. upCost .. "V)"
-			UI.evoBLbl.Text = "SIÊU TỐC (" .. upCost .. "V)"
+			UI.evoALbl.Text = "HỦY DIỆT (" .. formatNum(upCost) .. "V)"
+			UI.evoBLbl.Text = "SIÊU TỐC (" .. formatNum(upCost) .. "V)"
 		else
 			UI.upgBtn.Visible = true
 			UI.evoABtn.Visible = false
 			UI.evoBBtn.Visible = false
-			UI.upgLbl.Text = (t.Level < 3) and ("NÂNG CẤP (" .. upCost .. "V)") or ("CƯỜNG HÓA C" .. tostring(t.Level + 1) .. " (" .. formatNum(upCost) .. "V)")
+			UI.upgLbl.Text = (t.Level < 3) and ("NÂNG CẤP C" .. tostring(t.Level + 1) .. " (" .. formatNum(upCost) .. "V)") or ("CƯỜNG HÓA C" .. tostring(t.Level + 1) .. " (" .. formatNum(upCost) .. "V)")
 		end
-		local mNames = { First = "Xa nhất", Strong = "Máu cao", Weak = "Máu thấp" }
-		UI.targetLbl.Text = "Mục tiêu: " .. (mNames[t.TargetMode or "First"] or "Xa nhất")
+		if t.Def.Kind == "Buff" then
+			UI.targetLbl.Text = (t.BuffMode == "range") and "Chế độ: Buff Tầm" or "Chế độ: Buff Sức Mạnh"
+		else
+			local mNames = { First = "Xa nhất", Strong = "Máu cao", Weak = "Máu thấp" }
+			UI.targetLbl.Text = "Mục tiêu: " .. (mNames[t.TargetMode or "First"] or "Xa nhất")
+		end
 		UI.sellLbl.Text = "BÁN (+" .. sellVal .. "V)"
 		UI.rangeRing.Visible = true
 		UI.rangeRing.Position = UDim2.fromOffset(t.X, t.Y)
-		UI.rangeRing.Size = UDim2.fromOffset(t.Range * 2, t.Range * 2)
+		local _, _, ringMult = 1, 1, 1
+		if t.Def.Kind ~= "Buff" and getTowerBuffMults then _, _, ringMult = getTowerBuffMults(t) end
+		local showR = t.Range * (ringMult or 1)
+		UI.rangeRing.Size = UDim2.fromOffset(showR * 2, showR * 2)
 		
 	else
 		UI.upgradePopup.Visible = false
@@ -4060,9 +4131,27 @@ local function finishMatch(won)
 		if nextDiffLv > (saveState.StageDiffUnlocked[stKey] or 1) then
 			saveState.StageDiffUnlocked[stKey] = nextDiffLv
 		end
-		-- Thuong Sao ky nang cong them theo so Sao dat duoc o Ai
+		-- Thuong Sao ky nang cong them + Thuong Vuot Lan Dau (First Clear) + Thuong Tron 3 Sao
 		matchStars = math.floor((10 + (TD.stage or 1) * 3 + earnedStageStars * 4) * diffMult + 0.5)
+		if not TD.map.Endless then
+			local fcKey = stKey .. "_" .. tostring(saveState.Difficulty)
+			if not saveState.FirstCleared[fcKey] then
+				saveState.FirstCleared[fcKey] = true
+				local fcBonus = (saveState.Difficulty == "hard") and 40 or ((saveState.Difficulty == "normal") and 25 or 15)
+				matchStars += fcBonus
+				starNote = starNote .. " | Lần đầu +" .. tostring(fcBonus) .. "★"
+			end
+			if earnedStageStars == 3 and not saveState.Perfect3Star[fcKey] then
+				saveState.Perfect3Star[fcKey] = true
+				local p3Bonus = (saveState.Difficulty == "hard") and 30 or ((saveState.Difficulty == "normal") and 20 or 15)
+				matchStars += p3Bonus
+				saveState.Bag.goldbag = (saveState.Bag.goldbag or 0) + 1
+				starNote = starNote .. " | Trọn 3★ +" .. tostring(p3Bonus) .. "★ & +1 Túi Vàng"
+			end
+		end
 		saveState.Stars += matchStars
+		playSfx("victory", 1.25)
+		TD.shakeTime = 0.16
 		if (not TD.map.Endless) and (TD.stage or 1) < 7 then
 			local nextSt = (TD.stage or 1) + 1
 			if nextSt > (saveState.StageUnlocked[mid] or 1) then
@@ -4237,8 +4326,8 @@ local function buildTowerAt(gx, gy, towerIdx)
 		GX = gx, GY = gy, X = cx, Y = cy,
 		Def = def, Level = 1, Branch = nil, TargetMode = "First", Invested = def.Cost,
 		Damage = def.Damage * dmgMult, Range = def.Range, FireRate = def.FireRate,
-		BuffDmg = def.BuffDmg or 0, BuffRate = def.BuffRate or 0,
-		Cooldown = 0, StunTimer = 0, Node = holder, Turret = turret, Barrel = barrel, LvTag = lvTag,
+		BuffDmg = def.BuffDmg or 0, BuffRate = def.BuffRate or 0, BuffRange = (def.Kind == "Buff") and 0.24 or 0, BuffMode = "dmg",
+		Cooldown = 0, StunTimer = 0, FreezeTimer = 0, Node = holder, Turret = turret, Barrel = barrel, LvTag = lvTag,
 	}
 	local stBadge = Instance.new("TextLabel")
 	stBadge.Size = UDim2.fromOffset(30, 12)
@@ -4255,7 +4344,8 @@ local function buildTowerAt(gx, gy, towerIdx)
 	stBadge.Parent = holder
 	addCorner(stBadge, 4)
 	tObj.StunBadge = stBadge
-	playSfx("upgrade", 1.15)
+	playSfx("place", 1.1)
+	TD.shakeTime = math.max(TD.shakeTime or 0, 0.08)
 
 	addQuestProg("build", 1)
 	table.insert(TD.towers, tObj)
@@ -4584,6 +4674,8 @@ local function spawnEnemy(kind)
 	table.insert(TD.enemies, eObj)
 	if def.Boss then
 		showBossWarning(def.Name)
+		playSfx("boss", 0.78)
+		TD.shakeTime = math.max(TD.shakeTime or 0, 0.45)
 	end
 	return eObj
 end
@@ -4632,18 +4724,23 @@ local function damageEnemy(e, dmg, slowFrac, slowDur, poisonDps, poisonDur, srcN
 	end
 end
 
-local function getTowerBuffMults(t)
-	local dmgBonus, rateBonus = 0, 0
+getTowerBuffMults = function(t)
+	local dmgBonus, rateBonus, rangeBonus = 0, 0, 0
 	for _, other in ipairs(TD.towers) do
 		if other.Def.Kind == "Buff" and other ~= t then
 			local d = math.sqrt((other.X - t.X)^2 + (other.Y - t.Y)^2)
 			if d <= other.Range then
-				dmgBonus = math.max(dmgBonus, other.BuffDmg or 0.25)
-				rateBonus = math.max(rateBonus, other.BuffRate or 0.20)
+				if other.BuffMode == "range" then
+					rangeBonus = math.max(rangeBonus, other.BuffRange or 0.24)
+					rateBonus = math.max(rateBonus, (other.BuffRate or 0.18) * 0.65)
+				else
+					dmgBonus = math.max(dmgBonus, other.BuffDmg or 0.28)
+					rateBonus = math.max(rateBonus, other.BuffRate or 0.20)
+				end
 			end
 		end
 	end
-	return 1 + dmgBonus, 1 - rateBonus
+	return 1 + dmgBonus, math.max(0.45, 1 - rateBonus), 1 + rangeBonus
 end
 
 local function fireTower(t, target, effDmg)
@@ -4651,7 +4748,7 @@ local function fireTower(t, target, effDmg)
 	if not saveState.LowFx then
 		for _, ob in ipairs(TD.towers) do
 			if ob.Def.Kind == "Buff" and math.sqrt((ob.X - t.X)^2 + (ob.Y - t.Y)^2) <= ob.Range then
-				spawnBeamLine(ob.X, ob.Y, t.X, t.Y, THEME.TextGold, 1.5, 0.10)
+				spawnBeamLine(ob.X, ob.Y, t.X, t.Y, (ob.BuffMode == "range") and THEME.TextCyan or THEME.TextGold, 1.5, 0.10)
 				break
 			end
 		end
@@ -4819,31 +4916,42 @@ local function applyTowerUpgrade(branchName)
 	end
 	TD.gold -= cost
 	t.Invested += cost
+	local wasLv3Evo = (t.Level == 3 and not t.Branch and branchName ~= nil)
 	t.Level += 1
-	if t.Level > 3 then
-		t.Damage = t.Damage * 1.25
-		t.Range = math.min(240, t.Range + 4)
-		if t.Def.Kind == "Buff" then
-			t.BuffDmg = math.min(0.85, (t.BuffDmg or 0.25) + 0.05)
-		end
-		t.LvTag.Text = "C" .. tostring(t.Level)
-	elseif branchName == "Hủy Diệt" then
+	if wasLv3Evo and branchName == "Hủy Diệt" then
 		t.Branch = "Hủy Diệt"
 		t.Damage = t.Damage * 1.85
 		t.Range = t.Range * 1.10
-		t.LvTag.Text = "C3A"
-	elseif branchName == "Siêu Tốc" then
+		if t.Def.Kind == "Buff" then
+			t.BuffDmg = math.min(0.95, (t.BuffDmg or 0.28) + 0.14)
+			t.BuffRange = math.min(0.85, (t.BuffRange or 0.24) + 0.14)
+		end
+		t.LvTag.Text = "C4A"
+	elseif wasLv3Evo and branchName == "Siêu Tốc" then
 		t.Branch = "Siêu Tốc"
 		t.Damage = t.Damage * 1.32
 		t.Range = t.Range * 1.25
 		t.FireRate = math.max(0.18, t.FireRate * 0.65)
-		t.LvTag.Text = "C3B"
+		if t.Def.Kind == "Buff" then
+			t.BuffRate = math.min(0.55, (t.BuffRate or 0.20) + 0.10)
+			t.BuffRange = math.min(0.85, (t.BuffRange or 0.24) + 0.10)
+		end
+		t.LvTag.Text = "C4B"
+	elseif t.Level > 3 then
+		t.Damage = t.Damage * 1.25
+		t.Range = math.min(240, t.Range + 4)
+		if t.Def.Kind == "Buff" then
+			t.BuffDmg = math.min(0.95, (t.BuffDmg or 0.28) + 0.05)
+			t.BuffRange = math.min(0.85, (t.BuffRange or 0.24) + 0.05)
+		end
+		t.LvTag.Text = "C" .. tostring(t.Level)
 	else
 		t.Damage = t.Damage * 1.52
 		t.Range = t.Range * 1.12
 		t.FireRate = math.max(0.25, t.FireRate * 0.88)
 		if t.Def.Kind == "Buff" then
-			t.BuffDmg = (t.BuffDmg or 0.25) + 0.08
+			t.BuffDmg = (t.BuffDmg or 0.28) + 0.08
+			t.BuffRange = (t.BuffRange or 0.24) + 0.08
 			t.BuffRate = (t.BuffRate or 0.20) + 0.06
 		end
 		t.LvTag.Text = "C" .. tostring(t.Level)
@@ -4864,6 +4972,15 @@ UI.evoBBtn.MouseButton1Click:Connect(function() applyTowerUpgrade("Siêu Tốc")
 UI.targetBtn.MouseButton1Click:Connect(function()
 	local t = TD.selectedTower
 	if not t then return end
+	if t.Def.Kind == "Buff" then
+		t.BuffMode = (t.BuffMode == "range") and "dmg" or "range"
+		if t.BuffAura then
+			t.BuffAura.BackgroundColor3 = (t.BuffMode == "range") and Color3.fromRGB(64, 198, 232) or Color3.fromRGB(232, 196, 64)
+		end
+		showToast(t.BuffMode == "range" and "Tháp Buff chuyển sang: BUFF TẦM ĐÁNH!" or "Tháp Buff chuyển sang: BUFF SỨC MẠNH!", t.BuffMode == "range" and THEME.TextCyan or THEME.TextGold, 1.8)
+		updateHUD()
+		return
+	end
 	local order = { First = "Strong", Strong = "Weak", Weak = "First" }
 	t.TargetMode = order[t.TargetMode or "First"] or "First"
 	updateHUD()
@@ -5681,15 +5798,34 @@ local function openLobbySettings()
 			{ Code = "TANTHU2026", Desc = "+25 Sao, +3 Bẫy Gai, +2 Mìn Nổ, +1 Hố Đen" },
 			{ Code = "VIPBOSS888", Desc = "+50 Sao, +3 Thiên Thạch, +3 Hố Đen, +3 Túi Vàng" },
 			{ Code = "SIEUCAP999", Desc = "+100 Sao & +5 tất cả Kỹ Năng, Bẫy, Túi Vàng" },
+			{ Code = "QUATANG500", Desc = "+40 Sao, +3 Bão Tuyết, +3 Bẫy Gai, +2 Túi Vàng" },
+			{ Code = "THAPCANH2D", Desc = "+35 Sao, +3 Thiên Thạch, +3 Mìn Nổ" },
+			{ Code = "PHONGTHU77", Desc = "+60 Sao, +2 Hố Đen, +4 Bẫy Gai, +3 Mìn Nổ" },
+			{ Code = "VUOTAI2026", Desc = "+80 Sao, +4 Thiên Thạch, +4 Bão Tuyết, +4 Túi Vàng" },
+			{ Code = "CHIENBINH9", Desc = "+75 Sao, +4 Hố Đen, +5 Bẫy Gai, +5 Mìn Nổ" },
+			{ Code = "DAUTRUONG1", Desc = "+120 Sao & +6 tất cả Kỹ Năng, Bẫy, Túi Vàng" },
 		}
+		local cScroll = Instance.new("ScrollingFrame")
+		cScroll.Size = UDim2.new(1, 0, 0, 218)
+		cScroll.BackgroundTransparency = 1
+		cScroll.BorderSizePixel = 0
+		cScroll.ScrollBarThickness = 5
+		cScroll.ScrollBarImageColor3 = THEME.TextCyan
+		cScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+		cScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+		cScroll.ZIndex = 53
+		cScroll.Parent = UI.pmList
+		local cLay = Instance.new("UIListLayout")
+		cLay.Padding = UDim.new(0, 6)
+		cLay.Parent = cScroll
 		for _, pc in ipairs(PUBLIC_CODES) do
 			local used = (saveState.UsedCodes[pc.Code] == true)
 			local r = Instance.new("Frame")
-			r.Size = UDim2.new(1, 0, 0, 48)
+			r.Size = UDim2.new(1, -8, 0, 48)
 			r.BackgroundColor3 = Color3.fromRGB(28, 32, 58)
 			r.BorderSizePixel = 0
 			r.ZIndex = 53
-			r.Parent = UI.pmList
+			r.Parent = cScroll
 			addCorner(r, 9)
 			addStroke(r, used and Color3.fromRGB(72, 78, 112) or THEME.TextCyan, 1.5)
 
@@ -5741,11 +5877,11 @@ local function openLobbySettings()
 		end
 		if code == "ADMINFULLALLTHUTHANH2D" then
 			saveState.UsedCodes[code] = true
-			saveState.Stars += 9999
+			saveState.Stars += 999999
 			for _, sk in ipairs({"meteor", "bliz", "void", "spike", "mine"}) do
-				saveState.SkillStock[sk] = (saveState.SkillStock[sk] or 0) + 99
+				saveState.SkillStock[sk] = (saveState.SkillStock[sk] or 0) + 9999
 			end
-			saveState.Bag.goldbag = (saveState.Bag.goldbag or 0) + 99
+			saveState.Bag.goldbag = (saveState.Bag.goldbag or 0) + 9999
 			for _, u in ipairs(PERM_UPGRADES) do saveState.Upgrades[u.Key] = u.Max end
 			for _, mp in ipairs(MAPS) do
 				saveState.StageUnlocked[mp.Id] = 7
@@ -5754,15 +5890,21 @@ local function openLobbySettings()
 			saveData()
 			playSfx("upgrade", 1.25)
 			refreshLobbyStats()
-			showToast("ADMIN FULL: +9999 Sao, +99 tất cả Kỹ Năng & Mở Full Ải!", THEME.TextGold, 3.2)
+			showToast("ADMIN FULL: +999,999 Sao, +9,999 Kỹ Năng/Vật Phẩm & Mở Full Ải!", THEME.TextGold, 3.2)
 			cInput.Text = ""
 			return
 		end
 		local REWARDS = {
-			THUTHANH2D = { Stars = 30, meteor = 2, bliz = 2, goldbag = 2, Msg = "+30 Sao, +2 Thiên Thạch, +2 Bão Tuyết, +2 Túi Vàng!" },
-			TANTHU2026 = { Stars = 25, spike = 3, mine = 2, void = 1, Msg = "+25 Sao, +3 Bẫy Gai, +2 Mìn Nổ, +1 Hố Đen!" },
-			VIPBOSS888 = { Stars = 50, meteor = 3, void = 3, goldbag = 3, Msg = "+50 Sao, +3 Thiên Thạch, +3 Hố Đen, +3 Túi Vàng!" },
+			THUTHANH2D = { Stars = 30,  meteor = 2, bliz = 2, goldbag = 2, Msg = "+30 Sao, +2 Thiên Thạch, +2 Bão Tuyết, +2 Túi Vàng!" },
+			TANTHU2026 = { Stars = 25,  spike = 3, mine = 2, void = 1, Msg = "+25 Sao, +3 Bẫy Gai, +2 Mìn Nổ, +1 Hố Đen!" },
+			VIPBOSS888 = { Stars = 50,  meteor = 3, void = 3, goldbag = 3, Msg = "+50 Sao, +3 Thiên Thạch, +3 Hố Đen, +3 Túi Vàng!" },
 			SIEUCAP999 = { Stars = 100, meteor = 5, bliz = 5, void = 5, spike = 5, mine = 5, goldbag = 5, Msg = "+100 Sao & +5 tất cả Kỹ Năng, Bẫy, Túi Vàng!" },
+			QUATANG500 = { Stars = 40,  bliz = 3, spike = 3, goldbag = 2, Msg = "+40 Sao, +3 Bão Tuyết, +3 Bẫy Gai, +2 Túi Vàng!" },
+			THAPCANH2D = { Stars = 35,  meteor = 3, mine = 3, Msg = "+35 Sao, +3 Thiên Thạch, +3 Mìn Nổ!" },
+			PHONGTHU77 = { Stars = 60,  void = 2, spike = 4, mine = 3, Msg = "+60 Sao, +2 Hố Đen, +4 Bẫy Gai, +3 Mìn Nổ!" },
+			VUOTAI2026 = { Stars = 80,  meteor = 4, bliz = 4, goldbag = 4, Msg = "+80 Sao, +4 Thiên Thạch, +4 Bão Tuyết, +4 Túi Vàng!" },
+			CHIENBINH9 = { Stars = 75,  void = 4, spike = 5, mine = 5, Msg = "+75 Sao, +4 Hố Đen, +5 Bẫy Gai, +5 Mìn Nổ!" },
+			DAUTRUONG1 = { Stars = 120, meteor = 6, bliz = 6, void = 6, spike = 6, mine = 6, goldbag = 6, Msg = "+120 Sao & +6 tất cả Kỹ Năng, Bẫy, Túi Vàng!" },
 		}
 		local rw = REWARDS[code]
 		if not rw then
@@ -5780,6 +5922,106 @@ local function openLobbySettings()
 		refreshLobbyStats()
 		showToast("NHẬN CODE THÀNH CÔNG: " .. rw.Msg, THEME.TextGold, 3.0)
 		cInput.Text = ""
+	end)
+
+	-- Nut Reset du lieu choi lai tu dau (co xac nhan 2 buoc)
+	local resetRow = Instance.new("Frame")
+	resetRow.Size = UDim2.new(1, -6, 0, 52)
+	resetRow.BackgroundColor3 = Color3.fromRGB(40, 22, 34)
+	resetRow.BorderSizePixel = 0
+	resetRow.ZIndex = 53
+	resetRow.Parent = setScroll
+	addCorner(resetRow, 10)
+	addStroke(resetRow, THEME.TextRed, 1.8)
+	addGradient(resetRow, Color3.fromRGB(64, 24, 38), Color3.fromRGB(28, 14, 24), 90)
+
+	local rTitle = Instance.new("TextLabel")
+	rTitle.Size = UDim2.fromOffset(310, 20)
+	rTitle.Position = UDim2.fromOffset(12, 6)
+	rTitle.BackgroundTransparency = 1
+	rTitle.Text = "CHƠI LẠI TỪ ĐẦU (RESET DỮ LIỆU)"
+	rTitle.TextColor3 = THEME.TextRed
+	rTitle.Font = THEME.FontHead
+	rTitle.TextSize = 11
+	rTitle.TextXAlignment = Enum.TextXAlignment.Left
+	rTitle.ZIndex = 54
+	rTitle.Parent = resetRow
+
+	local rDesc = Instance.new("TextLabel")
+	rDesc.Size = UDim2.fromOffset(310, 18)
+	rDesc.Position = UDim2.fromOffset(12, 27)
+	rDesc.BackgroundTransparency = 1
+	rDesc.Text = "Xóa Sao, Ải đã mở, Kỹ năng, Nhiệm vụ & Code đã nhập"
+	rDesc.TextColor3 = THEME.TextMuted
+	rDesc.Font = THEME.FontBody
+	rDesc.TextSize = 9
+	rDesc.TextXAlignment = Enum.TextXAlignment.Left
+	rDesc.ZIndex = 54
+	rDesc.Parent = resetRow
+
+	local rBtn = makeArcadeBtn(resetRow, "RESET", UDim2.fromOffset(88, 32), UDim2.new(1, -96, 0, 10), Color3.fromRGB(218, 62, 72), Color3.fromRGB(148, 28, 38), 8, { TextSize = 11, ZIndex = 54, Depth = 3 })
+	rBtn.MouseButton1Click:Connect(function()
+		for _, ch in ipairs(UI.pmList:GetChildren()) do if ch:IsA("Frame") or ch:IsA("ScrollingFrame") then ch:Destroy() end end
+		UI.pmTitle.Text = "XÁC NHẬN CHƠI LẠI TỪ ĐẦU"
+
+		local warnCard = Instance.new("Frame")
+		warnCard.Size = UDim2.new(1, 0, 0, 118)
+		warnCard.BackgroundColor3 = Color3.fromRGB(36, 20, 32)
+		warnCard.BorderSizePixel = 0
+		warnCard.ZIndex = 53
+		warnCard.Parent = UI.pmList
+		addCorner(warnCard, 12)
+		addStroke(warnCard, THEME.TextRed, 2.0)
+
+		local wl = Instance.new("TextLabel")
+		wl.Size = UDim2.new(1, -24, 0, 86)
+		wl.Position = UDim2.fromOffset(12, 16)
+		wl.BackgroundTransparency = 1
+		wl.Text = "Bạn có chắc chắn muốn RESET toàn bộ dữ liệu game?\n\nToàn bộ Sao, Ải & Độ khó đã mở, Kỹ năng/Kho đồ, Nhiệm vụ và Code đã dùng sẽ quay về trạng thái ban đầu."
+		wl.TextColor3 = THEME.TextMain
+		wl.Font = THEME.FontBody
+		wl.TextSize = 12
+		wl.TextWrapped = true
+		wl.ZIndex = 54
+		wl.Parent = warnCard
+
+		local actRow = Instance.new("Frame")
+		actRow.Size = UDim2.new(1, 0, 0, 44)
+		actRow.BackgroundTransparency = 1
+		actRow.ZIndex = 53
+		actRow.Parent = UI.pmList
+
+		local cancelB = makeArcadeBtn(actRow, "HỦY", UDim2.fromOffset(156, 36), UDim2.new(0.5, -166, 0, 4), Color3.fromRGB(82, 92, 128), Color3.fromRGB(48, 54, 82), 9, { TextSize = 12, ZIndex = 54, Depth = 3 })
+		local okB     = makeArcadeBtn(actRow, "XÁC NHẬN RESET", UDim2.fromOffset(176, 36), UDim2.new(0.5, 6, 0, 4), Color3.fromRGB(224, 58, 68), Color3.fromRGB(152, 24, 34), 9, { TextSize = 12, ZIndex = 54, Depth = 3 })
+
+		cancelB.MouseButton1Click:Connect(openLobbySettings)
+		okB.MouseButton1Click:Connect(function()
+			saveState.BestWave = { meadow = 0, desert = 0, citadel = 0, heroic_boss = 0, endless = 0 }
+			saveState.Wins = { meadow = 0, desert = 0, citadel = 0, heroic_boss = 0, endless = 0 }
+			saveState.TotalKills = 0
+			saveState.Stars = 15
+			saveState.Upgrades = { dmg = 0, gold = 0, lives = 0, skill = 0 }
+			saveState.MapStars = { meadow = 0, desert = 0, citadel = 0, heroic_boss = 0, endless = 0 }
+			saveState.StageUnlocked = { meadow = 1, desert = 1, citadel = 1, heroic_boss = 1, endless = 1 }
+			saveState.StageStars = {}
+			saveState.StageDiffUnlocked = {}
+			saveState.SelectedStage = 1
+			saveState.Bag = { goldbag = 2 }
+			saveState.SkillStock = { meteor = 3, bliz = 3, void = 2, spike = 4, mine = 3 }
+			saveState.SelectedMap = 1
+			saveState.Difficulty = "easy"
+			saveState.OwnedSkins = { default = true }
+			saveState.EquippedSkin = "default"
+			saveState.UsedCodes = {}
+			saveState.FirstCleared = {}
+			saveState.Perfect3Star = {}
+			saveState.Quests = createDefaultQuests()
+			saveData()
+			refreshLobbyStats()
+			UI.pmOverlay.Visible = false
+			playSfx("upgrade", 0.9)
+			showToast("Đã reset toàn bộ dữ liệu! Bắt đầu hành trình mới.", THEME.TextGold, 2.8)
+		end)
 	end)
 
 	UI.pmOverlay.Visible = true
@@ -6405,49 +6647,106 @@ track(RunService.Heartbeat:Connect(function(rawDt)
 			if e.Def.Boss then
 				e.SkillCd -= dt
 				if e.SkillCd <= 0 then
-					e.SkillCd = 8.5
-					if e.Def.HeroBoss then
-						local heal = math.floor(e.MaxHP * 0.04)
-						e.HP = math.min(e.MaxHP, e.HP + heal)
-						e.HpFill.Size = UDim2.fromScale(math.clamp(e.HP / e.MaxHP, 0, 1), 1)
-						spawnExplosionRing(e.X, e.Y, 44, Color3.fromRGB(186, 86, 232))
-						spawnFloatingText(e.X, e.Y, "+" .. formatNum(heal) .. " HP", THEME.TextPurple)
-					else
-						local roll = math.random(1, 3)
-						if roll == 1 then
-							-- Trieu hoi 2 quai con tai vi tri Boss
-							spawnExplosionRing(e.X, e.Y, 42, Color3.fromRGB(178, 82, 224))
-							spawnFloatingText(e.X, e.Y - 12, "TRIỆU HỒI!", THEME.TextPurple)
-							for sIdx = 1, 2 do
-								local sub = spawnEnemy((sIdx == 1) and "goblin" or "spider")
-								if sub then
-									sub.X = e.X + math.random(-8, 8)
-									sub.Y = e.Y + math.random(-8, 8)
-									sub.WpIdx = e.WpIdx
-									sub.Progress = e.Progress
-									sub.Node.Position = UDim2.fromOffset(sub.X, sub.Y)
-								end
+					e.SkillCd = 7.8
+					local roll = math.random(1, 4)
+					if roll == 1 then
+						-- Goi 2-3 linh con tai vi tri Boss
+						spawnExplosionRing(e.X, e.Y, 44, Color3.fromRGB(178, 82, 224))
+						spawnFloatingText(e.X, e.Y - 12, "GỌI LÍNH!", THEME.TextPurple)
+						local pool = { "goblin", "spider", "skeleton" }
+						local cnt = e.Def.HeroBoss and 3 or 2
+						for sIdx = 1, cnt do
+							local sub = spawnEnemy(pool[((sIdx - 1) % #pool) + 1])
+							if sub then
+								sub.Summoned = true
+								sub.X = e.X + math.random(-10, 10)
+								sub.Y = e.Y + math.random(-10, 10)
+								sub.WpIdx = e.WpIdx
+								sub.Progress = e.Progress
+								sub.Node.Position = UDim2.fromOffset(sub.X, sub.Y)
 							end
-						elseif roll == 2 then
-							-- Tang toc doan ngan
+						end
+					elseif roll == 2 then
+						-- Dong bang toi da 2 thap gan nhat trong 2.2 giay
+						local hit = 0
+						for _, tw in ipairs(TD.towers) do
+							if math.sqrt((tw.X - e.X)^2 + (tw.Y - e.Y)^2) <= 175 then
+								tw.FreezeTimer = math.max(tw.FreezeTimer or 0, 2.2)
+								spawnBeamLine(e.X, e.Y, tw.X, tw.Y, THEME.TextCyan, 4, 0.28)
+								spawnExplosionRing(tw.X, tw.Y, 26, THEME.TextCyan)
+								spawnFloatingText(tw.X, tw.Y - 10, "ĐÓNG BĂNG!", THEME.TextCyan)
+								hit += 1
+								if hit >= 2 then break end
+							end
+						end
+						if hit > 0 then playSfx("freeze", 0.95) else e.SprintTimer = 1.8 end
+					elseif roll == 3 then
+						-- Lam choang 1 thap gan nhat trong 2.0 giay + rung nhe
+						local nearT, bestD = nil, 170
+						for _, tw in ipairs(TD.towers) do
+							local dd = math.sqrt((tw.X - e.X)^2 + (tw.Y - e.Y)^2)
+							if dd < bestD then bestD = dd nearT = tw end
+						end
+						if nearT then
+							nearT.StunTimer = math.max(nearT.StunTimer or 0, 2.0)
+							TD.shakeTime = math.max(TD.shakeTime or 0, 0.16)
+							spawnBeamLine(e.X, e.Y, nearT.X, nearT.Y, Color3.fromRGB(186, 86, 232), 4, 0.25)
+							spawnExplosionRing(nearT.X, nearT.Y, 28, Color3.fromRGB(186, 86, 232))
+							spawnFloatingText(nearT.X, nearT.Y - 10, "CHOÁNG!", THEME.TextPurple)
+						else
+							e.SprintTimer = 2.0
+						end
+					else
+						if e.Def.HeroBoss then
+							local heal = math.floor(e.MaxHP * 0.04)
+							e.HP = math.min(e.MaxHP, e.HP + heal)
+							e.HpFill.Size = UDim2.fromScale(math.clamp(e.HP / e.MaxHP, 0, 1), 1)
+							spawnExplosionRing(e.X, e.Y, 44, Color3.fromRGB(186, 86, 232))
+							spawnFloatingText(e.X, e.Y, "+" .. formatNum(heal) .. " HP", THEME.TextPurple)
+						else
 							e.SprintTimer = 2.0
 							spawnExplosionRing(e.X, e.Y, 36, THEME.TextRed)
 							spawnFloatingText(e.X, e.Y - 12, "TĂNG TỐC!", THEME.TextRed)
-						else
-							-- Lam choang 1 thap gan nhat trong 2 giay
-							local nearT, bestD = nil, 155
-							for _, tw in ipairs(TD.towers) do
-								local dd = math.sqrt((tw.X - e.X)^2 + (tw.Y - e.Y)^2)
-								if dd < bestD then bestD = dd nearT = tw end
-							end
-							if nearT then
-								nearT.StunTimer = 1.6
-								spawnBeamLine(e.X, e.Y, nearT.X, nearT.Y, Color3.fromRGB(186, 86, 232), 4, 0.25)
-								spawnExplosionRing(nearT.X, nearT.Y, 26, Color3.fromRGB(186, 86, 232))
-								spawnFloatingText(nearT.X, nearT.Y - 10, "CHOÁNG!", THEME.TextPurple)
-							else
-								e.SprintTimer = 1.8
-							end
+						end
+					end
+				end
+			elseif not e.Summoned and (e.Kind == "golem" or e.Kind == "orc" or e.Kind == "wraith" or e.Kind == "skeleton" or e.Kind == "scorpion" or e.Elite) then
+				-- Quai dac biet / Tinh anh co ky nang rieng: Choang, Dong bang, hoac Goi linh
+				e.SkillCd -= dt
+				if e.SkillCd <= 0 then
+					e.SkillCd = 10.0
+					if e.Kind == "golem" or e.Kind == "orc" then
+						local nearT, bestD = nil, 125
+						for _, tw in ipairs(TD.towers) do
+							local dd = math.sqrt((tw.X - e.X)^2 + (tw.Y - e.Y)^2)
+							if dd < bestD then bestD = dd nearT = tw end
+						end
+						if nearT then
+							nearT.StunTimer = math.max(nearT.StunTimer or 0, 1.3)
+							spawnExplosionRing(nearT.X, nearT.Y, 22, THEME.TextGold)
+							spawnFloatingText(nearT.X, nearT.Y - 10, "CHOÁNG!", THEME.TextGold)
+						end
+					elseif e.Kind == "wraith" or e.Kind == "skeleton" then
+						local nearT, bestD = nil, 130
+						for _, tw in ipairs(TD.towers) do
+							local dd = math.sqrt((tw.X - e.X)^2 + (tw.Y - e.Y)^2)
+							if dd < bestD then bestD = dd nearT = tw end
+						end
+						if nearT then
+							nearT.FreezeTimer = math.max(nearT.FreezeTimer or 0, 1.5)
+							spawnBeamLine(e.X, e.Y, nearT.X, nearT.Y, THEME.TextCyan, 3, 0.22)
+							spawnFloatingText(nearT.X, nearT.Y - 10, "ĐÓNG BĂNG!", THEME.TextCyan)
+						end
+					elseif (e.Kind == "scorpion" or e.Elite) and #TD.enemies < 32 then
+						local sub = spawnEnemy("spider")
+						if sub then
+							sub.Summoned = true
+							sub.X = e.X + math.random(-6, 6)
+							sub.Y = e.Y + math.random(-6, 6)
+							sub.WpIdx = e.WpIdx
+							sub.Progress = e.Progress
+							sub.Node.Position = UDim2.fromOffset(sub.X, sub.Y)
+							spawnFloatingText(e.X, e.Y - 10, "GỌI LÍNH!", THEME.TextPurple)
 						end
 					end
 				end
@@ -6563,21 +6862,45 @@ track(RunService.Heartbeat:Connect(function(rawDt)
 
 	-- Thap tim muc tieu theo TargetMode + huong Buff tu Thap Buff + Kiem tra choang Boss
 	for _, t in ipairs(TD.towers) do
+		local disabled = false
+		if t.FreezeTimer and t.FreezeTimer > 0 then
+			t.FreezeTimer = math.max(0, t.FreezeTimer - dt)
+			if t.FreezeTimer > 0 then
+				disabled = true
+				if t.StunBadge then
+					t.StunBadge.Text = "ĐÓNG BĂNG"
+					t.StunBadge.BackgroundColor3 = Color3.fromRGB(32, 148, 214)
+					t.StunBadge.TextColor3 = Color3.fromRGB(236, 248, 255)
+					t.StunBadge.Visible = true
+				end
+			end
+		end
 		if t.StunTimer and t.StunTimer > 0 then
 			t.StunTimer = math.max(0, t.StunTimer - dt)
-			if t.StunBadge then t.StunBadge.Visible = (t.StunTimer > 0) end
-			if t.StunTimer > 0 then continue end
-		elseif t.StunBadge and t.StunBadge.Visible then
+			if t.StunTimer > 0 and not disabled then
+				disabled = true
+				if t.StunBadge then
+					t.StunBadge.Text = "CHOÁNG"
+					t.StunBadge.BackgroundColor3 = Color3.fromRGB(132, 42, 186)
+					t.StunBadge.TextColor3 = THEME.TextGold
+					t.StunBadge.Visible = true
+				end
+			end
+		end
+		if disabled then continue end
+		if t.StunBadge and t.StunBadge.Visible then
 			t.StunBadge.Visible = false
 		end
 		if t.Def.Kind ~= "Buff" then
 			t.Cooldown = math.max(0, t.Cooldown - dt)
+			local bDmg, bRate, bRange = getTowerBuffMults(t)
+			local effRange = t.Range * (bRange or 1)
 			local mode = t.TargetMode or "First"
 			local bestE, bestVal = nil, nil
 			for _, e in ipairs(TD.enemies) do
 				if not e.Dead then
 					local d = math.sqrt((e.X - t.X)^2 + (e.Y - t.Y)^2)
-					if d <= t.Range then
+					if d <= effRange then
 						local val = (mode == "Strong") and e.HP or ((mode == "Weak") and -e.HP or e.Progress)
 						if bestVal == nil or val > bestVal then
 							bestVal = val
@@ -6589,7 +6912,6 @@ track(RunService.Heartbeat:Connect(function(rawDt)
 			if bestE then
 				t.Turret.Rotation = math.deg(math.atan2(bestE.Y - t.Y, bestE.X - t.X))
 				if t.Cooldown <= 0 then
-					local bDmg, bRate = getTowerBuffMults(t)
 					local rageDmg = ((TD.rageTimer or 0) > 0) and 1.50 or 1.0
 					local rageRate = ((TD.rageTimer or 0) > 0) and 0.60 or 1.0
 					t.Cooldown = math.max(0.12, t.FireRate * bRate * rageRate)
@@ -6644,13 +6966,24 @@ track(RunService.Heartbeat:Connect(function(rawDt)
 			local bonus = 35 + TD.wave * 10
 			TD.gold += bonus
 			local wStars = math.max(2, math.floor(2 * (getDiffDef(saveState.Difficulty).StarMult or 1) + 0.5))
+			local endlessExtra = 0
+			if TD.map.Endless and TD.wave % 5 == 0 then
+				local tier = math.floor(TD.wave / 5)
+				endlessExtra = 5 + tier * 5
+				wStars += endlessExtra
+				playSfx("victory", 1.15)
+			end
 			saveState.Stars += wStars
 			if TD.wave > (saveState.BestWave[TD.map.Id] or 0) then
 				saveState.BestWave[TD.map.Id] = TD.wave
 			end
 			saveData()
 			TD.autoTimer = 2.4
-			showToast("Xong Đợt " .. TD.wave .. "! Thưởng +" .. bonus .. " Vàng & +" .. wStars .. " Sao", THEME.TextGreen, 2.2)
+			if endlessExtra > 0 then
+				showToast("MỐC VÔ TẬN ĐỢT " .. TD.wave .. "! Thưởng +" .. bonus .. " Vàng & +" .. wStars .. " Sao!", THEME.TextGold, 3.0)
+			else
+				showToast("Xong Đợt " .. TD.wave .. "! Thưởng +" .. bonus .. " Vàng & +" .. wStars .. " Sao", THEME.TextGreen, 2.2)
+			end
 			updateHUD()
 		elseif TD.autoWave then
 			TD.autoTimer -= dt
@@ -6669,7 +7002,7 @@ screenGui.Destroying:Connect(function()
 end)
 end)
 if not _ok then
-	local errMsg = "[ThuThanh2D v7.6 ERROR]: " .. tostring(_err)
+	local errMsg = "[ThuThanh2D v8.0 ERROR]: " .. tostring(_err)
 	warn(errMsg)
 	pcall(function()
 		local lp = game:GetService("Players").LocalPlayer
