@@ -1,5 +1,5 @@
 -- ============================================================
--- THU THANH 2D (TOWER DEFENSE) v8.2 - KHO DO + NUT TRON 3D + HOI MAU THANH + 3 SAO MAP + TOGGLE + XAC NHAN THOAT
+-- THU THANH 2D (TOWER DEFENSE) v8.4 - KHO DO + NUT TRON 3D + HOI MAU THANH + 3 SAO MAP + TOGGLE + XAC NHAN THOAT
 -- Full-Screen Mobile & PC | Tu dong luu ky luc | Phim tat PC: RightShift
 -- ============================================================
 local _ok, _err = pcall(function()
@@ -118,46 +118,57 @@ local MAPS = {
 	},
 }
 
+local STAGE_PATH_VARIANTS = {
+	{ {1, 2}, {12, 2}, {12, 5}, {3, 5}, {3, 8}, {14, 8} },
+	{ {1, 7}, {3, 7}, {3, 2}, {6, 2}, {6, 7}, {9, 7}, {9, 2}, {12, 2}, {12, 6}, {14, 6} },
+	{ {1, 8}, {11, 8}, {11, 5}, {2, 5}, {2, 2}, {14, 2} },
+	{ {1, 2}, {3, 2}, {3, 8}, {6, 8}, {6, 3}, {10, 3}, {10, 8}, {13, 8}, {13, 4}, {14, 4} },
+	{ {1, 2}, {6, 2}, {6, 5}, {2, 5}, {2, 8}, {9, 8}, {9, 2}, {14, 2} },
+	{ {1, 4}, {3, 4}, {3, 1}, {7, 1}, {7, 6}, {4, 6}, {4, 9}, {11, 9}, {11, 3}, {14, 3} },
+	{ {1, 5}, {4, 5}, {4, 8}, {11, 8}, {11, 5}, {7, 5}, {7, 2}, {14, 2} },
+	{ {1, 1}, {5, 1}, {5, 4}, {9, 4}, {9, 8}, {13, 8}, {13, 3}, {14, 3} },
+}
+
 local TOWERS = {
 	{
-		Id = "archer", Name = "Cung Thủ", Cost = 60, UpgradeCost = 55,
-		Damage = 26, Range = 138, FireRate = 0.54, ProjSpeed = 450,
+		Id = "archer", Name = "Cung Thủ", Cost = 65, UpgradeCost = 65,
+		Damage = 18, Range = 134, FireRate = 0.62, ProjSpeed = 450,
 		Kind = "Arrow", BaseCol = Color3.fromRGB(64, 176, 92), TopCol = Color3.fromRGB(168, 118, 56),
 		Accent = Color3.fromRGB(214, 186, 86), Desc = "Bắn nhanh, tầm rộng, mở trận ổn định"
 	},
 	{
-		Id = "frost", Name = "Băng Giá", Cost = 90, UpgradeCost = 80,
-		Damage = 18, Range = 132, FireRate = 0.82, ProjSpeed = 360, Slow = 0.44, SlowDur = 2.5,
+		Id = "frost", Name = "Băng Giá", Cost = 95, UpgradeCost = 90,
+		Damage = 13, Range = 128, FireRate = 0.90, ProjSpeed = 360, Slow = 0.38, SlowDur = 2.3,
 		Kind = "Frost", BaseCol = Color3.fromRGB(54, 152, 212), TopCol = Color3.fromRGB(132, 206, 224),
-		Accent = Color3.fromRGB(182, 222, 232), Desc = "Làm chậm quái 44% giữ nhịp phòng thủ"
+		Accent = Color3.fromRGB(182, 222, 232), Desc = "Làm chậm quái 38% giữ nhịp phòng thủ"
 	},
 	{
-		Id = "cannon", Name = "Đại Bác", Cost = 115, UpgradeCost = 95,
-		Damage = 58, Range = 124, FireRate = 1.24, ProjSpeed = 300, Splash = 66,
+		Id = "cannon", Name = "Đại Bác", Cost = 125, UpgradeCost = 105,
+		Damage = 42, Range = 122, FireRate = 1.38, ProjSpeed = 300, Splash = 58,
 		Kind = "Bomb", BaseCol = Color3.fromRGB(196, 82, 54), TopCol = Color3.fromRGB(58, 62, 76),
 		Accent = Color3.fromRGB(218, 128, 48), Desc = "Nổ diện rộng dọn đàn quái đông"
 	},
 	{
-		Id = "poison", Name = "Tháp Độc", Cost = 120, UpgradeCost = 100,
-		Damage = 22, Range = 136, FireRate = 0.80, ProjSpeed = 370, PoisonDps = 20, PoisonDur = 3.8,
+		Id = "poison", Name = "Tháp Độc", Cost = 130, UpgradeCost = 110,
+		Damage = 16, Range = 132, FireRate = 0.88, ProjSpeed = 370, PoisonDps = 14, PoisonDur = 3.5,
 		Kind = "Poison", BaseCol = Color3.fromRGB(48, 168, 72), TopCol = Color3.fromRGB(32, 92, 46),
 		Accent = Color3.fromRGB(118, 224, 72), Desc = "Độc rút máu bền bỉ khắc chế quái trâu"
 	},
 	{
-		Id = "buff", Name = "Tháp Buff", Cost = 140, UpgradeCost = 125,
-		Damage = 0, Range = 136, FireRate = 1.0, BuffDmg = 0.28, BuffRate = 0.20,
+		Id = "buff", Name = "Tháp Buff", Cost = 155, UpgradeCost = 140,
+		Damage = 0, Range = 132, FireRate = 1.0, BuffDmg = 0.20, BuffRate = 0.14,
 		Kind = "Buff", BaseCol = Color3.fromRGB(204, 156, 38), TopCol = Color3.fromRGB(226, 204, 102),
-		Accent = Color3.fromRGB(232, 212, 84), Desc = "Tăng +28% ST & tốc bắn tháp quanh nó"
+		Accent = Color3.fromRGB(232, 212, 84), Desc = "Tăng +20% ST hoặc Tầm cho tháp quanh nó"
 	},
 	{
-		Id = "tesla", Name = "Lôi Điện", Cost = 165, UpgradeCost = 140,
-		Damage = 44, Range = 142, FireRate = 0.84, Chain = 4,
+		Id = "tesla", Name = "Lôi Điện", Cost = 180, UpgradeCost = 155,
+		Damage = 32, Range = 138, FireRate = 0.94, Chain = 3,
 		Kind = "Lightning", BaseCol = Color3.fromRGB(142, 72, 212), TopCol = Color3.fromRGB(214, 192, 62),
-		Accent = Color3.fromRGB(112, 204, 228), Desc = "Sét chuỗi giật lan 4 mục tiêu liên tiếp"
+		Accent = Color3.fromRGB(112, 204, 228), Desc = "Sét chuỗi giật lan 3 mục tiêu liên tiếp"
 	},
 	{
-		Id = "laser", Name = "Laze Thần", Cost = 240, UpgradeCost = 205,
-		Damage = 116, Range = 168, FireRate = 1.02,
+		Id = "laser", Name = "Laze Thần", Cost = 260, UpgradeCost = 225,
+		Damage = 82, Range = 162, FireRate = 1.15,
 		Kind = "Laser", BaseCol = Color3.fromRGB(204, 58, 118), TopCol = Color3.fromRGB(224, 184, 54),
 		Accent = Color3.fromRGB(228, 92, 168), Desc = "Tia laze xuyên phá diệt Boss cực nhanh"
 	},
@@ -185,9 +196,9 @@ local function getTdSkin(id)
 end
 
 local DIFFICULTIES = {
-	{ Id = "easy",   Name = "Dễ",          Lives = 50, HpMult = 0.78, SpdMult = 0.95, StarMult = 1.0, Color = Color3.fromRGB(82, 206, 108),  Top = Color3.fromRGB(64, 196, 92),  Bot = Color3.fromRGB(28, 134, 54) },
-	{ Id = "normal", Name = "Bình Thường", Lives = 30, HpMult = 1.00, SpdMult = 1.00, StarMult = 1.3, Color = Color3.fromRGB(84, 178, 228),  Top = Color3.fromRGB(54, 152, 214), Bot = Color3.fromRGB(28, 92, 164) },
-	{ Id = "hard",   Name = "Khó",         Lives = 10, HpMult = 1.45, SpdMult = 1.05, StarMult = 1.8, Color = Color3.fromRGB(228, 148, 56),  Top = Color3.fromRGB(218, 94, 52),  Bot = Color3.fromRGB(154, 42, 32) },
+	{ Id = "easy",   Name = "Dễ",          Lives = 40, HpMult = 0.90, SpdMult = 0.98, StarMult = 1.0, Color = Color3.fromRGB(82, 206, 108),  Top = Color3.fromRGB(64, 196, 92),  Bot = Color3.fromRGB(28, 134, 54) },
+	{ Id = "normal", Name = "Bình Thường", Lives = 25, HpMult = 1.30, SpdMult = 1.05, StarMult = 1.3, Color = Color3.fromRGB(84, 178, 228),  Top = Color3.fromRGB(54, 152, 214), Bot = Color3.fromRGB(28, 92, 164) },
+	{ Id = "hard",   Name = "Khó",         Lives = 10, HpMult = 1.85, SpdMult = 1.12, StarMult = 1.8, Color = Color3.fromRGB(228, 148, 56),  Top = Color3.fromRGB(218, 94, 52),  Bot = Color3.fromRGB(154, 42, 32) },
 }
 
 local function getDiffDef(id)
@@ -198,23 +209,23 @@ local function getDiffDef(id)
 end
 
 local ENEMIES = {
-	slime            = { Name = "Slime Xanh",        HP = 65,   Speed = 54, Reward = 12,  Size = 22, Color = Color3.fromRGB(72, 198, 96),   Eye = Color3.fromRGB(20, 26, 22),   Damage = 1 },
-	goblin           = { Name = "Yêu Tinh Nhanh",    HP = 48,   Speed = 88, Reward = 14,  Size = 20, Color = Color3.fromRGB(214, 156, 48),  Eye = Color3.fromRGB(196, 46, 46),  Damage = 1 },
-	spider           = { Name = "Nhện Bóng Đêm",     HP = 72,   Speed = 82, Reward = 16,  Size = 22, Color = Color3.fromRGB(46, 38, 56),    Eye = Color3.fromRGB(228, 48, 54),  Damage = 1 },
-	bat              = { Name = "Dơi Ma Tím",        HP = 58,   Speed = 94, Reward = 16,  Size = 21, Color = Color3.fromRGB(118, 54, 178),  Eye = Color3.fromRGB(232, 92, 134), Damage = 1 },
-	skeleton         = { Name = "Xương Khô",         HP = 105,  Speed = 58, Reward = 18,  Size = 23, Color = Color3.fromRGB(208, 212, 220), Eye = Color3.fromRGB(22, 24, 34),   Damage = 1 },
-	knight           = { Name = "Hiệp Sĩ Giáp",      HP = 185,  Speed = 40, Reward = 24,  Size = 26, Color = Color3.fromRGB(122, 136, 162), Eye = Color3.fromRGB(76, 188, 216), Damage = 2 },
-	scorpion         = { Name = "Bọ Cạp Sa Mạc",     HP = 210,  Speed = 52, Reward = 26,  Size = 26, Color = Color3.fromRGB(186, 128, 54),  Eye = Color3.fromRGB(64, 212, 86),  Damage = 2 },
-	wraith           = { Name = "Ma Bóng Đêm",       HP = 120,  Speed = 72, Reward = 22,  Size = 24, Color = Color3.fromRGB(148, 86, 212),  Eye = Color3.fromRGB(220, 212, 228),Alpha = 0.25, Damage = 2 },
-	orc              = { Name = "Chằn Tinh Orc",     HP = 310,  Speed = 38, Reward = 34,  Size = 28, Color = Color3.fromRGB(74, 132, 54),   Eye = Color3.fromRGB(224, 68, 48),  Damage = 2 },
-	golem            = { Name = "Khổng Lồ Đá",       HP = 420,  Speed = 30, Reward = 45,  Size = 30, Color = Color3.fromRGB(156, 88, 62),   Eye = Color3.fromRGB(224, 182, 52), Damage = 3 },
-	boss             = { Name = "Rồng Hắc Ám",       HP = 1250, Speed = 34, Reward = 150, Size = 36, Color = Color3.fromRGB(198, 42, 66),   Eye = Color3.fromRGB(232, 196, 56), Boss = true, Damage = 5 },
-	cerberus         = { Name = "Chó Địa Ngục 3 Đầu",HP = 1900, Speed = 38, Reward = 210, Size = 38, Color = Color3.fromRGB(178, 36, 42),   Eye = Color3.fromRGB(234, 186, 48), Boss = true, Damage = 5 },
-	lich_boss        = { Name = "Pháp Sư Xương",     HP = 2250, Speed = 32, Reward = 240, Size = 38, Color = Color3.fromRGB(54, 34, 78),    Eye = Color3.fromRGB(118, 232, 134),Boss = true, HeroBoss = true, Damage = 6 },
-	titan_boss       = { Name = "Chúa Quỷ Dung Nham",HP = 2700, Speed = 30, Reward = 280, Size = 39, Color = Color3.fromRGB(142, 34, 28),   Eye = Color3.fromRGB(236, 152, 44), Boss = true, Damage = 6 },
-	dark_knight_boss = { Name = "Hắc Kỵ Sĩ Đen",     HP = 3400, Speed = 34, Reward = 340, Size = 40, Color = Color3.fromRGB(36, 32, 46),    Eye = Color3.fromRGB(224, 48, 72),  Boss = true, Damage = 7 },
-	phoenix_boss     = { Name = "Phượng Hoàng Lửa",  HP = 4200, Speed = 36, Reward = 420, Size = 41, Color = Color3.fromRGB(218, 86, 36),   Eye = Color3.fromRGB(238, 214, 72), Boss = true, HeroBoss = true, Damage = 8 },
-	hero_boss        = { Name = "Đế Vương Hư Không", HP = 5400, Speed = 28, Reward = 520, Size = 42, Color = Color3.fromRGB(48, 22, 88),    Eye = Color3.fromRGB(236, 196, 64), Boss = true, HeroBoss = true, Damage = 10 },
+	slime            = { Name = "Slime Xanh",        HP = 105,   Speed = 56, Reward = 10,  Size = 22, Color = Color3.fromRGB(72, 198, 96),   Eye = Color3.fromRGB(20, 26, 22),   Damage = 1 },
+	goblin           = { Name = "Yêu Tinh Nhanh",    HP = 78,    Speed = 90, Reward = 12,  Size = 20, Color = Color3.fromRGB(214, 156, 48),  Eye = Color3.fromRGB(196, 46, 46),  Damage = 1 },
+	spider           = { Name = "Nhện Bóng Đêm",     HP = 115,   Speed = 84, Reward = 14,  Size = 22, Color = Color3.fromRGB(46, 38, 56),    Eye = Color3.fromRGB(228, 48, 54),  Damage = 1 },
+	bat              = { Name = "Dơi Ma Tím",        HP = 95,    Speed = 96, Reward = 14,  Size = 21, Color = Color3.fromRGB(118, 54, 178),  Eye = Color3.fromRGB(232, 92, 134), Damage = 1 },
+	skeleton         = { Name = "Xương Khô",         HP = 175,   Speed = 60, Reward = 15,  Size = 23, Color = Color3.fromRGB(208, 212, 220), Eye = Color3.fromRGB(22, 24, 34),   Damage = 1 },
+	knight           = { Name = "Hiệp Sĩ Giáp",      HP = 310,   Speed = 44, Reward = 20,  Size = 26, Color = Color3.fromRGB(122, 136, 162), Eye = Color3.fromRGB(76, 188, 216), Damage = 2 },
+	scorpion         = { Name = "Bọ Cạp Sa Mạc",     HP = 350,   Speed = 55, Reward = 22,  Size = 26, Color = Color3.fromRGB(186, 128, 54),  Eye = Color3.fromRGB(64, 212, 86),  Damage = 2 },
+	wraith           = { Name = "Ma Bóng Đêm",       HP = 210,   Speed = 76, Reward = 19,  Size = 24, Color = Color3.fromRGB(148, 86, 212),  Eye = Color3.fromRGB(220, 212, 228),Alpha = 0.25, Damage = 2 },
+	orc              = { Name = "Chằn Tinh Orc",     HP = 520,   Speed = 42, Reward = 28,  Size = 28, Color = Color3.fromRGB(74, 132, 54),   Eye = Color3.fromRGB(224, 68, 48),  Damage = 2 },
+	golem            = { Name = "Khổng Lồ Đá",       HP = 740,   Speed = 34, Reward = 36,  Size = 30, Color = Color3.fromRGB(156, 88, 62),   Eye = Color3.fromRGB(224, 182, 52), Damage = 3 },
+	boss             = { Name = "Rồng Hắc Ám",       HP = 2400,  Speed = 36, Reward = 130, Size = 36, Color = Color3.fromRGB(198, 42, 66),   Eye = Color3.fromRGB(232, 196, 56), Boss = true, Damage = 5 },
+	cerberus         = { Name = "Chó Địa Ngục 3 Đầu",HP = 3600,  Speed = 40, Reward = 180, Size = 38, Color = Color3.fromRGB(178, 36, 42),   Eye = Color3.fromRGB(234, 186, 48), Boss = true, Damage = 5 },
+	lich_boss        = { Name = "Pháp Sư Xương",     HP = 4400,  Speed = 34, Reward = 210, Size = 38, Color = Color3.fromRGB(54, 34, 78),    Eye = Color3.fromRGB(118, 232, 134),Boss = true, HeroBoss = true, Damage = 6 },
+	titan_boss       = { Name = "Chúa Quỷ Dung Nham",HP = 5400,  Speed = 32, Reward = 240, Size = 39, Color = Color3.fromRGB(142, 34, 28),   Eye = Color3.fromRGB(236, 152, 44), Boss = true, Damage = 6 },
+	dark_knight_boss = { Name = "Hắc Kỵ Sĩ Đen",     HP = 6800,  Speed = 36, Reward = 290, Size = 40, Color = Color3.fromRGB(36, 32, 46),    Eye = Color3.fromRGB(224, 48, 72),  Boss = true, Damage = 7 },
+	phoenix_boss     = { Name = "Phượng Hoàng Lửa",  HP = 8400,  Speed = 38, Reward = 360, Size = 41, Color = Color3.fromRGB(218, 86, 36),   Eye = Color3.fromRGB(238, 214, 72), Boss = true, HeroBoss = true, Damage = 8 },
+	hero_boss        = { Name = "Đế Vương Hư Không", HP = 11500, Speed = 30, Reward = 450, Size = 42, Color = Color3.fromRGB(48, 22, 88),    Eye = Color3.fromRGB(236, 196, 64), Boss = true, HeroBoss = true, Damage = 10 },
 }
 
 -- ============================================================
@@ -3961,14 +3972,14 @@ local function updateHUD()
 				and string.format("Buff Tầm: +%d%% • Phủ: %d", curPct, math.floor(t.Range))
 				or string.format("Buff ST: +%d%% • Tốc +%d%% • Phủ: %d", curPct, math.floor((t.BuffRate or 0.20)*100), math.floor(t.Range))
 			if isEvoChoice then
-				UI.upPreview.Text = "Hủy Diệt: Buff +14% | Siêu Tốc: Phủ +25% & Tốc +10%"
+				UI.upPreview.Text = "Hủy Diệt: Buff +10% | Siêu Tốc: Phủ +16% & Tốc +8%"
 			elseif t.Level < 3 then
-				local nPct = curPct + 8
-				local nRng = math.floor(t.Range * 1.12)
+				local nPct = curPct + 6
+				local nRng = math.floor(t.Range * 1.08)
 				UI.upPreview.Text = string.format("Nâng: %s +%d%%→+%d%% | Phủ: %d→%d", isRng and "Tầm" or "ST", curPct, nPct, math.floor(t.Range), nRng)
 			else
-				local nPct = math.min(85, curPct + 5)
-				local nRng = math.min(240, math.floor(t.Range + 4))
+				local nPct = math.min(65, curPct + 4)
+				local nRng = math.min(230, math.floor(t.Range + 3))
 				UI.upPreview.Text = string.format("Cường hóa: +%d%%→+%d%% | Phủ: %d→%d", curPct, nPct, math.floor(t.Range), nRng)
 			end
 		else
@@ -3978,18 +3989,18 @@ local function updateHUD()
 			local curRg = math.floor(t.Range * bRg)
 			UI.upStats.Text = string.format("ST: %d • Tầm: %d • Tốc: %.2fs", curD, curRg, t.FireRate * bR)
 			if isEvoChoice then
-				local dA = math.floor(t.Damage * 1.85)
-				local rB = math.floor(t.Range * 1.25)
-				local fB = math.max(0.18, t.FireRate * 0.65)
+				local dA = math.floor(t.Damage * 1.50)
+				local rB = math.floor(t.Range * 1.16)
+				local fB = math.max(0.22, t.FireRate * 0.74)
 				UI.upPreview.Text = string.format("Hủy Diệt: ST→%d | Siêu Tốc: Tầm→%d, Tốc→%.2fs", dA, rB, fB)
 			elseif t.Level < 3 then
-				local nD = math.floor(t.Damage * 1.52)
-				local nRg = math.floor(t.Range * 1.12)
-				local nFr = math.max(0.25, t.FireRate * 0.88)
+				local nD = math.floor(t.Damage * 1.35)
+				local nRg = math.floor(t.Range * 1.08)
+				local nFr = math.max(0.28, t.FireRate * 0.92)
 				UI.upPreview.Text = string.format("Nâng: ST %d→%d | Tầm %d→%d | Tốc %.2f→%.2fs", math.floor(t.Damage), nD, math.floor(t.Range), nRg, t.FireRate, nFr)
 			else
-				local nD = math.floor(t.Damage * 1.25)
-				local nRg = math.min(240, math.floor(t.Range + 4))
+				local nD = math.floor(t.Damage * 1.18)
+				local nRg = math.min(230, math.floor(t.Range + 3))
 				UI.upPreview.Text = string.format("Cường hóa: ST %d→%d | Tầm %d→%d", math.floor(t.Damage), nD, math.floor(t.Range), nRg)
 			end
 		end
@@ -4338,7 +4349,7 @@ local function buildTowerAt(gx, gy, towerIdx)
 		GX = gx, GY = gy, X = cx, Y = cy,
 		Def = def, Level = 1, Branch = nil, TargetMode = "First", Invested = def.Cost,
 		Damage = def.Damage * dmgMult, Range = def.Range, FireRate = def.FireRate,
-		BuffDmg = def.BuffDmg or 0, BuffRate = def.BuffRate or 0, BuffRange = (def.Kind == "Buff") and 0.24 or 0, BuffMode = "dmg",
+		BuffDmg = def.BuffDmg or 0, BuffRate = def.BuffRate or 0, BuffRange = (def.Kind == "Buff") and 0.18 or 0, BuffMode = "dmg",
 		Cooldown = 0, StunTimer = 0, FreezeTimer = 0, Node = holder, Turret = turret, Barrel = barrel, LvTag = lvTag,
 	}
 	local stBadge = Instance.new("TextLabel")
@@ -4370,16 +4381,30 @@ local function buildTowerAt(gx, gy, towerIdx)
 	updateHUD()
 end
 
+local function getStageWaypoints(mp, stageNum)
+	local st = math.clamp(tonumber(stageNum) or 1, 1, 7)
+	if mp.Endless then
+		local roll = math.random(0, #STAGE_PATH_VARIANTS)
+		return (roll == 0) and mp.Waypoints or STAGE_PATH_VARIANTS[roll]
+	end
+	if st == 1 then return mp.Waypoints end
+	local mapOff = 0
+	for idx, m in ipairs(MAPS) do if m.Id == mp.Id then mapOff = idx - 1 break end end
+	local vIdx = ((st - 2 + mapOff) % #STAGE_PATH_VARIANTS) + 1
+	return STAGE_PATH_VARIANTS[vIdx]
+end
+
 local function buildMapBoard(mp)
 	clearMatchLayers()
 	TD.pathCells = {}
 	TD.pathPoints = {}
-	for _, wp in ipairs(mp.Waypoints) do
+	local activeWps = getStageWaypoints(mp, TD.stage or 1)
+	for _, wp in ipairs(activeWps) do
 		local cx, cy = cellCenter(wp[1], wp[2])
 		table.insert(TD.pathPoints, { x = cx, y = cy })
 	end
-	for w = 1, #mp.Waypoints - 1 do
-		local a, b = mp.Waypoints[w], mp.Waypoints[w + 1]
+	for w = 1, #activeWps - 1 do
+		local a, b = activeWps[w], activeWps[w + 1]
 		local dx = (b[1] > a[1]) and 1 or ((b[1] < a[1]) and -1 or 0)
 		local dy = (b[2] > a[2]) and 1 or ((b[2] < a[2]) and -1 or 0)
 		local cx, cy = a[1], a[2]
@@ -4668,10 +4693,11 @@ local function spawnEnemy(kind)
 		saveState.Difficulty = DIFFICULTIES[maxDiffLv].Id
 	end
 	local diffDef = getDiffDef(saveState.Difficulty)
-	local stageMult = 1 + ((TD.stage or 1) - 1) * 0.16
-	local scaleHP = (1 + (TD.wave - 1) * 0.20) * stageMult * (diffDef.HpMult or 1.0)
-	local isElite = (TD.wave >= 15 and not def.Boss and math.random(1, 4) == 1)
-	local maxHp = math.max(10, math.floor(def.HP * scaleHP * (isElite and 1.65 or 1.0)))
+	local stageMult = 1 + ((TD.stage or 1) - 1) * 0.22
+	local w0 = math.max(0, (TD.wave or 1) - 1)
+	local scaleHP = (1 + w0 * 0.28 + (w0 * w0) * 0.014) * stageMult * (diffDef.HpMult or 1.0)
+	local isElite = (TD.wave >= 6 and not def.Boss and math.random(1, 5) == 1)
+	local maxHp = math.max(15, math.floor(def.HP * scaleHP * (isElite and 1.75 or 1.0)))
 	local p0 = TD.pathPoints[1]
 	local node, body, hpFill, frostCoat, wingL, wingR, bodyStroke = GFX.buildEnemySprite(UI.enemyLayer, def, kind, 15)
 	if isElite and bodyStroke then bodyStroke.Color = Color3.fromRGB(224, 92, 224) bodyStroke.Thickness = 2.4 end
@@ -4934,39 +4960,39 @@ local function applyTowerUpgrade(branchName)
 	t.Level += 1
 	if wasLv3Evo and branchName == "Hủy Diệt" then
 		t.Branch = "Hủy Diệt"
-		t.Damage = t.Damage * 1.85
-		t.Range = t.Range * 1.10
+		t.Damage = t.Damage * 1.50
+		t.Range = t.Range * 1.08
 		if t.Def.Kind == "Buff" then
-			t.BuffDmg = math.min(0.95, (t.BuffDmg or 0.28) + 0.14)
-			t.BuffRange = math.min(0.85, (t.BuffRange or 0.24) + 0.14)
+			t.BuffDmg = math.min(0.65, (t.BuffDmg or 0.20) + 0.10)
+			t.BuffRange = math.min(0.60, (t.BuffRange or 0.18) + 0.10)
 		end
 		t.LvTag.Text = "C4A"
 	elseif wasLv3Evo and branchName == "Siêu Tốc" then
 		t.Branch = "Siêu Tốc"
-		t.Damage = t.Damage * 1.32
-		t.Range = t.Range * 1.25
-		t.FireRate = math.max(0.18, t.FireRate * 0.65)
+		t.Damage = t.Damage * 1.18
+		t.Range = t.Range * 1.16
+		t.FireRate = math.max(0.22, t.FireRate * 0.74)
 		if t.Def.Kind == "Buff" then
-			t.BuffRate = math.min(0.55, (t.BuffRate or 0.20) + 0.10)
-			t.BuffRange = math.min(0.85, (t.BuffRange or 0.24) + 0.10)
+			t.BuffRate = math.min(0.42, (t.BuffRate or 0.14) + 0.08)
+			t.BuffRange = math.min(0.60, (t.BuffRange or 0.18) + 0.08)
 		end
 		t.LvTag.Text = "C4B"
 	elseif t.Level > 3 then
-		t.Damage = t.Damage * 1.25
-		t.Range = math.min(240, t.Range + 4)
+		t.Damage = t.Damage * 1.18
+		t.Range = math.min(230, t.Range + 3)
 		if t.Def.Kind == "Buff" then
-			t.BuffDmg = math.min(0.95, (t.BuffDmg or 0.28) + 0.05)
-			t.BuffRange = math.min(0.85, (t.BuffRange or 0.24) + 0.05)
+			t.BuffDmg = math.min(0.65, (t.BuffDmg or 0.20) + 0.04)
+			t.BuffRange = math.min(0.60, (t.BuffRange or 0.18) + 0.04)
 		end
 		t.LvTag.Text = "C" .. tostring(t.Level)
 	else
-		t.Damage = t.Damage * 1.52
-		t.Range = t.Range * 1.12
-		t.FireRate = math.max(0.25, t.FireRate * 0.88)
+		t.Damage = t.Damage * 1.35
+		t.Range = t.Range * 1.08
+		t.FireRate = math.max(0.28, t.FireRate * 0.92)
 		if t.Def.Kind == "Buff" then
-			t.BuffDmg = (t.BuffDmg or 0.28) + 0.08
-			t.BuffRange = (t.BuffRange or 0.24) + 0.08
-			t.BuffRate = (t.BuffRate or 0.20) + 0.06
+			t.BuffDmg = (t.BuffDmg or 0.20) + 0.06
+			t.BuffRange = (t.BuffRange or 0.18) + 0.06
+			t.BuffRate = (t.BuffRate or 0.14) + 0.04
 		end
 		t.LvTag.Text = "C" .. tostring(t.Level)
 	end
@@ -7066,7 +7092,7 @@ screenGui.Destroying:Connect(function()
 end)
 end)
 if not _ok then
-	local errMsg = "[ThuThanh2D v8.2 ERROR]: " .. tostring(_err)
+	local errMsg = "[ThuThanh2D v8.4 ERROR]: " .. tostring(_err)
 	warn(errMsg)
 	pcall(function()
 		local lp = game:GetService("Players").LocalPlayer
