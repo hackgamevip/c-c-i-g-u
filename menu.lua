@@ -1,5 +1,5 @@
 -- ============================================================
--- THU THANH 2D (TOWER DEFENSE) v8.1 - KHO DO + NUT TRON 3D + HOI MAU THANH + 3 SAO MAP + TOGGLE + XAC NHAN THOAT
+-- THU THANH 2D (TOWER DEFENSE) v8.2 - KHO DO + NUT TRON 3D + HOI MAU THANH + 3 SAO MAP + TOGGLE + XAC NHAN THOAT
 -- Full-Screen Mobile & PC | Tu dong luu ky luc | Phim tat PC: RightShift
 -- ============================================================
 local _ok, _err = pcall(function()
@@ -3248,7 +3248,7 @@ function SEC.buildGameUI()
 
 	-- POPUP NANG CAP + NHANH TIEN HOA CAP 3 + MUC TIEU + BAN THAP
 	local upgradePopup = Instance.new("Frame")
-	upgradePopup.Size = UDim2.fromOffset(266, 124)
+	upgradePopup.Size = UDim2.fromOffset(266, 126)
 	upgradePopup.BackgroundColor3 = Color3.fromRGB(20, 24, 46)
 	upgradePopup.BorderSizePixel = 0
 	upgradePopup.Visible = false
@@ -3338,7 +3338,7 @@ function SEC.buildGameUI()
 
 	local targetBtn, targetLbl = makeArcadeBtn(
 		upgradePopup, "Mục tiêu: Xa nhất",
-		UDim2.fromOffset(146, 28), UDim2.fromOffset(8, 72),
+		UDim2.fromOffset(146, 28), UDim2.fromOffset(8, 88),
 		Color3.fromRGB(108, 74, 186), Color3.fromRGB(66, 38, 134), 8,
 		{ TextSize = 10, ZIndex = 35, Depth = 3, Stroke = 1.5 }
 	)
@@ -3347,7 +3347,7 @@ function SEC.buildGameUI()
 
 	local sellBtn, sellLbl = makeArcadeBtn(
 		upgradePopup, "BÁN",
-		UDim2.fromOffset(98, 28), UDim2.fromOffset(160, 72),
+		UDim2.fromOffset(98, 28), UDim2.fromOffset(160, 88),
 		Color3.fromRGB(206, 72, 76), Color3.fromRGB(146, 34, 42), 8,
 		{ TextSize = 10, ZIndex = 35, Depth = 3, Stroke = 1.5 }
 	)
@@ -3950,7 +3950,7 @@ local function updateHUD()
 		local upCost = (t.Level >= 3) and (320 + (t.Level - 2) * 260) or math.floor(t.Def.UpgradeCost * t.Level)
 		local sellVal = math.floor(t.Invested * 0.7)
 		UI.upgradePopup.Visible = true
-		positionPopupNear(UI.upgradePopup, t.X, t.Y, 266, 124)
+		positionPopupNear(UI.upgradePopup, t.X, t.Y, 266, 126)
 		local brTxt = t.Branch and (" • " .. t.Branch) or ""
 		UI.upTitle.Text = string.format("%s • Cấp %d%s", t.Def.Name, t.Level, brTxt)
 		local isEvoChoice = (t.Level == 3 and not t.Branch)
@@ -5275,7 +5275,7 @@ local function openStarQuests()
 		row.ZIndex = 53
 		row.Parent = qScroll
 		addCorner(row, 9)
-		addStroke(row, (q.Progress >= q.Goal and not q.Claimed) and THEME.TextGreen or Color3.fromRGB(74, 82, 128), 1.5)
+		local rowStroke = addStroke(row, (q.Progress >= q.Goal and not q.Claimed) and THEME.TextGreen or Color3.fromRGB(74, 82, 128), 1.5)
 
 		local tLbl = Instance.new("TextLabel")
 		tLbl.Size = UDim2.fromOffset(306, 20)
@@ -5306,7 +5306,7 @@ local function openStarQuests()
 		addCorner(qBarFl, 4)
 
 		local canClaim = (q.Progress >= q.Goal) and not q.Claimed
-		local btn = makeArcadeBtn(
+		local btn, btnLbl = makeArcadeBtn(
 			row, q.Claimed and "ĐÃ NHẬN" or ("+" .. q.Reward .. " Sao"),
 			UDim2.fromOffset(106, 30), UDim2.new(1, -114, 0, 7),
 			canClaim and Color3.fromRGB(64, 194, 92) or Color3.fromRGB(72, 82, 112),
@@ -5314,13 +5314,40 @@ local function openStarQuests()
 			8, { TextSize = 11, ZIndex = 54, Depth = 3 }
 		)
 		btn.MouseButton1Click:Connect(function()
-			if not canClaim then return end
+			if q.Claimed or q.Progress < q.Goal then return end
 			q.Claimed = true
 			saveState.Stars += q.Reward
 			saveData()
 			playSfx("upgrade", 1.1)
 			refreshLobbyStats()
-			openStarQuests()
+			UI.pmTitle.Text = "NHIỆM VỤ KIẾM SAO  •  " .. formatNum(saveState.Stars) .. " Sao"
+			btnLbl.Text = "ĐÃ NHẬN"
+			btn.BackgroundColor3 = Color3.fromRGB(72, 82, 112)
+			rowStroke.Color = Color3.fromRGB(74, 82, 128)
+			for _, gc in ipairs(btn:GetDescendants()) do
+				if gc:IsA("UIGradient") then
+					gc.Color = ColorSequence.new(Color3.fromRGB(72, 82, 112), Color3.fromRGB(48, 54, 78))
+				elseif gc:IsA("Frame") and gc.Name == "Face" then
+					gc.BackgroundColor3 = Color3.fromRGB(72, 82, 112)
+				end
+			end
+			local nowAll = true
+			for _, oq in ipairs(saveState.Quests) do if not oq.Claimed then nowAll = false break end end
+			if nowAll and not qScroll:FindFirstChild("ResetQuestRow") then
+				local rRow = Instance.new("Frame")
+				rRow.Name = "ResetQuestRow"
+				rRow.Size = UDim2.new(1, 0, 0, 38)
+				rRow.BackgroundTransparency = 1
+				rRow.ZIndex = 53
+				rRow.Parent = qScroll
+				local rb = makeArcadeBtn(rRow, "LÀM MỚI NHIỆM VỤ", UDim2.fromOffset(200, 32), UDim2.new(0.5, -100, 0, 3), Color3.fromRGB(154, 72, 218), Color3.fromRGB(94, 34, 168), 9, { TextSize = 11, ZIndex = 54, Depth = 3 })
+				rb.MouseButton1Click:Connect(function()
+					saveState.Quests = createDefaultQuests()
+					saveData()
+					refreshLobbyStats()
+					openStarQuests()
+				end)
+			end
 		end)
 	end
 	if allDone then
@@ -6131,14 +6158,14 @@ local function openInventoryModal()
 			ds.Parent = row
 
 			local qBadge = Instance.new("TextLabel")
-			qBadge.Size = UDim2.fromOffset(84, 30)
-			qBadge.Position = UDim2.new(1, -92, 0, 11)
+			qBadge.Size = UDim2.fromOffset(64, 30)
+			qBadge.Position = UDim2.new(1, -72, 0, 11)
 			qBadge.BackgroundColor3 = Color3.fromRGB(38, 46, 86)
 			qBadge.BorderSizePixel = 0
-			qBadge.Text = "Số lượng: x" .. tostring(qty)
-			qBadge.TextColor3 = THEME.TextMain
+			qBadge.Text = formatNum(qty)
+			qBadge.TextColor3 = THEME.TextGold
 			qBadge.Font = THEME.FontHead
-			qBadge.TextSize = 10
+			qBadge.TextSize = 13
 			qBadge.ZIndex = 54
 			qBadge.Parent = row
 			addCorner(qBadge, 8)
@@ -7039,7 +7066,7 @@ screenGui.Destroying:Connect(function()
 end)
 end)
 if not _ok then
-	local errMsg = "[ThuThanh2D v8.1 ERROR]: " .. tostring(_err)
+	local errMsg = "[ThuThanh2D v8.2 ERROR]: " .. tostring(_err)
 	warn(errMsg)
 	pcall(function()
 		local lp = game:GetService("Players").LocalPlayer
